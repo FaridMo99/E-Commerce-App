@@ -2,6 +2,13 @@ import express, { type NextFunction ,type Request, type Response} from "express"
 import dotenv from "dotenv"
 import chalk from "chalk"
 import { disconnectAllServices } from "./src/lib/disconnectHandler.js"
+import usersRouter from "./src/routes/usersRouter.js"
+import productsRouter from "./src/routes/productsRouter.js"
+import categoriesRouter from "./src/routes/categoriesRouter.js"
+import ordersRouter from "./src/routes/ordersRouter.js"
+import reviewsRouter from "./src/routes/reviewsRouter.js"
+import authRouter from "./src/routes/authRouter.js"
+import adminRouter from "./src/routes/adminRouter.js"
 
 dotenv.config()
 export const app = express()
@@ -11,10 +18,25 @@ app.use(express.json())
 
 
 
+
+
+//route handlers
+app.use("/users", usersRouter)
+app.use("/products", productsRouter);
+app.use("/categories", categoriesRouter);
+app.use("/orders", ordersRouter);
+app.use("/reviews", reviewsRouter);
+app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
+
+
+
 export const server = app.listen(PORT, () => {
     console.log(chalk.green("Server running on Port: " + PORT))
 })
 
+
+//global error middleware
 app.use((err:Error, req:Request, res:Response, next:NextFunction) => {
     console.log(chalk.red("Global error: " + err))
       return res.status(500).json({ error: "Something went wrong" });

@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  birthdate  DateTime
+  password   String
+  verified   Boolean   @default(false)
+  isAdmin    Boolean   @default(false)
+  created_at DateTime  @default(now())
+  address    String
+  cart       Product[] @relation("UserCart")
+  orders     Order[]
+  reviews    Review[]
+}
+
+model Product {
+  id             String       @id @default(uuid())
+  name           String
+  description    String
+  price          Decimal      @db.Decimal(10, 2)
+  stock_quantity Int
+  is_public      Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime?
+  category       Category     @relation(fields: [category_id], references: [id])
+  category_id    String
+  reviews        Review[]
+  order_items    Order_Item[]
+  cart_users     User[]       @relation("UserCart")
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
+model Order {
+  id                 String       @id @default(uuid())
+  user               User         @relation(fields: [user_id], references: [id])
+  user_id            String
+  shipping_address   String
+  ordered_at         DateTime     @default(now())
+  status             OrderStatus
+  total_amount       Decimal      @db.Decimal(10, 2)
+  items              Order_Item[]
+  payment            Payment?
+}
+
+model Order_Item {
+  id                String   @id @default(uuid())
+  order             Order    @relation(fields: [order_id], references: [id])
+  order_id          String
+  product           Product  @relation(fields: [product_id], references: [id])
+  product_id        String
+  quantity          Int
+  price_at_purchase Decimal  @db.Decimal(10, 2)
+}
+
+model Review {
+  id         String    @id @default(uuid())
+  product    Product   @relation(fields: [product_id], references: [id])
+  product_id String
+  user       User      @relation(fields: [user_id], references: [id])
+  user_id    String
+  title      String
+  content    String
+  rating     Float
+  is_public  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  imageUrls  String[]
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  order      Order         @relation(fields: [order_id], references: [id])
+  order_id   String        @unique
+  method     PaymentMethod
+  details    String
+  status     PaymentStatus
+  created_at DateTime      @default(now())
+}
+
+enum OrderStatus {
+  ORDERED
+  DELIVERING
+  DELIVERED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  CARD
+  PAYPAL
+  OTHER
+}
