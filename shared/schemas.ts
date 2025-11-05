@@ -6,8 +6,4 @@ export const loginSchema = z.object({
     password:z.string().nonempty()
 })
 
-export const signupSchema = z.object({
-    username: z.string().nonempty(),
-    email: loginSchema.shape.email,
-    password: loginSchema.shape.password
-})
+export const signupSchema = loginSchema.extend({username: z.string().nonempty()})

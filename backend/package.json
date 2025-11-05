@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@monorepo/shared": "1.0.0",
     "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
     "connect-redis": "^9.0.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
+    "@types/redis": "^4.0.10",
     "chalk": "^4.1.2",
     "prisma": "^6.18.0",
     "tsx": "^4.20.6",

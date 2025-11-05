@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-  },
+  "private":true,
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "workspaces":[
-  "./frontend",
-  "./backend",
-  "./shared"
+  "frontend",
+  "backend",
+  "shared"
 ]
 }
