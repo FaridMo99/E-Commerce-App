@@ -21,7 +21,7 @@ model User {
   birthdate  DateTime
   password   String
   verified   Boolean   @default(false)
-  isAdmin    Boolean   @default(false)
+  role       UserRole  @default(USER)
   created_at DateTime  @default(now())
   address    String
   cart       Product[] @relation("UserCart")
@@ -113,4 +113,9 @@ enum PaymentMethod {
   CARD
   PAYPAL
   OTHER
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }

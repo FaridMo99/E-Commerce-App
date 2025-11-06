@@ -1,6 +1,7 @@
 import z from "zod";
-import { loginSchema, signupSchema } from "./schemas";
+import { loginSchema, ordersQuerySchema, signupSchema } from "./schemas.js";
 
 
-type LoginSchema = z.infer<typeof loginSchema>
-type SignupSchema = z.infer<typeof signupSchema>
+export type LoginSchema = z.infer<typeof loginSchema>
+export type SignupSchema = z.infer<typeof signupSchema>
+export type OrdersQuerySchema = z.infer<typeof ordersQuerySchema>;

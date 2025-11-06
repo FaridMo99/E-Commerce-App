@@ -9,16 +9,21 @@ import ordersRouter from "./src/routes/ordersRouter.js"
 import reviewsRouter from "./src/routes/reviewsRouter.js"
 import authRouter from "./src/routes/authRouter.js"
 import adminRouter from "./src/routes/adminRouter.js"
-
+import cookieParser from "cookie-parser"
 dotenv.config()
+
 export const app = express()
 const PORT = process.env.PORT
 
+
+//middleware to parse form submits to req.body
+app.use(express.urlencoded({ extended: true }))
+
+//middleware to parse application/json to req.body
 app.use(express.json())
 
-
-
-
+//middleware to parse cookies to req.cookie, jwt is inside req.cookie.jwt
+app.use(cookieParser())
 
 //route handlers
 app.use("/users", usersRouter)
@@ -32,7 +37,7 @@ app.use("/admin", adminRouter);
 
 
 export const server = app.listen(PORT, () => {
-    console.log(chalk.green("Server running on Port: " + PORT))
+  console.log(chalk.green("Server running on Port: " + PORT))
 })
 
 
