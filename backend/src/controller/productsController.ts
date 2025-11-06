@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import type { ProductSchema, ProductsQuerySchema, UpdateProductSchema } from "@monorepo/shared";
 import { Decimal } from "@prisma/client/runtime/library";
+import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 
 
 //send admin all and user only is public, render ui in a way where the none public for admin are greyish to know they offline
@@ -36,23 +37,31 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
     }
 }
 
-//add functionality to create multiple at once
+
 export async function createProduct(req: Request<{}, {},ProductSchema>, res: Response, next: NextFunction) { 
   const product = req.body
+  const images = req.files
   
   try {
+    let imageUrls
+    if (images && Array.isArray(images)) {
+      const results = await Promise.all(images.map(image => handleCloudUpload(image)))
+      imageUrls = results.map(result=> result.secure_url)
+    }
+
     const newProduct = await prisma.product.create({
       data: {
         name: product.name,
+        ...(imageUrls && { imageUrls: [...imageUrls] }),
         price: new Decimal(product.price),
         description: product.description,
         stock_quantity: product.stock_quantity,
-        is_public:product.is_public,
+        is_public: product.is_public,
         category: {
-          connect:{name:product.category}
-        }
-      }
-    })
+          connect: { name: product.category },
+        },
+      },
+    });
     return res.status(201).json(newProduct)
   } catch (err) {
     next(err)
@@ -75,16 +84,24 @@ export async function getProductByProductId(req: Request, res: Response, next: N
     }
 }
 
+
 export async function deleteProductByProductId(req: Request, res: Response, next: NextFunction) { 
         const id = req.params.productId!;
 
         try {
-         await prisma.product.delete({
+         const product = await prisma.product.delete({
             where: {
               id,
             },
-          });
-          return res.status(200).json({message:"Product successfuly deleted"});
+         });
+          
+          if (product.imageUrls.length > 0) {
+            await Promise.all(
+              product.imageUrls.map((url) => deleteCloudAsset(url))
+            );
+          }
+
+          return res.status(200).json({ message: "Product successfuly deleted" });
         } catch (err) {
           next(err);
         }

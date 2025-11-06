@@ -38,6 +38,7 @@ model Product {
   is_public      Boolean      @default(false)
   created_at     DateTime     @default(now())
   updated_at     DateTime?
+  imageUrls      String[]
   category       Category     @relation(fields: [category_id], references: [id])
   category_id    String
   reviews        Review[]

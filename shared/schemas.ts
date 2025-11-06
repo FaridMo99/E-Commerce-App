@@ -92,7 +92,7 @@ export const productSchema = z.object({
   ]),
   stock_quantity: z.number().int(),
   is_public: z.boolean().default(false),
-  category:z.string()
+  category: z.string(),
 });
 
 export const updateProductSchema = productSchema.partial()
