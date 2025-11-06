@@ -3,9 +3,9 @@ import prisma from "../services/prisma.js";
 import type { OrdersQuerySchema } from "@monorepo/shared";
 
 
-export async function getAllOrdersByUser(req: Request, res: Response, next: NextFunction) {
+export async function getAllOrdersByUser(req: Request<{}, {}, {},OrdersQuerySchema>, res: Response, next: NextFunction) {
     const userId = req.user?.id
-    const {sort, order, page, limit, status } = req.query as OrdersQuerySchema
+    const {sort, order, page, limit, status } = req.query
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 

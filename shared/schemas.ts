@@ -28,7 +28,7 @@ export const signupSchema = loginSchema.extend({
       return !isNaN(date.getTime()) && isAdult(date);
     },
     { message: "You must be at least 18 years old and provide a valid date" }
-  ),
+  ).transform((dateStr) => new Date(dateStr)),
   address: z
     .string()
     .regex(
@@ -36,6 +36,8 @@ export const signupSchema = loginSchema.extend({
       "Address must be valid (street, house number, postal code, country)"
     ),
 });
+
+export const updateUserSchema = signupSchema.partial()
 
 export const ordersQuerySchema = z.object({
   sort: z.enum(["status", "ordered_at"]).optional().default("ordered_at"),
@@ -56,3 +58,41 @@ export const ordersQuerySchema = z.object({
     .default("1"),
   status: z.enum(["ORDERED", "DELIVERING", "DELIVERED"]).optional(),
 });
+
+
+//should have sorting(also through categories), filtering, pagination, search functionality, 
+export const productsQuerySchema = z.object({
+  search: z.string().max(255).optional(),
+
+  // Filtering
+  category: z.string().optional(),
+  minPrice:z.union([
+    z.number(),
+    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format").optional(),
+  ]),
+  maxPrice: z.union([
+    z.number(),
+    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
+  ]).optional(),
+  // Sorting
+  sortBy: z.enum(["name", "price", "created_at"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+
+  // Pagination
+  page: z.string().regex(/^\d+$/).optional(),
+  limit: z.string().regex(/^\d+$/).optional(),
+});
+
+export const productSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  price: z.union([
+    z.number(),
+    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
+  ]),
+  stock_quantity: z.number().int(),
+  is_public: z.boolean().default(false),
+  category:z.string()
+});
+
+export const updateProductSchema = productSchema.partial()

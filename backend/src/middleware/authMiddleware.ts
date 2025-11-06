@@ -1,4 +1,4 @@
-import { loginSchema, signupSchema } from "@monorepo/shared"
+import { loginSchema, signupSchema, updateUserSchema } from "@monorepo/shared"
 import chalk from "chalk";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -22,6 +22,21 @@ export function validateSignup(
 
   if (!validated.success) return res.status(400).json({ message: validated.error.message });
 
+  req.body = validated.data
+  return next();
+}
+
+export function validateUpdateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const validated = updateUserSchema.safeParse(req.body);
+
+  if (!validated.success)
+    return res.status(400).json({ message: validated.error.message });
+
+  req.body = validated.data
   return next();
 }
 

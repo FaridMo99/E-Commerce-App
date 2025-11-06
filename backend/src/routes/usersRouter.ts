@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { deleteUserByUserId, getUserByUserId, updateUserByUserId } from "../controller/usersController.js";
-import { isAuthenticated, isAuthorizedUser } from "../middleware/authMiddleware.js";
+import { isAuthenticated, validateUpdateUser } from "../middleware/authMiddleware.js";
 
 const usersRouter = Router()
 
 
-usersRouter.get(":userId",isAuthenticated,isAuthorizedUser,getUserByUserId)
-usersRouter.patch(":userId",isAuthenticated,isAuthorizedUser,updateUserByUserId);
-usersRouter.delete(":userId",isAuthenticated,isAuthorizedUser,deleteUserByUserId);
+usersRouter.get("me",isAuthenticated,getUserByUserId)
+usersRouter.patch("me",validateUpdateUser,isAuthenticated,updateUserByUserId);
+usersRouter.delete("me",isAuthenticated,deleteUserByUserId);
 
 
 export default usersRouter
