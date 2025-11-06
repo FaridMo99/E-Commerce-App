@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { getAllProductCategories } from "../controller/categoriesController.js";
+import { createCategory, deleteCategory, getAllProductCategories } from "../controller/categoriesController.js";
+import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
 
 const categoriesRouter = Router()
 
-//check how you wanna create categories, should be always unique names
+
 categoriesRouter.get("/", getAllProductCategories)
+categoriesRouter.post("/", isAuthenticated, isAdmin, createCategory)
+categoriesRouter.delete("/:categoryId", isAuthenticated, isAdmin, deleteCategory);
+
 
 export default categoriesRouter
