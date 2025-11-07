@@ -6,6 +6,7 @@ import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 
 
 //send admin all and user only is public, render ui in a way where the none public for admin are greyish to know they offline
+//add a search query to get stock amount also for admin(doesnt need to be protected)
 export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchema>,res:Response, next:NextFunction) {
     const role = req.user?.role
     const { search, category, minPrice, maxPrice, sortBy, sortOrder, page, limit } = req.query

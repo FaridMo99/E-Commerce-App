@@ -60,6 +60,8 @@ export const ordersQuerySchema = z.object({
 });
 
 
+export const sortOrderSchema = z.enum(["asc", "desc"]).optional();
+
 //should have sorting(also through categories), filtering, pagination, search functionality, 
 export const productsQuerySchema = z.object({
   search: z.string().max(255).optional(),
@@ -76,12 +78,14 @@ export const productsQuerySchema = z.object({
   ]).optional(),
   // Sorting
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
+  sortOrder: sortOrderSchema,
 
   // Pagination
   page: z.string().regex(/^\d+$/).optional(),
   limit: z.string().regex(/^\d+$/).optional(),
 });
+
+
 
 export const productSchema = z.object({
   name: z.string(),
@@ -96,3 +100,20 @@ export const productSchema = z.object({
 });
 
 export const updateProductSchema = productSchema.partial()
+
+export const timeframeQuerySchema = z.object({
+  from: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined))
+    .refine((val) => !val || !isNaN(val.getTime()), {
+      message: "Invalid 'from' date",
+    }),
+  to: z
+    .string()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined))
+    .refine((val) => !val || !isNaN(val.getTime()), {
+      message: "Invalid 'to' date",
+    }),
+});

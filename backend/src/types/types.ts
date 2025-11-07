@@ -4,3 +4,8 @@ export type JWTUserPayload = {
   id: string;
   role: UserRole;
 };
+
+export type Timeframe = {
+  from?: Date | undefined;
+  to: Date
+};
