@@ -61,11 +61,14 @@ export const ordersQuerySchema = z.object({
 
 
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();
+export const paginationSchema = z.object({
+  page: z.string().regex(/^\d+$/).optional(),
+  limit: z.string().regex(/^\d+$/).optional(),
+});
 
 //should have sorting(also through categories), filtering, pagination, search functionality, 
-export const productsQuerySchema = z.object({
+export const productsQuerySchema = paginationSchema.extend({
   search: z.string().max(255).optional(),
-
   // Filtering
   category: z.string().optional(),
   minPrice:z.union([
@@ -79,7 +82,15 @@ export const productsQuerySchema = z.object({
   // Sorting
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
+});
 
+export const reviewsQuerySchema = paginationSchema.extend({
+  //filter
+  rating: z.number().min(0).max(5).optional(),
+  created_at: z.date().optional(),
+  //sort
+  sortBy: z.enum(["rating", "created_at"]).optional(),
+  sortOrder: sortOrderSchema,
   // Pagination
   page: z.string().regex(/^\d+$/).optional(),
   limit: z.string().regex(/^\d+$/).optional(),
@@ -116,4 +127,11 @@ export const timeframeQuerySchema = z.object({
     .refine((val) => !val || !isNaN(val.getTime()), {
       message: "Invalid 'to' date",
     }),
+});
+
+export const reviewSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+  rating: z.number().min(0).max(5),
+  isPublic: z.boolean().optional(),
 });

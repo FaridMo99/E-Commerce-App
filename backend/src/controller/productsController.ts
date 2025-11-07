@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import type { ProductSchema, ProductsQuerySchema, UpdateProductSchema } from "@monorepo/shared";
+import type { ProductSchema, ProductsQuerySchema, ReviewSchema, UpdateProductSchema } from "@monorepo/shared";
 import { Decimal } from "@prisma/client/runtime/library";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 
 
-//send admin all and user only is public, render ui in a way where the none public for admin are greyish to know they offline
+//render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
 export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchema>,res:Response, next:NextFunction) {
     const role = req.user?.role
@@ -128,6 +128,44 @@ export async function updateProductByProductId(req: Request<{productId:string}, 
     })
 
     return res.status(200).json(product)
+  } catch (err) {
+    next(err)
+  }
+}
+
+
+export async function getAllReviewsByProductId(req: Request<{productId:string}>, res: Response, next: NextFunction) {
+  const productId = req.params.productId
+
+  try {
+    const reviews = await prisma.review.findMany({
+      where:{product_id:productId, is_public:true}
+    })
+
+    return res.status(200).json(reviews)
+  } catch (err) {
+    next(err)
+  }
+}
+
+
+export async function createReviewByProductId(req: Request<{productId:string}, {},ReviewSchema>, res: Response, next: NextFunction) {
+  const productId = req.params.productId
+  const userId = req.user?.id!
+  const {title, content, rating, isPublic} = req.body
+  try {
+    const review = await prisma.review.create({
+      data: {
+        title,
+        content,
+        rating,
+        user_id: userId,
+        product_id: productId,
+        ...(isPublic !== undefined && {is_public:isPublic})
+      }
+    })
+
+    return res.status(201).json(review)
   } catch (err) {
     next(err)
   }

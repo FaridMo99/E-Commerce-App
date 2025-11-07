@@ -85,7 +85,6 @@ model Review {
   rating     Float
   is_public  Boolean   @default(true)
   created_at DateTime  @default(now())
-  imageUrls  String[]
 }
 
 model Payment {

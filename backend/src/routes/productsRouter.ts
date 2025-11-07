@@ -1,19 +1,21 @@
 import { Router } from "express";
 import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
 import { validateProductSearchQueries } from "../middleware/queryMiddleware.js";
-import { createProduct, deleteProductByProductId, getAllProducts, getProductByProductId, updateProductByProductId } from "../controller/productsController.js";
-import { validateProduct, validateUpdateProduct } from "../middleware/validationMiddleware.js";
+import { createProduct, createReviewByProductId, deleteProductByProductId, getAllProducts, getAllReviewsByProductId, getProductByProductId, updateProductByProductId } from "../controller/productsController.js";
+import { validateProduct, validateReview, validateUpdateProduct } from "../middleware/validationMiddleware.js";
 import { upload } from "../services/cloud.js";
 
 const productsRouter = Router()
 
 
 
-//think about where to put reviews and orders, like in which router
+//think about where to put orders, like in which router
 
 
 productsRouter.get("/", validateProductSearchQueries, getAllProducts)
 productsRouter.post("/", isAuthenticated, isAdmin, upload.array("images"), validateProduct, createProduct);
+productsRouter.get("/:productId/reviews",getAllReviewsByProductId);
+productsRouter.post("/:productId/reviews", validateReview, isAuthenticated, createReviewByProductId);
 productsRouter.get("/:productId", getProductByProductId)
 productsRouter.delete("/:productId", isAuthenticated, isAdmin, deleteProductByProductId)
 productsRouter.patch("/:productId",validateUpdateProduct, isAuthenticated, isAdmin, updateProductByProductId)

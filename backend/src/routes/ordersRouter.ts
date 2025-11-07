@@ -5,7 +5,7 @@ import { validateOrderSearchQueries } from "../middleware/queryMiddleware.js";
 
 const ordersRouter = Router()
 
-//order should also update stock amount, updating should update state of delivery
+//order updates should be for the stock amount and status
 ordersRouter.get("/",validateOrderSearchQueries,isAuthenticated,getAllOrdersByUser)
 ordersRouter.get("/:orderId", isAuthenticated,getSingleOrderByUser)
 

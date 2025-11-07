@@ -1,4 +1,4 @@
-import { productSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
+import { productSchema, reviewSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
 import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 
@@ -27,6 +27,20 @@ export function validateProduct(req: Request,res: Response,next: NextFunction) {
   }
   const validatedProduct = productSchema.safeParse(product);
   if (!validatedProduct.success) return res.status(400).json({ message: validatedProduct.error.message });
+
+  next();
+}
+
+export function validateReview(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const review = req.body;
+
+  const validated = reviewSchema.safeParse(review);
+  if (!validated.success)
+    return res.status(400).json({ message: validated.error.message });
 
   next();
 }
