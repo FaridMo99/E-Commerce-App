@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import type { UpdateUserSchema } from "@monorepo/shared";
+import type { OrdersQuerySchema, UpdateUserSchema } from "@monorepo/shared";
 import bcrypt from "bcrypt"
 import type { User } from "../generated/prisma/client.js";
 
@@ -67,4 +67,81 @@ export async function deleteUserByUserId(req: Request, res: Response, next: Next
     } catch (err) {
         next(err)
     }
+}
+
+export async function getAllOrdersByUser(
+  req: Request<{}, {}, {}, OrdersQuerySchema>,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id;
+  const { sort, order, page, limit, status } = req.query;
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+
+  if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        user_id: userId,
+        ...(status ? { status } : {}),
+      },
+      include: {
+        _count: {
+          select: {
+            items: true,
+          },
+        },
+      },
+      orderBy: {
+        [sort]: order,
+      },
+
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+    });
+    return res.status(200).json(orders)
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getSingleOrderByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id;
+  const orderId = req.params.orderId!;
+  if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        user_id: userId,
+      },
+    });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    return res.status(200).json(order);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getReviewsByUser(req: Request, res: Response, next: NextFunction) {
+  const userId = req.user?.id!
+
+  try {
+    const reviews = await prisma.review.findMany({
+      where: {
+        user_id:userId
+      }
+    })
+    return res.status(200).json(reviews)
+  } catch (err) {
+    next(err)
+  }
 }

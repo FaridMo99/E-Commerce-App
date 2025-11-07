@@ -1,14 +1,12 @@
 import { Router } from "express";
-import { getAllOrdersByUser, getSingleOrderByUser } from "../controller/ordersController.js";
-import { isAuthenticated } from "../middleware/authMiddleware.js";
-import { validateOrderSearchQueries } from "../middleware/queryMiddleware.js";
+import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
+import { validateTimeframeQuery } from "../middleware/validationMiddleware.js";
+import { getOrders } from "../controller/ordersController.js";
 
 const ordersRouter = Router()
 
-//order updates should be for the stock amount and status
-ordersRouter.get("/",validateOrderSearchQueries,isAuthenticated,getAllOrdersByUser)
-ordersRouter.get("/:orderId", isAuthenticated,getSingleOrderByUser)
-
+//post put patch delete should happen through stripe webhook not here
+ordersRouter.get("/", isAuthenticated, isAdmin, validateTimeframeQuery, getOrders);
 
 
 export default ordersRouter

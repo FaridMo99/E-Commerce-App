@@ -7,11 +7,6 @@ import { upload } from "../services/cloud.js";
 
 const productsRouter = Router()
 
-
-
-//think about where to put orders, like in which router
-
-
 productsRouter.get("/", validateProductSearchQueries, getAllProducts)
 productsRouter.post("/", isAuthenticated, isAdmin, upload.array("images"), validateProduct, createProduct);
 productsRouter.get("/:productId/reviews",getAllReviewsByProductId);
