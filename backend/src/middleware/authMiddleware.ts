@@ -40,6 +40,27 @@ export function validateUpdateUser(
   return next();
 }
 
+export async function isAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user?.role
+  if (!req.user || role !== "ADMIN" ) return res.status(403).json({ message: "User not authorized" })
+  next()
+}
+
+export async function isAuthorizedUser(req: Request<{userId:string}>, res: Response, next: NextFunction) {
+  const userMakingRequest = req.params.userId
+  const realUser = req.user?.id;
+
+  if (!userMakingRequest || !realUser || (realUser !== userMakingRequest)) return res.status(403).json({ message: "Forbidden" })
+  
+  next();
+}
+
+
+//change, doesnt work
 export async function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   
   const token = req.cookies.jwt
@@ -59,21 +80,13 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
   }
 }
 
-export async function isAdmin(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const role = req.user?.role
-  if (!req.user || role !== "ADMIN" ) return res.status(403).json({ message: "User not authorized" })
-  next()
-}
+export async function hasCsrfToken(req: Request,res: Response,next: NextFunction) {
+  const csrfHeader = req.headers["x-csrf-token"];
+  const csrfCookie = req.cookies.csrfToken;
 
-export async function isAuthorizedUser(req: Request<{userId:string}>, res: Response, next: NextFunction) {
-  const userMakingRequest = req.params.userId
-  const realUser = req.user?.id;
+  if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+    return res.status(403).json({ message: "Invalid CSRF token" });
+  }
 
-  if (!userMakingRequest || !realUser || (realUser !== userMakingRequest)) return res.status(403).json({ message: "Forbidden" })
-  
   next();
 }

@@ -5,38 +5,34 @@ import jwt from "jsonwebtoken";
 import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import { sendVerificationEmail } from "../services/email.js";
+import { issueTokens } from "../lib/auth.js";
+import { v4 } from "uuid";
 
 
 export async function login(req: Request<{}, {},LoginSchema>, res: Response, next: NextFunction) {
   const {email, password} = req.body
   try {
-    
     //fix the return of cart products and orders, rn sending too much, also for verify user
     const user = await prisma.user.findFirst({
       where: { email },
       include: {
         cart: true,
-        orders:true
-      }
-    })
+        orders: true,
+      },
+    });
 
-    if(!user) return res.status(404).json({message:"Email or Password is wrong"})
-    if (!user.verified) return res.status(400).json({ message: "Not verified yet" })
-    
+    if (!user)
+      return res.status(401).json({ message: "Email or Password is wrong" });
+    if (!user.verified)
+      return res.status(400).json({ message: "Not verified yet" });
+
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordsMatch) return res.status(404).json({ message: "Email or Password is wrong" });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "30min" })
-    
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "dev",
-      sameSite: "strict",
-      maxAge: 1000 * 60 * 30,
-    });
+    const {accessToken, csrfToken} = await issueTokens(user, res)
 
-    return res.status(200).json({name:user.name,cart:user.cart, orders:user.orders})
+    return res.status(200).json({accessToken,csrfToken,user});
   } catch (err) {
     next(err)
   }
@@ -73,12 +69,20 @@ export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, 
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
-    res.cookie("jwt", "", {
+    const token = req.cookies.refreshToken;
+
+    if (token) {
+      await prisma.refreshToken.deleteMany({ where: { token } })
+    }
+
+    res.cookie("refreshToken", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "dev",
       expires: new Date(0),
+      path: "/",
       sameSite: "strict",
     });
+
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     next(err);
@@ -86,7 +90,6 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 }
 
 
-//trigger login after success
 export async function verifyUser(
   req: Request<{}, {}, { token: string | undefined }>,
   res: Response,
@@ -126,22 +129,10 @@ export async function verifyUser(
     await redis.del(`verifyToken:${userId}`);
 
     //create token for logging in
-    const authToken = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: "30min" }
-    );
+    const {accessToken, csrfToken} = await issueTokens(user, res)
 
-    res.cookie("jwt", authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "dev",
-      sameSite: "strict",
-      maxAge: 1000 * 60 * 30,
-    });
+    return res.status(200).json({ accessToken, csrfToken, user });
 
-    return res
-      .status(200)
-      .json({ name: user.name, cart: user.cart, orders: user.orders });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       return res.status(400).json({ message: "Token expired" });
@@ -209,24 +200,11 @@ export async function changePassword(req: Request<{}, {}, { password?: string, t
           }
         })
 
-        const authToken = jwt.sign(
-          { id: user.id, role: user.role },
-          process.env.JWT_SECRET!,
-          { expiresIn: "30min" }
-        );
+    await redis.del(redisTokenKey);
+    
+    const {accessToken, csrfToken} = await issueTokens(user, res)
 
-        res.cookie("jwt", authToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV !== "dev",
-          sameSite: "strict",
-          maxAge: 1000 * 60 * 30,
-        });
-
-        await redis.del(redisTokenKey);
-
-        return res
-          .status(200)
-          .json({ name: user.name, cart: user.cart, orders: user.orders });
+    return res.status(200).json({ accessToken, csrfToken, user });
 
   } catch (err) {
     next(err)
@@ -254,7 +232,42 @@ export async function sendEmailToChangePassword(req: Request<{}, {}, { email: st
   }
 
 }
+
+export async function issueRefreshToken(req: Request, res: Response, next: NextFunction) {
+      const token = req.cookies.refreshToken;
+      if (!token) return res.status(401).json({ message: "No refresh token" });
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+      id: string;
+    };
+    const dbToken = await prisma.refreshToken.findFirst({ where: { userId:payload.id } });
+    if (!dbToken || dbToken.expiresAt < new Date())
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired refresh token" });
+
+    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const tokenMatch = await bcrypt.compare(token, dbToken.token);
+    
+    if (!tokenMatch) return res.status(401).json({message:"Unauthorized"})
+      
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_ACCESS_SECRET!,
+      { expiresIn: "15m" }
+    );
+    const csrfToken = v4();
+
+    return res.status(200).json({ accessToken, csrfToken });
+  } catch (err) {
+    next(err);
+  }
+}
  
-//add refresh token to stay logged in
-//add csrf token to avoid csrf
-//extract duplicate stuff like issuing tokens, verifying etc. to util fns
+
+	//2.	Implement refresh token rotation.
+	//3.	Support multi-device sessions (store a token ID).
+  //change isAuthenticated middleware 
