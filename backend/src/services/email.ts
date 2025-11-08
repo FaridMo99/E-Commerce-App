@@ -1,31 +1,38 @@
 import Mailjet from "node-mailjet";
+import type { UrlType } from "../types/types.js";
 import dotenv from "dotenv"
 dotenv.config()
 
-const publicKey = process.env.MJ_APIKEY_PUBLIC!
-const privateKey = process.env.MJ_APIKEY_PRIVATE!
+const publicKey = process.env.MJ_APIKEY_PUBLIC!;
+const privateKey = process.env.MJ_APIKEY_PRIVATE!;
 
 const mailjet = new Mailjet.Client({
-  apiKey: publicKey, 
+  apiKey: publicKey,
   apiSecret: privateKey,
 });
 
 export async function sendVerificationEmail(
   receiver: string,
+  url: UrlType,
   token: string
 ) {
   const clientOrigin = process.env.CLIENT_ORIGIN;
   const senderEmail = process.env.EMAIL_ADDRESS!;
   const senderName = `The ${clientOrigin} Team`;
 
-  const verificationLink = `${clientOrigin}/verify?token=${token}`;
+  const verificationLink = `${clientOrigin}/${url}?token=${token}`;
 
-  const subject ="E-Mail verification - ${clientOrigin}"
+  const subject =
+    url === "verify-success"
+      ? `E-Mail verification - ${clientOrigin}`
+      : `Change Password - ${clientOrigin}`;
 
   const htmlPart = `
     <h2>Hi there 👋</h2>
     <p>You recently visited ${clientOrigin}.</p>
-    <p>Please verify your email by clicking the link below:</p>
+    <p>Please ${
+      url === "verify-success" ? "verify your email" : "change your Password"
+    } by clicking the link below:</p>
     <a href="${verificationLink}">Link</a>
     <p>This link will expire in 24 hours.</p>
     <p>Wasnt you? Ignore this E-Mail.</p>
@@ -36,8 +43,9 @@ export async function sendVerificationEmail(
     Hi there 👋
 
     You recently visited ${clientOrigin}.
-    Please verify your email
-    by clicking the link below:
+    Please ${
+      url === "verify-success" ? "verify your email" : "change your Password"
+    } by clicking the link below:
     ${verificationLink}
 
     This link will expire in 24 hours.

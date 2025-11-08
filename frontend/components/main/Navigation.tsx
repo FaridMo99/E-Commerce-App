@@ -1,7 +1,6 @@
 "use client"
 import useProducts from "@/stores/productsStore";
-import { MenuIcon, Settings2, ShoppingCart, User } from "lucide-react";
-import Link from "next/link";
+import { DollarSign, MenuIcon, ShoppingCart, User } from "lucide-react";
 
 
 function Navigation() {
@@ -11,10 +10,9 @@ function Navigation() {
   return (
     <nav className="w-1/3 h-full flex justify-evenly items-center ">
       <button className="block md:hidden">
-        <MenuIcon />
+        <MenuIcon size={40}/>
       </button>
-      <Link
-        href="/cart"
+      <button
         className="relative hidden md:block"
         aria-label="show shopping cart"
       >
@@ -24,21 +22,19 @@ function Navigation() {
             {productsCount > 99 ? "99+" : productsCount}
           </div>
         )}
-      </Link>
-      <Link
-        href="/user"
-        aria-label="go to user account"
+      </button>
+      <button
+        aria-label="show user account"
         className="hidden md:block"
       >
         <User />
-      </Link>
-      <Link
-        href="/settings"
-        aria-label="go to settings"
+      </button>
+      <button
+        aria-label="show currencies"
         className="hidden md:block"
       >
-        <Settings2 />
-      </Link>
+        <DollarSign />
+      </button>
     </nav>
   );
 }

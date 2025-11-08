@@ -43,7 +43,3 @@ export async function getOrders(
     next(err);
   }
 }
-
-export async function createOrder(req: Request, res: Response, next: NextFunction) { 
-  
-}

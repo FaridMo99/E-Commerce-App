@@ -1,4 +1,4 @@
-import { productSchema, reviewSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
+import { loginSchema, productSchema, reviewSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
 import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 
@@ -54,11 +54,7 @@ export function validateUpdateProduct(req: Request,res: Response,next: NextFunct
   next();
 }
 
-export function validateTimeframeQuery(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export function validateTimeframeQuery(req: Request,res: Response,next: NextFunction) {
   const parsed = timeframeQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.message });
@@ -70,6 +66,16 @@ export function validateTimeframeQuery(
   const to = parsed.data.to ?? now; 
 
   req.timeframe = { from, to };
+
+  next();
+}
+
+export function validateEmail(req: Request,res: Response,next: NextFunction) {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email missing" });
+    if (!loginSchema.shape.email.safeParse(email).success) {
+      return res.status(400).json({ message: "Invalid Email" });
+    }
 
   next();
 }

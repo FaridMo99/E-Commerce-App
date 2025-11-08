@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getNewUsers, getOrders, getRevenue, getTopsellers } from "../controller/adminController.js";
+import { getNewUsers, getRevenue, getTopsellers } from "../controller/adminController.js";
 import { isAuthenticated, isAdmin } from "../middleware/authMiddleware.js";
 import { validateTimeframeQuery } from "../middleware/validationMiddleware.js";
 

@@ -9,3 +9,5 @@ export type Timeframe = {
   from?: Date | undefined;
   to: Date
 };
+
+export type UrlType = "verify-success" | "change-password"
