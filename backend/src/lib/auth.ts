@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { v4 } from "uuid";
 import type { User } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
-import type { Response } from "express";
+import type { Response, Request } from "express";
 import bcrypt from "bcrypt"
 import dotenv from "dotenv"
 import type { AccessToken } from "../types/types.js";
@@ -56,4 +56,12 @@ export async function issueTokens(user:User,res:Response):Promise<AccessToken> {
   });
     
     return accessToken
+}
+
+export async function OauthLogin(req:Request, res: Response) {
+  const user = req.oAuthUser?.user!;
+
+  const accessToken = await issueTokens(user, res);
+
+  return res.status(200).json({ accessToken, user });
 }

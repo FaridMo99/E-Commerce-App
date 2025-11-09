@@ -18,12 +18,14 @@ model User {
   id         String    @id @default(uuid())
   name       String
   email      String    @unique
-  birthdate  DateTime
-  password   String
+  birthdate  DateTime?
+  password   String?
   verified   Boolean   @default(false)
   role       UserRole  @default(USER)
   created_at DateTime  @default(now())
-  address    String
+  createdBy  UserCreatedBy
+  providerId String?
+  address    String?
   cart       Product[] @relation("UserCart")
   orders     Order[]
   reviews    Review[]
@@ -129,4 +131,10 @@ enum PaymentMethod {
 enum UserRole {
   ADMIN
   USER
+}
+
+enum UserCreatedBy {
+  SELF
+  GOOGLE
+  FACEBOOK
 }

@@ -1,6 +1,7 @@
 import RedisStore from "rate-limit-redis";
 import redis from "../services/redis.js";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+
 
 export const authRateLimiter = rateLimit({
   store: new RedisStore({
@@ -11,5 +12,5 @@ export const authRateLimiter = rateLimit({
   message: "Too many requests, please try again later",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.body.email || req.ip,
+  keyGenerator: (req) => ipKeyGenerator(req.ip!),
 });

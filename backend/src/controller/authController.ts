@@ -25,6 +25,7 @@ export async function login(req: Request<{}, {},LoginSchema>, res: Response, nex
     if (!user.verified)
       return res.status(400).json({ message: "Not verified yet" });
 
+    if(!user.password) return res.status(401).json({message:"Email or Password is wrong"})
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordsMatch) return res.status(401).json({ message: "Email or Password is wrong" });
@@ -49,9 +50,10 @@ export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, 
       data: {
         email,
         name,
-        birthdate,
-        address,
-        password: await bcrypt.hash(password,10)
+        ...(birthdate && {birthdate}),
+        ...(address && {address}),
+        password: await bcrypt.hash(password, 10),
+        createdBy:"SELF"
       }
       })
     

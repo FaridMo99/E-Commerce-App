@@ -12,13 +12,13 @@ export const loginSchema = z.object({
 
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
-  birthdate: z.date().transform((dateStr) => new Date(dateStr)),
+  birthdate: z.date().transform((dateStr) => new Date(dateStr)).optional(),
   address: z
     .string()
     .regex(
       /^[a-zA-Z0-9\s,.-]{10,100}$/,
       "Address must be valid (street, house number, postal code, country)"
-    ),
+    ).optional(),
 });
 
 export const updateUserSchema = signupSchema.partial()

@@ -1,4 +1,4 @@
-import type { JWTRefreshTokenPayload, JWTUserPayload, Timeframe } from "./src/types/types.ts"
+import type { JWTRefreshTokenPayload, JWTUserPayload, OAuthUserPayload, Timeframe } from "./src/types/types.ts"
 
 declare global {
   namespace Express {
@@ -6,7 +6,8 @@ declare global {
       user?: JWTUserPayload;
       files?: Express.Multer.File[];
       timeframe?: Timeframe;
-      refreshTokenPayload?:JWTRefreshTokenPayload
+      refreshTokenPayload?: JWTRefreshTokenPayload
+      oAuthUser?:OAuthUserPayload
     }
   }
 }
