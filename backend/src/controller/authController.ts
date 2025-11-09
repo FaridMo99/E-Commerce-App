@@ -6,7 +6,6 @@ import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import { sendVerificationEmail } from "../services/email.js";
 import { issueTokens } from "../lib/auth.js";
-import { v4 } from "uuid";
 
 
 export async function login(req: Request<{}, {},LoginSchema>, res: Response, next: NextFunction) {
@@ -28,11 +27,11 @@ export async function login(req: Request<{}, {},LoginSchema>, res: Response, nex
 
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-    if (!passwordsMatch) return res.status(404).json({ message: "Email or Password is wrong" });
+    if (!passwordsMatch) return res.status(401).json({ message: "Email or Password is wrong" });
 
-    const {accessToken, csrfToken} = await issueTokens(user, res)
+    const accessToken = await issueTokens(user, res)
 
-    return res.status(200).json({accessToken,csrfToken,user});
+    return res.status(200).json({accessToken, user});
   } catch (err) {
     next(err)
   }
@@ -69,10 +68,15 @@ export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, 
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
-    const token = req.cookies.refreshToken;
+    const token = req.refreshTokenPayload!;
 
     if (token) {
-      await prisma.refreshToken.deleteMany({ where: { token } })
+      await prisma.refreshToken.deleteMany({
+        where: {
+          deviceId: token.deviceId,
+          userId:token.userId
+        }
+      })
     }
 
     res.cookie("refreshToken", "", {
@@ -88,7 +92,6 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     next(err);
   }
 }
-
 
 export async function verifyUser(
   req: Request<{}, {}, { token: string | undefined }>,
@@ -129,9 +132,9 @@ export async function verifyUser(
     await redis.del(`verifyToken:${userId}`);
 
     //create token for logging in
-    const {accessToken, csrfToken} = await issueTokens(user, res)
+    const accessToken = await issueTokens(user, res)
 
-    return res.status(200).json({ accessToken, csrfToken, user });
+    return res.status(200).json({ accessToken, user });
 
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
@@ -202,9 +205,9 @@ export async function changePassword(req: Request<{}, {}, { password?: string, t
 
     await redis.del(redisTokenKey);
     
-    const {accessToken, csrfToken} = await issueTokens(user, res)
+    const accessToken = await issueTokens(user, res)
 
-    return res.status(200).json({ accessToken, csrfToken, user });
+    return res.status(200).json({ accessToken, user });
 
   } catch (err) {
     next(err)
@@ -234,40 +237,39 @@ export async function sendEmailToChangePassword(req: Request<{}, {}, { email: st
 }
 
 export async function issueRefreshToken(req: Request, res: Response, next: NextFunction) {
-      const token = req.cookies.refreshToken;
-      if (!token) return res.status(401).json({ message: "No refresh token" });
+  const token = req.refreshTokenPayload!
+  const rawToken = req.cookies.refreshToken as string;
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
-      id: string;
-    };
-    const dbToken = await prisma.refreshToken.findFirst({ where: { userId:payload.id } });
-    if (!dbToken || dbToken.expiresAt < new Date())
-      return res
-        .status(401)
-        .json({ message: "Invalid or expired refresh token" });
+    //verify and compare token
+    const dbToken = await prisma.refreshToken.findFirst({ where: { deviceId:token.deviceId } });
+    if (!dbToken)
+    return res.status(401).json({ message: "Invalid refresh token" });
+    if (dbToken.expiresAt < new Date()) {
+      await prisma.refreshToken.delete({ where: { id: dbToken?.id } });
+      return res.status(401).json({ message: "Expired refresh token" });
+    }
 
-    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+
+    const user = await prisma.user.findUnique({ where: { id: token.userId } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const tokenMatch = await bcrypt.compare(token, dbToken.token);
+    const tokenMatch = await bcrypt.compare(rawToken, dbToken.token);
+    if (!tokenMatch) return res.status(401).json({ message: "Unauthorized" })
     
-    if (!tokenMatch) return res.status(401).json({message:"Unauthorized"})
-      
-    const accessToken = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_ACCESS_SECRET!,
-      { expiresIn: "15m" }
-    );
-    const csrfToken = v4();
+    //delete and issue new tokens
+    await prisma.refreshToken.deleteMany({
+      where: {
+        deviceId: dbToken.deviceId
+      }
+    })
+    const accessToken = await issueTokens(user, res)
 
-    return res.status(200).json({ accessToken, csrfToken });
+    return res.status(200).json({ accessToken });
   } catch (err) {
-    next(err);
+    if (err instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: "Refresh token expired" });
+    }
+    return res.status(401).json({ message: "Invalid refresh token" });
   }
 }
- 
-
-	//2.	Implement refresh token rotation.
-	//3.	Support multi-device sessions (store a token ID).
-  //change isAuthenticated middleware 

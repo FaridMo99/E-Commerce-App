@@ -2,7 +2,7 @@ import { loginSchema, signupSchema, updateUserSchema } from "@monorepo/shared"
 import chalk from "chalk";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import type { JWTUserPayload } from "../types/types.js";
+import type { JWTRefreshTokenPayload, JWTUserPayload } from "../types/types.js";
 
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
@@ -59,33 +59,49 @@ export async function isAuthorizedUser(req: Request<{userId:string}>, res: Respo
   next();
 }
 
-
-//change, doesnt work
 export async function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   
-  const token = req.cookies.jwt
-  if (!token) return res.status(401).json({ message: "User not logged in" })
+  const accessToken = req.headers.authorization?.split(" ")[1]
+
+  if (!accessToken) return res.status(401).json({ message: "User not logged in" });
   
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as Partial<JWTUserPayload>;
+    const payload = jwt.verify(
+      accessToken,
+      process.env.JWT_ACCESS_SECRET!
+    ) as Partial<JWTUserPayload>;
 
 
-    if (!payload.id || !payload.role) return res.status(403).json({ message: "Invalid token" })
+    if (!payload.id || !payload.role) return res.status(401).json({ message: "Invalid token" })
     req.user = payload as JWTUserPayload;
     
     next()
   } catch (err) {
     console.log(chalk.red("Jwt token issue: " + err))
-    return res.status(403).json({ message: "Invalid or expired token" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 }
+
+export async function hasRefreshToken(req: Request, res: Response, next: NextFunction) { 
+    const token = req.cookies.refreshToken;
+  if (!token) return res.status(401).json({ message: "No refresh token" });
+  
+    try {
+      const verifiedToken = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JWTRefreshTokenPayload;
+      req.refreshTokenPayload = verifiedToken
+      next()
+    } catch (err) {
+      return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }       
+}
+
 
 export async function hasCsrfToken(req: Request,res: Response,next: NextFunction) {
   const csrfHeader = req.headers["x-csrf-token"];
   const csrfCookie = req.cookies.csrfToken;
 
   if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
-    return res.status(403).json({ message: "Invalid CSRF token" });
+    return res.status(401).json({ message: "Invalid CSRF token" });
   }
 
   next();

@@ -1,15 +1,5 @@
 import z from "zod"
 
-const isAdult = (date: Date) => {
-  const today = new Date();
-  const age = today.getFullYear() - date.getFullYear();
-  const m = today.getMonth() - date.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
-    return age - 1 >= 18;
-  }
-  return age >= 18;
-};
-
 export const loginSchema = z.object({
   email: z.email("Invalid email"),
   password: z
@@ -22,13 +12,7 @@ export const loginSchema = z.object({
 
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
-  birthdate: z.string().refine(
-    (dateStr) => {
-      const date = new Date(dateStr);
-      return !isNaN(date.getTime()) && isAdult(date);
-    },
-    { message: "You must be at least 18 years old and provide a valid date" }
-  ).transform((dateStr) => new Date(dateStr)),
+  birthdate: z.date().transform((dateStr) => new Date(dateStr)),
   address: z
     .string()
     .regex(

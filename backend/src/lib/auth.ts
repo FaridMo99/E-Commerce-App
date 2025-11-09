@@ -5,9 +5,12 @@ import prisma from "../services/prisma.js";
 import type { Response } from "express";
 import bcrypt from "bcrypt"
 import dotenv from "dotenv"
+import type { AccessToken } from "../types/types.js";
 dotenv.config()
 
-export async function issueTokens(user:User,res:Response):Promise<{accessToken:string, csrfToken:string}> {
+
+//issues new refresh and csrf tokens and returns access token
+export async function issueTokens(user:User,res:Response):Promise<AccessToken> {
   //access token
   const accessToken = jwt.sign(
     { id: user.id, role: user.role },
@@ -17,8 +20,9 @@ export async function issueTokens(user:User,res:Response):Promise<{accessToken:s
     }
   );
 
+  const deviceId = v4()
   //refresh token
-  const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET!, {
+  const refreshToken = jwt.sign({ userId: user.id, deviceId }, process.env.JWT_REFRESH_SECRET!, {
     expiresIn: "7d",
   });
 
@@ -28,19 +32,28 @@ export async function issueTokens(user:User,res:Response):Promise<{accessToken:s
       token: await bcrypt.hash(refreshToken,10),
       userId: user.id,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      deviceId
     },
   });
 
   //csrf token (only browser)
   const csrfToken = v4();
 
+  const maxAge = 7 * 24 * 60 * 60 * 1000
+  res.cookie("csrfToken", csrfToken, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV !== "dev",
+    sameSite: "strict",
+    maxAge
+  });
+
   // Send refresh token as httpOnly cookie
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV !== "dev",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge
   });
     
-    return {accessToken, csrfToken}
+    return accessToken
 }
