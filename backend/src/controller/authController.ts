@@ -48,13 +48,14 @@ export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, 
     
     //create user
       const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        ...(birthdate && {birthdate}),
-        ...(address && {address}),
-        password: await bcrypt.hash(password, 10),
-        createdBy:"SELF"
+        data: {
+          email,
+          name,
+          ...(birthdate && { birthdate }),
+          ...(address && { address }),
+          password: await bcrypt.hash(password, 10),
+          createdBy: "SELF",
+          cart:{create:{}}
       }
       })
     

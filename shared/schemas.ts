@@ -1,9 +1,8 @@
 import z from "zod"
 
-const priceSchema = z.union([
-  z.number(),
-  z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
-]);
+const priceSchema = z.number().int("Price must be an integer") .nonnegative("Price must be 0 or greater"); 
+
+const currencySchema = z.enum(["usd", "eur", "gbp"])
 
 export const loginSchema = z.object({
   email: z.email("Invalid email"),
@@ -90,6 +89,7 @@ export const productSchema = z.object({
   is_public: z.boolean().default(false),
   category: z.string(),
   sale_price: priceSchema,
+  currency:currencySchema
 });
 
 export const updateProductSchema = productSchema.partial()
@@ -117,3 +117,15 @@ export const reviewSchema = z.object({
   rating: z.number().min(0).max(5),
   isPublic: z.boolean().optional(),
 });
+
+const itemQuantity = z.number("Quantity must be a number").int("Quantity must be an integer").min(1, "Quantity must be at least 1")
+const uuid = z.uuid("Invalid ID")
+
+export const itemQuantitySchema = z.object({
+  quantity:itemQuantity
+})
+
+export const addCartItemSchema = z.object({
+  productId: uuid,
+  quantity: itemQuantitySchema
+})

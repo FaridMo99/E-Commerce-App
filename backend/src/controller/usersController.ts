@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import type { OrdersQuerySchema, UpdateUserSchema } from "@monorepo/shared";
+import type { AddCartItemSchema, ItemQuantitySchema, OrdersQuerySchema, UpdateUserSchema } from "@monorepo/shared";
 import bcrypt from "bcrypt"
 import type { User } from "../generated/prisma/client.js";
+import type { JWTUserPayload } from "../types/types.js";
 
 //update in all controllers what you return
 export async function getUserByUserId(req: Request, res: Response, next: NextFunction) {
@@ -74,7 +75,7 @@ export async function getAllOrdersByUser(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id;
+  const userId = (req.user as JWTUserPayload).id;
   const { sort, order, page, limit, status } = req.query;
   const pageNum = parseInt(page);
   const limitNum = parseInt(limit);
@@ -163,34 +164,82 @@ export async function getUserCart(req: Request, res: Response, next: NextFunctio
   }
 }
 
-//finish this
+export async function emptyCart(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id;
+
+  try {
+    const [_, cart] = await prisma.$transaction([
+      prisma.cartItem.deleteMany({
+        where: { cart: { userId: userId } },
+      }),
+      prisma.cart.findUnique({
+        where: { userId: userId },
+        include: { items: true },
+      }),
+    ]);
+
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    return res.status(200).json(cart);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function addProductToUserCart(
+  req: Request<{}, {},AddCartItemSchema>,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+  const {productId, quantity} = req.body
+
+  try {
+    const newCartItem = await prisma.cartItem.create({
+      data: {
+        cart: { connect: { userId: userId } },
+        product: { connect: { id: productId } },
+        quantity: quantity, 
+      },
+      select: {
+        cart:true
+      }
+    });
+
+    return res.status(200).json(newCartItem.cart);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function removeProductFromUserCart(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const userId = req.user?.id!;
-  const {productId, amount} = req.body.product
+  const itemId = req.params.itemId
 
-  //make it support product quantity
+  if (!itemId) return res.status(400).json({ message: "No ProductId received" })
+  
   try {
-    const cart = await prisma.user.update({
+    const cart = await prisma.cartItem.delete({
       where: {
-        id: userId
-      },
-      data: {
         cart: {
-          connect: {
-            id: productId,
-          }
-        }
+          userId,
+        },
+        id: itemId,
       },
       select: {
-        cart: true
+        cart:true
       }
     });
 
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+    if (!cart) return res.status(404).json({ message: "Item not found" });
 
     return res.status(200).json(cart.cart);
   } catch (err) {
@@ -198,24 +247,31 @@ export async function addProductToUserCart(
   }
 }
 
-export async function deleteCart(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+//later give support for variants
+export async function updateItemQuantity(req: Request<{itemId:string}, {},ItemQuantitySchema>,res: Response,next: NextFunction) {
   const userId = req.user?.id!;
+  const itemId = req.params.itemId;
+  const {quantity} = req.body
+
+  if (!itemId)return res.status(400).json({ message: "No ProductId received" });
 
   try {
-    const cart = await prisma.user.delete({
+    const cart = await prisma.cartItem.update({
       where: {
-        id: userId,
+        cart: {
+          userId,
+        },
+        id: itemId,
+      },
+      data: {
+        quantity
       },
       select: {
         cart: true,
       },
     });
 
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+    if (!cart) return res.status(404).json({ message: "Item not found" });
 
     return res.status(200).json(cart.cart);
   } catch (err) {
@@ -223,12 +279,78 @@ export async function deleteCart(
   }
 }
 
-//finish this
-export async function updateCart(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const userId = req.user?.id!;
+export async function getFavoriteItems(req: Request, res: Response, next: NextFunction) { 
+  const userId = req.user?.id!
 
+  try {
+    const favorites = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        favorites: {
+          some: {
+            is_public: true,
+            deleted:false
+          }
+        }
+      },
+      select: {
+        favorites:true
+      }
+    })
+    if (!favorites) return res.status(404).json({ message: "Favorite products not found" })
+    return res.status(200).json(favorites)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function deleteFavoriteItem(req: Request, res: Response, next: NextFunction) { 
+  const userId = req.user?.id!
+  const productId = req.params.productId
+  if (!productId) return res.status(400).json({ message: "No product provided" })
+  
+  try {
+    const product = await prisma.user.delete({
+      where: {
+        id: userId,
+        favorites: {
+          some: {
+            id: productId,
+            deleted: false,
+            is_public:true
+          }
+        }
+      }
+    })
+
+    if (!product) return res.status(404).json({ message: "Product not found" })
+    return res.status(200).json(product)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function addFavoriteItem(req: Request, res: Response, next: NextFunction) {
+  const userId = req.user?.id!
+  const productId = req.body.productId as string
+
+  try {
+    const product = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        favorites: {
+          connect: { id: productId },
+        },
+      },
+      include: {
+        favorites: true,
+      },
+    });
+
+    if (!product) return res.status(404).json({ message: "Product not found" })
+    
+    return res.status(200).json(product)
+  } catch (err) {
+    next(err)
+  }
 }

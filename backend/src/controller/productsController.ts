@@ -1,9 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import type { ProductSchema, ProductsQuerySchema, ReviewSchema, UpdateProductSchema } from "@monorepo/shared";
-import { Decimal } from "@prisma/client/runtime/library";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
-
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
@@ -17,14 +15,15 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
     const products = await prisma.product.findMany({
       where: {
         ...(role !== "ADMIN" && { is_public: true }),
+        deleted:false,
         ...(search && { name: { contains: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
         ...(sale && { sale }),
         ...(minPrice !== undefined || maxPrice !== undefined
           ? {
               price: {
-                ...(minPrice !== undefined && { gte: new Decimal(minPrice) }),
-                ...(maxPrice !== undefined && { lte: new Decimal(maxPrice) }),
+                ...(minPrice !== undefined && { gte:minPrice }),
+                ...(maxPrice !== undefined && { lte:maxPrice }),
               },
             }
           : {}),
@@ -56,7 +55,8 @@ export async function createProduct(req: Request<{}, {},ProductSchema>, res: Res
       data: {
         name: product.name,
         ...(imageUrls && { imageUrls: [...imageUrls] }),
-        price: new Decimal(product.price),
+        price: product.price,
+        currency:product.currency,
         description: product.description,
         stock_quantity: product.stock_quantity,
         is_public: product.is_public,
@@ -88,26 +88,37 @@ export async function getProductByProductId(req: Request, res: Response, next: N
 }
 
 
-export async function deleteProductByProductId(req: Request, res: Response, next: NextFunction) { 
-        const id = req.params.productId!;
+export async function deleteProductByProductId(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const id = req.params.productId!;
 
-        try {
-         const product = await prisma.product.delete({
-            where: {
-              id,
-            },
-         });
-          
-          if (product.imageUrls.length > 0) {
-            await Promise.all(
-              product.imageUrls.map((url) => deleteCloudAsset(url))
-            );
-          }
+  try {
+    //fetch product
+    const preProduct = await prisma.product.findUnique({ where: { id } });
+    if (!preProduct) return res.status(404).json({ message: "Product not found" });
 
-          return res.status(200).json({ message: "Product successfuly deleted" });
-        } catch (err) {
-          next(err);
-        }
+    //keep first image, delete rest from cloud
+    const imagesToDelete = preProduct.imageUrls.slice(1);
+    if (imagesToDelete.length > 0) {
+      await Promise.all(imagesToDelete.map((url) => deleteCloudAsset(url)));
+    }
+
+    //update product
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        deleted: true,
+        imageUrls: preProduct.imageUrls.slice(0, 1),
+      },
+    });
+
+    return res.status(200).json({ message: "Product successfully deleted", product });
+  } catch (err) {
+    next(err);
+  }
 }
 
 

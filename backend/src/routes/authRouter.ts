@@ -19,22 +19,7 @@ authRouter.post("/refresh-token", authRateLimiter, hasRefreshToken, issueRefresh
 //Oauth routes
 authRouter.get("/oauth/google",authRateLimiter,verifyCaptcha, passport.authenticate("google", {scope: ["profile", "email"],session: false}));
 authRouter.get("/oauth/facebook",authRateLimiter,verifyCaptcha, passport.authenticate("facebook", {scope: ["public_profile", "email"],session: false}));
-authRouter.get(
-  "/oauth/google/callback",
-  authRateLimiter,
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/login",
-  }),
-  OauthLogin
-);
-authRouter.get(
-    "/oauth/facebook/callback",
-    authRateLimiter,
-    passport.authenticate("facebook", {
-        session: false, failureRedirect: "/login"
-    }),
-    OauthLogin
-);
+authRouter.get("/oauth/google/callback",authRateLimiter,passport.authenticate("google", {session: false,failureRedirect: "/login",}),OauthLogin);
+authRouter.get("/oauth/facebook/callback",authRateLimiter,passport.authenticate("facebook", {session: false, failureRedirect: "/login"}),OauthLogin);
 
 export default authRouter

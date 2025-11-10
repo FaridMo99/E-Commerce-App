@@ -39,7 +39,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "include": ["src/**/*.ts", "types.d.ts"] // make sure this includes your types
+  "include": ["src/**/*.ts","types.d.ts"]
 }

@@ -26,20 +26,26 @@ model User {
   createdBy  UserCreatedBy
   providerId String?
   address    String?
-  cart       Product[] @relation("UserCart")
   orders     Order[]
   reviews    Review[]
   refreshTokens RefreshToken[]
-}
+
+  favorites  Product[] @relation("UserFavorites")
+
+
+  cart       Cart?     @relation(name: "CartToUser")
+  }
 
 model Product {
   id             String       @id @default(uuid())
   name           String
   description    String
-  price          Decimal      @db.Decimal(10, 2)
-  sale_price     Decimal?     @db.Decimal(10, 2)
+  price          Int
+  sale_price     Int?
+  currency       Currency
   stock_quantity Int
   is_public      Boolean      @default(false)
+  deleted        Boolean      @default(false)
   created_at     DateTime     @default(now())
   updated_at     DateTime?
   imageUrls      String[]
@@ -47,7 +53,8 @@ model Product {
   category_id    String
   reviews        Review[]
   order_items    Order_Item[]
-  cart_users     User[]       @relation("UserCart")
+  cart_items     CartItem[]
+  favoredBy      User[]       @relation("UserFavorites")
 }
 
 model Category {
@@ -63,9 +70,10 @@ model Order {
   shipping_address   String
   ordered_at         DateTime     @default(now())
   status             OrderStatus
-  total_amount       Decimal      @db.Decimal(10, 2)
+  total_amount       Int
   items              Order_Item[]
   payment            Payment?
+  currency           Currency
 }
 
 model Order_Item {
@@ -75,7 +83,8 @@ model Order_Item {
   product           Product  @relation(fields: [product_id], references: [id])
   product_id        String
   quantity          Int
-  price_at_purchase Decimal  @db.Decimal(10, 2)
+  price_at_purchase Int
+  currency          Currency
 }
 
 model Review {
@@ -111,6 +120,23 @@ model RefreshToken {
   user       User     @relation(fields: [userId], references: [id])
 }
 
+model Cart {
+  id        String      @id @default(uuid())
+  user      User        @relation(name: "CartToUser", fields: [userId], references: [id])
+  userId    String      @unique
+  createdAt DateTime    @default(now())
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+}
+
 enum OrderStatus {
   ORDERED
   DELIVERING
@@ -138,4 +164,10 @@ enum UserCreatedBy {
   SELF
   GOOGLE
   FACEBOOK
+}
+
+enum Currency {
+  usd
+  eur
+  gbp
 }

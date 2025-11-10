@@ -1,5 +1,4 @@
 import type { JWTRefreshTokenPayload, JWTUserPayload, OAuthUserPayload, Timeframe } from "./src/types/types.ts"
-
 declare global {
   namespace Express {
     interface Request {

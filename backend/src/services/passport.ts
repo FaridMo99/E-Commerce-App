@@ -70,6 +70,7 @@ function makeVerifyCb(provider: UserCreatedBy) {
             verified: true,
             providerId: profile.id,
             createdBy: provider,
+            cart:{create:{}}
           },
         });
       }
