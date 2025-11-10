@@ -37,6 +37,7 @@ model Product {
   name           String
   description    String
   price          Decimal      @db.Decimal(10, 2)
+  sale_price     Decimal?     @db.Decimal(10, 2)
   stock_quantity Int
   is_public      Boolean      @default(false)
   created_at     DateTime     @default(now())

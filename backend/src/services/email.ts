@@ -1,14 +1,12 @@
 import Mailjet from "node-mailjet";
 import type { UrlType } from "../types/types.js";
-import dotenv from "dotenv"
-dotenv.config()
+import { CLIENT_ORIGIN, EMAIL_ADDRESS, MJ_APIKEY_PRIVATE, MJ_APIKEY_PUBLIC } from "../config/env.js";
 
-const publicKey = process.env.MJ_APIKEY_PUBLIC!;
-const privateKey = process.env.MJ_APIKEY_PRIVATE!;
+
 
 const mailjet = new Mailjet.Client({
-  apiKey: publicKey,
-  apiSecret: privateKey,
+  apiKey: MJ_APIKEY_PUBLIC,
+  apiSecret: MJ_APIKEY_PRIVATE,
 });
 
 export async function sendVerificationEmail(
@@ -16,20 +14,18 @@ export async function sendVerificationEmail(
   url: UrlType,
   token: string
 ) {
-  const clientOrigin = process.env.CLIENT_ORIGIN;
-  const senderEmail = process.env.EMAIL_ADDRESS!;
-  const senderName = `The ${clientOrigin} Team`;
+  const senderName = `The ${CLIENT_ORIGIN} Team`;
 
-  const verificationLink = `${clientOrigin}/${url}?token=${token}`;
+  const verificationLink = `${CLIENT_ORIGIN}/${url}?token=${token}`;
 
   const subject =
     url === "verify-success"
-      ? `E-Mail verification - ${clientOrigin}`
-      : `Change Password - ${clientOrigin}`;
+      ? `E-Mail verification - ${CLIENT_ORIGIN}`
+      : `Change Password - ${CLIENT_ORIGIN}`;
 
   const htmlPart = `
     <h2>Hi there 👋</h2>
-    <p>You recently visited ${clientOrigin}.</p>
+    <p>You recently visited ${CLIENT_ORIGIN}.</p>
     <p>Please ${
       url === "verify-success" ? "verify your email" : "change your Password"
     } by clicking the link below:</p>
@@ -37,12 +33,12 @@ export async function sendVerificationEmail(
     <p>This link will expire in 24 hours.</p>
     <p>Wasnt you? Ignore this E-Mail.</p>
     <p>Thanks,</p>
-    <h3>The ${clientOrigin} Team</h3>`;
+    <h3>The ${CLIENT_ORIGIN} Team</h3>`;
 
   const textPart = `
     Hi there 👋
 
-    You recently visited ${clientOrigin}.
+    You recently visited ${CLIENT_ORIGIN}.
     Please ${
       url === "verify-success" ? "verify your email" : "change your Password"
     } by clicking the link below:
@@ -52,7 +48,7 @@ export async function sendVerificationEmail(
     Wasnt you? Ignore this E-Mail.
 
     Thanks,
-    The ${clientOrigin} Team`;
+    The ${CLIENT_ORIGIN} Team`;
 
   console.log("sending email");
 
@@ -60,7 +56,7 @@ export async function sendVerificationEmail(
     Messages: [
       {
         From: {
-          Email: senderEmail,
+          Email: EMAIL_ADDRESS,
           Name: senderName,
         },
         To: [

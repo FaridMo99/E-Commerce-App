@@ -6,6 +6,7 @@ import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import { sendVerificationEmail } from "../services/email.js";
 import { issueTokens } from "../lib/auth.js";
+import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
 
 
 export async function login(req: Request<{}, {},LoginSchema>, res: Response, next: NextFunction) {
@@ -58,7 +59,7 @@ export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, 
       })
     
     //send email to verify, token only valid 24 hours
-    const token = jwt.sign({id:user.id},process.env.JWT_EMAIL_SECRET!,{expiresIn:"1d"})
+    const token = jwt.sign({id:user.id},JWT_EMAIL_TOKEN_SECRET,{expiresIn:"1d"})
     await redis.setEx(`verifyToken:${user.id}`,60*60*24, token)
 
     await sendVerificationEmail(user.email, "verify-success",token)
@@ -83,7 +84,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 
     res.cookie("refreshToken", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== "dev",
+      secure: NODE_ENV !== "dev",
       expires: new Date(0),
       path: "/",
       sameSite: "strict",
@@ -105,7 +106,7 @@ export async function verifyUser(
 
   try {
     //Verify JWT signature
-    const payload = jwt.verify(token, process.env.JWT_EMAIL_SECRET!) as {
+    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as {
       id: string;
     };
     const userId = payload.id;
@@ -158,7 +159,7 @@ export async function sendNewVerifyLink(req: Request<{}, {}, { email: string }>,
     if (user.verified) return res.status(400).json({ message: "User already verified" })
     
     await redis.del(`verifyToken:${user.id}`);
-    const token = jwt.sign({ id: user.id }, process.env.JWT_EMAIL_SECRET!, {
+    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
       expiresIn: "1d",
     });
     await redis.setEx(`verifyToken:${user.id}`, 60 * 60 * 24, token);
@@ -182,7 +183,7 @@ export async function changePassword(req: Request<{}, {}, { password?: string, t
   
   try {
 
-      const payload = jwt.verify(token, process.env.JWT_EMAIL_SECRET!) as {
+      const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as {
         id: string;
       };
     
@@ -225,7 +226,7 @@ export async function sendEmailToChangePassword(req: Request<{}, {}, { email: st
 
     if (!user) return res.status(404).json({ message: `User with E-Mail: ${email} does not exist.` });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_EMAIL_SECRET!, {expiresIn: "1d"});
+    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {expiresIn: "1d"});
     
     await redis.setEx(`changePasswordUserId:${user.id}`, 60*60*24, token);
 

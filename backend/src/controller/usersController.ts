@@ -145,3 +145,90 @@ export async function getReviewsByUser(req: Request, res: Response, next: NextFu
     next(err)
   }
 }
+
+export async function getUserCart(req: Request, res: Response, next: NextFunction) {
+  const userId = req.user?.id!
+
+  try {
+    const cart = await prisma.user.findUnique({
+      where: { id: userId },
+      select:{cart:true}
+    })
+    if (!cart) return res.status(404).json({message:"Cart not found"})
+    
+    return res.status(200).json(cart.cart)
+    
+  } catch (err) {
+    next(err)
+  }
+}
+
+//finish this
+export async function addProductToUserCart(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+  const {productId, amount} = req.body.product
+
+  //make it support product quantity
+  try {
+    const cart = await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        cart: {
+          connect: {
+            id: productId,
+          }
+        }
+      },
+      select: {
+        cart: true
+      }
+    });
+
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    return res.status(200).json(cart.cart);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteCart(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+
+  try {
+    const cart = await prisma.user.delete({
+      where: {
+        id: userId,
+      },
+      select: {
+        cart: true,
+      },
+    });
+
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    return res.status(200).json(cart.cart);
+  } catch (err) {
+    next(err);
+  }
+}
+
+//finish this
+export async function updateCart(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+
+}

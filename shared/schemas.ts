@@ -1,5 +1,10 @@
 import z from "zod"
 
+const priceSchema = z.union([
+  z.number(),
+  z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
+]);
+
 export const loginSchema = z.object({
   email: z.email("Invalid email"),
   password: z
@@ -55,14 +60,9 @@ export const productsQuerySchema = paginationSchema.extend({
   search: z.string().max(255).optional(),
   // Filtering
   category: z.string().optional(),
-  minPrice:z.union([
-    z.number(),
-    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format").optional(),
-  ]),
-  maxPrice: z.union([
-    z.number(),
-    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
-  ]).optional(),
+  minPrice: priceSchema.optional(),
+  maxPrice: priceSchema.optional(),
+  sale: z.preprocess((val) => {if (val === "true") return true;if (val === "false") return false;return val;}, z.boolean()).optional(),
   // Sorting
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
@@ -85,13 +85,11 @@ export const reviewsQuerySchema = paginationSchema.extend({
 export const productSchema = z.object({
   name: z.string(),
   description: z.string(),
-  price: z.union([
-    z.number(),
-    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid decimal format"),
-  ]),
+  price: priceSchema,
   stock_quantity: z.number().int(),
   is_public: z.boolean().default(false),
   category: z.string(),
+  sale_price: priceSchema,
 });
 
 export const updateProductSchema = productSchema.partial()

@@ -3,28 +3,39 @@ import express, {
   type Request,
   type Response,
 } from "express";
-import dotenv from "dotenv";
 import chalk from "chalk";
 import { disconnectAllServices } from "./src/lib/disconnectHandler.js";
 import cookieParser from "cookie-parser";
 import apiRouter from "./src/routes/apiRouter.js";
-dotenv.config();
+import webhookRouter from "./src/routes/webhookRouter.js";
+import passport from "passport";
+import { PORT } from "./src/config/env.js";
 
 export const app = express();
-const PORT = process.env.PORT;
+
+//proxy support middleware to access ip
+app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+
 
 //middleware to parse form submits to req.body
 app.use(express.urlencoded({ extended: true }));
 
 //middleware to parse application/json to req.body
-app.use(express.json());
-
+app.use((req, res, next) => {
+  if (req.originalUrl === "/webhooks/stripe") return next();
+  express.json()(req, res, next);
+});
 //middleware to parse cookies to req.cookie, jwt is inside req.cookie.jwt
 app.use(cookieParser());
 
+//passport for oauth
+app.use(passport.initialize())
+
 //route handlers
 app.use("/api", apiRouter);
-//add another here for webapp serving
+app.use("/webhooks", webhookRouter);
+
+//add another handler here for webapp serving
 
 export const server = app.listen(PORT, () => {
   console.log(chalk.green("Server running on Port: " + PORT));

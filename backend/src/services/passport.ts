@@ -8,30 +8,28 @@ import {
   Strategy as FacebookStrategy,
   type StrategyOptionsWithRequest as FacebookStrategyOptions,
 } from "passport-facebook";
-import dotenv from "dotenv";
 import prisma from "./prisma.js";
 import type { Request } from "express";
 import type { UserCreatedBy } from "../generated/prisma/enums.js";
-dotenv.config();
+import { CLIENT_ORIGIN, OAUTH_FACEBOOK_CLIENT_ID, OAUTH_FACEBOOK_CLIENT_SECRET, OAUTH_GOOGLE_CLIENT_ID, OAUTH_GOOGLE_CLIENT_SECRET } from "../config/env.js";
 
-const clientOrigin = process.env.CLIENT_ORIGIN!;
 
 
 type MinimalProfile = Pick<Profile, "displayName" | "emails" | "id">;
 
 
 const googleConfig: GoogleStrategyOptions = {
-  clientID: process.env.OAUTH_GOOGLE_CLIENT_ID!,
-  clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET!,
-  callbackURL: `${clientOrigin}/login/google/success`,
+  clientID: OAUTH_GOOGLE_CLIENT_ID,
+  clientSecret: OAUTH_GOOGLE_CLIENT_SECRET,
+  callbackURL: `${CLIENT_ORIGIN}/login/google/success`,
   scope: ["profile", "email"],
   passReqToCallback:true,
 };
 
 const facebookConfig: FacebookStrategyOptions = {
-  clientID: process.env.OAUTH_FACEBOOK_CLIENT_ID!,
-  clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET!,
-  callbackURL: `${clientOrigin}/login/facebook/success`,
+  clientID: OAUTH_FACEBOOK_CLIENT_ID,
+  clientSecret: OAUTH_FACEBOOK_CLIENT_SECRET,
+  callbackURL: `${CLIENT_ORIGIN}/login/facebook/success`,
   scope: ["public_profile", "email"],
   passReqToCallback:true
 };

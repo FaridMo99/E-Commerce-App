@@ -1,6 +1,6 @@
 import type { User } from "../generated/prisma/client.js";
 import type { UserRole } from "../generated/prisma/enums.js";
-import type { Request } from "express";
+
 
 export type JWTUserPayload = {
   id: string;
@@ -22,4 +22,13 @@ export type AccessToken = string;
 
 export type UrlType = "verify-success" | "change-password"
 
-export type OAuthUserPayload = {user: User;}
+export type OAuthUserPayload = {
+  user: User;
+}
+
+export type TurnstileResponse = {
+  success: boolean;
+  challenge_ts?: string;
+  hostname?: string;
+  ["error-codes"]?: string[];
+}

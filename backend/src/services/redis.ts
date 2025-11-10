@@ -1,9 +1,8 @@
 import chalk from "chalk";
 import { createClient } from "redis"
-import dotenv from "dotenv"
-dotenv.config()
+import { REDIS_URL } from "../config/env.js";
 
-const redis = createClient({ url: process.env.REDIS_URL! });
+const redis = createClient({ url: REDIS_URL });
 
   (async () => {
   try {

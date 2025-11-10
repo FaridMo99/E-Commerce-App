@@ -3,6 +3,8 @@ import chalk from "chalk";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { JWTRefreshTokenPayload, JWTUserPayload } from "../types/types.js";
+import { JWT_ACCESS_TOKEN_SECRET, JWT_REFRESH_TOKEN_SECRET } from "../config/env.js";
+import { validateTurnstile } from "../lib/auth.js";
 
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
@@ -50,15 +52,6 @@ export async function isAdmin(
   next()
 }
 
-export async function isAuthorizedUser(req: Request<{userId:string}>, res: Response, next: NextFunction) {
-  const userMakingRequest = req.params.userId
-  const realUser = req.user?.id;
-
-  if (!userMakingRequest || !realUser || (realUser !== userMakingRequest)) return res.status(403).json({ message: "Forbidden" })
-  
-  next();
-}
-
 export async function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   
   const accessToken = req.headers.authorization?.split(" ")[1]
@@ -68,7 +61,7 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
   try {
     const payload = jwt.verify(
       accessToken,
-      process.env.JWT_ACCESS_SECRET!
+      JWT_ACCESS_TOKEN_SECRET
     ) as Partial<JWTUserPayload>;
 
 
@@ -87,7 +80,7 @@ export async function hasRefreshToken(req: Request, res: Response, next: NextFun
   if (!token) return res.status(401).json({ message: "No refresh token" });
   
     try {
-      const verifiedToken = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JWTRefreshTokenPayload;
+      const verifiedToken = jwt.verify(token, JWT_REFRESH_TOKEN_SECRET) as JWTRefreshTokenPayload;
       req.refreshTokenPayload = verifiedToken
       next()
     } catch (err) {
@@ -105,4 +98,24 @@ export async function hasCsrfToken(req: Request,res: Response,next: NextFunction
   }
 
   next();
+}
+
+
+export async function verifyCaptcha(req: Request, res: Response, next: NextFunction) {
+  const cfToken = req.body.cfToken
+  const ip = req.ip
+  if (!cfToken || !ip || typeof cfToken !== "string") return res.status(400).json({ message: "Failed Captcha" })
+  
+  const verificationResult = await validateTurnstile(cfToken, ip)
+
+  if (!verificationResult.success) {
+    return res
+      .status(400)
+      .json({
+        message: "Captcha verification failed",
+        errors: verificationResult["error-codes"],
+      });
+  }
+
+  next()
 }

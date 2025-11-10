@@ -7,30 +7,32 @@ import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
+//maybe types wont work bc they always strings
 export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchema>,res:Response, next:NextFunction) {
     const role = req.user?.role
-    const { search, category, minPrice, maxPrice, sortBy, sortOrder, page, limit } = req.query
+    const { search, category, minPrice, maxPrice, sortBy, sortOrder, page, limit, sale } = req.query
   
 
     try {
     const products = await prisma.product.findMany({
-    where: {
-      ...(role !== "ADMIN" && { is_public: true }),
-      ...(search && { name: { contains: search, mode: "insensitive" } }),
-      ...(category && { category:{name:category} }),
-      ...(minPrice !== undefined || maxPrice !== undefined
-        ? {
-            price: {
-              ...(minPrice !== undefined && { gte: new Decimal(minPrice) }),
-              ...(maxPrice !== undefined && { lte: new Decimal(maxPrice) }),
-            },
-          }
-        : {}),
-    },
-    ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
-    ...(limit && { take: parseInt(limit) }),
-    ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
-  });
+      where: {
+        ...(role !== "ADMIN" && { is_public: true }),
+        ...(search && { name: { contains: search, mode: "insensitive" } }),
+        ...(category && { category: { name: category } }),
+        ...(sale && { sale }),
+        ...(minPrice !== undefined || maxPrice !== undefined
+          ? {
+              price: {
+                ...(minPrice !== undefined && { gte: new Decimal(minPrice) }),
+                ...(maxPrice !== undefined && { lte: new Decimal(maxPrice) }),
+              },
+            }
+          : {}),
+      },
+      ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
+      ...(limit && { take: parseInt(limit) }),
+      ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
+    });
 
       return res.status(200).json(products)
     } catch (err) {
@@ -111,7 +113,7 @@ export async function deleteProductByProductId(req: Request, res: Response, next
 
 export async function updateProductByProductId(req: Request<{productId:string}, {},UpdateProductSchema>, res: Response, next: NextFunction) {
   const id = req.params.productId
-  const { name, description, price, stock_quantity, is_public, category } = req.body
+  const { name, description, price, stock_quantity, is_public, category, sale_price } = req.body
 
   try {
     const product = await prisma.product.update({
@@ -122,10 +124,11 @@ export async function updateProductByProductId(req: Request<{productId:string}, 
         ...(price && { price }),
         ...(stock_quantity && { stock_quantity }),
         ...(is_public && { is_public }),
+        ...(sale_price && { sale_price }),
         ...(category && { category: { connect: { name: category } } }),
-        updated_at:new Date()
-      }
-    })
+        updated_at: new Date(),
+      },
+    });
 
     return res.status(200).json(product)
   } catch (err) {
