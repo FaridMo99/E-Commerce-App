@@ -1,7 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import type { ProductSchema, ProductsQuerySchema, ReviewSchema, UpdateProductSchema } from "@monorepo/shared";
+import { currencySchema, type ProductSchema, type ProductsQuerySchema, type ReviewSchema, type UpdateProductSchema } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
+import { exchangeToCurrency, formatPriceForClient } from "../lib/currencyHandlers.js";
+import type { CurrencyISO } from "../generated/prisma/enums.js";
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
@@ -9,21 +11,27 @@ import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchema>,res:Response, next:NextFunction) {
     const role = req.user?.role
     const { search, category, minPrice, maxPrice, sortBy, sortOrder, page, limit, sale } = req.query
+    let currency:CurrencyISO | undefined = req.cookies.currency 
   
+    if (!currency || !currencySchema.safeParse(currency).success) {
+      currency = "USD"
+    }
 
-    try {
+  try {
+    //get products
     const products = await prisma.product.findMany({
       where: {
         ...(role !== "ADMIN" && { is_public: true }),
-        deleted:false,
+        deleted: false,
         ...(search && { name: { contains: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
         ...(sale && { sale }),
-        ...(minPrice !== undefined || maxPrice !== undefined
+        ...(minPrice || maxPrice
           ? {
+              // has to use the curreny saved in db
               price: {
-                ...(minPrice !== undefined && { gte:minPrice }),
-                ...(maxPrice !== undefined && { lte:maxPrice }),
+                ...(minPrice && { gte: minPrice }),
+                ...(maxPrice && { lte: maxPrice }),
               },
             }
           : {}),
@@ -33,8 +41,50 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
     });
 
-      return res.status(200).json(products)
-    } catch (err) {
+    //transformation for when request currency isnt the same as in db stored
+    if (products.length > 0 && products[0]?.currency !== currency) {
+      const formattedProducts = await Promise.all(
+        products.map(async (product) => {
+          const exchange = await exchangeToCurrency(
+            product.currency,
+            product.price,
+            currency
+          );
+          product.currency = exchange.currency;
+          product.price = formatPriceForClient(exchange.exchangedPrice);
+
+          if (product.sale_price) {
+            const saleExchange = await exchangeToCurrency(
+              product.currency,
+              product.sale_price,
+              currency
+            );
+            product.sale_price = formatPriceForClient(
+              saleExchange.exchangedPrice
+            );
+          }
+
+          return product;
+        })
+      );
+      return res.status(200).json(formattedProducts);
+    }
+
+    //transformation for when request currency is the same as in db stored
+    if (products.length > 0) {
+      const formattedProducts = products.map((product) => {
+        product.price = formatPriceForClient(product.price);
+
+        if (product.sale_price) {
+          product.sale_price = formatPriceForClient(product.sale_price);
+        }
+        return product;
+      });
+      return res.status(200).json(formattedProducts);
+    }
+
+    return res.status(200).json(products);
+  } catch (err) {
         next(err)
     }
 }
@@ -65,6 +115,12 @@ export async function createProduct(req: Request<{}, {},ProductSchema>, res: Res
         },
       },
     });
+
+    newProduct.price = formatPriceForClient(newProduct.price)
+    if (newProduct.sale_price) {
+      newProduct.sale_price = formatPriceForClient(newProduct.sale_price);
+    }
+
     return res.status(201).json(newProduct)
   } catch (err) {
     next(err)
@@ -72,7 +128,12 @@ export async function createProduct(req: Request<{}, {},ProductSchema>, res: Res
 }
 
 export async function getProductByProductId(req: Request, res: Response, next: NextFunction) {
-    const id = req.params.productId!
+  const id = req.params.productId!
+  let currency: CurrencyISO | undefined = req.cookies.currency;
+
+  if (!currency || !currencySchema.safeParse(currency).success) {
+    currency = "USD";
+  }
 
     try {
         const product = await prisma.product.findUnique({
@@ -80,7 +141,17 @@ export async function getProductByProductId(req: Request, res: Response, next: N
                 id
             }
         })
-        if (!product) return res.status(404).json({ message: "Product not found" })
+      if (!product) return res.status(404).json({ message: "Product not found" })
+
+          const exchangedPrice = await exchangeToCurrency(product.currency,product.price,currency);
+          product.price = formatPriceForClient(exchangedPrice.exchangedPrice);
+          product.currency = exchangedPrice.currency
+      
+      if (product.sale_price) {
+            const saleExchangedPrice = await exchangeToCurrency(product.currency,product.sale_price,currency);
+            product.sale_price = formatPriceForClient(saleExchangedPrice.exchangedPrice);
+          }
+      
         return res.status(200).json(product)
     } catch (err) {
         next(err)
@@ -107,15 +178,35 @@ export async function deleteProductByProductId(
     }
 
     //update product
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        deleted: true,
-        imageUrls: preProduct.imageUrls.slice(0, 1),
-      },
+    const product = await prisma.$transaction(async (tx) => {
+      //delete product
+      const updatedProduct = await tx.product.update({
+        where: { id },
+        data: {
+          deleted: true,
+          imageUrls: preProduct.imageUrls.slice(0, 1),
+        },
+      });
+
+      //remove from all favorites
+      await tx.product.update({
+        where: { id },
+        data: {
+          favoredBy: {
+            set: [],
+          },
+        },
+      });
+
+      //remove from all carts
+      await tx.cartItem.deleteMany({
+        where: { productId: id },
+      });
+
+      return updatedProduct;
     });
 
-    return res.status(200).json({ message: "Product successfully deleted", product });
+    return res.status(200).json({ message: "Product successfully deleted" });
   } catch (err) {
     next(err);
   }
@@ -127,19 +218,49 @@ export async function updateProductByProductId(req: Request<{productId:string}, 
   const { name, description, price, stock_quantity, is_public, category, sale_price } = req.body
 
   try {
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        ...(name && { name }),
-        ...(description && { description }),
-        ...(price && { price }),
-        ...(stock_quantity && { stock_quantity }),
-        ...(is_public && { is_public }),
-        ...(sale_price && { sale_price }),
-        ...(category && { category: { connect: { name: category } } }),
-        updated_at: new Date(),
-      },
+    const product = await prisma.$transaction(async (tx) => {
+
+      const updatedProduct = await tx.product.update({
+        where: { id },
+        data: {
+          ...(name && { name }),
+          ...(description && { description }),
+          ...(price && { price }),
+          ...(stock_quantity && { stock_quantity }),
+          ...(typeof is_public === "boolean" && { is_public }),
+          ...(sale_price && { sale_price }),
+          ...(category && { category: { connect: { name: category } } }),
+          updated_at: new Date(),
+        },
+      });
+
+      //if product is made private, remove from favorites & carts
+      if (is_public === false) {
+        //remove from favorites 
+        await tx.product.update({
+          where: { id },
+          data: {
+            favoredBy: {
+              set: [],
+            },
+          },
+        });
+
+        //remove from all carts
+        await tx.cartItem.deleteMany({
+          where: { productId: id },
+        });
+      }
+
+      return updatedProduct;
     });
+
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+    product.price = formatPriceForClient(product.price);
+    if (product.sale_price) {
+      product.sale_price = formatPriceForClient(product.sale_price);
+    }
 
     return res.status(200).json(product)
   } catch (err) {

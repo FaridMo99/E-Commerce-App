@@ -10,6 +10,7 @@ import apiRouter from "./src/routes/apiRouter.js";
 import webhookRouter from "./src/routes/webhookRouter.js";
 import passport from "passport";
 import { PORT } from "./src/config/env.js";
+import "./src/services/cronJobs.js"
 
 export const app = express();
 

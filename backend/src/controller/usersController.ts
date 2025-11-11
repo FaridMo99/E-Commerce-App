@@ -4,6 +4,7 @@ import type { AddCartItemSchema, ItemQuantitySchema, OrdersQuerySchema, UpdateUs
 import bcrypt from "bcrypt"
 import type { User } from "../generated/prisma/client.js";
 import type { JWTUserPayload } from "../types/types.js";
+import { formatPriceForClient } from "../lib/currencyHandlers.js";
 
 //update in all controllers what you return
 export async function getUserByUserId(req: Request, res: Response, next: NextFunction) {
@@ -102,6 +103,7 @@ export async function getAllOrdersByUser(
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
     });
+    orders.forEach(order => order.total_amount = formatPriceForClient(order.total_amount))
     return res.status(200).json(orders)
   } catch (err) {
     next(err);
@@ -125,7 +127,7 @@ export async function getSingleOrderByUser(
       },
     });
     if (!order) return res.status(404).json({ message: "Order not found" });
-
+    order.total_amount = formatPriceForClient(order.total_amount)
     return res.status(200).json(order);
   } catch (err) {
     next(err);
@@ -147,6 +149,7 @@ export async function getReviewsByUser(req: Request, res: Response, next: NextFu
   }
 }
 
+//format cart product prices
 export async function getUserCart(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id!
 
@@ -184,7 +187,7 @@ export async function emptyCart(
 
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    return res.status(200).json(cart);
+    return res.status(200).json({message:"Emptied successful"});
   } catch (err) {
     next(err);
   }
@@ -203,7 +206,7 @@ export async function addProductToUserCart(
       data: {
         cart: { connect: { userId: userId } },
         product: { connect: { id: productId } },
-        quantity: quantity, 
+        quantity
       },
       select: {
         cart:true
@@ -279,6 +282,7 @@ export async function updateItemQuantity(req: Request<{itemId:string}, {},ItemQu
   }
 }
 
+//format favorite item prices
 export async function getFavoriteItems(req: Request, res: Response, next: NextFunction) { 
   const userId = req.user?.id!
 
@@ -298,6 +302,12 @@ export async function getFavoriteItems(req: Request, res: Response, next: NextFu
       }
     })
     if (!favorites) return res.status(404).json({ message: "Favorite products not found" })
+    favorites.favorites.forEach(favorite => {
+      favorite.price = formatPriceForClient(favorite.price)
+      if (favorite.sale_price) {
+        favorite.sale_price = formatPriceForClient(favorite.sale_price)
+      }
+    })
     return res.status(200).json(favorites)
   } catch (err) {
     next(err)
@@ -310,25 +320,23 @@ export async function deleteFavoriteItem(req: Request, res: Response, next: Next
   if (!productId) return res.status(400).json({ message: "No product provided" })
   
   try {
-    const product = await prisma.user.delete({
-      where: {
-        id: userId,
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
         favorites: {
-          some: {
-            id: productId,
-            deleted: false,
-            is_public:true
-          }
-        }
-      }
-    })
+          disconnect: { id: productId },
+        },
+      },
+      include: { favorites: true },
+    });
 
-    if (!product) return res.status(404).json({ message: "Product not found" })
-    return res.status(200).json(product)
+    if (!user) return res.status(404).json({ message: "Product not found" })
+    return res.status(200).json({message:"Deleted item successful"})
   } catch (err) {
     next(err)
   }
 }
+
 
 export async function addFavoriteItem(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id!

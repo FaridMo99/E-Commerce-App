@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import { sortOrderSchema } from "@monorepo/shared";
+import { formatPriceForClient } from "../lib/currencyHandlers.js";
 
 
 export async function getRevenue(req: Request, res: Response, next: NextFunction) { 
@@ -73,6 +74,8 @@ export async function getTopsellers(
     const productsWithSales = products.map((p) => ({
       product: p,
       totalSold: p.order_items.reduce((sum, oi) => sum + oi.quantity, 0),
+      price: formatPriceForClient(p.price),
+      sale_price:p.sale_price ? formatPriceForClient(p.sale_price) : p.sale_price
     }));
 
     // Sort by total sold

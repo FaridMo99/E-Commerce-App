@@ -1,7 +1,7 @@
 import {
     loginSchema, signupSchema, ordersQuerySchema, updateUserSchema, productsQuerySchema, productSchema,
     updateProductSchema, timeframeQuerySchema, sortOrderSchema, reviewSchema, reviewsQuerySchema,
-    addCartItemSchema, itemQuantitySchema
+    addCartItemSchema, itemQuantitySchema, currencySchema
 } from "./schemas.js"
 
 
@@ -13,7 +13,7 @@ import type {
 
 export {
     loginSchema, signupSchema, ordersQuerySchema, updateUserSchema, productsQuerySchema, productSchema, updateProductSchema,
-    timeframeQuerySchema, sortOrderSchema, reviewSchema, reviewsQuerySchema, addCartItemSchema, itemQuantitySchema
+    timeframeQuerySchema, sortOrderSchema, reviewSchema, reviewsQuerySchema, addCartItemSchema, itemQuantitySchema, currencySchema
 }
 export type {
     LoginSchema, SignupSchema, OrdersQuerySchema, UpdateUserSchema, ProductsQuerySchema, ProductSchema,

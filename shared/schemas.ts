@@ -1,8 +1,14 @@
 import z from "zod"
 
-const priceSchema = z.number().int("Price must be an integer") .nonnegative("Price must be 0 or greater"); 
+const priceSchema = z
+  .int()
+  .nonnegative("Price must be 0 or greater")
+  .refine((val) => {
+    const cents = Math.round((val % 1) * 100);
+    return cents === 0 || cents === 95 || cents === 99;
+  }, "Price must end with .00, .95, or .99");
 
-const currencySchema = z.enum(["usd", "eur", "gbp"])
+export const currencySchema = z.enum(["USD", "EUR", "GBP"])
 
 export const loginSchema = z.object({
   email: z.email("Invalid email"),
@@ -127,5 +133,5 @@ export const itemQuantitySchema = z.object({
 
 export const addCartItemSchema = z.object({
   productId: uuid,
-  quantity: itemQuantitySchema
+  quantity: itemQuantity
 })

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
+import { formatPriceForClient } from "../lib/currencyHandlers.js";
 
 export async function getOrders(
   req: Request,
@@ -37,6 +38,8 @@ export async function getOrders(
       take,
       orderBy: { [field]: order },
     });
+
+    orders.forEach(order => order.total_amount = formatPriceForClient(order.total_amount))
 
     return res.status(200).json(orders);
   } catch (err) {

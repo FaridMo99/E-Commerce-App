@@ -42,7 +42,7 @@ model Product {
   description    String
   price          Int
   sale_price     Int?
-  currency       Currency
+  currency       CurrencyISO
   stock_quantity Int
   is_public      Boolean      @default(false)
   deleted        Boolean      @default(false)
@@ -73,7 +73,7 @@ model Order {
   total_amount       Int
   items              Order_Item[]
   payment            Payment?
-  currency           Currency
+  currency           CurrencyISO
 }
 
 model Order_Item {
@@ -84,7 +84,7 @@ model Order_Item {
   product_id        String
   quantity          Int
   price_at_purchase Int
-  currency          Currency
+  currency          CurrencyISO
 }
 
 model Review {
@@ -166,8 +166,8 @@ enum UserCreatedBy {
   FACEBOOK
 }
 
-enum Currency {
-  usd
-  eur
-  gbp
+enum CurrencyISO {
+  USD
+  GBP
+  EUR
 }

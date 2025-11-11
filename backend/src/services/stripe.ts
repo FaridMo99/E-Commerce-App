@@ -1,7 +1,9 @@
 import Stripe from "stripe";
 import { STRIPE_API_KEY } from "../config/env.js";
 
-const stripe = new Stripe(STRIPE_API_KEY)
+const stripe = new Stripe(STRIPE_API_KEY, {
+  typescript:true
+})
 
 export async function stripeEventHandler(type:Stripe.Event.Type) {
         switch (type) {
