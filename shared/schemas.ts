@@ -135,3 +135,8 @@ export const addCartItemSchema = z.object({
   productId: uuid,
   quantity: itemQuantity
 })
+
+export const settingsSchema = z.object({
+  key: z.string().nonempty(),
+  value:z.string().nonempty()
+})

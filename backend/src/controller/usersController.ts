@@ -5,6 +5,7 @@ import bcrypt from "bcrypt"
 import type { User } from "../generated/prisma/client.js";
 import type { JWTUserPayload } from "../types/types.js";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
+import { deleteUserCart } from "../lib/controllerUtils.js";
 
 //update in all controllers what you return
 export async function getUserByUserId(req: Request, res: Response, next: NextFunction) {
@@ -175,15 +176,7 @@ export async function emptyCart(
   const userId = req.user?.id;
 
   try {
-    const [_, cart] = await prisma.$transaction([
-      prisma.cartItem.deleteMany({
-        where: { cart: { userId: userId } },
-      }),
-      prisma.cart.findUnique({
-        where: { userId: userId },
-        include: { items: true },
-      }),
-    ]);
+    const [_,cart] = await deleteUserCart(userId)
 
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 

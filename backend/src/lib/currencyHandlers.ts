@@ -1,14 +1,14 @@
+import { EXHCANGE_RATE_REDIS_KEY, ROUNDING_PRICE_ENDING } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
 import redis from "../services/redis.js";
 import type { ExchangePrice, OpenExchangeRateApiReturn } from "../types/types.js";
 
-const roundingPriceEnding = 99
-export const exchangeRateRedisKey = "exchangeRates";
+
 
 //only returns exchange rates related to usd
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
-    const redisReturn = await redis.get(exchangeRateRedisKey)
+    const redisReturn = await redis.get(EXHCANGE_RATE_REDIS_KEY)
     if (redisReturn) return JSON.parse(redisReturn);
     
     const res = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`);
@@ -19,7 +19,9 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
     const data: OpenExchangeRateApiReturn = await res.json();
     const twelveHours = 43200;
 
-    await redis.set(exchangeRateRedisKey, JSON.stringify(data), { EX: twelveHours });
+    await redis.set(EXHCANGE_RATE_REDIS_KEY, JSON.stringify(data), {
+      EX: twelveHours,
+    });
     return data
 }
 
@@ -50,7 +52,7 @@ export async function exchangeToCurrency(
   // USD → target currency
   const targetInMajorUnits = priceInUSD * exchangeRates.rates[wantedCurrency]!;
 
-  const rounded = roundPriceUp(targetInMajorUnits, roundingPriceEnding);
+  const rounded = roundPriceUp(targetInMajorUnits, ROUNDING_PRICE_ENDING);
 
   return {
     currency: wantedCurrency,

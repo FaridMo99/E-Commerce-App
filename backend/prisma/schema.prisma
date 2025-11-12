@@ -36,6 +36,14 @@ model User {
   cart       Cart?     @relation(name: "CartToUser")
   }
 
+model Settings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+}
+
 model Product {
   id             String       @id @default(uuid())
   name           String

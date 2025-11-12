@@ -6,6 +6,7 @@ import ordersRouter from "./ordersRouter.js";
 import reviewsRouter from "./reviewsRouter.js";
 import authRouter from "./authRouter.js";
 import adminRouter from "./adminRouter.js";
+import settingsRouter from "./settingsRouter.js";
 
 const apiRouter = Router();
 
@@ -16,6 +17,8 @@ apiRouter.use("/orders", ordersRouter);
 apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/admin", adminRouter);
+apiRouter.use("/settings",settingsRouter);
+
 
 export default apiRouter;
  

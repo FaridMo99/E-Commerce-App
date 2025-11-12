@@ -42,6 +42,7 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
     });
 
     //transformation for when request currency isnt the same as in db stored
+      //could get issues when admin puts it in different currencies in
     if (products.length > 0 && products[0]?.currency !== currency) {
       const formattedProducts = await Promise.all(
         products.map(async (product) => {

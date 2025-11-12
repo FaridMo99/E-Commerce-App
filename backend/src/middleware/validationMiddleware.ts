@@ -1,4 +1,4 @@
-import { addCartItemSchema, itemQuantitySchema, loginSchema, productSchema, reviewSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
+import { addCartItemSchema, itemQuantitySchema, loginSchema, productSchema, reviewSchema, settingsSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
 import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 
@@ -103,6 +103,20 @@ export function validateProductId(req: Request,res: Response,next: NextFunction)
   const {productId} = req.body;
 
   const validated = addCartItemSchema.shape.productId.safeParse(productId);
+  if (!validated.success)
+    return res.status(400).json({ message: validated.error.message });
+
+  next();
+}
+
+export function validateSettings(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const body = req.body;
+
+  const validated = settingsSchema.safeParse(body)
   if (!validated.success)
     return res.status(400).json({ message: validated.error.message });
 

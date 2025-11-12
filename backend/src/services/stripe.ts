@@ -1,14 +1,32 @@
 import Stripe from "stripe";
 import { STRIPE_API_KEY } from "../config/env.js";
+import { deleteUserCart } from "../lib/controllerUtils.js";
+import prisma from "./prisma.js";
 
 const stripe = new Stripe(STRIPE_API_KEY, {
   typescript:true
 })
 
-export async function stripeEventHandler(type:Stripe.Event.Type) {
+//failed -> redirect fail screen
+//success -> success screen, create order in db, send email with data, empty cart
+//cancelled -> cancel screen
+export async function stripeEventHandler(type:Stripe.Event.Type, userId:string) {
         switch (type) {
           case "payment_intent.succeeded":
             //successful action
+            const cart = await prisma.cart.findFirst({
+              where: {
+                userId
+              },
+              include: {
+                items: {
+                  include: {
+                    product:true
+                  }
+                }
+              }
+            })
+
             break;
           case "payment_intent.canceled":
             //cancelled action
