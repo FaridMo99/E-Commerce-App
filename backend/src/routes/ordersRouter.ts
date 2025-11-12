@@ -5,8 +5,8 @@ import { getOrders, makeOrder } from "../controller/ordersController.js";
 
 const ordersRouter = Router()
 
-//post put patch delete should happen through stripe webhook not here
+
 ordersRouter.get("/", isAuthenticated, isAdmin, validateTimeframeQuery, getOrders);
-ordersRouter.post("/",isAuthenticated,hasCsrfToken, makeOrder);
+ordersRouter.post("/", isAuthenticated, hasCsrfToken, makeOrder);
 
 export default ordersRouter

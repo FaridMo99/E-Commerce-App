@@ -7,6 +7,7 @@ import reviewsRouter from "./reviewsRouter.js";
 import authRouter from "./authRouter.js";
 import adminRouter from "./adminRouter.js";
 import settingsRouter from "./settingsRouter.js";
+import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
 
 const apiRouter = Router();
 
@@ -16,8 +17,8 @@ apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/orders", ordersRouter);
 apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/auth", authRouter);
-apiRouter.use("/admin", adminRouter);
-apiRouter.use("/settings",settingsRouter);
+apiRouter.use("/admin",isAuthenticated, isAdmin, adminRouter);
+apiRouter.use("/settings",isAuthenticated, isAdmin,settingsRouter);
 
 
 export default apiRouter;

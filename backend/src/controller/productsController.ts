@@ -2,8 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import { currencySchema, type ProductSchema, type ProductsQuerySchema, type ReviewSchema, type UpdateProductSchema } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
-import { exchangeToCurrency, formatPriceForClient } from "../lib/currencyHandlers.js";
+import { exchangeToCurrencyInCents, formatPriceForClient } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
+import { BASE_CURRENCY_KEY } from "../config/constants.js";
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
@@ -41,34 +42,19 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
     });
 
-    //transformation for when request currency isnt the same as in db stored
-      //could get issues when admin puts it in different currencies in
     if (products.length > 0 && products[0]?.currency !== currency) {
-      const formattedProducts = await Promise.all(
-        products.map(async (product) => {
-          const exchange = await exchangeToCurrency(
-            product.currency,
-            product.price,
-            currency
-          );
-          product.currency = exchange.currency;
-          product.price = formatPriceForClient(exchange.exchangedPrice);
+      const formattedProducts = await Promise.all(products.map(async (product) => {
+        const exchangedProduct = await exchangeToCurrencyInCents(product.currency,product.price, currency)
+        product.price = formatPriceForClient(exchangedProduct.exchangedPriceInCents)
+        product.currency = exchangedProduct.currency
+        if (product.sale_price) {
+          const exchangedSaleProduct = await exchangeToCurrencyInCents(product.currency,product.sale_price, currency)
+          product.sale_price = formatPriceForClient(exchangedSaleProduct.exchangedPriceInCents)
+        }
+        return product
+      }))
 
-          if (product.sale_price) {
-            const saleExchange = await exchangeToCurrency(
-              product.currency,
-              product.sale_price,
-              currency
-            );
-            product.sale_price = formatPriceForClient(
-              saleExchange.exchangedPrice
-            );
-          }
-
-          return product;
-        })
-      );
-      return res.status(200).json(formattedProducts);
+      return res.status(200).json(formattedProducts)
     }
 
     //transformation for when request currency is the same as in db stored
@@ -96,25 +82,33 @@ export async function createProduct(req: Request<{}, {},ProductSchema>, res: Res
   const images = req.files
   
   try {
-    let imageUrls
+    let imageUrls:string [] | undefined
     if (images && Array.isArray(images)) {
       const results = await Promise.all(images.map(image => handleCloudUpload(image)))
       imageUrls = results.map(result=> result.secure_url)
     }
 
-    const newProduct = await prisma.product.create({
-      data: {
-        name: product.name,
-        ...(imageUrls && { imageUrls: [...imageUrls] }),
-        price: product.price,
-        currency:product.currency,
-        description: product.description,
-        stock_quantity: product.stock_quantity,
-        is_public: product.is_public,
-        category: {
-          connect: { name: product.category },
+    const newProduct = await prisma.$transaction(async (tx) => {
+      const currency = await tx.settings.findFirst({
+        where: { key: BASE_CURRENCY_KEY },
+      });
+
+      if (!currency) throw new Error("Base currency not found");
+
+      return tx.product.create({
+        data: {
+          name: product.name,
+          ...(imageUrls && { imageUrls: [...imageUrls] }),
+          price: product.price,
+          currency: currency.value as CurrencyISO,
+          description: product.description,
+          stock_quantity: product.stock_quantity,
+          is_public: product.is_public,
+          category: {
+            connect: { name: product.category },
+          },
         },
-      },
+      });
     });
 
     newProduct.price = formatPriceForClient(newProduct.price)
@@ -144,13 +138,13 @@ export async function getProductByProductId(req: Request, res: Response, next: N
         })
       if (!product) return res.status(404).json({ message: "Product not found" })
 
-          const exchangedPrice = await exchangeToCurrency(product.currency,product.price,currency);
-          product.price = formatPriceForClient(exchangedPrice.exchangedPrice);
+          const exchangedPrice = await exchangeToCurrencyInCents(product.currency,product.price,currency);
+          product.price = formatPriceForClient(exchangedPrice.exchangedPriceInCents);
           product.currency = exchangedPrice.currency
       
       if (product.sale_price) {
-            const saleExchangedPrice = await exchangeToCurrency(product.currency,product.sale_price,currency);
-            product.sale_price = formatPriceForClient(saleExchangedPrice.exchangedPrice);
+            const saleExchangedPrice = await exchangeToCurrencyInCents(product.currency,product.sale_price,currency);
+            product.sale_price = formatPriceForClient(saleExchangedPrice.exchangedPriceInCents);
           }
       
         return res.status(200).json(product)

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import { exchangeToCurrency, formatPriceForClient } from "../lib/currencyHandlers.js";
+import { exchangeToCurrencyInCents, formatPriceForClient } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import stripe from "../services/stripe.js";
 
@@ -68,17 +68,17 @@ export async function makeOrder(req: Request,res: Response,next: NextFunction) {
       }
     })
     if (!shoppingCart) return res.status(404).json({ message: "Shopping Cart not found" })
-    //doesnt return price in cent, fix that
+
     const formattedProducts = await Promise.all(
       shoppingCart.items.map(async (item) => {
 
-        const exchange = await exchangeToCurrency(item.product.currency,item.product.price,currency);
+        const exchange = await exchangeToCurrencyInCents(item.product.currency,item.product.price,currency);
         item.product.currency = exchange.currency;
-        item.product.price = exchange.exchangedPrice
+        item.product.price = exchange.exchangedPriceInCents
 
         if (item.product.sale_price) {
-          const saleExchange = await exchangeToCurrency(item.product.currency,item.product.sale_price,item.product.currency);
-          item.product.sale_price = saleExchange.exchangedPrice
+          const saleExchange = await exchangeToCurrencyInCents(item.product.currency,item.product.sale_price,item.product.currency);
+          item.product.sale_price = saleExchange.exchangedPriceInCents
         }
 
         return item;

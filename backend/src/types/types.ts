@@ -33,9 +33,8 @@ export type TurnstileResponse = {
   ["error-codes"]?: string[];
 }
 
-type USD = string
 type seconds = number
-type ExchangeRates = Record<string, number>;
+type ExchangeRates = Record<CurrencyISO | string, number>;
 
 
 // format of exchange rates example:AED: 3.672538;
@@ -43,11 +42,13 @@ export type OpenExchangeRateApiReturn = {
   disclaimer: string;
   license: string;
   timestamp: seconds;
-  base: USD;
+  base: "USD";
   rates: ExchangeRates
 };
 
 export type ExchangePrice = {
   currency: CurrencyISO;
-  exchangedPrice: number;
+  exchangedPriceInCents: number;
 };
+
+export type NicePrice = 0 | 95 | 99;

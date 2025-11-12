@@ -6,16 +6,16 @@ import { createSetting, deleteAllSettings, deleteSettingBySettingId, getAllSetti
 const settingsRouter = Router()
 
 //get all settings
-settingsRouter.get("/", isAuthenticated, isAdmin, getAllSettings)
+settingsRouter.get("/", getAllSettings)
 //create a setting
-settingsRouter.post("/", validateSettings, isAuthenticated, isAdmin, hasCsrfToken,createSetting);
+settingsRouter.post("/", validateSettings, hasCsrfToken,createSetting);
 //delete all settings, would have to choose base currency again afterwards
-settingsRouter.delete("/", isAuthenticated, isAdmin, hasCsrfToken,deleteAllSettings);
+settingsRouter.delete("/", hasCsrfToken,deleteAllSettings);
 //get a setting
-settingsRouter.get("/:settingId", isAuthenticated, isAdmin, getSettingBySettingId);
+settingsRouter.get("/:settingId", getSettingBySettingId);
 //delete a setting 
-settingsRouter.delete("/:settingId", isAuthenticated, isAdmin, hasCsrfToken,deleteSettingBySettingId);
+settingsRouter.delete("/:settingId", hasCsrfToken,deleteSettingBySettingId);
 //update a setting
-settingsRouter.patch("/:settingId",validateSettings, isAuthenticated, isAdmin, hasCsrfToken,updateSettingBySettingId);
+settingsRouter.patch("/:settingId",validateSettings, hasCsrfToken,updateSettingBySettingId);
 
 export default settingsRouter

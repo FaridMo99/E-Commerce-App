@@ -1,5 +1,5 @@
-//price endings after rounding
-export const ROUNDING_PRICE_ENDING = 99;
-
 //redis store exchange rates, key name
-export const EXHCANGE_RATE_REDIS_KEY = "exchangeRates";
+export const EXCHANGE_RATE_REDIS_KEY = "exchangeRates";
+export const TWELVE_HOURS_IN_SECONDS = 43200;
+export const DEFAULT_NICE_PRICE = 99
+export const BASE_CURRENCY_KEY = "baseCurrency"

@@ -95,7 +95,6 @@ export const productSchema = z.object({
   is_public: z.boolean().default(false),
   category: z.string(),
   sale_price: priceSchema,
-  currency:currencySchema
 });
 
 export const updateProductSchema = productSchema.partial()

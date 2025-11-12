@@ -20,12 +20,12 @@ export async function getRevenue(req: Request, res: Response, next: NextFunction
       },
     });
 
+    revenue._sum.total_amount = formatPriceForClient(revenue._sum.total_amount ?? 0)
     return res.status(200).json(revenue)
   } catch (err) {
     next(err)
   }
 }
-
 
 export async function getTopsellers(
   req: Request,
