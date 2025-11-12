@@ -9,7 +9,7 @@ import { cancelOrder, getOrders, makeOrder } from "../controller/ordersControlle
 
 const ordersRouter = Router();
 
-ordersRouter.get("/",isAuthenticated,isAdmin,validateTimeframeQuery,getOrders,);
+ordersRouter.get("/",isAuthenticated,isAdmin,validateTimeframeQuery,getOrders);
 ordersRouter.post("/", isAuthenticated, hasCsrfToken, makeOrder);
 ordersRouter.post("/:orderId/cancel", isAuthenticated, hasCsrfToken, cancelOrder);
 

@@ -54,7 +54,7 @@ export const ordersQuerySchema = z.object({
     })
     .optional()
     .default("1"),
-  status: z.enum(["ORDERED", "DELIVERING", "DELIVERED"]).optional(),
+  status: z.enum(["ORDERED", "DELIVERING", "DELIVERED","PENDING","CANCELLED"]).optional(),
 });
 
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();

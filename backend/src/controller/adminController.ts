@@ -9,7 +9,7 @@ export async function getRevenue(
   next: NextFunction,
 ) {
   //exists for sure here because of the middleware
-  const { from, to } = req.timeframe!;
+  const { from, to } = req.timeframe!
 
   try {
     const revenue = await prisma.order.aggregate({

@@ -7,10 +7,10 @@ import chalk from "chalk";
 import { disconnectAllServices } from "./src/lib/disconnectHandler.js";
 import cookieParser from "cookie-parser";
 import apiRouter from "./src/routes/apiRouter.js";
-import webhookRouter from "./src/routes/webhookRouter.js";
 import passport from "passport";
 import { PORT } from "./src/config/env.js";
 import "./src/services/cronJobs.js";
+import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
 
 export const app = express();
 

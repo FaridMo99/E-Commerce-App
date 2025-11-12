@@ -1,6 +1,6 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
-import { stripeHandler } from "../controller/stripeController.js";
+import { stripeHandler } from "../../controller/stripeController.js";
 
 const stripeRouter = Router();
 

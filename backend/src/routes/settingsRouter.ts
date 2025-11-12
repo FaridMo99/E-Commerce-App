@@ -20,7 +20,7 @@ const settingsRouter = Router();
 settingsRouter.get("/", getAllSettings);
 //create a setting
 settingsRouter.post("/", validateSettings, hasCsrfToken, createSetting);
-//delete all settings, would have to choose base currency again afterwards
+//delete all except base currency
 settingsRouter.delete("/", hasCsrfToken, deleteAllSettings);
 //get a setting
 settingsRouter.get("/:settingId", getSettingBySettingId);

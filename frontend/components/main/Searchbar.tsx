@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Search } from "lucide-react";
+import useDebounce from "@/hooks/useDebounce";
 
 function Searchbar() {
   const [search, setSearch] = useState<string>("");
+  const debouncedSearch: string = useDebounce(search, 600);
 
   return (
     <div className="w-2/3 h-full flex justify-center items-center relative">
