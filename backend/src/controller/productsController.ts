@@ -180,6 +180,8 @@ export async function getProductByProductId(
     const product = await prisma.product.findUnique({
       where: {
         id,
+        is_public: true,
+        deleted:false
       },
     });
     if (!product) return res.status(404).json({ message: "Product not found" });

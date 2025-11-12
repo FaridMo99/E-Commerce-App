@@ -6,6 +6,7 @@ import {
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import stripe from "../services/stripe.js";
+import { CLIENT_ORIGIN } from "../config/env.js";
 
 export async function getOrders(
   req: Request,
@@ -79,41 +80,125 @@ export async function makeOrder(
     if (!shoppingCart)
       return res.status(404).json({ message: "Shopping Cart not found" });
 
-    const formattedProducts = await Promise.all(
+    if (shoppingCart.items.length === 0) {
+      return res.status(400).json({message:"No Items in Cart"})
+    }
+
+    const line_items = await Promise.all(
       shoppingCart.items.map(async (item) => {
         const exchange = await exchangeToCurrencyInCents(
           item.product.currency,
           item.product.price,
-          currency,
+          currency
         );
-        item.product.currency = exchange.currency;
-        item.product.price = exchange.exchangedPriceInCents;
+        const priceInCents = exchange.exchangedPriceInCents;
 
-        if (item.product.sale_price) {
-          const saleExchange = await exchangeToCurrencyInCents(
-            item.product.currency,
-            item.product.sale_price,
-            item.product.currency,
-          );
-          item.product.sale_price = saleExchange.exchangedPriceInCents;
-        }
-
-        return item;
-      }),
+        return {
+          price_data: {
+            currency: exchange.currency.toLowerCase(),
+            product_data: {
+              name: item.product.name,
+              description: item.product.description,
+            },
+            unit_amount: priceInCents,
+          },
+          quantity: item.quantity,
+        };
+      })
     );
 
-    const totalPrice = formattedProducts.reduce((sum, item) => {
-      const price = item.product.sale_price ?? item.product.price;
-      return sum + price * item.quantity;
+    const totalAmount = line_items.reduce((sum, item) => {
+      const price = item.price_data.unit_amount!;
+      const quantity = item.quantity!;
+      return sum + price * quantity;
     }, 0);
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: totalPrice,
-      currency,
+    const order = await prisma.order.create({
+      data: {
+        user_id: userId,
+        status: "PENDING",
+        currency,
+        total_amount: totalAmount,
+        items: {
+          create: shoppingCart.items.map((item) => ({
+            product: { connect: { id: item.product.id } },
+            quantity: item.quantity,
+            price_at_purchase: item.product.sale_price ?? item.product.price,
+            currency,
+          })),
+        },
+        payment: {
+          create: {
+            method: "CARD",
+            details: "Stripe Checkout Session",
+            status: "PENDING",
+          },
+        },
+      },
     });
 
-    return res.status(200).json(formattedProducts);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      success_url: `${CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+      //make 
+      cancel_url: `${CLIENT_ORIGIN}/cart?cancelOrderId=${order.id}`,
+      billing_address_collection: "required",
+      metadata: {
+        orderId: order.id,
+        userId
+      }
+    });
+
+    //reserve products
+    await prisma.$transaction(
+      shoppingCart.items.map((item) =>
+        prisma.product.update({
+          where: { id: item.product.id },
+          data: { 
+            stock_quantity: {
+              decrement: item.quantity
+            }
+           },
+        })
+      )
+    );
+
+    return res.status(200).json({sessionId:session.id});
   } catch (err) {
     next(err);
   }
+}
+
+export async function cancelOrder(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) { 
+  const userId = req.user?.id!
+  const orderId = req.params.orderId
+
+  if (!orderId) return res.status(400).json({ message: "No order id provided" })
+  
+  try {
+    const orderItems = await prisma.order_Item.findMany({
+      where: { order_id: orderId },
+    });
+
+    await prisma.$transaction(
+      orderItems.map((item) =>
+        prisma.product.update({
+          where: { id: item.product_id },
+          data: { stock_quantity: { increment: item.quantity } },
+        })
+      )
+    );
+    if (orderItems.length === 0) return res.status(404).json({ message: "Order not found" })
+    
+    return res.status(200).json({message:"Order cancelled"})
+  } catch (err) {
+    next(err)
+  }
+
 }

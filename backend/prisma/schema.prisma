@@ -75,7 +75,7 @@ model Order {
   id                 String       @id @default(uuid())
   user               User         @relation(fields: [user_id], references: [id])
   user_id            String
-  shipping_address   String
+  shipping_address   String?
   ordered_at         DateTime     @default(now())
   status             OrderStatus
   total_amount       Int
@@ -146,6 +146,8 @@ model CartItem {
 }
 
 enum OrderStatus {
+  PENDING
+  CANCELLED
   ORDERED
   DELIVERING
   DELIVERED
@@ -153,6 +155,7 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
+  CANCELLED
   COMPLETED
   FAILED
 }
@@ -160,7 +163,8 @@ enum PaymentStatus {
 enum PaymentMethod {
   CARD
   PAYPAL
-  OTHER
+  GIROPAY
+  KLARNA
 }
 
 enum UserRole {

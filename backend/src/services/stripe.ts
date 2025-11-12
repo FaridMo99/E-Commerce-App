@@ -2,59 +2,46 @@ import Stripe from "stripe";
 import { STRIPE_API_KEY } from "../config/env.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import prisma from "./prisma.js";
+import { email, includes } from "zod";
+import { sendOrderEmail } from "./email.js";
 
 const stripe = new Stripe(STRIPE_API_KEY, {
   typescript: true,
 });
 
-//failed -> redirect fail screen
-//success -> success screen, create order in db, send email with data, empty cart
-//cancelled -> cancel screen
-export async function stripeEventHandler(
-  type: Stripe.Event.Type,
-  userId: string,
-) {
-  switch (type) {
-    case "payment_intent.succeeded":
+
+
+//success -> send email with data, update stock amount
+export async function stripeEventHandler(stripeEvent: Stripe.Event,) {
+
+  switch (stripeEvent.type) {
+    //only for card payment not for async payments like klarna etc.
+    case "checkout.session.completed":
       //successful action
-      const cart = await prisma.cart.findFirst({
-        where: {
-          userId,
-        },
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
+      const session = stripeEvent.data.object
+      const orderId = session.metadata?.orderId!;
+      const userId = session.metadata?.userId!;
+        
+      //update order status and empty user cart
+      const [cart, order] = await prisma.$transaction([
+        prisma.cart.delete({
+          where: { userId },
+          include: {
+            user: { select: { email: true } },
+            items: { include: { product: true } },
           },
-        },
-      });
+        }),
+        prisma.order.update({
+          where: { id: orderId },
+          data: { status: "ORDERED" },
+          include: { items: { include: { product: true } } },
+        }),
+      ]);
 
-      break;
-    case "payment_intent.canceled":
-      //cancelled action
-      break;
-    case "payment_intent.payment_failed":
-      //failed payment action
-      break;
-    //add more actions
-
+      await sendOrderEmail(cart.user.email,order)
     default:
-      console.log("Unhandled event" + type);
+      console.log("Unhandled event" + stripeEvent.type);
   }
 }
 
 export default stripe;
-
-//add middleware, rn everything public(get stripe webhook secret to protect this route)
-//webhooks to update db and keep in sync
-//should also notify owner if something sold out or close to sold out
-//webhook to notify owner, email or sms
-//paymentintents to create payments
-//user creation for stripe
-//etc. etc. etc.
-//how to keep in sync with db and other users
-//multi currency support
-//handle payment fails
-//redirect on success pay/fail pay/cancelled pay(server side redirect and frontend ui)
-//handle stornierungen and refunds, also in db orders table

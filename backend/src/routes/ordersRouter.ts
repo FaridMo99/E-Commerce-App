@@ -5,17 +5,12 @@ import {
   isAuthenticated,
 } from "../middleware/authMiddleware.js";
 import { validateTimeframeQuery } from "../middleware/validationMiddleware.js";
-import { getOrders, makeOrder } from "../controller/ordersController.js";
+import { cancelOrder, getOrders, makeOrder } from "../controller/ordersController.js";
 
 const ordersRouter = Router();
 
-ordersRouter.get(
-  "/",
-  isAuthenticated,
-  isAdmin,
-  validateTimeframeQuery,
-  getOrders,
-);
+ordersRouter.get("/",isAuthenticated,isAdmin,validateTimeframeQuery,getOrders,);
 ordersRouter.post("/", isAuthenticated, hasCsrfToken, makeOrder);
+ordersRouter.post("/:orderId/cancel", isAuthenticated, hasCsrfToken, cancelOrder);
 
 export default ordersRouter;

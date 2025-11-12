@@ -5,7 +5,6 @@ import { STRIPE_WEBHOOK_SECRET } from "../config/env.js";
 //request that key later from stripe for prod
 
 //webhook that gets hit after order done
-
 export async function stripeHandler(
   req: Request,
   res: Response,
@@ -20,8 +19,8 @@ export async function stripeHandler(
       sig,
       STRIPE_WEBHOOK_SECRET,
     );
-    //replace with correct userid
-    await stripeEventHandler(event.type, "dw");
+    
+    await stripeEventHandler(event);
 
     res.send({ received: true });
   } catch (err) {
