@@ -6,17 +6,25 @@ import { STRIPE_WEBHOOK_SECRET } from "../config/env.js";
 
 //webhook that gets hit after order done
 
-export async function stripeHandler(req:Request, res:Response, next:NextFunction) {
-    const sig = req.headers["stripe-signature"];
+export async function stripeHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const sig = req.headers["stripe-signature"];
   if (!sig) return res.status(400).send("Missing signature");
-  
+
   try {
-    const event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      STRIPE_WEBHOOK_SECRET,
+    );
     //replace with correct userid
-    await stripeEventHandler(event.type,"dw" )
+    await stripeEventHandler(event.type, "dw");
 
     res.send({ received: true });
   } catch (err) {
-    next(err)
-    }
+    next(err);
   }
+}

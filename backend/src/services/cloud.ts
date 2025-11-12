@@ -1,16 +1,19 @@
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 import multer from "multer";
-import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from "../config/env.js";
-
+import {
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+  CLOUDINARY_CLOUD_NAME,
+} from "../config/env.js";
 
 cloudinary.config({
-  cloud_name:CLOUDINARY_CLOUD_NAME,
+  cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 });
 
 export async function handleCloudUpload(
-  file: Express.Multer.File
+  file: Express.Multer.File,
 ): Promise<UploadApiResponse> {
   const imageStringBase64 = `data:${
     file.mimetype
@@ -22,8 +25,8 @@ export async function handleCloudUpload(
   return res;
 }
 
-export async function deleteCloudAsset(url:string): Promise<void> {
-    const publicId = url.split("/").slice(-1)[0]?.split(".")[0]
+export async function deleteCloudAsset(url: string): Promise<void> {
+  const publicId = url.split("/").slice(-1)[0]?.split(".")[0];
 
   await cloudinary.uploader.destroy(publicId!, { resource_type: "image" });
 }

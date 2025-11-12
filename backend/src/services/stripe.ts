@@ -4,45 +4,47 @@ import { deleteUserCart } from "../lib/controllerUtils.js";
 import prisma from "./prisma.js";
 
 const stripe = new Stripe(STRIPE_API_KEY, {
-  typescript:true
-})
+  typescript: true,
+});
 
 //failed -> redirect fail screen
 //success -> success screen, create order in db, send email with data, empty cart
 //cancelled -> cancel screen
-export async function stripeEventHandler(type:Stripe.Event.Type, userId:string) {
-        switch (type) {
-          case "payment_intent.succeeded":
-            //successful action
-            const cart = await prisma.cart.findFirst({
-              where: {
-                userId
-              },
-              include: {
-                items: {
-                  include: {
-                    product:true
-                  }
-                }
-              }
-            })
+export async function stripeEventHandler(
+  type: Stripe.Event.Type,
+  userId: string,
+) {
+  switch (type) {
+    case "payment_intent.succeeded":
+      //successful action
+      const cart = await prisma.cart.findFirst({
+        where: {
+          userId,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
 
-            break;
-          case "payment_intent.canceled":
-            //cancelled action
-            break;
-          case "payment_intent.payment_failed":
-            //failed payment action
-            break;
-          //add more actions
+      break;
+    case "payment_intent.canceled":
+      //cancelled action
+      break;
+    case "payment_intent.payment_failed":
+      //failed payment action
+      break;
+    //add more actions
 
-          default:
-            console.log("Unhandled event" + type);
-        }
+    default:
+      console.log("Unhandled event" + type);
+  }
 }
 
-
-export default stripe
+export default stripe;
 
 //add middleware, rn everything public(get stripe webhook secret to protect this route)
 //webhooks to update db and keep in sync

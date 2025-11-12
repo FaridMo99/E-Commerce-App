@@ -1,8 +1,17 @@
-import { addCartItemSchema, itemQuantitySchema, loginSchema, productSchema, reviewSchema, settingsSchema, timeframeQuerySchema, updateProductSchema } from "@monorepo/shared";
+import {
+  addCartItemSchema,
+  itemQuantitySchema,
+  loginSchema,
+  productSchema,
+  reviewSchema,
+  settingsSchema,
+  timeframeQuerySchema,
+  updateProductSchema,
+} from "@monorepo/shared";
 import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 
-//some middleware parses back to body and some doesnt, make all middleware validation to just two 
+//some middleware parses back to body and some doesnt, make all middleware validation to just two
 //zods parsed.error.message could be wrong to send back, check later
 
 const maxSize = 5 * 1024 * 1024;
@@ -15,9 +24,13 @@ const imageSchema = z.object({
   buffer: z.instanceof(Buffer),
 });
 
-export function validateProduct(req: Request,res: Response,next: NextFunction) {
+export function validateProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const product = req.body;
-  const images = req.files
+  const images = req.files;
 
   if (images && Array.isArray(images)) {
     const validatedImages = z.array(imageSchema).safeParse(images);
@@ -26,7 +39,8 @@ export function validateProduct(req: Request,res: Response,next: NextFunction) {
     }
   }
   const validatedProduct = productSchema.safeParse(product);
-  if (!validatedProduct.success) return res.status(400).json({ message: validatedProduct.error.message });
+  if (!validatedProduct.success)
+    return res.status(400).json({ message: validatedProduct.error.message });
 
   next();
 }
@@ -34,7 +48,7 @@ export function validateProduct(req: Request,res: Response,next: NextFunction) {
 export function validateReview(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const review = req.body;
 
@@ -45,16 +59,25 @@ export function validateReview(
   next();
 }
 
-export function validateUpdateProduct(req: Request,res: Response,next: NextFunction) {
+export function validateUpdateProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const product = req.body;
-    
+
   const validated = updateProductSchema.safeParse(product);
-  if (!validated.success)return res.status(400).json({ message: validated.error.message });
+  if (!validated.success)
+    return res.status(400).json({ message: validated.error.message });
 
   next();
 }
 
-export function validateTimeframeQuery(req: Request,res: Response,next: NextFunction) {
+export function validateTimeframeQuery(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const parsed = timeframeQuerySchema.safeParse(req.query);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.message });
@@ -62,26 +85,30 @@ export function validateTimeframeQuery(req: Request,res: Response,next: NextFunc
 
   const now = new Date();
 
-  const from = parsed.data.from; 
-  const to = parsed.data.to ?? now; 
+  const from = parsed.data.from;
+  const to = parsed.data.to ?? now;
 
   req.timeframe = { from, to };
 
   next();
 }
 
-export function validateEmail(req: Request,res: Response,next: NextFunction) {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email missing" });
-    if (!loginSchema.shape.email.safeParse(email).success) {
-      return res.status(400).json({ message: "Invalid Email" });
-    }
+export function validateEmail(req: Request, res: Response, next: NextFunction) {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email missing" });
+  if (!loginSchema.shape.email.safeParse(email).success) {
+    return res.status(400).json({ message: "Invalid Email" });
+  }
 
   next();
 }
 
-export function validateItemQuantity(req: Request, res: Response, next: NextFunction) {
-  const {quantity} = req.body;
+export function validateItemQuantity(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const { quantity } = req.body;
 
   const validated = itemQuantitySchema.safeParse(quantity);
   if (!validated.success)
@@ -90,17 +117,26 @@ export function validateItemQuantity(req: Request, res: Response, next: NextFunc
   next();
 }
 
-export function validateCartItem(req: Request, res: Response, next: NextFunction) {
+export function validateCartItem(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const item = req.body;
-    
+
   const validated = addCartItemSchema.safeParse(item);
-  if (!validated.success) return res.status(400).json({ message: validated.error.message });
+  if (!validated.success)
+    return res.status(400).json({ message: validated.error.message });
 
   next();
 }
 
-export function validateProductId(req: Request,res: Response,next: NextFunction) {
-  const {productId} = req.body;
+export function validateProductId(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const { productId } = req.body;
 
   const validated = addCartItemSchema.shape.productId.safeParse(productId);
   if (!validated.success)
@@ -112,11 +148,11 @@ export function validateProductId(req: Request,res: Response,next: NextFunction)
 export function validateSettings(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const body = req.body;
 
-  const validated = settingsSchema.safeParse(body)
+  const validated = settingsSchema.safeParse(body);
   if (!validated.success)
     return res.status(400).json({ message: validated.error.message });
 

@@ -1,6 +1,6 @@
 import Header from "@/components/main/Header";
 import "./globals.css";
-import "server-only"
+import "server-only";
 import Footer from "@/components/main/Footer";
 
 export default function RootLayout({
@@ -11,9 +11,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header/>
+        <Header />
         {children}
-        <Footer/>
+        <Footer />
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-import z from "zod"
+import z from "zod";
 
 const priceSchema = z
   .int()
@@ -8,7 +8,7 @@ const priceSchema = z
     return cents === 0 || cents === 95 || cents === 99;
   }, "Price must end with .00, .95, or .99");
 
-export const currencySchema = z.enum(["USD", "EUR", "GBP"])
+export const currencySchema = z.enum(["USD", "EUR", "GBP"]);
 
 export const loginSchema = z.object({
   email: z.email("Invalid email"),
@@ -22,16 +22,20 @@ export const loginSchema = z.object({
 
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
-  birthdate: z.date().transform((dateStr) => new Date(dateStr)).optional(),
+  birthdate: z
+    .date()
+    .transform((dateStr) => new Date(dateStr))
+    .optional(),
   address: z
     .string()
     .regex(
       /^[a-zA-Z0-9\s,.-]{10,100}$/,
-      "Address must be valid (street, house number, postal code, country)"
-    ).optional(),
+      "Address must be valid (street, house number, postal code, country)",
+    )
+    .optional(),
 });
 
-export const updateUserSchema = signupSchema.partial()
+export const updateUserSchema = signupSchema.partial();
 
 export const ordersQuerySchema = z.object({
   sort: z.enum(["status", "ordered_at"]).optional().default("ordered_at"),
@@ -53,21 +57,26 @@ export const ordersQuerySchema = z.object({
   status: z.enum(["ORDERED", "DELIVERING", "DELIVERED"]).optional(),
 });
 
-
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();
 export const paginationSchema = z.object({
   page: z.string().regex(/^\d+$/).optional(),
   limit: z.string().regex(/^\d+$/).optional(),
 });
 
-//should have sorting(also through categories), filtering, pagination, search functionality, 
+//should have sorting(also through categories), filtering, pagination, search functionality,
 export const productsQuerySchema = paginationSchema.extend({
   search: z.string().max(255).optional(),
   // Filtering
   category: z.string().optional(),
   minPrice: priceSchema.optional(),
   maxPrice: priceSchema.optional(),
-  sale: z.preprocess((val) => {if (val === "true") return true;if (val === "false") return false;return val;}, z.boolean()).optional(),
+  sale: z
+    .preprocess((val) => {
+      if (val === "true") return true;
+      if (val === "false") return false;
+      return val;
+    }, z.boolean())
+    .optional(),
   // Sorting
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
@@ -85,8 +94,6 @@ export const reviewsQuerySchema = paginationSchema.extend({
   limit: z.string().regex(/^\d+$/).optional(),
 });
 
-
-
 export const productSchema = z.object({
   name: z.string(),
   description: z.string(),
@@ -97,7 +104,7 @@ export const productSchema = z.object({
   sale_price: priceSchema,
 });
 
-export const updateProductSchema = productSchema.partial()
+export const updateProductSchema = productSchema.partial();
 
 export const timeframeQuerySchema = z.object({
   from: z
@@ -123,19 +130,22 @@ export const reviewSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
-const itemQuantity = z.number("Quantity must be a number").int("Quantity must be an integer").min(1, "Quantity must be at least 1")
-const uuid = z.uuid("Invalid ID")
+const itemQuantity = z
+  .number("Quantity must be a number")
+  .int("Quantity must be an integer")
+  .min(1, "Quantity must be at least 1");
+const uuid = z.uuid("Invalid ID");
 
 export const itemQuantitySchema = z.object({
-  quantity:itemQuantity
-})
+  quantity: itemQuantity,
+});
 
 export const addCartItemSchema = z.object({
   productId: uuid,
-  quantity: itemQuantity
-})
+  quantity: itemQuantity,
+});
 
 export const settingsSchema = z.object({
   key: z.string().nonempty(),
-  value:z.string().nonempty()
-})
+  value: z.string().nonempty(),
+});

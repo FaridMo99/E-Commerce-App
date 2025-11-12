@@ -4,16 +4,18 @@ import prisma from "../services/prisma.js";
 
 type CartReturn = (Cart & { items: CartItem[] }) | null;
 
-export async function deleteUserCart(userId:string):Promise<[BatchPayload, CartReturn]> {
-        const [_, cart] = await prisma.$transaction([
-          prisma.cartItem.deleteMany({
-            where: { cart: { userId: userId } },
-          }),
-          prisma.cart.findUnique({
-            where: { userId: userId },
-            include: { items: true },
-          }),
-        ]);
-  
-  return [_, cart]
+export async function deleteUserCart(
+  userId: string,
+): Promise<[BatchPayload, CartReturn]> {
+  const [_, cart] = await prisma.$transaction([
+    prisma.cartItem.deleteMany({
+      where: { cart: { userId: userId } },
+    }),
+    prisma.cart.findUnique({
+      where: { userId: userId },
+      include: { items: true },
+    }),
+  ]);
+
+  return [_, cart];
 }

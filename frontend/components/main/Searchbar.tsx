@@ -1,11 +1,11 @@
-"use client"
-import { useState } from 'react'
-import { Input } from '../ui/input';
-import { Search } from 'lucide-react';
+"use client";
+import { useState } from "react";
+import { Input } from "../ui/input";
+import { Search } from "lucide-react";
 
 function Searchbar() {
-    const [search, setSearch] = useState<string>("");
-    
+  const [search, setSearch] = useState<string>("");
+
   return (
     <div className="w-2/3 h-full flex justify-center items-center relative">
       <Input
@@ -25,4 +25,4 @@ function Searchbar() {
   );
 }
 
-export default Searchbar
+export default Searchbar;

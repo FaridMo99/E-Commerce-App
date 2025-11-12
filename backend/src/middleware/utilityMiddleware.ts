@@ -2,7 +2,6 @@ import RedisStore from "rate-limit-redis";
 import redis from "../services/redis.js";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-
 export const authRateLimiter = rateLimit({
   store: new RedisStore({
     sendCommand: (...args: string[]) => redis.sendCommand(args),

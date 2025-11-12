@@ -19,8 +19,7 @@ export async function disconnectAllServices(reason: string, error?: Error) {
     }
 
     console.log("Disconnecting DB...");
-      await prisma.$disconnect();
-      
+    await prisma.$disconnect();
 
     console.log("Disconnects successful. Exiting...");
     process.exit(error ? 1 : 0);

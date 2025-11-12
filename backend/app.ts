@@ -10,13 +10,12 @@ import apiRouter from "./src/routes/apiRouter.js";
 import webhookRouter from "./src/routes/webhookRouter.js";
 import passport from "passport";
 import { PORT } from "./src/config/env.js";
-import "./src/services/cronJobs.js"
+import "./src/services/cronJobs.js";
 
 export const app = express();
 
 //proxy support middleware to access ip
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
-
 
 //middleware to parse form submits to req.body
 app.use(express.urlencoded({ extended: true }));
@@ -30,7 +29,7 @@ app.use((req, res, next) => {
 app.use(cookieParser());
 
 //passport for oauth
-app.use(passport.initialize())
+app.use(passport.initialize());
 
 //route handlers
 app.use("/api", apiRouter);

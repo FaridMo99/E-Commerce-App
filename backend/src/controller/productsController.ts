@@ -1,22 +1,45 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import { currencySchema, type ProductSchema, type ProductsQuerySchema, type ReviewSchema, type UpdateProductSchema } from "@monorepo/shared";
+import {
+  currencySchema,
+  type ProductSchema,
+  type ProductsQuerySchema,
+  type ReviewSchema,
+  type UpdateProductSchema,
+} from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
-import { exchangeToCurrencyInCents, formatPriceForClient } from "../lib/currencyHandlers.js";
+import {
+  exchangeToCurrencyInCents,
+  formatPriceForClient,
+} from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import { BASE_CURRENCY_KEY } from "../config/constants.js";
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
 //maybe types wont work bc they always strings
-export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchema>,res:Response, next:NextFunction) {
-    const role = req.user?.role
-    const { search, category, minPrice, maxPrice, sortBy, sortOrder, page, limit, sale } = req.query
-    let currency:CurrencyISO | undefined = req.cookies.currency 
-  
-    if (!currency || !currencySchema.safeParse(currency).success) {
-      currency = "USD"
-    }
+export async function getAllProducts(
+  req: Request<{}, {}, {}, ProductsQuerySchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const role = req.user?.role;
+  const {
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    sortBy,
+    sortOrder,
+    page,
+    limit,
+    sale,
+  } = req.query;
+  let currency: CurrencyISO | undefined = req.cookies.currency;
+
+  if (!currency || !currencySchema.safeParse(currency).success) {
+    currency = "USD";
+  }
 
   try {
     //get products
@@ -43,18 +66,32 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
     });
 
     if (products.length > 0 && products[0]?.currency !== currency) {
-      const formattedProducts = await Promise.all(products.map(async (product) => {
-        const exchangedProduct = await exchangeToCurrencyInCents(product.currency,product.price, currency)
-        product.price = formatPriceForClient(exchangedProduct.exchangedPriceInCents)
-        product.currency = exchangedProduct.currency
-        if (product.sale_price) {
-          const exchangedSaleProduct = await exchangeToCurrencyInCents(product.currency,product.sale_price, currency)
-          product.sale_price = formatPriceForClient(exchangedSaleProduct.exchangedPriceInCents)
-        }
-        return product
-      }))
+      const formattedProducts = await Promise.all(
+        products.map(async (product) => {
+          const exchangedProduct = await exchangeToCurrencyInCents(
+            product.currency,
+            product.price,
+            currency,
+          );
+          product.price = formatPriceForClient(
+            exchangedProduct.exchangedPriceInCents,
+          );
+          product.currency = exchangedProduct.currency;
+          if (product.sale_price) {
+            const exchangedSaleProduct = await exchangeToCurrencyInCents(
+              product.currency,
+              product.sale_price,
+              currency,
+            );
+            product.sale_price = formatPriceForClient(
+              exchangedSaleProduct.exchangedPriceInCents,
+            );
+          }
+          return product;
+        }),
+      );
 
-      return res.status(200).json(formattedProducts)
+      return res.status(200).json(formattedProducts);
     }
 
     //transformation for when request currency is the same as in db stored
@@ -72,20 +109,25 @@ export async function getAllProducts(req: Request<{}, {}, {}, ProductsQuerySchem
 
     return res.status(200).json(products);
   } catch (err) {
-        next(err)
-    }
+    next(err);
+  }
 }
 
+export async function createProduct(
+  req: Request<{}, {}, ProductSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const product = req.body;
+  const images = req.files;
 
-export async function createProduct(req: Request<{}, {},ProductSchema>, res: Response, next: NextFunction) { 
-  const product = req.body
-  const images = req.files
-  
   try {
-    let imageUrls:string [] | undefined
+    let imageUrls: string[] | undefined;
     if (images && Array.isArray(images)) {
-      const results = await Promise.all(images.map(image => handleCloudUpload(image)))
-      imageUrls = results.map(result=> result.secure_url)
+      const results = await Promise.all(
+        images.map((image) => handleCloudUpload(image)),
+      );
+      imageUrls = results.map((result) => result.secure_url);
     }
 
     const newProduct = await prisma.$transaction(async (tx) => {
@@ -111,60 +153,74 @@ export async function createProduct(req: Request<{}, {},ProductSchema>, res: Res
       });
     });
 
-    newProduct.price = formatPriceForClient(newProduct.price)
+    newProduct.price = formatPriceForClient(newProduct.price);
     if (newProduct.sale_price) {
       newProduct.sale_price = formatPriceForClient(newProduct.sale_price);
     }
 
-    return res.status(201).json(newProduct)
+    return res.status(201).json(newProduct);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-export async function getProductByProductId(req: Request, res: Response, next: NextFunction) {
-  const id = req.params.productId!
+export async function getProductByProductId(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const id = req.params.productId!;
   let currency: CurrencyISO | undefined = req.cookies.currency;
 
   if (!currency || !currencySchema.safeParse(currency).success) {
     currency = "USD";
   }
 
-    try {
-        const product = await prisma.product.findUnique({
-            where: {
-                id
-            }
-        })
-      if (!product) return res.status(404).json({ message: "Product not found" })
+  try {
+    const product = await prisma.product.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
-          const exchangedPrice = await exchangeToCurrencyInCents(product.currency,product.price,currency);
-          product.price = formatPriceForClient(exchangedPrice.exchangedPriceInCents);
-          product.currency = exchangedPrice.currency
-      
-      if (product.sale_price) {
-            const saleExchangedPrice = await exchangeToCurrencyInCents(product.currency,product.sale_price,currency);
-            product.sale_price = formatPriceForClient(saleExchangedPrice.exchangedPriceInCents);
-          }
-      
-        return res.status(200).json(product)
-    } catch (err) {
-        next(err)
+    const exchangedPrice = await exchangeToCurrencyInCents(
+      product.currency,
+      product.price,
+      currency,
+    );
+    product.price = formatPriceForClient(exchangedPrice.exchangedPriceInCents);
+    product.currency = exchangedPrice.currency;
+
+    if (product.sale_price) {
+      const saleExchangedPrice = await exchangeToCurrencyInCents(
+        product.currency,
+        product.sale_price,
+        currency,
+      );
+      product.sale_price = formatPriceForClient(
+        saleExchangedPrice.exchangedPriceInCents,
+      );
     }
-}
 
+    return res.status(200).json(product);
+  } catch (err) {
+    next(err);
+  }
+}
 
 export async function deleteProductByProductId(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.params.productId!;
 
   try {
     //fetch product
     const preProduct = await prisma.product.findUnique({ where: { id } });
-    if (!preProduct) return res.status(404).json({ message: "Product not found" });
+    if (!preProduct)
+      return res.status(404).json({ message: "Product not found" });
 
     //keep first image, delete rest from cloud
     const imagesToDelete = preProduct.imageUrls.slice(1);
@@ -207,14 +263,24 @@ export async function deleteProductByProductId(
   }
 }
 
-
-export async function updateProductByProductId(req: Request<{productId:string}, {},UpdateProductSchema>, res: Response, next: NextFunction) {
-  const id = req.params.productId
-  const { name, description, price, stock_quantity, is_public, category, sale_price } = req.body
+export async function updateProductByProductId(
+  req: Request<{ productId: string }, {}, UpdateProductSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const id = req.params.productId;
+  const {
+    name,
+    description,
+    price,
+    stock_quantity,
+    is_public,
+    category,
+    sale_price,
+  } = req.body;
 
   try {
     const product = await prisma.$transaction(async (tx) => {
-
       const updatedProduct = await tx.product.update({
         where: { id },
         data: {
@@ -231,7 +297,7 @@ export async function updateProductByProductId(req: Request<{productId:string}, 
 
       //if product is made private, remove from favorites & carts
       if (is_public === false) {
-        //remove from favorites 
+        //remove from favorites
         await tx.product.update({
           where: { id },
           data: {
@@ -250,39 +316,44 @@ export async function updateProductByProductId(req: Request<{productId:string}, 
       return updatedProduct;
     });
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
     product.price = formatPriceForClient(product.price);
     if (product.sale_price) {
       product.sale_price = formatPriceForClient(product.sale_price);
     }
 
-    return res.status(200).json(product)
+    return res.status(200).json(product);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-
-export async function getAllReviewsByProductId(req: Request<{productId:string}>, res: Response, next: NextFunction) {
-  const productId = req.params.productId
+export async function getAllReviewsByProductId(
+  req: Request<{ productId: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const productId = req.params.productId;
 
   try {
     const reviews = await prisma.review.findMany({
-      where:{product_id:productId, is_public:true}
-    })
+      where: { product_id: productId, is_public: true },
+    });
 
-    return res.status(200).json(reviews)
+    return res.status(200).json(reviews);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-
-export async function createReviewByProductId(req: Request<{productId:string}, {},ReviewSchema>, res: Response, next: NextFunction) {
-  const productId = req.params.productId
-  const userId = req.user?.id!
-  const {title, content, rating, isPublic} = req.body
+export async function createReviewByProductId(
+  req: Request<{ productId: string }, {}, ReviewSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const productId = req.params.productId;
+  const userId = req.user?.id!;
+  const { title, content, rating, isPublic } = req.body;
   try {
     const review = await prisma.review.create({
       data: {
@@ -291,12 +362,12 @@ export async function createReviewByProductId(req: Request<{productId:string}, {
         rating,
         user_id: userId,
         product_id: productId,
-        ...(isPublic !== undefined && {is_public:isPublic})
-      }
-    })
+        ...(isPublic !== undefined && { is_public: isPublic }),
+      },
+    });
 
-    return res.status(201).json(review)
+    return res.status(201).json(review);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }

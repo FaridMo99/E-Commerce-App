@@ -11,19 +11,22 @@ import {
 import prisma from "./prisma.js";
 import type { Request } from "express";
 import type { UserCreatedBy } from "../generated/prisma/enums.js";
-import { CLIENT_ORIGIN, OAUTH_FACEBOOK_CLIENT_ID, OAUTH_FACEBOOK_CLIENT_SECRET, OAUTH_GOOGLE_CLIENT_ID, OAUTH_GOOGLE_CLIENT_SECRET } from "../config/env.js";
-
-
+import {
+  CLIENT_ORIGIN,
+  OAUTH_FACEBOOK_CLIENT_ID,
+  OAUTH_FACEBOOK_CLIENT_SECRET,
+  OAUTH_GOOGLE_CLIENT_ID,
+  OAUTH_GOOGLE_CLIENT_SECRET,
+} from "../config/env.js";
 
 type MinimalProfile = Pick<Profile, "displayName" | "emails" | "id">;
-
 
 const googleConfig: GoogleStrategyOptions = {
   clientID: OAUTH_GOOGLE_CLIENT_ID,
   clientSecret: OAUTH_GOOGLE_CLIENT_SECRET,
   callbackURL: `${CLIENT_ORIGIN}/login/google/success`,
   scope: ["profile", "email"],
-  passReqToCallback:true,
+  passReqToCallback: true,
 };
 
 const facebookConfig: FacebookStrategyOptions = {
@@ -31,18 +34,16 @@ const facebookConfig: FacebookStrategyOptions = {
   clientSecret: OAUTH_FACEBOOK_CLIENT_SECRET,
   callbackURL: `${CLIENT_ORIGIN}/login/facebook/success`,
   scope: ["public_profile", "email"],
-  passReqToCallback:true
+  passReqToCallback: true,
 };
 
-
-
 function makeVerifyCb(provider: UserCreatedBy) {
-    return async function (
-    req:Request,
+  return async function (
+    req: Request,
     accessToken: string,
     refreshToken: string,
     profile: MinimalProfile,
-    done:VerifyCallback
+    done: VerifyCallback,
   ) {
     try {
       const name = profile.displayName;
@@ -70,12 +71,12 @@ function makeVerifyCb(provider: UserCreatedBy) {
             verified: true,
             providerId: profile.id,
             createdBy: provider,
-            cart:{create:{}}
+            cart: { create: {} },
           },
         });
       }
-        
-    req.oAuthUser = { user };
+
+      req.oAuthUser = { user };
 
       done(null, false);
     } catch (err) {

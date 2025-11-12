@@ -17,9 +17,7 @@ apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/orders", ordersRouter);
 apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/auth", authRouter);
-apiRouter.use("/admin",isAuthenticated, isAdmin, adminRouter);
-apiRouter.use("/settings",isAuthenticated, isAdmin,settingsRouter);
-
+apiRouter.use("/admin", isAuthenticated, isAdmin, adminRouter);
+apiRouter.use("/settings", isAuthenticated, isAdmin, settingsRouter);
 
 export default apiRouter;
- 

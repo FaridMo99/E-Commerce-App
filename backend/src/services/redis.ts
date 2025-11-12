@@ -1,10 +1,10 @@
 import chalk from "chalk";
-import { createClient } from "redis"
+import { createClient } from "redis";
 import { REDIS_URL } from "../config/env.js";
 
 const redis = createClient({ url: REDIS_URL });
 
-  (async () => {
+(async () => {
   try {
     await redis.connect();
   } catch (err) {
@@ -28,4 +28,4 @@ redis.on("end", () => {
   console.log(chalk.blue("Redis disconnected"));
 });
 
-export default redis
+export default redis;

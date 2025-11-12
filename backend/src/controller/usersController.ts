@@ -1,81 +1,99 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import type { AddCartItemSchema, ItemQuantitySchema, OrdersQuerySchema, UpdateUserSchema } from "@monorepo/shared";
-import bcrypt from "bcrypt"
+import type {
+  AddCartItemSchema,
+  ItemQuantitySchema,
+  OrdersQuerySchema,
+  UpdateUserSchema,
+} from "@monorepo/shared";
+import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
 import type { JWTUserPayload } from "../types/types.js";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 
 //update in all controllers what you return
-export async function getUserByUserId(req: Request, res: Response, next: NextFunction) {
-    const id = req.user?.id
-    if (!id) return res.status(400).json({ message: "User not logged in" })
-    
-    try {
-        const user = await prisma.user.findUnique({ where: { id } })
-        if (!user) return res.status(404).json({ message: "User not found" })
-        
-        return res.status(200).json(user)
-    } catch (err) {
-        next(err)
-    }
+export async function getUserByUserId(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const id = req.user?.id;
+  if (!id) return res.status(400).json({ message: "User not logged in" });
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
-export async function updateUserByUserId(req: Request<{}, {}, UpdateUserSchema>, res: Response, next: NextFunction) {
-    const { email, name, password, birthdate, address } = req.body
-    const id = req.user?.id
+export async function updateUserByUserId(
+  req: Request<{}, {}, UpdateUserSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { email, name, password, birthdate, address } = req.body;
+  const id = req.user?.id;
 
-    if (!id) return res.status(400).json({ message: "User not logged in" })
+  if (!id) return res.status(400).json({ message: "User not logged in" });
 
-    try {
-        //check if email already exists
-        if (email) {
-            const emailInUse = await prisma.user.findFirst({ where: { email } })
-            if(emailInUse) return res.status(400).json({message:"Email already in use"})
-        }
-        
-            const data: Partial<User> = {
-              ...(email && { email }),
-              ...(name && { name }),
-              ...(birthdate && { birthdate }),
-              ...(address && { address }),
-              ...(password && { password: await bcrypt.hash(password, 10) }),
-            };
-        
-        const user = await prisma.user.update({
-            where: {
-                id
-            },
-            data
-        })
-
-        return res.status(200).json(user)
-    } catch (err) {
-        next(err)
+  try {
+    //check if email already exists
+    if (email) {
+      const emailInUse = await prisma.user.findFirst({ where: { email } });
+      if (emailInUse)
+        return res.status(400).json({ message: "Email already in use" });
     }
+
+    const data: Partial<User> = {
+      ...(email && { email }),
+      ...(name && { name }),
+      ...(birthdate && { birthdate }),
+      ...(address && { address }),
+      ...(password && { password: await bcrypt.hash(password, 10) }),
+    };
+
+    const user = await prisma.user.update({
+      where: {
+        id,
+      },
+      data,
+    });
+
+    return res.status(200).json(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
-export async function deleteUserByUserId(req: Request, res: Response, next: NextFunction) {
-        const id = req.user?.id;
+export async function deleteUserByUserId(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const id = req.user?.id;
 
-        if (!id) return res.status(400).json({ message: "User not logged in" });
+  if (!id) return res.status(400).json({ message: "User not logged in" });
 
-    try {
-        const user = await prisma.user.delete({
-            where:{id}
-        })
+  try {
+    const user = await prisma.user.delete({
+      where: { id },
+    });
 
-        return res.status(200).json({message:"Delete successful"})
-    } catch (err) {
-        next(err)
-    }
+    return res.status(200).json({ message: "Delete successful" });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function getAllOrdersByUser(
   req: Request<{}, {}, {}, OrdersQuerySchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = (req.user as JWTUserPayload).id;
   const { sort, order, page, limit, status } = req.query;
@@ -104,8 +122,11 @@ export async function getAllOrdersByUser(
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
     });
-    orders.forEach(order => order.total_amount = formatPriceForClient(order.total_amount))
-    return res.status(200).json(orders)
+    orders.forEach(
+      (order) =>
+        (order.total_amount = formatPriceForClient(order.total_amount)),
+    );
+    return res.status(200).json(orders);
   } catch (err) {
     next(err);
   }
@@ -114,7 +135,7 @@ export async function getAllOrdersByUser(
 export async function getSingleOrderByUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id;
   const orderId = req.params.orderId!;
@@ -128,82 +149,89 @@ export async function getSingleOrderByUser(
       },
     });
     if (!order) return res.status(404).json({ message: "Order not found" });
-    order.total_amount = formatPriceForClient(order.total_amount)
+    order.total_amount = formatPriceForClient(order.total_amount);
     return res.status(200).json(order);
   } catch (err) {
     next(err);
   }
 }
 
-export async function getReviewsByUser(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user?.id!
+export async function getReviewsByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
 
   try {
     const reviews = await prisma.review.findMany({
       where: {
-        user_id:userId
-      }
-    })
-    return res.status(200).json(reviews)
+        user_id: userId,
+      },
+    });
+    return res.status(200).json(reviews);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 //format cart product prices
-export async function getUserCart(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user?.id!
+export async function getUserCart(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
 
   try {
     const cart = await prisma.user.findUnique({
       where: { id: userId },
-      select:{cart:true}
-    })
-    if (!cart) return res.status(404).json({message:"Cart not found"})
-    
-    return res.status(200).json(cart.cart)
-    
+      select: { cart: true },
+    });
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    return res.status(200).json(cart.cart);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
 export async function emptyCart(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id;
 
   try {
-    const [_,cart] = await deleteUserCart(userId)
+    const [_, cart] = await deleteUserCart(userId);
 
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    return res.status(200).json({message:"Emptied successful"});
+    return res.status(200).json({ message: "Emptied successful" });
   } catch (err) {
     next(err);
   }
 }
 
 export async function addProductToUserCart(
-  req: Request<{}, {},AddCartItemSchema>,
+  req: Request<{}, {}, AddCartItemSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const {productId, quantity} = req.body
+  const { productId, quantity } = req.body;
 
   try {
     const newCartItem = await prisma.cartItem.create({
       data: {
         cart: { connect: { userId: userId } },
         product: { connect: { id: productId } },
-        quantity
+        quantity,
       },
       select: {
-        cart:true
-      }
+        cart: true,
+      },
     });
 
     return res.status(200).json(newCartItem.cart);
@@ -215,13 +243,14 @@ export async function addProductToUserCart(
 export async function removeProductFromUserCart(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const itemId = req.params.itemId
+  const itemId = req.params.itemId;
 
-  if (!itemId) return res.status(400).json({ message: "No ProductId received" })
-  
+  if (!itemId)
+    return res.status(400).json({ message: "No ProductId received" });
+
   try {
     const cart = await prisma.cartItem.delete({
       where: {
@@ -231,8 +260,8 @@ export async function removeProductFromUserCart(
         id: itemId,
       },
       select: {
-        cart:true
-      }
+        cart: true,
+      },
     });
 
     if (!cart) return res.status(404).json({ message: "Item not found" });
@@ -244,12 +273,17 @@ export async function removeProductFromUserCart(
 }
 
 //later give support for variants
-export async function updateItemQuantity(req: Request<{itemId:string}, {},ItemQuantitySchema>,res: Response,next: NextFunction) {
+export async function updateItemQuantity(
+  req: Request<{ itemId: string }, {}, ItemQuantitySchema>,
+  res: Response,
+  next: NextFunction,
+) {
   const userId = req.user?.id!;
   const itemId = req.params.itemId;
-  const {quantity} = req.body
+  const { quantity } = req.body;
 
-  if (!itemId)return res.status(400).json({ message: "No ProductId received" });
+  if (!itemId)
+    return res.status(400).json({ message: "No ProductId received" });
 
   try {
     const cart = await prisma.cartItem.update({
@@ -260,7 +294,7 @@ export async function updateItemQuantity(req: Request<{itemId:string}, {},ItemQu
         id: itemId,
       },
       data: {
-        quantity
+        quantity,
       },
       select: {
         cart: true,
@@ -276,8 +310,12 @@ export async function updateItemQuantity(req: Request<{itemId:string}, {},ItemQu
 }
 
 //format favorite item prices
-export async function getFavoriteItems(req: Request, res: Response, next: NextFunction) { 
-  const userId = req.user?.id!
+export async function getFavoriteItems(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
 
   try {
     const favorites = await prisma.user.findUnique({
@@ -286,32 +324,38 @@ export async function getFavoriteItems(req: Request, res: Response, next: NextFu
         favorites: {
           some: {
             is_public: true,
-            deleted:false
-          }
-        }
+            deleted: false,
+          },
+        },
       },
       select: {
-        favorites:true
-      }
-    })
-    if (!favorites) return res.status(404).json({ message: "Favorite products not found" })
-    favorites.favorites.forEach(favorite => {
-      favorite.price = formatPriceForClient(favorite.price)
+        favorites: true,
+      },
+    });
+    if (!favorites)
+      return res.status(404).json({ message: "Favorite products not found" });
+    favorites.favorites.forEach((favorite) => {
+      favorite.price = formatPriceForClient(favorite.price);
       if (favorite.sale_price) {
-        favorite.sale_price = formatPriceForClient(favorite.sale_price)
+        favorite.sale_price = formatPriceForClient(favorite.sale_price);
       }
-    })
-    return res.status(200).json(favorites)
+    });
+    return res.status(200).json(favorites);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-export async function deleteFavoriteItem(req: Request, res: Response, next: NextFunction) { 
-  const userId = req.user?.id!
-  const productId = req.params.productId
-  if (!productId) return res.status(400).json({ message: "No product provided" })
-  
+export async function deleteFavoriteItem(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
+  const productId = req.params.productId;
+  if (!productId)
+    return res.status(400).json({ message: "No product provided" });
+
   try {
     const user = await prisma.user.update({
       where: { id: userId },
@@ -323,17 +367,20 @@ export async function deleteFavoriteItem(req: Request, res: Response, next: Next
       include: { favorites: true },
     });
 
-    if (!user) return res.status(404).json({ message: "Product not found" })
-    return res.status(200).json({message:"Deleted item successful"})
+    if (!user) return res.status(404).json({ message: "Product not found" });
+    return res.status(200).json({ message: "Deleted item successful" });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-
-export async function addFavoriteItem(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user?.id!
-  const productId = req.body.productId as string
+export async function addFavoriteItem(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
+  const productId = req.body.productId as string;
 
   try {
     const product = await prisma.user.update({
@@ -348,10 +395,10 @@ export async function addFavoriteItem(req: Request, res: Response, next: NextFun
       },
     });
 
-    if (!product) return res.status(404).json({ message: "Product not found" })
-    
-    return res.status(200).json(product)
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    return res.status(200).json(product);
   } catch (err) {
-    next(err)
+    next(err);
   }
 }

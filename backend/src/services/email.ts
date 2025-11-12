@@ -1,8 +1,11 @@
 import Mailjet from "node-mailjet";
 import type { UrlType } from "../types/types.js";
-import { CLIENT_ORIGIN, EMAIL_ADDRESS, MJ_APIKEY_PRIVATE, MJ_APIKEY_PUBLIC } from "../config/env.js";
-
-
+import {
+  CLIENT_ORIGIN,
+  EMAIL_ADDRESS,
+  MJ_APIKEY_PRIVATE,
+  MJ_APIKEY_PUBLIC,
+} from "../config/env.js";
 
 const mailjet = new Mailjet.Client({
   apiKey: MJ_APIKEY_PUBLIC,
@@ -12,7 +15,7 @@ const mailjet = new Mailjet.Client({
 export async function sendVerificationEmail(
   receiver: string,
   url: UrlType,
-  token: string
+  token: string,
 ) {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 

@@ -1,30 +1,41 @@
 import { productSchema } from "@monorepo/shared";
-import { EXCHANGE_RATE_REDIS_KEY, TWELVE_HOURS_IN_SECONDS, DEFAULT_NICE_PRICE} from "../config/constants.js";
+import {
+  EXCHANGE_RATE_REDIS_KEY,
+  TWELVE_HOURS_IN_SECONDS,
+  DEFAULT_NICE_PRICE,
+} from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
 import redis from "../services/redis.js";
-import type { ExchangePrice, NicePrice, OpenExchangeRateApiReturn } from "../types/types.js";
-
-
+import type {
+  ExchangePrice,
+  NicePrice,
+  OpenExchangeRateApiReturn,
+} from "../types/types.js";
 
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
-    const redisReturn = await redis.get(EXCHANGE_RATE_REDIS_KEY);
-    if (redisReturn) return JSON.parse(redisReturn);
-    
-    const res = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`);
-    if (!res.ok) {
-        console.log(`Exchange rate API failed (${res.status})}`);
-        throw new Error(`Exchange rate API failed (${res.status})}`);
-    }
-    const data: OpenExchangeRateApiReturn = await res.json();
+  const redisReturn = await redis.get(EXCHANGE_RATE_REDIS_KEY);
+  if (redisReturn) return JSON.parse(redisReturn);
 
-    await redis.set(EXCHANGE_RATE_REDIS_KEY, JSON.stringify(data), {
-      EX: TWELVE_HOURS_IN_SECONDS,
-    });
-    return data
+  const res = await fetch(
+    `https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`,
+  );
+  if (!res.ok) {
+    console.log(`Exchange rate API failed (${res.status})}`);
+    throw new Error(`Exchange rate API failed (${res.status})}`);
+  }
+  const data: OpenExchangeRateApiReturn = await res.json();
+
+  await redis.set(EXCHANGE_RATE_REDIS_KEY, JSON.stringify(data), {
+    EX: TWELVE_HOURS_IN_SECONDS,
+  });
+  return data;
 }
 
-function roundPriceUpInCents(amount: number, ending:NicePrice = DEFAULT_NICE_PRICE):number {
+function roundPriceUpInCents(
+  amount: number,
+  ending: NicePrice = DEFAULT_NICE_PRICE,
+): number {
   //transform to cent and round up
   const cents = Math.ceil(amount * 100);
 
@@ -35,8 +46,12 @@ function roundPriceUpInCents(amount: number, ending:NicePrice = DEFAULT_NICE_PRI
   return rounded < cents ? rounded + 100 : rounded;
 }
 
-export async function exchangeToCurrencyInCents(baseCurrency:CurrencyISO, priceInCents: number,wantedCurrency: CurrencyISO): Promise<ExchangePrice> {
-  const exchangeRates = await getExchangeRates()
+export async function exchangeToCurrencyInCents(
+  baseCurrency: CurrencyISO,
+  priceInCents: number,
+  wantedCurrency: CurrencyISO,
+): Promise<ExchangePrice> {
+  const exchangeRates = await getExchangeRates();
 
   if (baseCurrency === wantedCurrency) {
     return { exchangedPriceInCents: priceInCents, currency: wantedCurrency };
@@ -56,17 +71,19 @@ export async function exchangeToCurrencyInCents(baseCurrency:CurrencyISO, priceI
   const convertedCents = priceInCents * conversionRate;
 
   // Round up to a nice ending
-  let ending = priceInCents % 100
+  let ending = priceInCents % 100;
   if (!productSchema.shape.price.safeParse(ending).success) {
-    ending = DEFAULT_NICE_PRICE
+    ending = DEFAULT_NICE_PRICE;
   }
-  const exchangedPriceInCents = roundPriceUpInCents(convertedCents,ending as NicePrice);
+  const exchangedPriceInCents = roundPriceUpInCents(
+    convertedCents,
+    ending as NicePrice,
+  );
 
   return { exchangedPriceInCents, currency: wantedCurrency };
 }
 
-
-export function formatPriceForClient(cents: number):number {
+export function formatPriceForClient(cents: number): number {
   return Number((cents / 100).toFixed(2));
 }
 

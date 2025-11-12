@@ -1,13 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import { exchangeToCurrencyInCents, formatPriceForClient } from "../lib/currencyHandlers.js";
+import {
+  exchangeToCurrencyInCents,
+  formatPriceForClient,
+} from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import stripe from "../services/stripe.js";
 
 export async function getOrders(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { from, to } = req.timeframe!;
   const { limit, sortBy, page, sortOrder } = req.query;
@@ -41,7 +44,10 @@ export async function getOrders(
       orderBy: { [field]: order },
     });
 
-    orders.forEach(order => order.total_amount = formatPriceForClient(order.total_amount))
+    orders.forEach(
+      (order) =>
+        (order.total_amount = formatPriceForClient(order.total_amount)),
+    );
 
     return res.status(200).json(orders);
   } catch (err) {
@@ -49,44 +55,63 @@ export async function getOrders(
   }
 }
 
-export async function makeOrder(req: Request,res: Response,next: NextFunction) {
-  const userId = req.user?.id!
-  const currency: CurrencyISO = req.cookies.currency ?? "USD"
-  
+export async function makeOrder(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
+  const currency: CurrencyISO = req.cookies.currency ?? "USD";
 
   try {
     const shoppingCart = await prisma.cart.findUnique({
       where: {
-      userId
+        userId,
       },
       include: {
         items: {
           include: {
-            product:true
-          }
-        }
-      }
-    })
-    if (!shoppingCart) return res.status(404).json({ message: "Shopping Cart not found" })
+            product: true,
+          },
+        },
+      },
+    });
+    if (!shoppingCart)
+      return res.status(404).json({ message: "Shopping Cart not found" });
 
     const formattedProducts = await Promise.all(
       shoppingCart.items.map(async (item) => {
-
-        const exchange = await exchangeToCurrencyInCents(item.product.currency,item.product.price,currency);
+        const exchange = await exchangeToCurrencyInCents(
+          item.product.currency,
+          item.product.price,
+          currency,
+        );
         item.product.currency = exchange.currency;
-        item.product.price = exchange.exchangedPriceInCents
+        item.product.price = exchange.exchangedPriceInCents;
 
         if (item.product.sale_price) {
-          const saleExchange = await exchangeToCurrencyInCents(item.product.currency,item.product.sale_price,item.product.currency);
-          item.product.sale_price = saleExchange.exchangedPriceInCents
+          const saleExchange = await exchangeToCurrencyInCents(
+            item.product.currency,
+            item.product.sale_price,
+            item.product.currency,
+          );
+          item.product.sale_price = saleExchange.exchangedPriceInCents;
         }
 
         return item;
-      })
+      }),
     );
 
-    const paymentIntent = await stripe.paymentIntents.create({amount:,currency})
-  
+    const totalPrice = formattedProducts.reduce((sum, item) => {
+      const price = item.product.sale_price ?? item.product.price;
+      return sum + price * item.quantity;
+    }, 0);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalPrice,
+      currency,
+    });
+
     return res.status(200).json(formattedProducts);
   } catch (err) {
     next(err);

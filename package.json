@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "private":true,
-  "scripts": {},
+  "private": true,
+  "scripts": {
+    "prettier": "prettier --write ."
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
-  "workspaces":[
-  "frontend",
-  "backend",
-  "shared"
-]
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }

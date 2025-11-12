@@ -1,5 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
-import { loginSchema, type LoginSchema, type SignupSchema } from "@monorepo/shared";
+import {
+  loginSchema,
+  type LoginSchema,
+  type SignupSchema,
+} from "@monorepo/shared";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../services/prisma.js";
@@ -8,9 +12,12 @@ import { sendVerificationEmail } from "../services/email.js";
 import { issueTokens } from "../lib/auth.js";
 import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
 
-
-export async function login(req: Request<{}, {},LoginSchema>, res: Response, next: NextFunction) {
-  const {email, password} = req.body
+export async function login(
+  req: Request<{}, {}, LoginSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { email, password } = req.body;
   try {
     //fix the return of cart products and orders, rn sending too much, also for verify user
     const user = await prisma.user.findFirst({
@@ -26,47 +33,58 @@ export async function login(req: Request<{}, {},LoginSchema>, res: Response, nex
     if (!user.verified)
       return res.status(400).json({ message: "Not verified yet" });
 
-    if(!user.password) return res.status(401).json({message:"Email or Password is wrong"})
+    if (!user.password)
+      return res.status(401).json({ message: "Email or Password is wrong" });
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-    if (!passwordsMatch) return res.status(401).json({ message: "Email or Password is wrong" });
+    if (!passwordsMatch)
+      return res.status(401).json({ message: "Email or Password is wrong" });
 
-    const accessToken = await issueTokens(user, res)
+    const accessToken = await issueTokens(user, res);
 
-    return res.status(200).json({accessToken, user});
+    return res.status(200).json({ accessToken, user });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-export async function signup(req: Request<{}, {}, SignupSchema>, res: Response, next: NextFunction) {
-  const { email, password, name, birthdate, address } = req.body
+export async function signup(
+  req: Request<{}, {}, SignupSchema>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { email, password, name, birthdate, address } = req.body;
   try {
     //check if email already exists
-    const emailExists = await prisma.user.findFirst({ where: { email } })
-    if (emailExists) return res.status(400).json({ message: "Email already in use" })
-    
-    //create user
-      const user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          ...(birthdate && { birthdate }),
-          ...(address && { address }),
-          password: await bcrypt.hash(password, 10),
-          createdBy: "SELF",
-          cart:{create:{}}
-      }
-      })
-    
-    //send email to verify, token only valid 24 hours
-    const token = jwt.sign({id:user.id},JWT_EMAIL_TOKEN_SECRET,{expiresIn:"1d"})
-    await redis.setEx(`verifyToken:${user.id}`,60*60*24, token)
+    const emailExists = await prisma.user.findFirst({ where: { email } });
+    if (emailExists)
+      return res.status(400).json({ message: "Email already in use" });
 
-    await sendVerificationEmail(user.email, "verify-success",token)
-    return res.status(201).json({message:"Signup successful, verify your Email."})
+    //create user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        ...(birthdate && { birthdate }),
+        ...(address && { address }),
+        password: await bcrypt.hash(password, 10),
+        createdBy: "SELF",
+        cart: { create: {} },
+      },
+    });
+
+    //send email to verify, token only valid 24 hours
+    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+    await redis.setEx(`verifyToken:${user.id}`, 60 * 60 * 24, token);
+
+    await sendVerificationEmail(user.email, "verify-success", token);
+    return res
+      .status(201)
+      .json({ message: "Signup successful, verify your Email." });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
@@ -78,9 +96,9 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
       await prisma.refreshToken.deleteMany({
         where: {
           deviceId: token.deviceId,
-          userId:token.userId
-        }
-      })
+          userId: token.userId,
+        },
+      });
     }
 
     res.cookie("refreshToken", "", {
@@ -100,7 +118,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 export async function verifyUser(
   req: Request<{}, {}, { token: string | undefined }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: "Token is required" });
@@ -128,18 +146,17 @@ export async function verifyUser(
       data: { verified: true },
       include: {
         cart: true,
-        orders:true
-      }
+        orders: true,
+      },
     });
 
     //Delete token from Redis
     await redis.del(`verifyToken:${userId}`);
 
     //create token for logging in
-    const accessToken = await issueTokens(user, res)
+    const accessToken = await issueTokens(user, res);
 
     return res.status(200).json({ accessToken, user });
-
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       return res.status(400).json({ message: "Token expired" });
@@ -148,17 +165,21 @@ export async function verifyUser(
   }
 }
 
-export async function sendNewVerifyLink(req: Request<{}, {}, { email: string }>, res: Response, next: NextFunction) {
-  
-  const { email } = req.body
-  
+export async function sendNewVerifyLink(
+  req: Request<{}, {}, { email: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { email } = req.body;
+
   try {
     const user = await prisma.user.findFirst({
-    where:{email}
-    })
-    if (!user) return res.status(404).json({ message: "User not found" })
-    if (user.verified) return res.status(400).json({ message: "User already verified" })
-    
+      where: { email },
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.verified)
+      return res.status(400).json({ message: "User already verified" });
+
     await redis.del(`verifyToken:${user.id}`);
     const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
       expiresIn: "1d",
@@ -166,108 +187,125 @@ export async function sendNewVerifyLink(req: Request<{}, {}, { email: string }>,
     await redis.setEx(`verifyToken:${user.id}`, 60 * 60 * 24, token);
 
     await sendVerificationEmail(user.email, "verify-success", token);
-    return res.status(201).json({ message: "Sent new Link, check your Email." });
-
+    return res
+      .status(201)
+      .json({ message: "Sent new Link, check your Email." });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
 
-export async function changePassword(req: Request<{}, {}, { password?: string, token?:string }>, res: Response, next: NextFunction) {
-  const { password, token } = req.body
+export async function changePassword(
+  req: Request<{}, {}, { password?: string; token?: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { password, token } = req.body;
 
-  if (!password || !token) return res.status(400).json({ message: "Password missing" })
-  
-  const validatedPassword = loginSchema.shape.password.safeParse(password)
+  if (!password || !token)
+    return res.status(400).json({ message: "Password missing" });
+
+  const validatedPassword = loginSchema.shape.password.safeParse(password);
   //change the messsage later, could be wrong
-  if (!validatedPassword.success) return res.status(400).json({ message: validatedPassword.error.message })
-  
+  if (!validatedPassword.success)
+    return res.status(400).json({ message: validatedPassword.error.message });
+
   try {
+    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as {
+      id: string;
+    };
 
-      const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as {
-        id: string;
-      };
-    
-        const redisTokenKey = `changePasswordUserId:${payload.id}`;
-        const redisToken = await redis.get(redisTokenKey);
+    const redisTokenKey = `changePasswordUserId:${payload.id}`;
+    const redisToken = await redis.get(redisTokenKey);
 
-        if (!redisToken)
-          return res.status(404).json({ message: "Invalid or expired Link" });
-        if (redisToken !== token)
-          return res.status(403).json({ message: "Invalid Link" });
+    if (!redisToken)
+      return res.status(404).json({ message: "Invalid or expired Link" });
+    if (redisToken !== token)
+      return res.status(403).json({ message: "Invalid Link" });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.update({
-          where: { id:payload.id },
-          data: { password: hashedPassword },
-          include: {
-            cart: true,
-            orders:true
-          }
-        })
+    const user = await prisma.user.update({
+      where: { id: payload.id },
+      data: { password: hashedPassword },
+      include: {
+        cart: true,
+        orders: true,
+      },
+    });
 
     await redis.del(redisTokenKey);
-    
-    const accessToken = await issueTokens(user, res)
+
+    const accessToken = await issueTokens(user, res);
 
     return res.status(200).json({ accessToken, user });
-
   } catch (err) {
-    next(err)
+    next(err);
   }
-  
 }
 
-export async function sendEmailToChangePassword(req: Request<{}, {}, { email: string }>, res: Response, next: NextFunction) {
-  const email = req.body.email
-  
+export async function sendEmailToChangePassword(
+  req: Request<{}, {}, { email: string }>,
+  res: Response,
+  next: NextFunction,
+) {
+  const email = req.body.email;
+
   try {
-    const user = await prisma.user.findFirst({where: { email }});
+    const user = await prisma.user.findFirst({ where: { email } });
 
-    if (!user) return res.status(404).json({ message: `User with E-Mail: ${email} does not exist.` });
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: `User with E-Mail: ${email} does not exist.` });
 
-    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {expiresIn: "1d"});
-    
-    await redis.setEx(`changePasswordUserId:${user.id}`, 60*60*24, token);
+    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
 
-    await sendVerificationEmail(email,"change-password",token);
+    await redis.setEx(`changePasswordUserId:${user.id}`, 60 * 60 * 24, token);
+
+    await sendVerificationEmail(email, "change-password", token);
 
     return res.status(200).json({ message: "success" });
   } catch (err) {
     next(err);
   }
-
 }
 
-export async function issueRefreshToken(req: Request, res: Response, next: NextFunction) {
-  const token = req.refreshTokenPayload!
+export async function issueRefreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const token = req.refreshTokenPayload!;
   const rawToken = req.cookies.refreshToken as string;
 
   try {
     //verify and compare token
-    const dbToken = await prisma.refreshToken.findFirst({ where: { deviceId:token.deviceId } });
+    const dbToken = await prisma.refreshToken.findFirst({
+      where: { deviceId: token.deviceId },
+    });
     if (!dbToken)
-    return res.status(401).json({ message: "Invalid refresh token" });
+      return res.status(401).json({ message: "Invalid refresh token" });
     if (dbToken.expiresAt < new Date()) {
       await prisma.refreshToken.delete({ where: { id: dbToken?.id } });
       return res.status(401).json({ message: "Expired refresh token" });
     }
 
-
     const user = await prisma.user.findUnique({ where: { id: token.userId } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const tokenMatch = await bcrypt.compare(rawToken, dbToken.token);
-    if (!tokenMatch) return res.status(401).json({ message: "Unauthorized" })
-    
+    if (!tokenMatch) return res.status(401).json({ message: "Unauthorized" });
+
     //delete and issue new tokens
     await prisma.refreshToken.deleteMany({
       where: {
-        deviceId: dbToken.deviceId
-      }
-    })
-    const accessToken = await issueTokens(user, res)
+        deviceId: dbToken.deviceId,
+      },
+    });
+    const accessToken = await issueTokens(user, res);
 
     return res.status(200).json({ accessToken });
   } catch (err) {

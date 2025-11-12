@@ -1,11 +1,10 @@
-import React from 'react'
-
+import React from "react";
 
 //add icons,links disclaimers etc.
 function Footer() {
-    return (<footer className='w-screen h-[10vh] bg-foreground text-secondary'>
-
-  </footer>)
+  return (
+    <footer className="w-screen h-[10vh] bg-foreground text-secondary"></footer>
+  );
 }
 
-export default Footer
+export default Footer;
