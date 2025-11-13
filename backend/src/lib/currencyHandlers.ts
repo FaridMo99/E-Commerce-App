@@ -36,14 +36,17 @@ function roundPriceUpInCents(
   amount: number,
   ending: NicePrice = DEFAULT_NICE_PRICE,
 ): number {
+  console.log(amount);
   //transform to cent and round up
   const cents = Math.ceil(amount * 100);
-
+  console.log(cents);
   //last two digits to "nice" ending
   const rounded = Math.floor(cents / 100) * 100 + ending;
-
+  console.log(rounded);
   // If the rounded value is less than the original cents, add 100 to ensure we round up
-  return rounded < cents ? rounded + 100 : rounded;
+  const result = rounded < cents ? rounded + 100 : rounded;
+  console.log(result);
+  return result;
 }
 
 export async function exchangeToCurrencyInCents(
@@ -56,17 +59,14 @@ export async function exchangeToCurrencyInCents(
   if (baseCurrency === wantedCurrency) {
     return { exchangedPriceInCents: priceInCents, currency: wantedCurrency };
   }
-
   // Convert base currency -> USD if needed
   const baseToUSD =
     baseCurrency === "USD" ? 1 : 1 / exchangeRates.rates[baseCurrency]!;
-
   // Convert USD -> wanted currency
   const usdToTarget = exchangeRates.rates[wantedCurrency]!;
 
   // Full conversion rate: baseCurrency -> wantedCurrency
   const conversionRate = baseToUSD * usdToTarget;
-
   // Convert price in cents
   const convertedCents = priceInCents * conversionRate;
 
@@ -79,12 +79,15 @@ export async function exchangeToCurrencyInCents(
     convertedCents,
     ending as NicePrice,
   );
-
   return { exchangedPriceInCents, currency: wantedCurrency };
 }
 
+//future reference, when implementing .00 this wont return floats to display
 export function formatPriceForClient(cents: number): number {
-  return Number((cents / 100).toFixed(2));
+  console.log("cents " + cents);
+  const result = Number((cents / 100).toFixed(2));
+  console.log("result " + result);
+  return result;
 }
 
 //also transform the product u send in cartitem/cart for user

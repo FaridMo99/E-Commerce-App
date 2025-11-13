@@ -81,7 +81,7 @@ export async function makeOrder(
       return res.status(404).json({ message: "Shopping Cart not found" });
 
     if (shoppingCart.items.length === 0) {
-      return res.status(400).json({message:"No Items in Cart"})
+      return res.status(400).json({ message: "No Items in Cart" });
     }
 
     const line_items = await Promise.all(
@@ -89,7 +89,7 @@ export async function makeOrder(
         const exchange = await exchangeToCurrencyInCents(
           item.product.currency,
           item.product.price,
-          currency
+          currency,
         );
         const priceInCents = exchange.exchangedPriceInCents;
 
@@ -104,7 +104,7 @@ export async function makeOrder(
           },
           quantity: item.quantity,
         };
-      })
+      }),
     );
 
     const totalAmount = line_items.reduce((sum, item) => {
@@ -142,13 +142,13 @@ export async function makeOrder(
       line_items,
       mode: "payment",
       success_url: `${CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      //make 
+      //make
       cancel_url: `${CLIENT_ORIGIN}/cart?cancelOrderId=${order.id}`,
       billing_address_collection: "required",
       metadata: {
         orderId: order.id,
-        userId
-      }
+        userId,
+      },
     });
 
     //reserve products
@@ -156,16 +156,16 @@ export async function makeOrder(
       shoppingCart.items.map((item) =>
         prisma.product.update({
           where: { id: item.product.id },
-          data: { 
+          data: {
             stock_quantity: {
-              decrement: item.quantity
-            }
-           },
-        })
-      )
+              decrement: item.quantity,
+            },
+          },
+        }),
+      ),
     );
 
-    return res.status(200).json({sessionId:session.id});
+    return res.status(200).json({ sessionId: session.id });
   } catch (err) {
     next(err);
   }
@@ -175,12 +175,13 @@ export async function cancelOrder(
   req: Request,
   res: Response,
   next: NextFunction,
-) { 
-  const userId = req.user?.id!
-  const orderId = req.params.orderId
+) {
+  const userId = req.user?.id!;
+  const orderId = req.params.orderId;
 
-  if (!orderId) return res.status(400).json({ message: "No order id provided" })
-  
+  if (!orderId)
+    return res.status(400).json({ message: "No order id provided" });
+
   try {
     const orderItems = await prisma.order_Item.findMany({
       where: { order_id: orderId },
@@ -191,14 +192,14 @@ export async function cancelOrder(
         prisma.product.update({
           where: { id: item.product_id },
           data: { stock_quantity: { increment: item.quantity } },
-        })
-      )
+        }),
+      ),
     );
-    if (orderItems.length === 0) return res.status(404).json({ message: "Order not found" })
-    
-    return res.status(200).json({message:"Order cancelled"})
-  } catch (err) {
-    next(err)
-  }
+    if (orderItems.length === 0)
+      return res.status(404).json({ message: "Order not found" });
 
+    return res.status(200).json({ message: "Order cancelled" });
+  } catch (err) {
+    next(err);
+  }
 }

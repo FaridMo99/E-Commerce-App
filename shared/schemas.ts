@@ -5,8 +5,8 @@ const priceSchema = z
   .nonnegative("Price must be 0 or greater")
   .refine((val) => {
     const cents = Math.round((val % 1) * 100);
-    return cents === 0 || cents === 95 || cents === 99;
-  }, "Price must end with .00, .95, or .99");
+    return cents === 95 || cents === 99;
+  }, "Price must end with .95, or .99");
 
 export const currencySchema = z.enum(["USD", "EUR", "GBP"]);
 
@@ -54,7 +54,9 @@ export const ordersQuerySchema = z.object({
     })
     .optional()
     .default("1"),
-  status: z.enum(["ORDERED", "DELIVERING", "DELIVERED","PENDING","CANCELLED"]).optional(),
+  status: z
+    .enum(["ORDERED", "DELIVERING", "DELIVERED", "PENDING", "CANCELLED"])
+    .optional(),
 });
 
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();

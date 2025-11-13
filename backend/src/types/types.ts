@@ -48,4 +48,4 @@ export type ExchangePrice = {
   exchangedPriceInCents: number;
 };
 
-export type NicePrice = 0 | 95 | 99;
+export type NicePrice = 95 | 99;

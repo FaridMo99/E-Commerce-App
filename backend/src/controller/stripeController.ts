@@ -19,7 +19,7 @@ export async function stripeHandler(
       sig,
       STRIPE_WEBHOOK_SECRET,
     );
-    
+
     await stripeEventHandler(event);
 
     res.send({ received: true });

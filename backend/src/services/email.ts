@@ -25,7 +25,7 @@ const mailjet = new Mailjet.Client({
 export async function sendVerificationEmail(
   receiver: string,
   url: UrlType,
-  token: string
+  token: string,
 ) {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 
@@ -91,13 +91,13 @@ export async function sendVerificationEmail(
 
 export async function sendOrderEmail(
   receiver: string,
-  order: OrderWithItemsAndProduct
+  order: OrderWithItemsAndProduct,
 ) {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 
-const orderItemsHtml = order.items
-  .map(
-    (item) => `
+  const orderItemsHtml = order.items
+    .map(
+      (item) => `
       <tr style="border-bottom:1px solid #ddd;">
         <td style="padding:8px;">
           <img src="${item.product.imageUrls?.[0] ?? ""}" alt="${item.product.name}" width="60" style="object-fit:cover; margin-right:8px; vertical-align:middle;">
@@ -106,14 +106,14 @@ const orderItemsHtml = order.items
         <td style="padding:8px; text-align:center;">${item.quantity}</td>
         <td style="padding:8px; text-align:right;">${formatPriceForClient(item.price_at_purchase)}</td>
       </tr>
-    `
-  )
-  .join("");
+    `,
+    )
+    .join("");
 
   const orderItemsText = order.items
     .map(
       (item) =>
-        `${item.product.name} x${item.quantity} - ${formatPriceForClient(item.price_at_purchase)}`
+        `${item.product.name} x${item.quantity} - ${formatPriceForClient(item.price_at_purchase)}`,
     )
     .join("\n");
 

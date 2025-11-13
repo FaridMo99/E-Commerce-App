@@ -2,9 +2,8 @@ import { ReviewsQuerySchema } from "@monorepo/shared";
 import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
 
-
 export async function getAllReviews(
-  queryParam?: ReviewsQuerySchema
+  queryParam?: ReviewsQuerySchema,
 ): Promise<> {
   const params = new URLSearchParams();
 
@@ -24,7 +23,7 @@ export async function getAllReviews(
   const url = `${apiBaseUrl}/reviews?${params.toString()}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return await handleResponse(res)
+  return await handleResponse(res);
 }
 
 export async function getReviewByReviewId(id: string): Promise<> {
@@ -44,7 +43,7 @@ export async function deleteReviewByReviewId(id: string): Promise<> {
 
 export async function setReviewPrivateOrPublic(
   id: string,
-  newState: boolean
+  newState: boolean,
 ): Promise<> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     credentials: "include",

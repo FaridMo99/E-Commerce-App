@@ -9,7 +9,7 @@ import { handleResponse } from "./utils";
 
 export async function getUser(): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me`, { credentials: "include" });
-  return await handleResponse(res)
+  return await handleResponse(res);
 }
 
 export async function updateUser(content: UpdateUserSchema): Promise<> {
@@ -46,7 +46,7 @@ export async function deleteUserCart(): Promise<> {
 }
 
 export async function addProductToUserCart(
-  product: AddCartItemSchema
+  product: AddCartItemSchema,
 ): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items`, {
     credentials: "include",
@@ -67,7 +67,7 @@ export async function removeItemFromCart(itemId: string): Promise<> {
 
 export async function changeItemQuantitiy(
   itemQuantity: ItemQuantitySchema,
-  itemId: string
+  itemId: string,
 ): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
@@ -110,7 +110,7 @@ export async function getUserOrderByOrderId(id: string): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me/orders/${id}`, {
     credentials: "include",
   });
-  return await handleResponse(res)
+  return await handleResponse(res);
 }
 
 export async function getUserFavoriteItems(): Promise<> {
@@ -133,7 +133,7 @@ export async function addFavoriteItemByProductId(productId: string): Promise<> {
 }
 
 export async function deleteFavoriteItemByProductId(
-  productId: string
+  productId: string,
 ): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me/favorites/${productId}`, {
     credentials: "include",

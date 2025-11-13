@@ -30,7 +30,7 @@ const usersRouter = Router();
 
 //user related routes
 usersRouter.get("/me", getUserByUserId);
-usersRouter.patch("/me",validateUpdateUser,hasCsrfToken,updateUserByUserId);
+usersRouter.patch("/me", validateUpdateUser, hasCsrfToken, updateUserByUserId);
 usersRouter.delete("/me", hasCsrfToken, deleteUserByUserId);
 
 //cart related routes
@@ -60,11 +60,7 @@ usersRouter.patch(
 usersRouter.get("/me/reviews", getReviewsByUser);
 
 //orders related routes
-usersRouter.get(
-  "/me/orders",
-  validateOrderSearchQueries,
-  getAllOrdersByUser,
-);
+usersRouter.get("/me/orders", validateOrderSearchQueries, getAllOrdersByUser);
 usersRouter.get("/me/orders/:orderId", getSingleOrderByUser);
 
 //favorite articles routes

@@ -9,16 +9,16 @@ function Searchbar() {
   const debouncedSearch: string = useDebounce(search, 600);
 
   return (
-    <div className="w-2/3 h-full flex justify-center items-center relative">
+    <div className="w-full absolute top-0 left-0 h-full flex justify-center items-center ">
       <Input
-        className="md:w-1/3 w-4/5 pr-10"
+        className="md:w-1/3 w-1/2 pr-10"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
       {search.length > 0 && (
         <button
           aria-label="Search for Products"
-          className="absolute md:right-[calc(33.333%+8px)] right-[calc(10%+8px)]"
+          className="absolute md:right-[calc(33.333%+8px)] right-[calc(25%+8px)]"
         >
           <Search aria-label="Search" />
         </button>

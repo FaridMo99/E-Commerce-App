@@ -9,10 +9,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body>
         <Header />
-        {children}
+        <main className="w-screen min-h-[75vh] overflow-x-hidden">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

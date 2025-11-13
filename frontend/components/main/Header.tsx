@@ -8,7 +8,7 @@ import Searchbar from "./Searchbar";
 
 function Header() {
   return (
-    <header className="w-screen h-[15vh] bg-foreground text-primary-foreground flex items-center justify-between">
+    <header className="w-screen h-[15vh] bg-foreground text-primary-foreground flex relative items-center justify-end">
       <Searchbar />
       <Navigation />
     </header>

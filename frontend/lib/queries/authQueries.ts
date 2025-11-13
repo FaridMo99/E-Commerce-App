@@ -7,6 +7,7 @@
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
+import { AccessToken } from "@/types/types";
 
 //button click redirects to this route
 const googleLoginPath = `${apiBaseUrl}/auth/oauth/google`;
@@ -14,8 +15,7 @@ const facebookLoginPath = `${apiBaseUrl}/auth/oauth/facebook`;
 
 //placeholder types
 type User = { name: string };
-type AuthResponse = { accessToken: string; user: User };
-
+type AuthResponse = { accessToken: AccessToken; user: User };
 
 export async function login(credentials: LoginSchema): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -90,7 +90,6 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
   });
   return handleResponse(res);
 }
-
 
 // optional if you handle redirects manually
 export async function googleLoginCallback(): Promise<AuthResponse> {

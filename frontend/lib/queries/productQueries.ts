@@ -7,9 +7,7 @@ import { handleResponse } from "./utils";
 export const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 export const apiBaseUrl = baseUrl + "/api";
 
-export async function getProducts(
-  queryParam?: ProductsQuerySchema
-): Promise<> {
+export async function getProducts(queryParam?: ProductsQuerySchema): Promise<> {
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -32,25 +30,30 @@ export async function getProducts(
   const url = `${apiBaseUrl}/products?${params.toString()}`;
 
   const res = await fetch(url, { credentials: "include" });
-  return await handleResponse(res)
+  return await handleResponse(res);
 }
 
 export async function getProductByProductId(id: string): Promise<> {
-  const res = await fetch(`${apiBaseUrl}/products/${id}`, { credentials: "include" });
+  const res = await fetch(`${apiBaseUrl}/products/${id}`, {
+    credentials: "include",
+  });
   return await handleResponse(res);
 }
 
-export async function getAllProductReviewsByProductId(id: string):Promise<> {
-  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`)
+export async function getAllProductReviewsByProductId(id: string): Promise<> {
+  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`);
   return await handleResponse(res);
 }
 
-export async function createProductReviewByProductId(id: string, content: ReviewSchema): Promise<>{
-    const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
-        credentials: "include",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body:JSON.stringify(content)
-    })
+export async function createProductReviewByProductId(
+  id: string,
+  content: ReviewSchema,
+): Promise<> {
+  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
+    credentials: "include",
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(content),
+  });
   return await handleResponse(res);
 }

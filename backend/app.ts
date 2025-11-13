@@ -11,6 +11,7 @@ import passport from "passport";
 import { PORT } from "./src/config/env.js";
 import "./src/services/cronJobs.js";
 import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
+import prisma from "./src/services/prisma.js";
 
 export const app = express();
 
@@ -36,7 +37,6 @@ app.use("/api", apiRouter);
 app.use("/webhooks", webhookRouter);
 
 //add another handler here for webapp serving
-
 export const server = app.listen(PORT, () => {
   console.log(chalk.green("Server running on Port: " + PORT));
 });

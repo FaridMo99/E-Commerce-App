@@ -11,7 +11,7 @@ import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
 
 const apiRouter = Router();
 
-apiRouter.use("/users",isAuthenticated, usersRouter);
+apiRouter.use("/users", isAuthenticated, usersRouter);
 apiRouter.use("/products", productsRouter);
 apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/orders", ordersRouter);

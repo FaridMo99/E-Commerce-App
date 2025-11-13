@@ -22,10 +22,12 @@ export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<> {
 
   const res = await fetch(url, { credentials: "include" });
 
-  return await handleResponse(res)
+  return await handleResponse(res);
 }
 
-export async function getTopsellers(timeframe?: TimeframeQuerySchema): Promise<> {
+export async function getTopsellers(
+  timeframe?: TimeframeQuerySchema,
+): Promise<> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -37,7 +39,7 @@ export async function getTopsellers(timeframe?: TimeframeQuerySchema): Promise<>
 
   const res = await fetch(url, { credentials: "include" });
 
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<> {
   const params = new URLSearchParams();
@@ -71,14 +73,14 @@ export async function createSetting(setting: SettingsSchema): Promise<> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(setting),
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function getSettingBySettingId(id: string): Promise<> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function deleteAllSettings(): Promise<> {
@@ -86,7 +88,7 @@ export async function deleteAllSettings(): Promise<> {
     credentials: "include",
     method: "DELETE",
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function deleteSettingBySettingId(id: string): Promise<> {
@@ -94,10 +96,13 @@ export async function deleteSettingBySettingId(id: string): Promise<> {
     credentials: "include",
     method: "DELETE",
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
-export async function updateSettingBySettingId(id: string,content: SettingsSchema): Promise<> {
+export async function updateSettingBySettingId(
+  id: string,
+  content: SettingsSchema,
+): Promise<> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -107,7 +112,7 @@ export async function updateSettingBySettingId(id: string,content: SettingsSchem
     body: JSON.stringify(content),
   });
 
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 //products
@@ -119,7 +124,7 @@ export async function createProduct(content: ProductSchema): Promise<> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(content),
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function deleteProductByProductId(id: string): Promise<> {
@@ -127,24 +132,27 @@ export async function deleteProductByProductId(id: string): Promise<> {
     credentials: "include",
     method: "DELETE",
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
-export async function updateProductByProductId(id: string,content: UpdateProductSchema): Promise<> {
+export async function updateProductByProductId(
+  id: string,
+  content: UpdateProductSchema,
+): Promise<> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(content),
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 //orders
 //order search queries type could be wrong since user also uses it
 export async function getOrders(
   timeframe?: TimeframeQuerySchema,
-  queryParam?: OrdersQuerySchema
+  queryParam?: OrdersQuerySchema,
 ): Promise<> {
   const params = new URLSearchParams();
 
@@ -165,7 +173,7 @@ export async function getOrders(
 
   const res = await fetch(url, { credentials: "include" });
 
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 //categories
@@ -178,7 +186,7 @@ export async function createCategory(category: string): Promise<> {
     },
     body: JSON.stringify({ category }),
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function deleteCategoryByCategoryId(id: string): Promise<> {
@@ -186,5 +194,5 @@ export async function deleteCategoryByCategoryId(id: string): Promise<> {
     credentials: "include",
     method: "DELETE",
   });
-return await handleResponse(res);
+  return await handleResponse(res);
 }
