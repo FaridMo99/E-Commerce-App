@@ -29,12 +29,24 @@ model User {
   orders     Order[]
   reviews    Review[]
   refreshTokens RefreshToken[]
-
+  recentlyViewedProducts RecentlyViewed[]
+  
   favorites  Product[] @relation("UserFavorites")
 
 
   cart       Cart?     @relation(name: "CartToUser")
   }
+
+  model RecentlyViewed {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  viewedAt  DateTime @default(now())
+
+  @@unique([userId, productId]) 
+}
 
 model Settings {
   id        String   @id @default(uuid())
@@ -56,6 +68,7 @@ model Product {
   deleted        Boolean      @default(false)
   created_at     DateTime     @default(now())
   updated_at     DateTime?
+  published_at   DateTime?    
   imageUrls      String[]
   category       Category     @relation(fields: [category_id], references: [id])
   category_id    String
@@ -63,6 +76,7 @@ model Product {
   order_items    Order_Item[]
   cart_items     CartItem[]
   favoredBy      User[]       @relation("UserFavorites")
+  recentlyViewed RecentlyViewed[]
 }
 
 model Category {

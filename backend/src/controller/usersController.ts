@@ -402,3 +402,49 @@ export async function addFavoriteItem(
     next(err);
   }
 }
+
+//format prices
+export async function getRecentlyViewedProducts(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id!;
+
+  try {
+    const recentlyViewedProducts = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        recentlyViewedProducts: {
+          some: {
+            product: {
+              is_public: true,
+              deleted: false,
+            },
+          },
+        },
+      },
+      select: {
+        recentlyViewedProducts: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!recentlyViewedProducts)
+      return res.status(404).json({ message: "Favorite products not found" });
+    recentlyViewedProducts.recentlyViewedProducts.forEach((product) => {
+      product.product.price = formatPriceForClient(product.product.price);
+      if (product.product.sale_price) {
+        product.product.sale_price = formatPriceForClient(
+          product.product.sale_price,
+        );
+      }
+    });
+    return res.status(200).json(recentlyViewedProducts);
+  } catch (err) {
+    next(err);
+  }
+}

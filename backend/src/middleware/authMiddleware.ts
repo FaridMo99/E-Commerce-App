@@ -138,3 +138,30 @@ export async function verifyCaptcha(
 
   next();
 }
+
+export async function attachUserIfExists(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const accessToken = req.headers.authorization?.split(" ")[1];
+
+  if (!accessToken) {
+    return next();
+  }
+
+  try {
+    const payload = jwt.verify(
+      accessToken,
+      JWT_ACCESS_TOKEN_SECRET,
+    ) as Partial<JWTUserPayload>;
+
+    if (payload.id && payload.role) {
+      req.user = payload as JWTUserPayload;
+    }
+  } catch (err) {
+    console.log("Jwt token issue ignored:", err);
+  }
+
+  next();
+}

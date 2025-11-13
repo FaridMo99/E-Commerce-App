@@ -13,7 +13,20 @@ import {
   formatPriceForClient,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
-import { BASE_CURRENCY_KEY } from "../config/constants.js";
+import {
+  BASE_CURRENCY_KEY,
+  NEW_PRODUCTS_REDIS_KEY,
+  SALE_PRODUCTS_REDIS_KEY,
+} from "../config/constants.js";
+import {
+  getCategoryProducts,
+  getNewProducts,
+  getRecentlyViewedProducts,
+  getSaleProducts,
+  getTrendingProducts,
+} from "../lib/productQueries.js";
+import redis from "../services/redis.js";
+import type { Product } from "../generated/prisma/client.js";
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
@@ -146,12 +159,19 @@ export async function createProduct(
           description: product.description,
           stock_quantity: product.stock_quantity,
           is_public: product.is_public,
+          ...(product.is_public && { published_at: new Date() }),
           category: {
             connect: { name: product.category },
           },
         },
       });
     });
+
+    await Promise.all([
+      redis.del(`category:${product.category}`),
+      redis.del(NEW_PRODUCTS_REDIS_KEY),
+      ...(newProduct.sale_price ? [redis.del(SALE_PRODUCTS_REDIS_KEY)] : []),
+    ]);
 
     newProduct.price = formatPriceForClient(newProduct.price);
     if (newProduct.sale_price) {
@@ -256,6 +276,10 @@ export async function deleteProductByProductId(
         where: { productId: id },
       });
 
+      await tx.recentlyViewed.deleteMany({
+        where: { productId: id },
+      });
+
       return updatedProduct;
     });
 
@@ -291,6 +315,7 @@ export async function updateProductByProductId(
           ...(price && { price }),
           ...(stock_quantity && { stock_quantity }),
           ...(typeof is_public === "boolean" && { is_public }),
+          ...(is_public === true && { published_at: new Date() }),
           ...(sale_price && { sale_price }),
           ...(category && { category: { connect: { name: category } } }),
           updated_at: new Date(),
@@ -315,10 +340,23 @@ export async function updateProductByProductId(
         });
       }
 
+      // remove from recently viewed
+      await tx.recentlyViewed.deleteMany({
+        where: { productId: id },
+      });
+
       return updatedProduct;
     });
 
     if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (is_public) {
+      await Promise.all([
+        redis.del(NEW_PRODUCTS_REDIS_KEY),
+        ...(sale_price ? [redis.del(SALE_PRODUCTS_REDIS_KEY)] : []),
+      ]);
+    }
+
     product.price = formatPriceForClient(product.price);
     if (product.sale_price) {
       product.sale_price = formatPriceForClient(product.sale_price);
@@ -369,6 +407,60 @@ export async function createReviewByProductId(
     });
 
     return res.status(201).json(review);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getHomeProducts(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user?.id;
+  let currency: CurrencyISO | undefined = req.cookies.currency;
+
+  if (!currency || !currencySchema.safeParse(currency).success) {
+    currency = "USD";
+  }
+
+  try {
+    // pick a random category if any
+    const categories = await prisma.category.findMany();
+    const randomCategory =
+      categories.length > 0
+        ? categories[Math.floor(Math.random() * categories.length)]?.name
+        : null;
+
+    // build the promises array dynamically
+    const promises: Promise<Product[]>[] = [
+      getNewProducts(),
+      getTrendingProducts(),
+      getSaleProducts(),
+    ];
+
+    if (randomCategory) promises.push(getCategoryProducts(randomCategory));
+    if (userId) promises.push(getRecentlyViewedProducts(userId));
+
+    // run all in parallel
+    const results = await Promise.all(promises);
+
+    // destructure results based on order
+    const [
+      newProducts,
+      trendingProducts,
+      productsOnSale,
+      categoryProducts = [],
+      recentlyViewedProducts = [],
+    ] = results;
+
+    return res.status(200).json({
+      newProducts,
+      trendingProducts,
+      productsOnSale,
+      categoryProducts,
+      recentlyViewedProducts,
+    });
   } catch (err) {
     next(err);
   }

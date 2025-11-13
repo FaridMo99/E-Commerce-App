@@ -3,11 +3,14 @@
 
 import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
+import { Product } from "@/components/main/ProductCard";
 
 export const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 export const apiBaseUrl = baseUrl + "/api";
 
-export async function getProducts(queryParam?: ProductsQuerySchema): Promise<> {
+export async function getProducts(
+  queryParam?: ProductsQuerySchema,
+): Promise<Product[]> {
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -33,7 +36,7 @@ export async function getProducts(queryParam?: ProductsQuerySchema): Promise<> {
   return await handleResponse(res);
 }
 
-export async function getProductByProductId(id: string): Promise<> {
+export async function getProductByProductId(id: string): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
   });
@@ -54,6 +57,21 @@ export async function createProductReviewByProductId(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(content),
+  });
+  return await handleResponse(res);
+}
+
+type HomeProducts = {
+  newProducts: Product[];
+  trendingProducts: Product[];
+  productsOnSale: Product[];
+  categoryProducts: Product[];
+  recentlyViewedProducts: Product[];
+};
+
+export async function getHomeProducts(): Promise<HomeProducts> {
+  const res = await fetch(`${apiBaseUrl}/products/home`, {
+    credentials: "include",
   });
   return await handleResponse(res);
 }

@@ -36,9 +36,9 @@ function roundPriceUpInCents(
   amount: number,
   ending: NicePrice = DEFAULT_NICE_PRICE,
 ): number {
-  console.log(amount);
-  //transform to cent and round up
-  const cents = Math.ceil(amount * 100);
+  console.log("amount" + amount);
+  //round up
+  const cents = Math.ceil(amount);
   console.log(cents);
   //last two digits to "nice" ending
   const rounded = Math.floor(cents / 100) * 100 + ending;
@@ -55,7 +55,7 @@ export async function exchangeToCurrencyInCents(
   wantedCurrency: CurrencyISO,
 ): Promise<ExchangePrice> {
   const exchangeRates = await getExchangeRates();
-
+  console.log(priceInCents);
   if (baseCurrency === wantedCurrency) {
     return { exchangedPriceInCents: priceInCents, currency: wantedCurrency };
   }

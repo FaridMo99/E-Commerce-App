@@ -14,9 +14,11 @@ import {
   addFavoriteItem,
   deleteFavoriteItem,
   updateItemQuantity,
+  getRecentlyViewedProducts,
 } from "../controller/usersController.js";
 import {
   hasCsrfToken,
+  isAuthenticated,
   validateUpdateUser,
 } from "../middleware/authMiddleware.js";
 import { validateOrderSearchQueries } from "../middleware/queryMiddleware.js";
@@ -75,6 +77,13 @@ usersRouter.delete(
   "/me/favorites/:productId",
   hasCsrfToken,
   deleteFavoriteItem,
+);
+
+//add route and controller for recently viewed products
+usersRouter.get(
+  "/me/recently-viewed",
+  isAuthenticated,
+  getRecentlyViewedProducts,
 );
 
 export default usersRouter;

@@ -1,7 +1,9 @@
 import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
 
-export async function getAllCategories(): Promise<> {
+export type Category = { name: string; id: string };
+
+export async function getAllCategories(): Promise<Category[]> {
   const res = await fetch(`${apiBaseUrl}/categories`);
   return await handleResponse(res);
 }

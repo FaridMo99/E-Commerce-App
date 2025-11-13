@@ -11,6 +11,7 @@ import {
 import { Bookmark, CameraIcon } from "lucide-react";
 import { useState } from "react";
 import CurrencySymbol from "./CurrencySymbol";
+import Link from "next/link";
 //make the card links
 
 //just placeholder
@@ -44,39 +45,41 @@ function ProductCard({ product }: ProductCardProps) {
   const secondImage = product.imageUrls[1];
 
   return (
-    <Card className="bg-foreground pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer">
-      <CardContent
-        onMouseEnter={() => {
-          setShowSecondImage(true);
-        }}
-        onMouseLeave={() => {
-          setShowSecondImage(false);
-        }}
-        className="w-full h-35 flex justify-center items-center bg-white"
-      >
-        {!showSecondImage &&
-          (firstImage ? <img src={firstImage} /> : <CameraIcon />)}
-        {showSecondImage && (secondImage ? <img src={secondImage} /> : null)}
-      </CardContent>
-      <CardHeader className="h-10">
-        <CardTitle>{product.name}</CardTitle>
-        <CardDescription className="break-after-all wrap-break-word truncate">
-          {product.description}
-        </CardDescription>
-        <CardAction>
-          <button
-          //disabled={isPending}
-          //onClick={() => mutate}
-          >
-            <Bookmark />
-          </button>
-        </CardAction>
-      </CardHeader>
-      <CardFooter className="h-10">
-        Price:{product.price}
-        <CurrencySymbol currency={product.currency} />
-      </CardFooter>
-    </Card>
+    <Link href={`/products/${product.id}`}>
+      <Card className="bg-foreground pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer">
+        <CardContent
+          onMouseEnter={() => {
+            setShowSecondImage(true);
+          }}
+          onMouseLeave={() => {
+            setShowSecondImage(false);
+          }}
+          className="w-full h-35 flex justify-center items-center bg-white"
+        >
+          {!showSecondImage &&
+            (firstImage ? <img src={firstImage} /> : <CameraIcon />)}
+          {showSecondImage && (secondImage ? <img src={secondImage} /> : null)}
+        </CardContent>
+        <CardHeader className="h-10">
+          <CardTitle>{product.name}</CardTitle>
+          <CardDescription className="break-after-all wrap-break-word truncate">
+            {product.description}
+          </CardDescription>
+          <CardAction>
+            <button
+            //disabled={isPending}
+            //onClick={() => mutate}
+            >
+              <Bookmark />
+            </button>
+          </CardAction>
+        </CardHeader>
+        <CardFooter className="h-10">
+          Price:{product.price}
+          <CurrencySymbol currency={product.currency} />
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
 

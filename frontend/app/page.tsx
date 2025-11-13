@@ -1,18 +1,45 @@
 import ProductsCarousel from "@/components/home/ProductsCarousel";
-import { getProducts } from "@/lib/queries/productQueries";
+import { getHomeProducts } from "@/lib/queries/productQueries";
 import "server-only";
 
-//hand the case if array.length === 0
 export default async function Home() {
-  const products = await getProducts();
-  console.log(products);
+  const {
+    newProducts,
+    trendingProducts,
+    productsOnSale,
+    categoryProducts,
+    recentlyViewedProducts,
+  } = await getHomeProducts();
+
   return (
-    <>
-      <ProductsCarousel title="New" products={products} />
-      <ProductsCarousel title="Trending" products={products} />
-      <ProductsCarousel title="Sale" products={products} />
-      <ProductsCarousel title="Clothing" products={products} />
-      <ProductsCarousel title="Recently Viewed" products={products} />
-    </>
+    <main>
+      {newProducts.length > 0 && (
+        <ProductsCarousel title="New Products" products={newProducts} />
+      )}
+      {trendingProducts.length > 0 && (
+        <ProductsCarousel
+          title="Trending Products"
+          products={trendingProducts}
+        />
+      )}
+      {productsOnSale.length > 0 && (
+        <ProductsCarousel title="Sale" products={productsOnSale} />
+      )}
+      {categoryProducts.length > 0 && (
+        <ProductsCarousel
+          title={
+            categoryProducts[0].name.charAt(0).toUpperCase() +
+            categoryProducts[0].name.slice(1).toLowerCase()
+          }
+          products={categoryProducts}
+        />
+      )}
+      {recentlyViewedProducts.length > 0 && (
+        <ProductsCarousel
+          title="Recently Viewed"
+          products={recentlyViewedProducts}
+        />
+      )}
+    </main>
   );
 }

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  attachUserIfExists,
   hasCsrfToken,
   isAdmin,
   isAuthenticated,
@@ -11,6 +12,7 @@ import {
   deleteProductByProductId,
   getAllProducts,
   getAllReviewsByProductId,
+  getHomeProducts,
   getProductByProductId,
   updateProductByProductId,
 } from "../controller/productsController.js";
@@ -24,6 +26,7 @@ import { upload } from "../services/cloud.js";
 const productsRouter = Router();
 
 productsRouter.get("/", validateProductSearchQueries, getAllProducts);
+productsRouter.get("/home", attachUserIfExists, getHomeProducts);
 productsRouter.post(
   "/",
   isAuthenticated,

@@ -12,9 +12,7 @@ export default function RootLayout({
     <html lang="de">
       <body>
         <Header />
-        <main className="w-screen min-h-[75vh] overflow-x-hidden">
-          {children}
-        </main>
+        <div className="w-screen min-h-[75vh]">{children}</div>
         <Footer />
       </body>
     </html>
