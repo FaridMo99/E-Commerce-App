@@ -15,7 +15,7 @@ import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
 export async function login(
   req: Request<{}, {}, LoginSchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { email, password } = req.body;
   try {
@@ -51,7 +51,7 @@ export async function login(
 export async function signup(
   req: Request<{}, {}, SignupSchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { email, password, name, birthdate, address } = req.body;
   try {
@@ -118,7 +118,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 export async function verifyUser(
   req: Request<{}, {}, { token: string | undefined }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: "Token is required" });
@@ -168,7 +168,7 @@ export async function verifyUser(
 export async function sendNewVerifyLink(
   req: Request<{}, {}, { email: string }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { email } = req.body;
 
@@ -198,12 +198,14 @@ export async function sendNewVerifyLink(
 export async function changePassword(
   req: Request<{}, {}, { password?: string; token?: string }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { password, token } = req.body;
 
-  if (!password || !token)
-    return res.status(400).json({ message: "Password missing" });
+  if (!password && !token)
+    return res.status(400).json({ message: "Token and Password missing" });
+  if (!password) return res.status(400).json({ message: "Password missing" });
+  if (!token) return res.status(400).json({ message: "Token missing" });
 
   const validatedPassword = loginSchema.shape.password.safeParse(password);
   //change the messsage later, could be wrong
@@ -247,7 +249,7 @@ export async function changePassword(
 export async function sendEmailToChangePassword(
   req: Request<{}, {}, { email: string }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const email = req.body.email;
 
@@ -263,8 +265,8 @@ export async function sendEmailToChangePassword(
       expiresIn: "1d",
     });
 
+    await redis.del(`changePasswordUserId:${user.id}`);
     await redis.setEx(`changePasswordUserId:${user.id}`, 60 * 60 * 24, token);
-
     await sendVerificationEmail(email, "change-password", token);
 
     return res.status(200).json({ message: "success" });
@@ -276,7 +278,7 @@ export async function sendEmailToChangePassword(
 export async function issueRefreshToken(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const token = req.refreshTokenPayload!;
   const rawToken = req.cookies.refreshToken as string;
@@ -313,5 +315,70 @@ export async function issueRefreshToken(
       return res.status(401).json({ message: "Refresh token expired" });
     }
     return res.status(401).json({ message: "Invalid refresh token" });
+  }
+}
+
+export async function changePasswordAuthenticated(
+  req: Request<{}, {}, { oldPassword?: string; newPassword?: string }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { oldPassword, newPassword } = req.body;
+  const id = req.user?.id!;
+
+  if (!oldPassword || !newPassword)
+    return res.status(400).json({ message: "Password missing" });
+
+  const validatedOld = loginSchema.shape.password.safeParse(oldPassword);
+  const validatedNew = loginSchema.shape.password.safeParse(newPassword);
+
+  //check message later could be wrong
+  if (!validatedOld.success)
+    return res.status(400).json({ message: validatedOld.error.message });
+  if (!validatedNew.success)
+    return res.status(400).json({ message: validatedNew.error.message });
+
+  try {
+    //check if user exists and and get hashed password
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    //logic for if =auth user has no password, just gets one
+    if (!user.password) {
+      //hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      //update password
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { password: hashedPassword },
+        include: {
+          cart: true,
+          orders: true,
+        },
+      });
+      return res.status(200).json({ user: updatedUser });
+    }
+    //compare old password with db hashed one
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Wrong password" });
+
+    //hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    //update password
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+      include: {
+        cart: true,
+        orders: true,
+      },
+    });
+
+    return res.status(200).json({ user: updatedUser });
+  } catch (err) {
+    next(err);
   }
 }

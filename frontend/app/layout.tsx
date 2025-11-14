@@ -10,7 +10,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="de">
       <body>
         <Header />
-        <div className="w-screen min-h-[75vh]">{children}</div>
+        <div className="w-screen min-h-[75vh] py-8">
+          {children}
+        </div>
         <Footer />
         <Toaster/>
       </body>

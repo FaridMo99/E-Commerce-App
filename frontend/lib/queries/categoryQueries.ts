@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "./productQueries";
+import { apiBaseUrl } from "@/config/constants";
 import { handleResponse } from "./utils";
 
 export type Category = { name: string; id: string };

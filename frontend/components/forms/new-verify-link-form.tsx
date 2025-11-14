@@ -1,23 +1,29 @@
-"use client"
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Field, FieldGroup, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
-import { cn } from '@/lib/utils';
-import { useForm } from 'react-hook-form';
-import { useRef, useState } from 'react';
-import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
-import { emailSchema } from '@/schemas/schemas';
-import { EmailSchema } from '@/types/types';
-import { forgotPasswordSendEmail } from '@/lib/queries/authQueries';
-import InputValidationFailedText from '../main/InputValidationFailedText';
-import { useRouter } from 'next/navigation';
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { useRef, useState } from "react";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { emailSchema } from "@/schemas/schemas";
+import { EmailSchema } from "@/types/types";
+import { sendNewVerificationLink } from "@/lib/queries/authQueries";
+import InputValidationFailedText from "@/components/main/InputValidationFailedText";
+import { useRouter } from "next/navigation";
 
 //redirect on success
-function ForgotPasswordForm({headerText}:{headerText:string}) {
+function NewVerifyLinkForm({headerText}:{headerText:string}) {
   //submission states
   const [isRequestLoading, setIsRequestLoading] = useState<boolean>(false);
 
@@ -31,20 +37,22 @@ function ForgotPasswordForm({headerText}:{headerText:string}) {
   const buttonDisabledReasons =
     isSubmitting || (!isValid && isSubmitted) || isRequestLoading;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const router = useRouter()
+  const router = useRouter();
 
-  async function submitHandler(credentials:EmailSchema) {
+  async function submitHandler(credentials: EmailSchema) {
     try {
       setIsRequestLoading(true);
 
       turnstileRef.current?.execute();
       const captchaToken = await turnstileRef.current?.getResponsePromise();
       if (!captchaToken) throw new Error("Failed Captcha");
-      
-      await forgotPasswordSendEmail(credentials, captchaToken);
 
-      toast.success("Submit successful! Check your E-Mails and follow the link.");
-      router.push("/")
+      await sendNewVerificationLink(credentials, captchaToken);
+
+      toast.success(
+        "Submit successful! Check your E-Mails and follow the link."
+      );
+      router.push("/");
     } catch (err: Error) {
       toast.error(err.message);
     } finally {
@@ -53,14 +61,13 @@ function ForgotPasswordForm({headerText}:{headerText:string}) {
     }
   }
 
-
   return (
     <div className={cn("flex flex-col gap-6")}>
       <Card className="bg-backgroundBright text-white ">
         <CardHeader>
-          <CardTitle>{headerText}</CardTitle>
+        <CardTitle>{ headerText}</CardTitle>
           <CardDescription>
-            Enter your email to receive a email to change your Password
+            Enter your email to receive a new Link
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,7 +82,10 @@ function ForgotPasswordForm({headerText}:{headerText:string}) {
                   {...register("email")}
                   required
                 />
-                <InputValidationFailedText trigger={errors.email} text={errors.email?.message} />
+                <InputValidationFailedText
+                  trigger={errors.email}
+                  text={errors.email?.message}
+                />
               </Field>
               <Turnstile
                 ref={turnstileRef}
@@ -100,4 +110,4 @@ function ForgotPasswordForm({headerText}:{headerText:string}) {
   );
 }
 
-export default ForgotPasswordForm
+export default NewVerifyLinkForm;

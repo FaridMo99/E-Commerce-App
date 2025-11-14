@@ -14,7 +14,8 @@ import {
   itemQuantitySchema,
   currencySchema,
   settingsSchema,
-  passwordSchema
+  passwordSchema,
+  emailSchema
 } from "./schemas.ts";
 
 import type {
@@ -49,7 +50,8 @@ export {
   itemQuantitySchema,
   currencySchema,
   settingsSchema,
-  passwordSchema
+  passwordSchema,
+  emailSchema
 };
 export type {
   LoginSchema,

@@ -18,9 +18,10 @@ export const passwordSchema = z
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/\d/, "Password must contain at least one number")
 
+export const emailSchema = z.email("Invalid email")
 
 export const loginSchema = z.object({
-  email: z.email("Invalid email"),
+  email: emailSchema,
   password:passwordSchema
 });
 

@@ -57,9 +57,9 @@ export function LoginForm({
     try {
       setIsLoginLoading(true)
 
-      await turnstileRef.current?.execute()
-      const captchaToken = turnstileRef.current?.getResponse();
-      if (!captchaToken) throw new Error("Failed Captcha")
+      turnstileRef.current?.execute();
+      const captchaToken = await turnstileRef.current?.getResponsePromise();
+      if (!captchaToken) throw new Error("Failed Captcha");
       
       const result = await login(credentials, captchaToken)
 
@@ -71,6 +71,7 @@ export function LoginForm({
     } catch (err:Error) {
       toast.error(err.message)
     } finally {
+      turnstileRef.current?.reset();
       setIsLoginLoading(false)
     }
 
@@ -78,7 +79,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-backgroundBright text-white ">
+      <Card className="bg-backgroundBright text-white">
         <CardHeader>
           <CardTitle>Sign in to your account</CardTitle>
           <CardDescription>
@@ -171,6 +172,10 @@ export function LoginForm({
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
                   <Link href="/signup">Sign up</Link>
+                </FieldDescription>
+                <FieldDescription className="text-center">
+                  Forgot Password?
+                  <Link href="/forgot-password"> Create a new One</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

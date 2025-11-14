@@ -1,22 +1,26 @@
 import { verifyAfterEmailLink } from '@/lib/queries/authQueries'
 import useAuth from '@/stores/authStore'
 import "server-only"
+import SuccessCard from './components/SuccessCard';
 
-//get query param and make request to verify account
-//!token make proper handling, maybe error page etc.
+
 async function page({ searchParams }: { searchParams?: { token: string } }) {
-
-    const param = await searchParams
-    if (!param?.token) return
+  
+    const param = await searchParams;
+    if (!param?.token) throw new Error()
+    
+    
     const token = param.token;
 
-    const res = await verifyAfterEmailLink(token)
-    useAuth.setState({ user: res.user, isAuthenticated: true, accessToken: res.accessToken })
-    
+    const res = await verifyAfterEmailLink(token);
+    useAuth.setState({
+      user: res.user,
+      isAuthenticated: true,
+      accessToken: res.accessToken,
+    });
 
-  return (
-      <div>{ token}</div>
-  )
+
+  return <SuccessCard/>
 }
 
 export default page

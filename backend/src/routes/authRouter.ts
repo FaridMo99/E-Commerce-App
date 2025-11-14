@@ -8,6 +8,7 @@ import {
   verifyUser,
   sendEmailToChangePassword,
   issueRefreshToken,
+  changePasswordAuthenticated,
 } from "../controller/authController.js";
 import {
   hasCsrfToken,
@@ -21,6 +22,7 @@ import { validateEmail } from "../middleware/validationMiddleware.js";
 import { authRateLimiter } from "../middleware/utilityMiddleware.js";
 import passport from "passport";
 import { OauthLogin } from "../lib/auth.js";
+import { addIssueToContext } from "zod/v3";
 
 const authRouter = Router();
 
@@ -47,12 +49,22 @@ authRouter.post(
   verifyCaptcha,
   sendNewVerifyLink,
 );
+
+//this only for when forgot password changing password, you need a seperate one for when already logged in changing password
+authRouter.patch("/change-password-authenticated",
+  authRateLimiter,
+  isAuthenticated,
+  hasCsrfToken,
+  changePasswordAuthenticated
+)
+
+
 authRouter.patch(
   "/change-password",
   authRateLimiter,
-  isAuthenticated,
   changePassword,
 );
+
 authRouter.post(
   "/forgot-password",
   authRateLimiter,
@@ -60,6 +72,7 @@ authRouter.post(
   verifyCaptcha,
   sendEmailToChangePassword,
 );
+
 authRouter.post(
   "/refresh-token",
   authRateLimiter,
@@ -70,7 +83,6 @@ authRouter.post(
 authRouter.get(
   "/oauth/google",
   authRateLimiter,
-  verifyCaptcha,
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
@@ -79,7 +91,6 @@ authRouter.get(
 authRouter.get(
   "/oauth/facebook",
   authRateLimiter,
-  verifyCaptcha,
   passport.authenticate("facebook", {
     scope: ["public_profile", "email"],
     session: false,
@@ -105,3 +116,7 @@ authRouter.get(
 );
 
 export default authRouter;
+
+
+//watch out how to exactly handle oAuth users since there password is optional, like what happens if they hit certain routes
+//like change password, verify account, send email etc

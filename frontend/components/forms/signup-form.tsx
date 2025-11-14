@@ -46,9 +46,9 @@ export function SignupForm({
         setIsSignupLoading(true)
         const { confirmPassword, ...rest } = credentials
 
-        await turnstileRef.current?.execute()
-        const captchaToken = turnstileRef.current?.getResponse();
-        if (!captchaToken) throw new Error("Failed Captcha")
+      turnstileRef.current?.execute();
+      const captchaToken = await turnstileRef.current?.getResponsePromise();
+      if (!captchaToken) throw new Error("Failed Captcha");
         
         await signup(rest, captchaToken)
   
@@ -58,6 +58,7 @@ export function SignupForm({
       } catch (err:Error) {
         toast.error(err.message)
       } finally {
+        turnstileRef.current?.reset();
         setIsSignupLoading(false)
       }
   
@@ -66,9 +67,9 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0 bg-backgroundBright text-white">
+      <Card className=" bg-backgroundBright text-white">
         <CardContent>
-          <form onSubmit={handleSubmit(submitHandler)} className="p-6 md:p-8">
+          <form onSubmit={handleSubmit(submitHandler)}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Create your account</h1>
@@ -159,7 +160,7 @@ export function SignupForm({
                   {isSignupLoading ? (
                     <Loader2 className="animate-spin" />
                   ) : (
-                    "Sign in"
+                    "Sign up"
                   )}
                 </Button>
               </Field>

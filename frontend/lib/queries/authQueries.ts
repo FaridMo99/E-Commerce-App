@@ -4,28 +4,31 @@
 //access token in authz bearer header
 //need auto refresh so doesnt get logged out
 
-"use server"
+"use server";
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
-import { AuthResponse } from "@/types/types";
+import { AuthResponse, EmailSchema } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 
-
-
-
-export async function login(credentials: LoginSchema, captchaToken: string): Promise<AuthResponse> {
+export async function login(
+  credentials: LoginSchema,
+  captchaToken: string
+): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-cf-turnstile-token":captchaToken
+      "x-cf-turnstile-token": captchaToken,
     },
     body: JSON.stringify(credentials),
   });
   return await handleResponse(res);
 }
 
-export async function signup(credentials: SignupSchema, captchaToken: string): Promise<void> {
+export async function signup(
+  credentials: SignupSchema,
+  captchaToken: string
+): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
     headers: {
@@ -45,19 +48,27 @@ export async function logout(): Promise<void> {
   await handleResponse(res);
 }
 
-export async function verifyAfterEmailLink(token: string): Promise<AuthResponse> {
+export async function verifyAfterEmailLink(
+  token: string
+): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({token}),
+    body: JSON.stringify({ token }),
   });
   return await handleResponse(res);
 }
 
-export async function sendNewVerificationLink(email: string): Promise<void> {
+export async function sendNewVerificationLink(
+  email: EmailSchema,
+  captchaToken: string
+): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-cf-turnstile-token": captchaToken,
+    },
     body: JSON.stringify({ email }),
   });
   await handleResponse(res);
@@ -67,20 +78,27 @@ export async function changePasswordAfterLogin(passwords: {
   oldPassword: string;
   newPassword: string;
 }): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
+  const {oldPassword, newPassword} = passwords
+  const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(passwords),
+    body: JSON.stringify({oldPassword,newPassword}),
     credentials: "include",
   });
   await handleResponse(res);
 }
 
-export async function forgotPasswordSendEmail(email: string): Promise<void> {
+export async function forgotPasswordSendEmail(
+  email: EmailSchema,
+  captchaToken: string
+): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    headers: {
+      "Content-Type": "application/json",
+      "x-cf-turnstile-token": captchaToken,
+    },
+    body: JSON.stringify(email),
   });
   await handleResponse(res);
 }
@@ -104,6 +122,15 @@ export async function googleLoginCallback(): Promise<AuthResponse> {
 export async function facebookLoginCallback(): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/oauth/facebook/callback`, {
     credentials: "include",
+  });
+  return await handleResponse(res);
+}
+
+export async function changePasswordUnauthenticated(token:string,password:string): Promise<AuthResponse> {
+  const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
+    method: "PATCH",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({token,password}),
   });
   return await handleResponse(res);
 }
