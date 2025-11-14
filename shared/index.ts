@@ -14,7 +14,8 @@ import {
   itemQuantitySchema,
   currencySchema,
   settingsSchema,
-} from "./schemas.js";
+  passwordSchema
+} from "./schemas.ts";
 
 import type {
   LoginSchema,
@@ -30,7 +31,7 @@ import type {
   AddCartItemSchema,
   ItemQuantitySchema,
   SettingsSchema,
-} from "./types.js";
+} from "./types.ts";
 
 export {
   loginSchema,
@@ -48,6 +49,7 @@ export {
   itemQuantitySchema,
   currencySchema,
   settingsSchema,
+  passwordSchema
 };
 export type {
   LoginSchema,

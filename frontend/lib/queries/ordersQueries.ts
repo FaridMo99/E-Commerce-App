@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "./productQueries";
+import { apiBaseUrl } from "@/config/constants";
 import { handleResponse } from "./utils";
 //returns sessionid from stripe to then route to stripe checkout
 export async function makeOrder(): Promise<> {

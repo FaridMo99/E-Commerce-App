@@ -122,7 +122,8 @@ export async function verifyCaptcha(
   res: Response,
   next: NextFunction,
 ) {
-  const cfToken = req.body.cfToken;
+  const cfToken = req.headers["x-cf-turnstile-token"];
+  console.log("Clodflare Token: " + cfToken)
   const ip = req.ip;
   if (!cfToken || !ip || typeof cfToken !== "string")
     return res.status(400).json({ message: "Failed Captcha" });

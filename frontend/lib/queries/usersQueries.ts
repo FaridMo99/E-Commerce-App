@@ -4,8 +4,8 @@ import {
   OrdersQuerySchema,
   UpdateUserSchema,
 } from "@monorepo/shared";
-import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
+import { apiBaseUrl } from "@/config/constants";
 
 export async function getUser(): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me`, { credentials: "include" });

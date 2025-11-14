@@ -4,9 +4,8 @@
 import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { Product } from "@/components/main/ProductCard";
+import { apiBaseUrl } from "@/config/constants";
 
-export const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
-export const apiBaseUrl = baseUrl + "/api";
 
 export async function getProducts(
   queryParam?: ProductsQuerySchema,

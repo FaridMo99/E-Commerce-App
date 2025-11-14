@@ -4,35 +4,37 @@
 //access token in authz bearer header
 //need auto refresh so doesnt get logged out
 
+"use server"
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
-import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
-import { AccessToken } from "@/types/types";
+import { AuthResponse } from "@/types/types";
+import { apiBaseUrl } from "@/config/constants";
 
-//button click redirects to this route
-const googleLoginPath = `${apiBaseUrl}/auth/oauth/google`;
-const facebookLoginPath = `${apiBaseUrl}/auth/oauth/facebook`;
 
-//placeholder types
-type User = { name: string };
-type AuthResponse = { accessToken: AccessToken; user: User };
 
-export async function login(credentials: LoginSchema): Promise<AuthResponse> {
+
+export async function login(credentials: LoginSchema, captchaToken: string): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-cf-turnstile-token":captchaToken
+    },
     body: JSON.stringify(credentials),
   });
-  return handleResponse(res);
+  return await handleResponse(res);
 }
 
-export async function signup(credentials: SignupSchema): Promise<AuthResponse> {
+export async function signup(credentials: SignupSchema, captchaToken: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-cf-turnstile-token": captchaToken,
+    },
     body: JSON.stringify(credentials),
   });
-  return handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function logout(): Promise<void> {
@@ -43,13 +45,13 @@ export async function logout(): Promise<void> {
   await handleResponse(res);
 }
 
-export async function verifyAfterEmaiLink(token: string): Promise<void> {
+export async function verifyAfterEmailLink(token: string): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({token}),
   });
-  await handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function sendNewVerificationLink(email: string): Promise<void> {
@@ -88,7 +90,7 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
     method: "POST",
     credentials: "include",
   });
-  return handleResponse(res);
+  return await handleResponse(res);
 }
 
 // optional if you handle redirects manually
@@ -96,12 +98,12 @@ export async function googleLoginCallback(): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/oauth/google/callback`, {
     credentials: "include",
   });
-  return handleResponse(res);
+  return await handleResponse(res);
 }
 
 export async function facebookLoginCallback(): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/oauth/facebook/callback`, {
     credentials: "include",
   });
-  return handleResponse(res);
+  return await handleResponse(res);
 }

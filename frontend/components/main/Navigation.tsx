@@ -1,12 +1,16 @@
 "use client";
+import useAuth from "@/stores/authStore";
 import useProducts from "@/stores/productsStore";
-import { DollarSign, MenuIcon, ShoppingCart, User } from "lucide-react";
+import { DollarSign, LogIn, MenuIcon, ShoppingCart, User } from "lucide-react";
+import Link from "next/link";
 
+//add logout icon
 function Navigation() {
   const productsCount = useProducts((state) => state.products.length);
-
+  const isAuthenticated = useAuth(state => state.isAuthenticated)
+  
   return (
-    <nav className="w-1/3 h-full flex justify-evenly items-center ">
+    <nav className="w-1/3 h-full flex justify-evenly items-center z-10">
       <button className="block md:hidden">
         <MenuIcon size={40} />
       </button>
@@ -21,9 +25,9 @@ function Navigation() {
           </div>
         )}
       </button>
-      <button aria-label="show user account" className="hidden md:block">
+      {isAuthenticated ? <button aria-label="show user account" className="hidden md:block">
         <User />
-      </button>
+      </button> : <Link href="/login" aria-label="login or signup" className="hidden md:block"><LogIn /></Link>}
       <button aria-label="show currencies" className="hidden md:block">
         <DollarSign />
       </button>

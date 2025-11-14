@@ -12,6 +12,7 @@ import { Bookmark, CameraIcon } from "lucide-react";
 import { useState } from "react";
 import CurrencySymbol from "./CurrencySymbol";
 import Link from "next/link";
+import useAuth from "@/stores/authStore";
 //make the card links
 
 //just placeholder
@@ -43,6 +44,8 @@ function ProductCard({ product }: ProductCardProps) {
   const [showSecondImage, setShowSecondImage] = useState<boolean>(false);
   const firstImage = product.imageUrls[0];
   const secondImage = product.imageUrls[1];
+  const isAuthenticated = useAuth(state => state.isAuthenticated)
+  
 
   return (
     <Link href={`/products/${product.id}`}>
@@ -65,14 +68,14 @@ function ProductCard({ product }: ProductCardProps) {
           <CardDescription className="break-after-all wrap-break-word truncate">
             {product.description}
           </CardDescription>
-          <CardAction>
+          {isAuthenticated && <CardAction>
             <button
             //disabled={isPending}
             //onClick={() => mutate}
             >
               <Bookmark />
             </button>
-          </CardAction>
+          </CardAction>}
         </CardHeader>
         <CardFooter className="h-10">
           Price:{product.price}

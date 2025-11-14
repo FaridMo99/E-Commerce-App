@@ -1,6 +1,6 @@
 import { ReviewsQuerySchema } from "@monorepo/shared";
-import { apiBaseUrl } from "./productQueries";
 import { handleResponse } from "./utils";
+import { apiBaseUrl } from "@/config/constants";
 
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,

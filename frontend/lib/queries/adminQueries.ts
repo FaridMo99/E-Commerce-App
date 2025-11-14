@@ -5,7 +5,7 @@ import {
   TimeframeQuerySchema,
   UpdateProductSchema,
 } from "@monorepo/shared";
-import { apiBaseUrl } from "./productQueries";
+import { apiBaseUrl } from "@/config/constants";
 import { SettingsSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 
