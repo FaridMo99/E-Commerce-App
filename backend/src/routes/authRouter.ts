@@ -20,9 +20,8 @@ import {
 } from "../middleware/authMiddleware.js";
 import { validateEmail } from "../middleware/validationMiddleware.js";
 import { authRateLimiter } from "../middleware/utilityMiddleware.js";
-import passport from "passport";
+import passport from "../services/passport.js";
 import { OauthLogin } from "../lib/auth.js";
-import { addIssueToContext } from "zod/v3";
 
 const authRouter = Router();
 
@@ -51,19 +50,15 @@ authRouter.post(
 );
 
 //this only for when forgot password changing password, you need a seperate one for when already logged in changing password
-authRouter.patch("/change-password-authenticated",
+authRouter.patch(
+  "/change-password-authenticated",
   authRateLimiter,
   isAuthenticated,
   hasCsrfToken,
-  changePasswordAuthenticated
-)
-
-
-authRouter.patch(
-  "/change-password",
-  authRateLimiter,
-  changePassword,
+  changePasswordAuthenticated,
 );
+
+authRouter.patch("/change-password", authRateLimiter, changePassword);
 
 authRouter.post(
   "/forgot-password",
@@ -116,7 +111,6 @@ authRouter.get(
 );
 
 export default authRouter;
-
 
 //watch out how to exactly handle oAuth users since there password is optional, like what happens if they hit certain routes
 //like change password, verify account, send email etc

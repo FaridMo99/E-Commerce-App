@@ -15,7 +15,7 @@ import {
   currencySchema,
   settingsSchema,
   passwordSchema,
-  emailSchema
+  emailSchema,
 } from "./schemas.ts";
 
 import type {
@@ -51,7 +51,7 @@ export {
   currencySchema,
   settingsSchema,
   passwordSchema,
-  emailSchema
+  emailSchema,
 };
 export type {
   LoginSchema,

@@ -10,19 +10,18 @@ const priceSchema = z
 
 export const currencySchema = z.enum(["USD", "EUR", "GBP"]);
 
-
 export const passwordSchema = z
-    .string()
-    .min(5, "Password must be at least 5 characters long")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/\d/, "Password must contain at least one number")
+  .string()
+  .min(5, "Password must be at least 5 characters long")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/\d/, "Password must contain at least one number");
 
-export const emailSchema = z.email("Invalid email")
+export const emailSchema = z.email("Invalid email");
 
 export const loginSchema = z.object({
   email: emailSchema,
-  password:passwordSchema
+  password: passwordSchema,
 });
 
 export const signupSchema = loginSchema.extend({

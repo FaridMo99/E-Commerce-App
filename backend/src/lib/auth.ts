@@ -77,9 +77,12 @@ export async function OauthLogin(req: Request, res: Response) {
 
   const accessToken = await issueTokens(user, res);
 
-  res.redirect(`${CLIENT_ORIGIN}/oauth-success?token=${accessToken}`);
+  return res.redirect(
+    `${CLIENT_ORIGIN}/login/oauth-success?token=${accessToken}`,
+  );
 }
 
+//this isnt auth, this is boit protect, move this somewhere else
 export async function validateTurnstile(
   token: string,
   remoteip: string,

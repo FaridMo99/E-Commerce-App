@@ -8,6 +8,7 @@ import authRouter from "./authRouter.js";
 import adminRouter from "./adminRouter.js";
 import settingsRouter from "./settingsRouter.js";
 import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
+import cookiesRouter from "./cookiesRouter.js";
 
 const apiRouter = Router();
 
@@ -19,5 +20,6 @@ apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/admin", isAuthenticated, isAdmin, adminRouter);
 apiRouter.use("/settings", isAuthenticated, isAdmin, settingsRouter);
+apiRouter.use("/cookies", cookiesRouter);
 
 export default apiRouter;

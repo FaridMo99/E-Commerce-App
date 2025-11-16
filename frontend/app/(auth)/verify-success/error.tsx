@@ -1,8 +1,8 @@
-"use client"
-import NewVerifyLinkForm from "@/components/forms/new-verify-link-form"
+"use client";
+import NewVerifyLinkForm from "@/components/forms/new-verify-link-form";
 
 function Error() {
-  return <NewVerifyLinkForm headerText="Link may be expired or invalid"/>
+  return <NewVerifyLinkForm headerText="Link may be expired or invalid" />;
 }
 
-export default Error
+export default Error;

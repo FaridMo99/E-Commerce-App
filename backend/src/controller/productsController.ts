@@ -60,7 +60,7 @@ export async function getAllProducts(
       where: {
         ...(role !== "ADMIN" && { is_public: true }),
         deleted: false,
-        ...(search && { name: { contains: search, mode: "insensitive" } }),
+        ...(search && { name: { startsWith: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
         ...(sale && { sale }),
         ...(minPrice || maxPrice

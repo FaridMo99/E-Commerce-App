@@ -12,6 +12,7 @@ import prisma from "./prisma.js";
 import type { Request } from "express";
 import type { UserCreatedBy } from "../generated/prisma/enums.js";
 import {
+  BACKEND_URL,
   CLIENT_ORIGIN,
   OAUTH_FACEBOOK_CLIENT_ID,
   OAUTH_FACEBOOK_CLIENT_SECRET,
@@ -24,7 +25,7 @@ type MinimalProfile = Pick<Profile, "displayName" | "emails" | "id">;
 const googleConfig: GoogleStrategyOptions = {
   clientID: OAUTH_GOOGLE_CLIENT_ID,
   clientSecret: OAUTH_GOOGLE_CLIENT_SECRET,
-  callbackURL: `${CLIENT_ORIGIN}/login/google/success`,
+  callbackURL: `${BACKEND_URL}/auth/oauth/google/callback`,
   scope: ["profile", "email"],
   passReqToCallback: true,
 };
@@ -32,7 +33,7 @@ const googleConfig: GoogleStrategyOptions = {
 const facebookConfig: FacebookStrategyOptions = {
   clientID: OAUTH_FACEBOOK_CLIENT_ID,
   clientSecret: OAUTH_FACEBOOK_CLIENT_SECRET,
-  callbackURL: `${CLIENT_ORIGIN}/login/facebook/success`,
+  callbackURL: `${BACKEND_URL}/auth/oauth/facebook/callback`,
   scope: ["public_profile", "email"],
   passReqToCallback: true,
 };
@@ -86,4 +87,9 @@ function makeVerifyCb(provider: UserCreatedBy) {
 }
 
 passport.use(new GoogleStrategy(googleConfig, makeVerifyCb("GOOGLE")));
-passport.use(new FacebookStrategy(facebookConfig, makeVerifyCb("FACEBOOK")));
+// passport.use(new FacebookStrategy(facebookConfig, makeVerifyCb("FACEBOOK")));
+
+export default passport;
+
+//facebook credentials missing
+//dev support missing for localhost

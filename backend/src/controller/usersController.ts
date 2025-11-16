@@ -186,7 +186,17 @@ export async function getUserCart(
   try {
     const cart = await prisma.user.findUnique({
       where: { id: userId },
-      select: { cart: true },
+      select: {
+        cart: {
+          select: {
+            items: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 

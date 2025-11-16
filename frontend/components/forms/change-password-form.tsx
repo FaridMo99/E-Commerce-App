@@ -23,7 +23,7 @@ import { ChangePasswordSchema } from "@/types/types";
 import useAuth from "@/stores/authStore";
 
 //redirect on success
-function ChangePasswordForm({token}:{token:string}) {
+function ChangePasswordForm({ token }: { token: string }) {
   //submission states
   const [isRequestLoading, setIsRequestLoading] = useState<boolean>(false);
 
@@ -38,17 +38,20 @@ function ChangePasswordForm({token}:{token:string}) {
     isSubmitting || (!isValid && isSubmitted) || isRequestLoading;
   const router = useRouter();
 
-  async function submitHandler(passwords:ChangePasswordSchema) {
+  async function submitHandler(passwords: ChangePasswordSchema) {
     try {
       setIsRequestLoading(true);
-      const res = await changePasswordUnauthenticated(token, passwords.password);
+      const res = await changePasswordUnauthenticated(
+        token,
+        passwords.password,
+      );
 
       toast.success("Password changed successfully!");
-        useAuth.setState({
-          user: res.user,
-          isAuthenticated: true,
-          accessToken: res.accessToken,
-        });
+      useAuth.setState({
+        user: res.user,
+        isAuthenticated: true,
+        accessToken: res.accessToken,
+      });
       router.push("/");
     } catch (err: Error) {
       toast.error(err.message);
@@ -81,7 +84,9 @@ function ChangePasswordForm({token}:{token:string}) {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="confirmPassword">Confirm Password:</FieldLabel>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm Password:
+                </FieldLabel>
                 <Input
                   id="confirmPassword"
                   type="text"

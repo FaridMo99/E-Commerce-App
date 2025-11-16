@@ -15,7 +15,7 @@ import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
 export async function login(
   req: Request<{}, {}, LoginSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { email, password } = req.body;
   try {
@@ -51,7 +51,7 @@ export async function login(
 export async function signup(
   req: Request<{}, {}, SignupSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { email, password, name, birthdate, address } = req.body;
   try {
@@ -118,7 +118,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 export async function verifyUser(
   req: Request<{}, {}, { token: string | undefined }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: "Token is required" });
@@ -168,7 +168,7 @@ export async function verifyUser(
 export async function sendNewVerifyLink(
   req: Request<{}, {}, { email: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { email } = req.body;
 
@@ -198,7 +198,7 @@ export async function sendNewVerifyLink(
 export async function changePassword(
   req: Request<{}, {}, { password?: string; token?: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { password, token } = req.body;
 
@@ -249,7 +249,7 @@ export async function changePassword(
 export async function sendEmailToChangePassword(
   req: Request<{}, {}, { email: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const email = req.body.email;
 
@@ -278,7 +278,7 @@ export async function sendEmailToChangePassword(
 export async function issueRefreshToken(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const token = req.refreshTokenPayload!;
   const rawToken = req.cookies.refreshToken as string;
@@ -309,7 +309,7 @@ export async function issueRefreshToken(
     });
     const accessToken = await issueTokens(user, res);
 
-    return res.status(200).json({ accessToken });
+    return res.status(200).json({ accessToken, user });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       return res.status(401).json({ message: "Refresh token expired" });
@@ -321,7 +321,7 @@ export async function issueRefreshToken(
 export async function changePasswordAuthenticated(
   req: Request<{}, {}, { oldPassword?: string; newPassword?: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { oldPassword, newPassword } = req.body;
   const id = req.user?.id!;

@@ -7,12 +7,13 @@
 "use server";
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
-import { AuthResponse, EmailSchema } from "@/types/types";
+import { AccessToken, AuthResponse, EmailSchema } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 
+//update error handling in all my fns to handle expected errors
 export async function login(
   credentials: LoginSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
@@ -22,12 +23,12 @@ export async function login(
     },
     body: JSON.stringify(credentials),
   });
-  return await handleResponse(res);
+  return await handleResponse<AuthResponse>(res);
 }
 
 export async function signup(
   credentials: SignupSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
@@ -37,31 +38,34 @@ export async function signup(
     },
     body: JSON.stringify(credentials),
   });
-  return await handleResponse(res);
+  return await handleResponse<void>(res);
 }
 
-export async function logout(): Promise<void> {
+export async function logout(accessToken: AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/logout`, {
     method: "POST",
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
-  await handleResponse(res);
+  await handleResponse<void>(res);
 }
 
 export async function verifyAfterEmailLink(
-  token: string
+  token: string,
 ): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
   });
-  return await handleResponse(res);
+  return await handleResponse<AuthResponse>(res);
 }
 
 export async function sendNewVerificationLink(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
     method: "POST",
@@ -71,26 +75,26 @@ export async function sendNewVerificationLink(
     },
     body: JSON.stringify({ email }),
   });
-  await handleResponse(res);
+  await handleResponse<void>(res);
 }
 
 export async function changePasswordAfterLogin(passwords: {
   oldPassword: string;
   newPassword: string;
 }): Promise<void> {
-  const {oldPassword, newPassword} = passwords
+  const { oldPassword, newPassword } = passwords;
   const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({oldPassword,newPassword}),
+    body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",
   });
-  await handleResponse(res);
+  await handleResponse<void>(res);
 }
 
 export async function forgotPasswordSendEmail(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
     method: "POST",
@@ -100,7 +104,7 @@ export async function forgotPasswordSendEmail(
     },
     body: JSON.stringify(email),
   });
-  await handleResponse(res);
+  await handleResponse<void>(res);
 }
 
 export async function getNewRefreshToken(): Promise<AuthResponse> {
@@ -108,29 +112,18 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
     method: "POST",
     credentials: "include",
   });
-  return await handleResponse(res);
+
+  return await handleResponse<AuthResponse>(res);
 }
 
-// optional if you handle redirects manually
-export async function googleLoginCallback(): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/oauth/google/callback`, {
-    credentials: "include",
-  });
-  return await handleResponse(res);
-}
-
-export async function facebookLoginCallback(): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/oauth/facebook/callback`, {
-    credentials: "include",
-  });
-  return await handleResponse(res);
-}
-
-export async function changePasswordUnauthenticated(token:string,password:string): Promise<AuthResponse> {
+export async function changePasswordUnauthenticated(
+  token: string,
+  password: string,
+): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
     method: "PATCH",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({token,password}),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
   });
-  return await handleResponse(res);
+  return await handleResponse<AuthResponse>(res);
 }

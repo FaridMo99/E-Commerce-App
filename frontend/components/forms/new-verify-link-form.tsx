@@ -23,7 +23,7 @@ import InputValidationFailedText from "@/components/main/InputValidationFailedTe
 import { useRouter } from "next/navigation";
 
 //redirect on success
-function NewVerifyLinkForm({headerText}:{headerText:string}) {
+function NewVerifyLinkForm({ headerText }: { headerText: string }) {
   //submission states
   const [isRequestLoading, setIsRequestLoading] = useState<boolean>(false);
 
@@ -50,7 +50,7 @@ function NewVerifyLinkForm({headerText}:{headerText:string}) {
       await sendNewVerificationLink(credentials, captchaToken);
 
       toast.success(
-        "Submit successful! Check your E-Mails and follow the link."
+        "Submit successful! Check your E-Mails and follow the link.",
       );
       router.push("/");
     } catch (err: Error) {
@@ -65,7 +65,7 @@ function NewVerifyLinkForm({headerText}:{headerText:string}) {
     <div className={cn("flex flex-col gap-6")}>
       <Card className="bg-backgroundBright text-white ">
         <CardHeader>
-        <CardTitle>{ headerText}</CardTitle>
+          <CardTitle>{headerText}</CardTitle>
           <CardDescription>
             Enter your email to receive a new Link
           </CardDescription>

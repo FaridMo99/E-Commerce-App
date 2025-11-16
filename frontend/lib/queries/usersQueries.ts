@@ -1,3 +1,5 @@
+"use server";
+
 import {
   AddCartItemSchema,
   ItemQuantitySchema,
@@ -6,12 +8,23 @@ import {
 } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
+import { AccessToken, User } from "@/types/types";
 
-export async function getUser(): Promise<> {
+export async function getUser(): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, { credentials: "include" });
   return await handleResponse(res);
 }
 
+//base cart for getcart
+export type Cart = {
+  cart: {
+    items: {
+      id: string;
+    }[];
+  } | null;
+};
+
+//every isauthenticated route need authz bearer token header
 export async function updateUser(content: UpdateUserSchema): Promise<> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
@@ -30,9 +43,12 @@ export async function deleteUser(): Promise<> {
   return await handleResponse(res);
 }
 
-export async function getUserCart(): Promise<> {
+export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }

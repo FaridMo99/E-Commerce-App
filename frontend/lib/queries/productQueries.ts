@@ -6,7 +6,6 @@ import { handleResponse } from "./utils";
 import { Product } from "@/components/main/ProductCard";
 import { apiBaseUrl } from "@/config/constants";
 
-
 export async function getProducts(
   queryParam?: ProductsQuerySchema,
 ): Promise<Product[]> {

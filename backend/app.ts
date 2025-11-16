@@ -7,16 +7,24 @@ import chalk from "chalk";
 import { disconnectAllServices } from "./src/lib/disconnectHandler.js";
 import cookieParser from "cookie-parser";
 import apiRouter from "./src/routes/apiRouter.js";
-import passport from "passport";
+import passport from "./src/services/passport.js";
 import { PORT } from "./src/config/env.js";
 import "./src/services/cronJobs.js";
 import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
 import prisma from "./src/services/prisma.js";
+import cors from "cors";
 
 export const app = express();
 
 //proxy support middleware to access ip
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+
+app.use(
+  cors({
+    origin: [process.env.CLIENT_ORIGIN!],
+    credentials: true,
+  }),
+);
 
 //middleware to parse form submits to req.body
 app.use(express.urlencoded({ extended: true }));

@@ -39,13 +39,10 @@ export type CurrencyISO = "EUR" | "USD" | "GBP";
 //also needs the data of if already bookmarked by user, not available rn
 //have to use server actions and optimistically update then manually
 function ProductCard({ product }: ProductCardProps) {
-  const [liked, setLiked] = useState(product);
   //can do with hover stacking on top and tggling opacity
   const [showSecondImage, setShowSecondImage] = useState<boolean>(false);
   const firstImage = product.imageUrls[0];
   const secondImage = product.imageUrls[1];
-  const isAuthenticated = useAuth(state => state.isAuthenticated)
-  
 
   return (
     <Link href={`/products/${product.id}`}>
@@ -68,14 +65,6 @@ function ProductCard({ product }: ProductCardProps) {
           <CardDescription className="break-after-all wrap-break-word truncate">
             {product.description}
           </CardDescription>
-          {isAuthenticated && <CardAction>
-            <button
-            //disabled={isPending}
-            //onClick={() => mutate}
-            >
-              <Bookmark />
-            </button>
-          </CardAction>}
         </CardHeader>
         <CardFooter className="h-10">
           Price:{product.price}

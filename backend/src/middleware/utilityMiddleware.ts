@@ -7,11 +7,16 @@ export const authRateLimiter = rateLimit({
   store: new RedisStore({
     sendCommand: (...args: string[]) => redis.sendCommand(args),
   }),
-  windowMs:NODE_ENV === "dev" ? 1 : 15 * 60 * 1000,
+  windowMs: NODE_ENV === "dev" ? 1 : 15 * 60 * 1000,
   max: 5,
   handler: (req, res) => {
-    console.log("Rate limit reached for: " + req.ip + " on " + req.url)
-    res.status(429).json({message:"Too many requests, please wait 15 minutes since your last request"})
+    console.log("Rate limit reached for: " + req.ip + " on " + req.url);
+    res
+      .status(429)
+      .json({
+        message:
+          "Too many requests, please wait 15 minutes since your last request",
+      });
   },
   standardHeaders: true,
   legacyHeaders: false,
