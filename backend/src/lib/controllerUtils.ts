@@ -1,4 +1,4 @@
-import type { Cart, CartItem } from "../generated/prisma/client.js";
+import type { Cart, CartItem, Product } from "../generated/prisma/client.js";
 import type { BatchPayload } from "../generated/prisma/internal/prismaNamespace.js";
 import prisma from "../services/prisma.js";
 
@@ -18,4 +18,13 @@ export async function deleteUserCart(
   ]);
 
   return [_, cart];
+}
+
+
+export function calculateAverage(numbers:number[]) {
+
+    if (!numbers.length) return 0;
+    const sum = numbers.reduce((total, n) => total + n, 0);
+    return sum / numbers.length;
+
 }

@@ -5,6 +5,7 @@ import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 
+
 export async function getRevenue(
   req: Request,
   res: Response,
@@ -138,7 +139,9 @@ export async function getNewUsers(
     );
 
     const userCount = await prisma.user.count({
-      where: { created_at: { ...(from && { gte: from }), lte: to } },
+      where: {
+        created_at: { ...(from && { gte: from }), lte: to }
+      }
     });
 
     console.log(

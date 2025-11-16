@@ -9,6 +9,7 @@ import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { orderSelect } from "../config/prismaHelpers.js";
 
 // Get orders within a timeframe
 export async function getOrders(
@@ -54,6 +55,9 @@ export async function getOrders(
       skip,
       take,
       orderBy: { [field]: order },
+      select: {
+        ...orderSelect
+      }
     });
 
     orders.forEach(

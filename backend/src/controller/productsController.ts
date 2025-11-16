@@ -29,6 +29,7 @@ import redis from "../services/redis.js";
 import type { Product } from "../generated/prisma/client.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { productSelect, productWhere, reviewSelect, reviewWhere } from "../config/prismaHelpers.js";
 
 
 //render for admin products so he knows which arent public and which are
@@ -79,6 +80,9 @@ export async function getAllProducts(
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
       ...(limit && { take: parseInt(limit) }),
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
+      select: {
+        ...productSelect
+      }
     });
 
     console.log(chalk.green(`${getTimestamp()} Retrieved ${products.length} products`));
@@ -171,6 +175,9 @@ export async function createProduct(
           ...(product.is_public && { published_at: new Date() }),
           category: { connect: { name: product.category } },
         },
+        select: {
+          ...productSelect
+        }
       });
     });
 
@@ -209,7 +216,10 @@ export async function getProductByProductId(
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
 
     const product = await prisma.product.findUnique({
-      where: { id, is_public: true, deleted: false },
+      where: { ...productWhere, id},
+      select: {
+        ...productSelect
+      }
     });
 
     if (!product) {
@@ -271,7 +281,7 @@ export async function deleteProductByProductId(
       await Promise.all(imagesToDelete.map((url) => deleteCloudAsset(url)));
     }
 
-    const product = await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx) => {
       const updatedProduct = await tx.product.update({
         where: { id },
         data: { deleted: true, imageUrls: preProduct.imageUrls.slice(0, 1) },
@@ -334,6 +344,9 @@ export async function updateProductByProductId(
           ...(category && { category: { connect: { name: category } } }),
           updated_at: new Date(),
         },
+        select: {
+          ...productSelect
+        }
       });
 
       if (is_public === false) {
@@ -392,7 +405,13 @@ export async function getAllReviewsByProductId(
       )
     );
     const reviews = await prisma.review.findMany({
-      where: { product_id: productId, is_public: true },
+      where: {
+        product_id: productId,
+        ...reviewWhere
+      },
+      select: {
+        ...reviewSelect
+      }
     });
 
     console.log(
@@ -436,6 +455,9 @@ export async function createReviewByProductId(
         product_id: productId,
         ...(isPublic !== undefined && { is_public: isPublic }),
       },
+      select: {
+        ...reviewSelect
+      }
     });
 
     console.log(

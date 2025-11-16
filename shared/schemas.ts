@@ -74,8 +74,8 @@ export const productsQuerySchema = paginationSchema.extend({
   search: z.string().max(255).optional(),
   // Filtering
   category: z.string().optional(),
-  minPrice: priceSchema.optional(),
-  maxPrice: priceSchema.optional(),
+  minPrice: z.int().nonnegative().optional(),
+  maxPrice: z.int().nonnegative().optional(),
   sale: z
     .preprocess((val) => {
       if (val === "true") return true;

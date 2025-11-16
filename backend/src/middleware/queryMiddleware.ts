@@ -37,7 +37,7 @@ export function validateProductSearchQueries(
   next: NextFunction
 ) {
   const searchparams = req.query;
-
+  
   const validated = productsQuerySchema.safeParse(searchparams);
   if (!validated.success) {
     console.log(
@@ -52,6 +52,7 @@ export function validateProductSearchQueries(
   console.log(
     chalk.green(`${getTimestamp()} Product search query validated successfully`)
   );
+
   next();
 }
 

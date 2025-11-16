@@ -13,6 +13,7 @@ import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { cartSelect, orderSelect, productSelect, productWhere, reviewSelect, userSelect } from "../config/prismaHelpers.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -28,7 +29,16 @@ export async function getUserByUserId(
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching user ${id}`));
-    const user = await prisma.user.findUnique({ where: { id } });
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id
+      },
+      select: {
+        ...userSelect
+      }
+    });
+
     if (!user) {
       console.log(chalk.red(`${getTimestamp()} User ${id} not found`));
       return res.status(404).json({ message: "User not found" });
@@ -84,6 +94,9 @@ export async function updateUserByUserId(
     const user = await prisma.user.update({
       where: { id },
       data,
+      select: {
+        ...userSelect
+      }
     });
 
     console.log(
@@ -113,7 +126,7 @@ export async function deleteUserByUserId(
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Deleting user ${id}`));
-    const user = await prisma.user.delete({ where: { id } });
+    await prisma.user.delete({ where: { id } });
     console.log(
       chalk.green(`${getTimestamp()} User ${id} deleted successfully`)
     );
@@ -151,12 +164,8 @@ export async function getAllOrdersByUser(
         user_id: userId,
         ...(status ? { status } : {}),
       },
-      include: {
-        _count: {
-          select: {
-            items: true,
-          },
-        },
+      select: {
+        ...orderSelect
       },
       orderBy: {
         [sort]: order,
@@ -206,7 +215,13 @@ export async function getSingleOrderByUser(
       )
     );
     const order = await prisma.order.findFirst({
-      where: { id: orderId, user_id: userId },
+      where: {
+        id: orderId,
+        user_id: userId
+      },
+      select: {
+        ...orderSelect
+      }
     });
 
     if (!order) {
@@ -249,7 +264,12 @@ export async function getReviewsByUser(
       chalk.yellow(`${getTimestamp()} Fetching reviews for user ${userId}`)
     );
     const reviews = await prisma.review.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId
+      },
+      select: {
+        ...reviewSelect
+      }
     });
     console.log(
       chalk.green(
@@ -280,9 +300,13 @@ export async function getUserCart(
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching cart for user ${userId}`)
     );
-    const cart = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { cart: { select: { items: { select: { id: true } } } } },
+    const cart = await prisma.cart.findFirst({
+      where: {
+        userId
+      },
+      select: {
+        ...cartSelect
+      }
     });
 
     if (!cart) {
@@ -297,7 +321,7 @@ export async function getUserCart(
         `${getTimestamp()} Cart fetched successfully for user ${userId}`
       )
     );
-    return res.status(200).json(cart.cart);
+    return res.status(200).json(cart);
   } catch (err) {
     console.log(
       chalk.red(
@@ -368,7 +392,12 @@ export async function addProductToUserCart(
         product: { connect: { id: productId } },
         quantity,
       },
-      select: { cart: true },
+      select: {
+        cart: {
+          select: {
+          ...cartSelect
+        }
+      } },
     });
 
     console.log(
@@ -412,7 +441,12 @@ export async function removeProductFromUserCart(
     );
     const cart = await prisma.cartItem.delete({
       where: { cart: { userId }, id: itemId },
-      select: { cart: true },
+      select: {
+        cart: {
+          select: {
+          ...cartSelect
+        }
+      } },
     });
 
     if (!cart) {
@@ -473,7 +507,11 @@ export async function updateItemQuantity(
         quantity,
       },
       select: {
-        cart: true,
+        cart: {
+          select: {
+            ...cartSelect
+          }
+        }
       },
     });
 
@@ -521,13 +559,16 @@ export async function getFavoriteItems(
         id: userId,
         favorites: {
           some: {
-            is_public: true,
-            deleted: false,
+            ...productWhere
           },
         },
       },
       select: {
-        favorites: true,
+        favorites: {
+          select: {
+            ...productSelect
+          }
+        }
       },
     });
 
@@ -636,11 +677,13 @@ export async function addFavoriteItem(
         `${getTimestamp()} Adding favorite product ${productId} for user ${userId}`
       )
     );
-    const product = await prisma.user.update({
+    const response = await prisma.user.update({
       where: { id: userId },
       data: {
         favorites: {
-          connect: { id: productId },
+          connect: {
+            id: productId
+          },
         },
       },
       include: {
@@ -648,7 +691,7 @@ export async function addFavoriteItem(
       },
     });
 
-    if (!product) {
+    if (!response) {
       console.log(
         chalk.red(
           `${getTimestamp()} Product ${productId} not found for user ${userId}`
@@ -662,6 +705,14 @@ export async function addFavoriteItem(
         `${getTimestamp()} Successfully added favorite product ${productId} for user ${userId}`
       )
     );
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        ...productSelect
+      }
+    })
+
     return res.status(200).json(product);
   } catch (err) {
     console.log(
@@ -694,17 +745,20 @@ export async function getRecentlyViewedProducts(
         recentlyViewedProducts: {
           some: {
             product: {
-              is_public: true,
-              deleted: false,
+              ...productWhere
             },
           },
         },
       },
       select: {
         recentlyViewedProducts: {
-          include: {
-            product: true,
-          },
+          select: {
+            product: {
+              select: {
+                ...productSelect
+              }
+            }
+          }
         },
       },
     });

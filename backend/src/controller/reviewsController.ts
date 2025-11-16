@@ -3,6 +3,7 @@ import prisma from "../services/prisma.js";
 import type { ReviewsQuerySchema } from "@monorepo/shared";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { reviewSelect, reviewWhere } from "../config/prismaHelpers.js";
 
 export async function getAllReviews(
   req: Request<{}, {}, {}, ReviewsQuerySchema>,
@@ -18,13 +19,16 @@ export async function getAllReviews(
 
     const reviews = await prisma.review.findMany({
       where: {
-        is_public: true,
+        ...reviewWhere,
         ...(rating && { rating: Number(rating) }),
         ...(created_at && { created_at: new Date(created_at) }),
       },
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
       ...(limit && { take: parseInt(limit) }),
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
+      select: {
+        ...reviewSelect
+      }
     });
 
     console.log(
@@ -52,7 +56,13 @@ export async function getReviewByReviewId(
     console.log(chalk.yellow(`${getTimestamp()} Fetching review by ID: ${id}`));
 
     const review = await prisma.review.findUnique({
-      where: { id, is_public: true },
+      where: {
+        ...reviewWhere,
+        id,
+      },
+      select: {
+        ...reviewSelect
+      }
     });
 
     if (!review) {
@@ -159,7 +169,7 @@ export async function setPublicByReviewId(
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    await prisma.review.update({
+      await prisma.review.update({
       where: { id: reviewId },
       data: { is_public: isPublic },
     });
@@ -169,7 +179,7 @@ export async function setPublicByReviewId(
         `${getTimestamp()} Review ${reviewId} public status updated to ${isPublic}`
       )
     );
-    res.status(200).json({ message: "Review updated" });
+    res.status(200).json({ message: `Review successfully  ${isPublic ? "published" : "deactivated"}` });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update review: ${reviewId}`),

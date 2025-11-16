@@ -4,6 +4,7 @@ import type { SettingsSchema } from "@monorepo/shared";
 import { BASE_CURRENCY_KEY } from "../config/constants.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { settingsSelect } from "../config/prismaHelpers.js";
 
 export async function getAllSettings(
   req: Request,
@@ -12,7 +13,11 @@ export async function getAllSettings(
 ) {
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching all settings...`));
-    const settings = await prisma.settings.findMany();
+    const settings = await prisma.settings.findMany({
+      select: {
+        ...settingsSelect
+      }
+    });
     console.log(
       chalk.green(`${getTimestamp()} Fetched ${settings.length} settings`)
     );
@@ -58,7 +63,14 @@ export async function createSetting(
   const { key, value } = req.body;
   try {
     console.log(chalk.yellow(`${getTimestamp()} Creating setting: ${key}...`));
-    const setting = await prisma.settings.create({ data: { key, value } });
+    const setting = await prisma.settings.create({
+      data: {
+        key, value
+      },
+      select: {
+        ...settingsSelect
+      }
+    });
     console.log(chalk.green(`${getTimestamp()} Setting created: ${key}`));
     return res.status(200).json(setting);
   } catch (err) {
@@ -85,7 +97,12 @@ export async function getSettingBySettingId(
       chalk.yellow(`${getTimestamp()} Fetching setting by ID: ${settingId}...`)
     );
     const setting = await prisma.settings.findUnique({
-      where: { id: settingId },
+      where: {
+        id: settingId
+      },
+      select: {
+        ...settingsSelect
+      }
     });
     if (!setting) {
       console.log(
@@ -133,7 +150,7 @@ export async function deleteSettingBySettingId(
       return res.status(404).json({ message: "Setting not found" });
     }
     console.log(chalk.green(`${getTimestamp()} Setting deleted: ${settingId}`));
-    return res.status(200).json(setting);
+    return res.status(200).json({message:"Deleted Setting successfully"});
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to delete setting: ${settingId}`),
@@ -166,8 +183,15 @@ export async function updateSettingBySettingId(
       chalk.yellow(`${getTimestamp()} Updating setting: ${settingId}...`)
     );
     const setting = await prisma.settings.update({
-      where: { id: settingId, key },
-      data: { value },
+      where: {
+        id: settingId, key
+      },
+      data: {
+        value
+      },
+      select: {
+        ...settingsSelect
+      }
     });
     if (!setting) {
       console.log(

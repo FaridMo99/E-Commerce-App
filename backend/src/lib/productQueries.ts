@@ -8,11 +8,7 @@ import {
   SALE_PRODUCTS_REDIS_KEY,
   TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
-
-const constraints = {
-  is_public: true,
-  deleted: false,
-};
+import { productSelect, productWhere } from "../config/prismaHelpers.js";
 
 const limit = 10;
 
@@ -28,12 +24,15 @@ export async function getNewProducts(): Promise<Product[]> {
   const products = await prisma.product.findMany({
     where: {
       published_at: { gte: timeDifference },
-      ...constraints,
+      ...productWhere,
     },
     orderBy: {
       published_at: "desc",
     },
     take: limit,
+    select: {
+      ...productSelect
+    }
   });
 
   await redis.set(NEW_PRODUCTS_REDIS_KEY, JSON.stringify(products), {
@@ -49,7 +48,7 @@ export async function getSaleProducts(): Promise<Product[]> {
 
   const products = await prisma.product.findMany({
     where: {
-      ...constraints,
+      ...productWhere,
       sale_price: {
         not: null,
       },
@@ -58,6 +57,9 @@ export async function getSaleProducts(): Promise<Product[]> {
       published_at: "desc",
     },
     take: limit,
+    select: {
+      ...productSelect,
+    },
   });
 
   await redis.set(SALE_PRODUCTS_REDIS_KEY, JSON.stringify(products), {
@@ -76,7 +78,7 @@ export async function getCategoryProducts(
 
   const products = await prisma.product.findMany({
     where: {
-      ...constraints,
+      ...productWhere,
       category: {
         name: category,
       },
@@ -85,6 +87,9 @@ export async function getCategoryProducts(
       published_at: "desc",
     },
     take: limit,
+    select: {
+      ...productSelect,
+    },
   });
 
   await redis.set(key, JSON.stringify(products), { EX: 1800 });
@@ -100,8 +105,12 @@ export async function getRecentlyViewedProducts(
       viewedAt: "desc",
     },
     take: limit,
-    include: {
-      product: true,
+    select: {
+      product: {
+        select: {
+          ...productSelect,
+        },
+      },
     },
   });
 
@@ -119,34 +128,12 @@ export async function getTrendingProducts(): Promise<Product[]> {
   // fetch all products with computed metrics
   const trending = await prisma.product.findMany({
     where: {
-      ...constraints,
+      ...productWhere,
       published_at: { not: null },
     },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      price: true,
-      sale_price: true,
-      currency: true,
-      stock_quantity: true,
-      is_public: true,
-      deleted: true,
-      category_id: true,
-      created_at: true,
-      updated_at: true,
-      published_at: true,
-      imageUrls: true,
-      order_items: {
-        where: { order: { ordered_at: { gte: timeDifference } } },
-        select: { id: true },
+      select: {
+        ...productSelect,
       },
-      favoredBy: { select: { id: true } },
-      recentlyViewed: {
-        where: { viewedAt: { gte: timeDifference } },
-        select: { id: true },
-      },
-    },
   });
 
   // compute trending score

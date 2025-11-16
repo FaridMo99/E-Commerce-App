@@ -129,7 +129,7 @@ export async function hasRefreshToken(
   res: Response,
   next: NextFunction,
 ) {
-  console.log(chalk.yellow("Checking for Refresh Token..."))
+  console.log(chalk.yellow(getTimestamp(),"Checking for Refresh Token..."))
   const token = req.cookies.refreshToken;
   if (!token) {
     console.log(

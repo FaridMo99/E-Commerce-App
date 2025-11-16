@@ -4,6 +4,7 @@ import redis from "../services/redis.js";
 import { CATEGORIES_REDIS_KEY } from "../config/constants.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { categorySelect } from "../config/prismaHelpers.js";
 
 const cacheTime = 1800; // 30min
 
@@ -28,7 +29,11 @@ export async function getAllProductCategories(
       return res.status(200).json(parsed);
     }
 
-    const categories = await prisma.category.findMany();
+    const categories = await prisma.category.findMany({
+      select: {
+        ...categorySelect
+      }
+    });
     await redis.set(CATEGORIES_REDIS_KEY, JSON.stringify(categories), {
       EX: cacheTime,
     });
@@ -65,7 +70,12 @@ export async function createCategory(
     );
 
     const exists = await prisma.category.findFirst({
-      where: { name: category },
+      where: {
+        name: category
+      },
+      select: {
+        ...categorySelect
+      }
     });
     if (exists) {
       console.log(

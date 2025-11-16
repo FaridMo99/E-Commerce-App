@@ -13,6 +13,7 @@ import { issueTokens } from "../lib/auth.js";
 import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { userSelect } from "../config/prismaHelpers.js";
 
 export async function login(
   req: Request<{}, {}, LoginSchema>,
@@ -27,10 +28,9 @@ export async function login(
 
     const user = await prisma.user.findFirst({
       where: { email },
-      include: {
-        cart: true,
-        orders: true,
-      },
+      select: {
+        ...userSelect
+      }
     });
 
     if (!user) {
@@ -219,7 +219,9 @@ export async function verifyUser(
     const user = await prisma.user.update({
       where: { id: userId },
       data: { verified: true },
-      include: { cart: true, orders: true },
+      select: {
+        ...userSelect
+      }
     });
 
     await redis.del(`verifyToken:${userId}`);
@@ -336,7 +338,9 @@ export async function changePassword(
     const user = await prisma.user.update({
       where: { id: payload.id },
       data: { password: hashedPassword },
-      include: { cart: true, orders: true },
+      select: {
+        ...userSelect
+      }
     });
 
     await redis.del(redisTokenKey);
@@ -425,7 +429,14 @@ export async function issueRefreshToken(
       return res.status(401).json({ message: "Expired refresh token" });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: token.userId } });
+    const user = await prisma.user.findUnique({
+      where: {
+        id: token.userId
+      },
+      select: {
+        ...userSelect
+      }
+    });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const tokenMatch = await bcrypt.compare(rawToken, dbToken.token);
@@ -515,10 +526,12 @@ export async function changePasswordAuthenticated(
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
+    const newUser = await prisma.user.update({
       where: { id },
       data: { password: hashedPassword },
-      include: { cart: true, orders: true },
+      select: {
+        ...userSelect
+      }
     });
 
     console.log(
@@ -526,7 +539,7 @@ export async function changePasswordAuthenticated(
         `${getTimestamp} Password changed successfully for userId: ${id}`
       )
     );
-    return res.status(200).json({ message: "Password changed successfully!" });
+    return res.status(200).json({user});
   } catch (err) {
     console.log(
       chalk.red(

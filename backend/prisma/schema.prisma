@@ -116,7 +116,7 @@ model Review {
   user       User      @relation(fields: [user_id], references: [id])
   user_id    String
   title      String
-  content    String
+  content    String?
   rating     Float
   is_public  Boolean   @default(true)
   created_at DateTime  @default(now())
