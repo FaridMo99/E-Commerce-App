@@ -1,9 +1,9 @@
 import Stripe from "stripe";
 import { STRIPE_API_KEY } from "../config/env.js";
-import { deleteUserCart } from "../lib/controllerUtils.js";
 import prisma from "./prisma.js";
-import { email, includes } from "zod";
 import { sendOrderEmail } from "./email.js";
+import chalk from "chalk";
+import { getTimestamp } from "../lib/utils.js";
 
 const stripe = new Stripe(STRIPE_API_KEY, {
   typescript: true,
@@ -18,6 +18,8 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event) {
       const session = stripeEvent.data.object;
       const orderId = session.metadata?.orderId!;
       const userId = session.metadata?.userId!;
+
+      console.log(chalk.yellow(`${getTimestamp()} Processing checkout.session.completed, orderId: ${orderId}, userId: ${userId}`));
 
       //update order status and empty user cart
       const [cart, order] = await prisma.$transaction([
@@ -35,9 +37,11 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event) {
         }),
       ]);
 
+      console.log(chalk.green(`${getTimestamp()} Cart cleared and order updated: orderId ${orderId}`));
+
       await sendOrderEmail(cart.user.email, order);
     default:
-      console.log("Unhandled event" + stripeEvent.type);
+      console.log(chalk.gray(`${getTimestamp()} Unhandled Stripe event: ${stripeEvent.type}`));
   }
 }
 

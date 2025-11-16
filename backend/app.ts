@@ -13,11 +13,15 @@ import "./src/services/cronJobs.js";
 import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
 import prisma from "./src/services/prisma.js";
 import cors from "cors";
+import { loggerMiddleware } from "./src/middleware/utilityMiddleware.js";
+import { getTimestamp } from "./src/lib/utils.js";
 
 export const app = express();
 
 //proxy support middleware to access ip
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+
+app.use(loggerMiddleware);
 
 app.use(
   cors({
@@ -46,12 +50,12 @@ app.use("/webhooks", webhookRouter);
 
 //add another handler here for webapp serving
 export const server = app.listen(PORT, () => {
-  console.log(chalk.green("Server running on Port: " + PORT));
+  console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
 });
 
 //global error middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.log(chalk.red("Global error: " + err));
+  console.log(chalk.red(`${getTimestamp()} Global error: ${err}`));
   return res.status(500).json({ error: "Something went wrong" });
 });
 

@@ -1,6 +1,7 @@
 //redis store exchange rates, key name
 export const EXCHANGE_RATE_REDIS_KEY = "exchangeRates";
-export const TWELVE_HOURS_IN_SECONDS = 43200;
+export const FIVE_DAYS_IN_SECONDS = 43200 * 2 * 5;
+export const TWELVE_HOURS_IN_SECONDS= 43200
 export const DEFAULT_NICE_PRICE = 99;
 export const BASE_CURRENCY_KEY = "baseCurrency";
 export const TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS = 14;

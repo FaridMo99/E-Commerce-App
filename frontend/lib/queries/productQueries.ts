@@ -67,6 +67,7 @@ type HomeProducts = {
   recentlyViewedProducts: Product[];
 };
 
+//have to give accesstoken when logged in to get recently viewed ones
 export async function getHomeProducts(): Promise<HomeProducts> {
   const res = await fetch(`${apiBaseUrl}/products/home`, {
     credentials: "include",

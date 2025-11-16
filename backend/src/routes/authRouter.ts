@@ -49,7 +49,6 @@ authRouter.post(
   sendNewVerifyLink,
 );
 
-//this only for when forgot password changing password, you need a seperate one for when already logged in changing password
 authRouter.patch(
   "/change-password-authenticated",
   authRateLimiter,

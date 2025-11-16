@@ -31,10 +31,19 @@ export async function login(
     if (!user)
       return res.status(401).json({ message: "Email or Password is wrong" });
     if (!user.verified)
-      return res.status(400).json({ message: "Not verified yet" });
+      return res.status(400).json({ message: "Account not verified yet" });
+
+    if (!user.password && user.createdBy !== "SELF") {
+      const formattedOAuthProvider = user.createdBy.charAt(0).toUpperCase() + user.createdBy.slice(1).toLowerCase()
+      
+      return res
+            .status(401)
+            .json({ message: `You logged in last time with ${formattedOAuthProvider}. Please log in again with ${formattedOAuthProvider} and set a password in Account Settings to use this login.` });
+        }
 
     if (!user.password)
       return res.status(401).json({ message: "Email or Password is wrong" });
+
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordsMatch)
@@ -343,13 +352,13 @@ export async function changePasswordAuthenticated(
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    //logic for if =auth user has no password, just gets one
+    //logic for if oauth user has no password, just gets one
     if (!user.password) {
       //hash new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       //update password
-      const updatedUser = await prisma.user.update({
+        await prisma.user.update({
         where: { id },
         data: { password: hashedPassword },
         include: {
@@ -357,7 +366,7 @@ export async function changePasswordAuthenticated(
           orders: true,
         },
       });
-      return res.status(200).json({ user: updatedUser });
+      return res.status(200).json({message:"Password set successfully!" });
     }
     //compare old password with db hashed one
 
@@ -368,7 +377,7 @@ export async function changePasswordAuthenticated(
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     //update password
-    const updatedUser = await prisma.user.update({
+      await prisma.user.update({
       where: { id },
       data: { password: hashedPassword },
       include: {
@@ -377,7 +386,7 @@ export async function changePasswordAuthenticated(
       },
     });
 
-    return res.status(200).json({ user: updatedUser });
+    return res.status(200).json({message:"Password changed successfully!" });
   } catch (err) {
     next(err);
   }

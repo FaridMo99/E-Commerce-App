@@ -1,8 +1,8 @@
 import { productSchema } from "@monorepo/shared";
 import {
   EXCHANGE_RATE_REDIS_KEY,
-  TWELVE_HOURS_IN_SECONDS,
   DEFAULT_NICE_PRICE,
+  FIVE_DAYS_IN_SECONDS,
 } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
@@ -12,8 +12,12 @@ import type {
   NicePrice,
   OpenExchangeRateApiReturn,
 } from "../types/types.js";
+import chalk from "chalk";
+import { getTimestamp } from "./utils.js";
 
+//cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
+  try {
   const redisReturn = await redis.get(EXCHANGE_RATE_REDIS_KEY);
   if (redisReturn) return JSON.parse(redisReturn);
 
@@ -21,31 +25,32 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
     `https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`,
   );
   if (!res.ok) {
-    console.log(`Exchange rate API failed (${res.status})}`);
+    console.log(chalk.red(`${getTimestamp()} Exchange rate API failed (${res.status})}`));
     throw new Error(`Exchange rate API failed (${res.status})}`);
   }
   const data: OpenExchangeRateApiReturn = await res.json();
 
   await redis.set(EXCHANGE_RATE_REDIS_KEY, JSON.stringify(data), {
-    EX: TWELVE_HOURS_IN_SECONDS,
+    EX: FIVE_DAYS_IN_SECONDS,
   });
   return data;
+  } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Exhcange Rate Api failure: ` + err))
+    throw err
+  }
+
 }
 
 function roundPriceUpInCents(
   amount: number,
   ending: NicePrice = DEFAULT_NICE_PRICE,
 ): number {
-  console.log("amount" + amount);
   //round up
   const cents = Math.ceil(amount);
-  console.log(cents);
   //last two digits to "nice" ending
   const rounded = Math.floor(cents / 100) * 100 + ending;
-  console.log(rounded);
   // If the rounded value is less than the original cents, add 100 to ensure we round up
   const result = rounded < cents ? rounded + 100 : rounded;
-  console.log(result);
   return result;
 }
 
@@ -55,7 +60,6 @@ export async function exchangeToCurrencyInCents(
   wantedCurrency: CurrencyISO,
 ): Promise<ExchangePrice> {
   const exchangeRates = await getExchangeRates();
-  console.log(priceInCents);
   if (baseCurrency === wantedCurrency) {
     return { exchangedPriceInCents: priceInCents, currency: wantedCurrency };
   }
@@ -84,9 +88,7 @@ export async function exchangeToCurrencyInCents(
 
 //future reference, when implementing .00 this wont return floats to display
 export function formatPriceForClient(cents: number): number {
-  console.log("cents " + cents);
   const result = Number((cents / 100).toFixed(2));
-  console.log("result " + result);
   return result;
 }
 
