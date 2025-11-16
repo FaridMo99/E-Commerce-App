@@ -7,23 +7,34 @@ import {
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
+import chalk from "chalk";
+import { getTimestamp } from "../lib/utils.js";
 
+// Get orders within a timeframe
 export async function getOrders(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const { from, to } = req.timeframe!;
   const { limit, sortBy, page, sortOrder } = req.query;
 
   try {
+    console.log(
+      chalk.yellow(`${getTimestamp()} Fetching orders from ${from} to ${to}`)
+    );
+
     const take = limit ? Number(limit) : 10;
     const currentPage = page ? Number(page) : 1;
 
-    if (isNaN(take) || take <= 0)
+    if (isNaN(take) || take <= 0) {
+      console.log(chalk.red(`${getTimestamp()} Invalid limit: ${limit}`));
       return res.status(400).json({ error: "Invalid limit" });
-    if (isNaN(currentPage) || currentPage <= 0)
+    }
+    if (isNaN(currentPage) || currentPage <= 0) {
+      console.log(chalk.red(`${getTimestamp()} Invalid page: ${page}`));
       return res.status(400).json({ error: "Invalid page" });
+    }
 
     const skip = (currentPage - 1) * take;
 
@@ -46,41 +57,49 @@ export async function getOrders(
     });
 
     orders.forEach(
-      (order) =>
-        (order.total_amount = formatPriceForClient(order.total_amount)),
+      (order) => (order.total_amount = formatPriceForClient(order.total_amount))
     );
 
+    console.log(chalk.green(`${getTimestamp()} Orders fetched successfully`));
     return res.status(200).json(orders);
   } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Failed to fetch orders:`, err));
     next(err);
   }
 }
 
+// Make a new order
 export async function makeOrder(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user?.id!;
   const currency: CurrencyISO = req.cookies.currency ?? "USD";
 
   try {
+    console.log(
+      chalk.yellow(`${getTimestamp()} Creating order for user ${userId}`)
+    );
+
     const shoppingCart = await prisma.cart.findUnique({
-      where: {
-        userId,
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
+      where: { userId },
+      include: { items: { include: { product: true } } },
     });
-    if (!shoppingCart)
+
+    if (!shoppingCart) {
+      console.log(
+        chalk.red(
+          `${getTimestamp()} Shopping cart not found for user ${userId}`
+        )
+      );
       return res.status(404).json({ message: "Shopping Cart not found" });
+    }
 
     if (shoppingCart.items.length === 0) {
+      console.log(
+        chalk.red(`${getTimestamp()} Shopping cart empty for user ${userId}`)
+      );
       return res.status(400).json({ message: "No Items in Cart" });
     }
 
@@ -89,7 +108,7 @@ export async function makeOrder(
         const exchange = await exchangeToCurrencyInCents(
           item.product.currency,
           item.product.price,
-          currency,
+          currency
         );
         const priceInCents = exchange.exchangedPriceInCents;
 
@@ -104,7 +123,7 @@ export async function makeOrder(
           },
           quantity: item.quantity,
         };
-      }),
+      })
     );
 
     const totalAmount = line_items.reduce((sum, item) => {
@@ -142,47 +161,59 @@ export async function makeOrder(
       line_items,
       mode: "payment",
       success_url: `${CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      //make
       cancel_url: `${CLIENT_ORIGIN}/cart?cancelOrderId=${order.id}`,
       billing_address_collection: "required",
-      metadata: {
-        orderId: order.id,
-        userId,
-      },
+      metadata: { orderId: order.id, userId },
     });
 
-    //reserve products
     await prisma.$transaction(
       shoppingCart.items.map((item) =>
         prisma.product.update({
           where: { id: item.product.id },
-          data: {
-            stock_quantity: {
-              decrement: item.quantity,
-            },
-          },
-        }),
-      ),
+          data: { stock_quantity: { decrement: item.quantity } },
+        })
+      )
     );
 
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Order created successfully for user ${userId}`
+      )
+    );
     return res.status(200).json({ sessionId: session.id });
   } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to create order for user ${userId}:`,
+        err
+      )
+    );
     next(err);
   }
 }
 
+// Cancel order
 export async function cancelOrder(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user?.id!;
   const orderId = req.params.orderId;
 
-  if (!orderId)
+  if (!orderId) {
+    console.log(
+      chalk.red(`${getTimestamp()} No orderId provided by user ${userId}`)
+    );
     return res.status(400).json({ message: "No order id provided" });
+  }
 
   try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Cancelling order ${orderId} for user ${userId}`
+      )
+    );
     const orderItems = await prisma.order_Item.findMany({
       where: { order_id: orderId },
     });
@@ -192,14 +223,32 @@ export async function cancelOrder(
         prisma.product.update({
           where: { id: item.product_id },
           data: { stock_quantity: { increment: item.quantity } },
-        }),
-      ),
+        })
+      )
     );
-    if (orderItems.length === 0)
-      return res.status(404).json({ message: "Order not found" });
 
+    if (orderItems.length === 0) {
+      console.log(
+        chalk.red(
+          `${getTimestamp()} Order ${orderId} not found for user ${userId}`
+        )
+      );
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Order ${orderId} cancelled successfully for user ${userId}`
+      )
+    );
     return res.status(200).json({ message: "Order cancelled" });
   } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to cancel order ${orderId} for user ${userId}:`,
+        err
+      )
+    );
     next(err);
   }
 }

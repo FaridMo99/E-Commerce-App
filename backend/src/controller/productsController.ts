@@ -27,6 +27,9 @@ import {
 } from "../lib/productQueries.js";
 import redis from "../services/redis.js";
 import type { Product } from "../generated/prisma/client.js";
+import chalk from "chalk";
+import { getTimestamp } from "../lib/utils.js";
+
 
 //render for admin products so he knows which arent public and which are
 //add a search query to get stock amount also for admin(doesnt need to be protected)
@@ -34,7 +37,7 @@ import type { Product } from "../generated/prisma/client.js";
 export async function getAllProducts(
   req: Request<{}, {}, {}, ProductsQuerySchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const role = req.user?.role;
   const {
@@ -55,7 +58,8 @@ export async function getAllProducts(
   }
 
   try {
-    //get products
+    console.log(chalk.yellow(`${getTimestamp()} Fetching all products for role ${role || "guest"}`));
+
     const products = await prisma.product.findMany({
       where: {
         ...(role !== "ADMIN" && { is_public: true }),
@@ -65,7 +69,6 @@ export async function getAllProducts(
         ...(sale && { sale }),
         ...(minPrice || maxPrice
           ? {
-              // has to use the curreny saved in db
               price: {
                 ...(minPrice && { gte: minPrice }),
                 ...(maxPrice && { lte: maxPrice }),
@@ -78,50 +81,53 @@ export async function getAllProducts(
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
     });
 
+    console.log(chalk.green(`${getTimestamp()} Retrieved ${products.length} products`));
+
     if (products.length > 0 && products[0]?.currency !== currency) {
       const formattedProducts = await Promise.all(
         products.map(async (product) => {
           const exchangedProduct = await exchangeToCurrencyInCents(
             product.currency,
             product.price,
-            currency,
+            currency
           );
           product.price = formatPriceForClient(
-            exchangedProduct.exchangedPriceInCents,
+            exchangedProduct.exchangedPriceInCents
           );
           product.currency = exchangedProduct.currency;
           if (product.sale_price) {
             const exchangedSaleProduct = await exchangeToCurrencyInCents(
               product.currency,
               product.sale_price,
-              currency,
+              currency
             );
             product.sale_price = formatPriceForClient(
-              exchangedSaleProduct.exchangedPriceInCents,
+              exchangedSaleProduct.exchangedPriceInCents
             );
           }
           return product;
-        }),
+        })
       );
-      console.log(formattedProducts[0]);
+      console.log(chalk.green(`${getTimestamp()} Products converted to ${currency}`));
       return res.status(200).json(formattedProducts);
     }
 
-    //transformation for when request currency is the same as in db stored
     if (products.length > 0) {
       const formattedProducts = products.map((product) => {
         product.price = formatPriceForClient(product.price);
-
         if (product.sale_price) {
           product.sale_price = formatPriceForClient(product.sale_price);
         }
         return product;
       });
+      console.log(chalk.green(`${getTimestamp()} Products formatted in original currency`));
       return res.status(200).json(formattedProducts);
     }
 
+    console.log(chalk.red(`${getTimestamp()} No products found`));
     return res.status(200).json(products);
   } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`,err));
     next(err);
   }
 }
@@ -129,18 +135,21 @@ export async function getAllProducts(
 export async function createProduct(
   req: Request<{}, {}, ProductSchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const product = req.body;
   const images = req.files;
 
   try {
+    console.log(chalk.yellow(`${getTimestamp()} Creating product ${product.name}`));
+
     let imageUrls: string[] | undefined;
     if (images && Array.isArray(images)) {
       const results = await Promise.all(
-        images.map((image) => handleCloudUpload(image)),
+        images.map((image) => handleCloudUpload(image))
       );
       imageUrls = results.map((result) => result.secure_url);
+      console.log(chalk.green(`${getTimestamp()} Uploaded ${imageUrls.length} images`));
     }
 
     const newProduct = await prisma.$transaction(async (tx) => {
@@ -160,9 +169,7 @@ export async function createProduct(
           stock_quantity: product.stock_quantity,
           is_public: product.is_public,
           ...(product.is_public && { published_at: new Date() }),
-          category: {
-            connect: { name: product.category },
-          },
+          category: { connect: { name: product.category } },
         },
       });
     });
@@ -178,8 +185,10 @@ export async function createProduct(
       newProduct.sale_price = formatPriceForClient(newProduct.sale_price);
     }
 
+    console.log(chalk.green(`${getTimestamp()} Product ${product.name} created successfully`));
     return res.status(201).json(newProduct);
   } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Failed to create product ${product.name}:`,err));
     next(err);
   }
 }
@@ -187,7 +196,7 @@ export async function createProduct(
 export async function getProductByProductId(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const id = req.params.productId!;
   let currency: CurrencyISO | undefined = req.cookies.currency;
@@ -197,19 +206,21 @@ export async function getProductByProductId(
   }
 
   try {
+    console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
+
     const product = await prisma.product.findUnique({
-      where: {
-        id,
-        is_public: true,
-        deleted: false,
-      },
+      where: { id, is_public: true, deleted: false },
     });
-    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (!product) {
+      console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     const exchangedPrice = await exchangeToCurrencyInCents(
       product.currency,
       product.price,
-      currency,
+      currency
     );
     product.price = formatPriceForClient(exchangedPrice.exchangedPriceInCents);
     product.currency = exchangedPrice.currency;
@@ -218,81 +229,82 @@ export async function getProductByProductId(
       const saleExchangedPrice = await exchangeToCurrencyInCents(
         product.currency,
         product.sale_price,
-        currency,
+        currency
       );
       product.sale_price = formatPriceForClient(
-        saleExchangedPrice.exchangedPriceInCents,
+        saleExchangedPrice.exchangedPriceInCents
       );
     }
 
+    console.log(chalk.green(`${getTimestamp()} Product ${id} fetched successfully`));
     return res.status(200).json(product);
   } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Failed to fetch product ${id}:`,err));
     next(err);
   }
 }
 
+// Delete a product
 export async function deleteProductByProductId(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const id = req.params.productId!;
 
   try {
-    //fetch product
-    const preProduct = await prisma.product.findUnique({ where: { id } });
-    if (!preProduct)
-      return res.status(404).json({ message: "Product not found" });
+    console.log(chalk.yellow(`${getTimestamp()} Deleting product ${id}`));
 
-    //keep first image, delete rest from cloud
+    const preProduct = await prisma.product.findUnique({ where: { id } });
+    if (!preProduct) {
+      console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     const imagesToDelete = preProduct.imageUrls.slice(1);
     if (imagesToDelete.length > 0) {
+      console.log(
+        chalk.yellow(
+          `${getTimestamp()} Deleting ${imagesToDelete.length} cloud images for product ${id}`
+        )
+      );
       await Promise.all(imagesToDelete.map((url) => deleteCloudAsset(url)));
     }
 
-    //update product
     const product = await prisma.$transaction(async (tx) => {
-      //delete product
       const updatedProduct = await tx.product.update({
         where: { id },
-        data: {
-          deleted: true,
-          imageUrls: preProduct.imageUrls.slice(0, 1),
-        },
+        data: { deleted: true, imageUrls: preProduct.imageUrls.slice(0, 1) },
       });
 
-      //remove from all favorites
       await tx.product.update({
         where: { id },
-        data: {
-          favoredBy: {
-            set: [],
-          },
-        },
+        data: { favoredBy: { set: [] } },
       });
 
-      //remove from all carts
-      await tx.cartItem.deleteMany({
-        where: { productId: id },
-      });
-
-      await tx.recentlyViewed.deleteMany({
-        where: { productId: id },
-      });
+      await tx.cartItem.deleteMany({ where: { productId: id } });
+      await tx.recentlyViewed.deleteMany({ where: { productId: id } });
 
       return updatedProduct;
     });
 
+    console.log(
+      chalk.green(`${getTimestamp()} Product ${id} deleted successfully`)
+    );
     return res.status(200).json({ message: "Product successfully deleted" });
   } catch (err) {
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to delete product ${id}:`, err)
+    );
     next(err);
   }
 }
 
+// Update a product
 export async function updateProductByProductId(
   req: Request<{ productId: string }, {}, UpdateProductSchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const id = req.params.productId;
   const {
@@ -306,6 +318,8 @@ export async function updateProductByProductId(
   } = req.body;
 
   try {
+    console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
+
     const product = await prisma.$transaction(async (tx) => {
       const updatedProduct = await tx.product.update({
         where: { id },
@@ -322,33 +336,23 @@ export async function updateProductByProductId(
         },
       });
 
-      //if product is made private, remove from favorites & carts
       if (is_public === false) {
-        //remove from favorites
         await tx.product.update({
           where: { id },
-          data: {
-            favoredBy: {
-              set: [],
-            },
-          },
+          data: { favoredBy: { set: [] } },
         });
-
-        //remove from all carts
-        await tx.cartItem.deleteMany({
-          where: { productId: id },
-        });
+        await tx.cartItem.deleteMany({ where: { productId: id } });
       }
 
-      // remove from recently viewed
-      await tx.recentlyViewed.deleteMany({
-        where: { productId: id },
-      });
+      await tx.recentlyViewed.deleteMany({ where: { productId: id } });
 
       return updatedProduct;
     });
 
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     if (is_public) {
       await Promise.all([
@@ -358,43 +362,71 @@ export async function updateProductByProductId(
     }
 
     product.price = formatPriceForClient(product.price);
-    if (product.sale_price) {
+    if (product.sale_price)
       product.sale_price = formatPriceForClient(product.sale_price);
-    }
 
+    console.log(
+      chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
+    );
     return res.status(200).json(product);
   } catch (err) {
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to update product ${id}:`, err)
+    );
     next(err);
   }
 }
 
+// Get all reviews for a product
 export async function getAllReviewsByProductId(
   req: Request<{ productId: string }>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const productId = req.params.productId;
 
   try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Fetching reviews for product ${productId}`
+      )
+    );
     const reviews = await prisma.review.findMany({
       where: { product_id: productId, is_public: true },
     });
 
+    console.log(
+      chalk.green(`${getTimestamp()} Reviews fetched for product ${productId}`)
+    );
     return res.status(200).json(reviews);
   } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to fetch reviews for product ${productId}:`,
+        err
+      )
+    );
     next(err);
   }
 }
 
+// Create a review for a product
 export async function createReviewByProductId(
   req: Request<{ productId: string }, {}, ReviewSchema>,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const productId = req.params.productId;
   const userId = req.user?.id!;
   const { title, content, rating, isPublic } = req.body;
+
   try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Creating review for product ${productId} by user ${userId}`
+      )
+    );
+
     const review = await prisma.review.create({
       data: {
         title,
@@ -406,46 +438,56 @@ export async function createReviewByProductId(
       },
     });
 
+    console.log(
+      chalk.green(`${getTimestamp()} Review created for product ${productId}`)
+    );
     return res.status(201).json(review);
   } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to create review for product ${productId}:`,
+        err
+      )
+    );
     next(err);
   }
 }
 
+// Get home page products
 export async function getHomeProducts(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const userId = req.user?.id;
   let currency: CurrencyISO | undefined = req.cookies.currency;
 
-  if (!currency || !currencySchema.safeParse(currency).success) {
+  if (!currency || !currencySchema.safeParse(currency).success)
     currency = "USD";
-  }
 
   try {
-    // pick a random category if any
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Fetching home products for user ${userId || "guest"}`
+      )
+    );
+
     const categories = await prisma.category.findMany();
     const randomCategory =
       categories.length > 0
         ? categories[Math.floor(Math.random() * categories.length)]?.name
         : null;
 
-    // build the promises array dynamically
     const promises: Promise<Product[]>[] = [
       getNewProducts(),
       getTrendingProducts(),
       getSaleProducts(),
     ];
-
     if (randomCategory) promises.push(getCategoryProducts(randomCategory));
     if (userId) promises.push(getRecentlyViewedProducts(userId));
 
-    // run all in parallel
     const results = await Promise.all(promises);
 
-    // destructure results based on order
     const [
       newProducts,
       trendingProducts,
@@ -454,6 +496,9 @@ export async function getHomeProducts(
       recentlyViewedProducts = [],
     ] = results;
 
+    console.log(
+      chalk.green(`${getTimestamp()} Home products fetched successfully`)
+    );
     return res.status(200).json({
       newProducts,
       trendingProducts,
@@ -462,6 +507,9 @@ export async function getHomeProducts(
       recentlyViewedProducts,
     });
   } catch (err) {
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to fetch home products:`, err)
+    );
     next(err);
   }
 }
