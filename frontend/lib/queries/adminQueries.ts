@@ -17,6 +17,7 @@ import {
   Product,
   ProductCategory,
 } from "@/types/types";
+import { getCsrfHeader } from "../helpers";
 
 //analytics
 export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<AdminRevenue> {
@@ -79,7 +80,10 @@ export async function createSetting(setting: SettingsSchema): Promise<AdminSetti
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader()
+    },
     body: JSON.stringify(setting),
   });
   return await handleResponse(res);
@@ -96,6 +100,9 @@ export async function deleteAllSettings(): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -104,6 +111,9 @@ export async function deleteSettingBySettingId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -117,6 +127,7 @@ export async function updateSettingBySettingId(
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      ...getCsrfHeader(),
     },
     body: JSON.stringify(content),
   });
@@ -130,7 +141,10 @@ export async function createProduct(content: ProductSchema): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
@@ -140,6 +154,9 @@ export async function deleteProductByProductId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -151,7 +168,10 @@ export async function updateProductByProductId(
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
@@ -192,6 +212,7 @@ export async function createCategory(category: string): Promise<ProductCategory>
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...getCsrfHeader(),
     },
     body: JSON.stringify({ category }),
   });
@@ -202,6 +223,9 @@ export async function deleteCategoryByCategoryId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }

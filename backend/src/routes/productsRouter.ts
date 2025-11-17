@@ -41,6 +41,7 @@ productsRouter.post(
   "/:productId/reviews",
   validateReview,
   isAuthenticated,
+  hasCsrfToken,
   createReviewByProductId,
 );
 productsRouter.get("/:productId", getProductByProductId);
@@ -48,6 +49,7 @@ productsRouter.delete(
   "/:productId",
   isAuthenticated,
   isAdmin,
+  hasCsrfToken,
   deleteProductByProductId,
 );
 productsRouter.patch(
@@ -55,6 +57,7 @@ productsRouter.patch(
   validateUpdateProduct,
   isAuthenticated,
   isAdmin,
+  hasCsrfToken,
   updateProductByProductId,
 );
 

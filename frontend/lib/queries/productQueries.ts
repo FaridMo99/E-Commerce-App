@@ -5,6 +5,7 @@ import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
 import { AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
+import { getCsrfHeader } from "../helpers";
 
 export async function getProducts(
   queryParam?: ProductsQuerySchema,
@@ -53,7 +54,10 @@ export async function createProductReviewByProductId(
   const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader()
+    },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);

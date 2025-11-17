@@ -1,10 +1,14 @@
 import { apiBaseUrl } from "@/config/constants";
 import { handleResponse } from "./utils";
+import { getCsrfHeader } from "../helpers";
 //returns sessionid from stripe to then route to stripe checkout
 export async function makeOrder(): Promise<> {
   const res = await fetch(`${apiBaseUrl}/orders`, {
     credentials: "include",
-    method: "POST",
+      method: "POST",
+      headers: {
+        ...getCsrfHeader()
+    }
   });
   return await handleResponse(res);
 }
@@ -14,6 +18,9 @@ export async function cancelOrder(orderId: string): Promise<> {
   const res = await fetch(`${apiBaseUrl}/orders/${orderId}/cancel`, {
     credentials: "include",
     method: "POST",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }

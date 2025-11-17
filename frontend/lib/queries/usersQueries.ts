@@ -8,7 +8,8 @@ import {
 } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthProductReview, Cart, Order, Product, ProductReview, User } from "@/types/types";
+import { AccessToken, AuthProductReview, Cart, Order, Product, User } from "@/types/types";
+import { getCsrfHeader } from "../helpers";
 
 export async function getUser(): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, { credentials: "include" });
@@ -21,7 +22,10 @@ export async function updateUser(content: UpdateUserSchema): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
@@ -31,6 +35,9 @@ export async function deleteUser(): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -49,6 +56,9 @@ export async function deleteUserCart(): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -59,7 +69,10 @@ export async function addProductToUserCart(
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items`, {
     credentials: "include",
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify(product),
   });
   return await handleResponse(res);
@@ -69,6 +82,9 @@ export async function removeItemFromCart(itemId: string): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "POST",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }
@@ -80,7 +96,10 @@ export async function changeItemQuantitiy(
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify(itemQuantity),
   });
   return await handleResponse(res);
@@ -134,6 +153,7 @@ export async function addFavoriteItemByProductId(productId: string): Promise<Pro
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...getCsrfHeader(),
     },
     body: JSON.stringify({ productId }),
   });
@@ -146,6 +166,9 @@ export async function deleteFavoriteItemByProductId(
   const res = await fetch(`${apiBaseUrl}/users/me/favorites/${productId}`, {
     credentials: "include",
     method: "DELETE",
+    headers: {
+      ...getCsrfHeader(),
+    },
   });
   return await handleResponse(res);
 }

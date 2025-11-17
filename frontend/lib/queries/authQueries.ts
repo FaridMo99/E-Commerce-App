@@ -1,5 +1,3 @@
-//some need verifycaptcha infos
-//csrf token on x-csrf-token header
 //expired accesstoken than call refresh-token route
 //access token in authz bearer header
 //need auto refresh so doesnt get logged out
@@ -9,6 +7,7 @@ import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { AccessToken, AuthResponse, EmailSchema, User } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
+import { getCsrfHeader } from "../helpers";
 
 
 export async function login(
@@ -47,6 +46,7 @@ export async function logout(accessToken: AccessToken): Promise<void> {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      ...getCsrfHeader()
     },
   });
   await handleResponse<void>(res);
@@ -85,7 +85,10 @@ export async function changePasswordAfterLogin(passwords: {
   const { oldPassword, newPassword } = passwords;
   const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader()
+    },
     body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",
   });

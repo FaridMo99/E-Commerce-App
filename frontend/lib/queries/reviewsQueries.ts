@@ -2,6 +2,7 @@ import { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
 import { AuthProductReview, ProductReview } from "@/types/types";
+import { getCsrfHeader } from "../helpers";
 
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,
@@ -37,6 +38,9 @@ export async function deleteReviewByReviewId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
+    headers: {
+      ...getCsrfHeader()
+    }
   });
   return await handleResponse(res);
 }
@@ -47,8 +51,11 @@ export async function setReviewPrivateOrPublic(
 ): Promise<AuthProductReview> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     credentials: "include",
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeader(),
+    },
     body: JSON.stringify({ is_public: newState }),
   });
   return await handleResponse(res);
