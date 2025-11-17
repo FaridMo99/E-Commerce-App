@@ -4,7 +4,7 @@
 import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
+import { AccessToken, AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
 import { getCsrfHeader } from "../helpers";
 
 export async function getProducts(
@@ -50,13 +50,15 @@ export async function getAllProductReviewsByProductId(id: string): Promise<Produ
 export async function createProductReviewByProductId(
   id: string,
   content: ReviewSchema,
+  accessToken:AccessToken
 ): Promise<AuthProductReview[]> {
   const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader()
+      ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(content),
   });

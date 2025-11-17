@@ -1,6 +1,7 @@
 //expired accesstoken than call refresh-token route
 //access token in authz bearer header
 //need auto refresh so doesnt get logged out
+//maybe add us server to the other fns too
 
 "use server";
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
@@ -78,16 +79,20 @@ export async function sendNewVerificationLink(
   await handleResponse<void>(res);
 }
 
-export async function changePasswordAfterLogin(passwords: {
-  oldPassword: string;
-  newPassword: string;
-}): Promise<User> {
+export async function changePasswordAfterLogin(
+  passwords: {
+    oldPassword: string;
+    newPassword: string;
+  },
+  accessToken: AccessToken
+): Promise<User> {
   const { oldPassword, newPassword } = passwords;
   const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader()
+      ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",

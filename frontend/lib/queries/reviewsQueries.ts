@@ -1,7 +1,7 @@
 import { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AuthProductReview, ProductReview } from "@/types/types";
+import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
 import { getCsrfHeader } from "../helpers";
 
 export async function getAllReviews(
@@ -34,12 +34,13 @@ export async function getReviewByReviewId(id: string): Promise<ProductReview> {
   return await handleResponse(res);
 }
 
-export async function deleteReviewByReviewId(id: string): Promise<void> {
+export async function deleteReviewByReviewId(id: string,accessToken:AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
     headers: {
-      ...getCsrfHeader()
+      ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     }
   });
   return await handleResponse(res);
@@ -48,6 +49,7 @@ export async function deleteReviewByReviewId(id: string): Promise<void> {
 export async function setReviewPrivateOrPublic(
   id: string,
   newState: boolean,
+  accessToken: AccessToken
 ): Promise<AuthProductReview> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     credentials: "include",
@@ -55,6 +57,7 @@ export async function setReviewPrivateOrPublic(
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ is_public: newState }),
   });

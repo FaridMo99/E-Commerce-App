@@ -18,25 +18,30 @@ export async function getUser(): Promise<User> {
 
 
 //every isauthenticated route need authz bearer token header
-export async function updateUser(content: UpdateUserSchema): Promise<User> {
+export async function updateUser(
+  content: UpdateUserSchema,
+  accessToken: AccessToken
+): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
 }
 
-export async function deleteUser(): Promise<void> {
+export async function deleteUser(accessToken: AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);
@@ -52,12 +57,13 @@ export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
   return await handleResponse(res);
 }
 
-export async function deleteUserCart(): Promise<void> {
+export async function deleteUserCart(accessToken: AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);
@@ -65,6 +71,7 @@ export async function deleteUserCart(): Promise<void> {
 
 export async function addProductToUserCart(
   product: AddCartItemSchema,
+  accessToken: AccessToken
 ): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items`, {
     credentials: "include",
@@ -72,18 +79,23 @@ export async function addProductToUserCart(
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(product),
   });
   return await handleResponse(res);
 }
 
-export async function removeItemFromCart(itemId: string): Promise<Cart> {
+export async function removeItemFromCart(
+  itemId: string,
+  accessToken: AccessToken
+): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "POST",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);
@@ -92,6 +104,7 @@ export async function removeItemFromCart(itemId: string): Promise<Cart> {
 export async function changeItemQuantitiy(
   itemQuantity: ItemQuantitySchema,
   itemId: string,
+  accessToken: AccessToken
 ): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
@@ -99,20 +112,29 @@ export async function changeItemQuantitiy(
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(itemQuantity),
   });
   return await handleResponse(res);
 }
 
-export async function getUserReviews(): Promise<AuthProductReview[]> {
+export async function getUserReviews(
+  accessToken: AccessToken
+): Promise<AuthProductReview[]> {
   const res = await fetch(`${apiBaseUrl}/users/me/reviews`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }
 
-export async function getUserOrders(queryParam?: OrdersQuerySchema): Promise<Order[]> {
+export async function getUserOrders(
+    accessToken: AccessToken,
+  queryParam?: OrdersQuerySchema
+): Promise<Order[]> {
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -128,32 +150,50 @@ export async function getUserOrders(queryParam?: OrdersQuerySchema): Promise<Ord
 
   const url = `${apiBaseUrl}/users/me/orders?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 
   return await handleResponse(res);
 }
 
-export async function getUserOrderByOrderId(id: string): Promise<Order> {
+export async function getUserOrderByOrderId(
+  id: string,
+  accessToken: AccessToken
+): Promise<Order> {
   const res = await fetch(`${apiBaseUrl}/users/me/orders/${id}`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }
 
-export async function getUserFavoriteItems(): Promise<Product[]> {
+export async function getUserFavoriteItems(
+  accessToken: AccessToken
+): Promise<Product[]> {
   const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }
 
-export async function addFavoriteItemByProductId(productId: string): Promise<Product> {
+export async function addFavoriteItemByProductId(
+  productId: string,
+  accessToken: AccessToken
+): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ productId }),
   });
@@ -162,12 +202,14 @@ export async function addFavoriteItemByProductId(productId: string): Promise<Pro
 
 export async function deleteFavoriteItemByProductId(
   productId: string,
+  accessToken: AccessToken
 ): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/users/me/favorites/${productId}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);

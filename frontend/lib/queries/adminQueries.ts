@@ -9,6 +9,7 @@ import { apiBaseUrl } from "@/config/constants";
 import { SettingsSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import {
+  AccessToken,
   AdminNewUser,
   AdminRevenue,
   AdminSetting,
@@ -20,7 +21,7 @@ import {
 import { getCsrfHeader } from "../helpers";
 
 //analytics
-export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<AdminRevenue> {
+export async function getRevenue(timeframe?: TimeframeQuerySchema, accessToken:AccessToken): Promise<AdminRevenue> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -30,13 +31,19 @@ export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<Admi
 
   const url = `${apiBaseUrl}/admin/analytics/revenue?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return await handleResponse(res);
 }
 
 export async function getTopsellers(
   timeframe?: TimeframeQuerySchema,
+  accessToken: AccessToken
 ): Promise<AdminTopseller> {
   const params = new URLSearchParams();
 
@@ -47,11 +54,16 @@ export async function getTopsellers(
 
   const url = `${apiBaseUrl}/admin/analytics/topsellers?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return await handleResponse(res);
 }
-export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<AdminNewUser> {
+export async function getNewUsers(timeframe?: TimeframeQuerySchema,accessToken:AccessToken): Promise<AdminNewUser> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -61,58 +73,75 @@ export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<Adm
 
   const url = `${apiBaseUrl}/admin/analytics/new-users?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   return await handleResponse(res);
 }
 
 //settings
-export async function getAllSettings(): Promise<AdminSetting[]> {
+export async function getAllSettings(accessToken:AccessToken): Promise<AdminSetting[]> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   const data = await res.json();
   return await handleResponse(res);
 }
 
-export async function createSetting(setting: SettingsSchema): Promise<AdminSetting> {
+export async function createSetting(setting: SettingsSchema,accessToken:AccessToken): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader()
+            Authorization: `Bearer ${accessToken}`,
+
     },
     body: JSON.stringify(setting),
   });
   return await handleResponse(res);
 }
 
-export async function getSettingBySettingId(id: string): Promise<AdminSetting> {
+export async function getSettingBySettingId(id: string,accessToken:AccessToken): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
+    headers: {
+            Authorization: `Bearer ${accessToken}`,
+    }
   });
   return await handleResponse(res);
 }
 
-export async function deleteAllSettings(): Promise<void> {
+export async function deleteAllSettings(accessToken:AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+            Authorization: `Bearer ${accessToken}`,
+
     },
   });
   return await handleResponse(res);
 }
 
-export async function deleteSettingBySettingId(id: string): Promise<void> {
+export async function deleteSettingBySettingId(id: string,accessToken:AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+            Authorization: `Bearer ${accessToken}`,
+
     },
   });
   return await handleResponse(res);
@@ -121,6 +150,7 @@ export async function deleteSettingBySettingId(id: string): Promise<void> {
 export async function updateSettingBySettingId(
   id: string,
   content: SettingsSchema,
+  accessToken:AccessToken
 ): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
@@ -128,6 +158,7 @@ export async function updateSettingBySettingId(
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(content),
   });
@@ -137,25 +168,27 @@ export async function updateSettingBySettingId(
 
 //products
 //check how to do with images
-export async function createProduct(content: ProductSchema): Promise<Product> {
+export async function createProduct(content: ProductSchema,accessToken:AccessToken): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
 }
 
-export async function deleteProductByProductId(id: string): Promise<void> {
+export async function deleteProductByProductId(id: string,accessToken:AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);
@@ -164,6 +197,7 @@ export async function deleteProductByProductId(id: string): Promise<void> {
 export async function updateProductByProductId(
   id: string,
   content: UpdateProductSchema,
+  accessToken:AccessToken
 ): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
@@ -171,6 +205,7 @@ export async function updateProductByProductId(
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(content),
   });
@@ -182,6 +217,7 @@ export async function updateProductByProductId(
 export async function getOrders(
   timeframe?: TimeframeQuerySchema,
   queryParam?: OrdersQuerySchema,
+  accessToken:AccessToken
 ): Promise<Order[]> {
   const params = new URLSearchParams();
 
@@ -200,31 +236,36 @@ export async function getOrders(
 
   const url = `${apiBaseUrl}/orders?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    Authorization: `Bearer ${accessToken}`,
+  });
 
   return await handleResponse(res);
 }
 
 //categories
-export async function createCategory(category: string): Promise<ProductCategory> {
+export async function createCategory(category: string,accessToken:AccessToken): Promise<ProductCategory> {
   const res = await fetch(`${apiBaseUrl}/categories`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ category }),
   });
   return await handleResponse(res);
 }
 
-export async function deleteCategoryByCategoryId(id: string): Promise<void> {
+export async function deleteCategoryByCategoryId(id: string,accessToken:AccessToken): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
       ...getCsrfHeader(),
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await handleResponse(res);
