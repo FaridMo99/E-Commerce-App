@@ -1,10 +1,10 @@
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export function getCsrfHeader(): Record<string, string> {
+export function getCsrfHeaderClientSide(): Record<string, string> {
   const csrfToken = document.cookie
     .split("; ")
-    .find(row => row.startsWith("csrfToken="))
+    .find((row) => row.startsWith("csrfToken="))
     ?.split("=")[1];
 
   if (!csrfToken) {

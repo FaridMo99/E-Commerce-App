@@ -22,6 +22,7 @@ import { validateEmail } from "../middleware/validationMiddleware.js";
 import { authRateLimiter } from "../middleware/utilityMiddleware.js";
 import passport from "../services/passport.js";
 import { OauthLogin } from "../lib/auth.js";
+import { CLIENT_ORIGIN } from "../config/env.js";
 
 const authRouter = Router();
 
@@ -90,12 +91,15 @@ authRouter.get(
     session: false,
   }),
 );
+
+//failure redirect should be a real frontend route to let try again
+//even on success redirects there
 authRouter.get(
   "/oauth/google/callback",
   authRateLimiter,
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/login",
+    failureRedirect: `${CLIENT_ORIGIN}/login`,
   }),
   OauthLogin,
 );
@@ -104,9 +108,9 @@ authRouter.get(
   authRateLimiter,
   passport.authenticate("facebook", {
     session: false,
-    failureRedirect: "/login",
+    failureRedirect: `${CLIENT_ORIGIN}/login`,
   }),
-  OauthLogin,
+  OauthLogin
 );
 
 export default authRouter;

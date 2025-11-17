@@ -4,7 +4,6 @@ import type { User } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
 import type { Response, Request } from "express";
 import bcrypt from "bcrypt";
-import dotenv from "dotenv";
 import type { AccessToken, TurnstileResponse } from "../types/types.js";
 import {
   CLIENT_ORIGIN,
@@ -15,7 +14,6 @@ import {
 } from "../config/env.js";
 import { getTimestamp } from "./utils.js";
 import chalk from "chalk";
-dotenv.config();
 
 //issues new refresh and csrf tokens and returns access token
 export async function issueTokens(
@@ -61,14 +59,14 @@ export async function issueTokens(
     res.cookie("csrfToken", csrfToken, {
       httpOnly: false,
       secure: NODE_ENV !== "dev",
-      sameSite: "strict",
+      sameSite: NODE_ENV === "dev" ? "lax" : "none",
       maxAge,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: NODE_ENV !== "dev",
-      sameSite: "strict",
+      sameSite: NODE_ENV === "dev" ? "lax" : "none",
       maxAge,
     });
 

@@ -5,6 +5,8 @@ type AuthStore = {
   user: null | User;
   accessToken: null | AccessToken;
   clearState: () => void;
+  setAccessToken: (accessToken: AccessToken) => void;
+  setUser:(user:User)=>void
 };
 
 const useAuth = create<AuthStore>((set) => ({
@@ -13,6 +15,12 @@ const useAuth = create<AuthStore>((set) => ({
   clearState: () => {
     set({ user: null, accessToken: null });
   },
+  setAccessToken: (accessToken) => {
+    set({accessToken})
+  },
+  setUser: (user) => {
+    set({user})
+  }
 }));
 
 export default useAuth;

@@ -1,4 +1,4 @@
-import { Cart, getUserCart } from "@/lib/queries/usersQueries";
+import { getUserCart } from "@/lib/queries/usersQueries";
 import useAuth from "@/stores/authStore";
 import { LogIn, MenuIcon } from "lucide-react";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import CurrencyDropdown from "./CurrencyDropdown";
 import UserDropdown from "./UserDropdown";
 import ShoppingCartDropdown from "./ShoppingCartDropdown";
 import LogoutButton from "./LogoutButton";
+import { Cart } from "@/types/types";
 
 //dont forget the popup for mobile
 async function Navigation() {

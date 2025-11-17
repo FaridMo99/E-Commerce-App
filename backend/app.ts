@@ -38,6 +38,7 @@ app.use((req, res, next) => {
   if (req.originalUrl === "/webhooks/stripe") return next();
   express.json()(req, res, next);
 });
+
 //middleware to parse cookies to req.cookie, jwt is inside req.cookie.jwt
 app.use(cookieParser());
 
@@ -49,7 +50,9 @@ app.use("/api", apiRouter);
 app.use("/webhooks", webhookRouter);
 
 //add another handler here for webapp serving
-export const server = app.listen(PORT, () => {
+export const server = app.listen(PORT, async () => {
+
+
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
 });
 

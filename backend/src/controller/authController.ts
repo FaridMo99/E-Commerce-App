@@ -15,6 +15,7 @@ import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import { userSelect } from "../config/prismaHelpers.js";
 
+
 export async function login(
   req: Request<{}, {}, LoginSchema>,
   res: Response,
@@ -26,12 +27,7 @@ export async function login(
       chalk.yellow(`${getTimestamp()} Attempting login for email: ${email}`)
     );
 
-    const user = await prisma.user.findFirst({
-      where: { email },
-      select: {
-        ...userSelect
-      }
-    });
+    const user = await prisma.user.findFirst({where: { email }});
 
     if (!user) {
       console.log(
@@ -43,6 +39,7 @@ export async function login(
     }
 
     if (!user.verified) {
+      console.log(user)
       console.log(
         chalk.yellow(
           `${getTimestamp()} Login attempt for unverified account: ${email}`
@@ -88,7 +85,11 @@ export async function login(
     console.log(
       chalk.green(`${getTimestamp()} Login successful for email: ${email}`)
     );
-    return res.status(200).json({ accessToken, user });
+    const safeUser = {
+      name: user.name,
+      role:user.role
+    }
+    return res.status(200).json({ accessToken, safeUser });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Error during login for email: ${email}`),
@@ -300,7 +301,7 @@ export async function changePassword(
 ) {
   const { password, token } = req.body;
   console.log(
-    chalk.yellow(`${getTimestamp} changePassword called for token: ${token}`)
+    chalk.yellow(`${getTimestamp()} changePassword called for token: ${token}`)
   );
 
   if (!password && !token)
@@ -320,7 +321,7 @@ export async function changePassword(
     if (!redisToken) {
       console.log(
         chalk.red(
-          `${getTimestamp} Invalid or expired change password link for userId: ${payload.id}`
+          `${getTimestamp()} Invalid or expired change password link for userId: ${payload.id}`
         )
       );
       return res.status(404).json({ message: "Invalid or expired Link" });
@@ -328,7 +329,7 @@ export async function changePassword(
     if (redisToken !== token) {
       console.log(
         chalk.red(
-          `${getTimestamp} Mismatched change password token for userId: ${payload.id}`
+          `${getTimestamp()} Mismatched change password token for userId: ${payload.id}`
         )
       );
       return res.status(403).json({ message: "Invalid Link" });
@@ -348,13 +349,13 @@ export async function changePassword(
 
     console.log(
       chalk.green(
-        `${getTimestamp} Password changed successfully for userId: ${payload.id}`
+        `${getTimestamp()} Password changed successfully for userId: ${payload.id}`
       )
     );
     return res.status(200).json({ accessToken, user });
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp} Error in changePassword`),
+      chalk.red(`${getTimestamp()} Error in changePassword`),
       err
     );
     next(err);
@@ -369,7 +370,7 @@ export async function sendEmailToChangePassword(
   const email = req.body.email;
   console.log(
     chalk.yellow(
-      `${getTimestamp} sendEmailToChangePassword called for email: ${email}`
+      `${getTimestamp()} sendEmailToChangePassword called for email: ${email}`
     )
   );
 
@@ -377,7 +378,7 @@ export async function sendEmailToChangePassword(
     const user = await prisma.user.findFirst({ where: { email } });
 
     if (!user) {
-      console.log(chalk.red(`${getTimestamp} User not found: ${email}`));
+      console.log(chalk.red(`${getTimestamp()} User not found: ${email}`));
       return res
         .status(404)
         .json({ message: `User with E-Mail: ${email} does not exist.` });
@@ -391,13 +392,13 @@ export async function sendEmailToChangePassword(
     await sendVerificationEmail(email, "change-password", token);
 
     console.log(
-      chalk.green(`${getTimestamp} Change password email sent to: ${email}`)
+      chalk.green(`${getTimestamp()} Change password email sent to: ${email}`)
     );
     return res.status(200).json({ message: "success" });
   } catch (err) {
     console.log(
       chalk.red(
-        `${getTimestamp} Error sending change password email to: ${email}`
+        `${getTimestamp()} Error sending change password email to: ${email}`
       ),
       err
     );
@@ -414,7 +415,7 @@ export async function issueRefreshToken(
   const rawToken = req.cookies.refreshToken as string;
   console.log(
     chalk.yellow(
-      `${getTimestamp} issueRefreshToken called for userId: ${token?.userId}`
+      `${getTimestamp()} issueRefreshToken called for userId: ${token?.userId}`
     )
   );
 
@@ -449,7 +450,7 @@ export async function issueRefreshToken(
 
     console.log(
       chalk.green(
-        `${getTimestamp} Refresh token issued successfully for userId: ${token.userId}`
+        `${getTimestamp()} Refresh token issued successfully for userId: ${token.userId}`
       )
     );
     return res.status(200).json({ accessToken, user });
@@ -457,14 +458,14 @@ export async function issueRefreshToken(
     if (err instanceof jwt.TokenExpiredError) {
       console.log(
         chalk.red(
-          `${getTimestamp} Refresh token expired for userId: ${token?.userId}`
+          `${getTimestamp()} Refresh token expired for userId: ${token?.userId}`
         )
       );
       return res.status(401).json({ message: "Refresh token expired" });
     }
     console.error(
       chalk.red(
-        `${getTimestamp} Error issuing refresh token for userId: ${token?.userId}`
+        `${getTimestamp()} Error issuing refresh token for userId: ${token?.userId}`
       ),
       err
     );
@@ -481,7 +482,7 @@ export async function changePasswordAuthenticated(
   const id = req.user?.id!;
   console.log(
     chalk.yellow(
-      `${getTimestamp} changePasswordAuthenticated called for userId: ${id}`
+      `${getTimestamp()} changePasswordAuthenticated called for userId: ${id}`
     )
   );
 
@@ -509,7 +510,7 @@ export async function changePasswordAuthenticated(
       });
       console.log(
         chalk.green(
-          `${getTimestamp} Password set successfully for OAuth userId: ${id}`
+          `${getTimestamp()} Password set successfully for OAuth userId: ${id}`
         )
       );
       return res.status(200).json({ message: "Password set successfully!" });
@@ -519,7 +520,7 @@ export async function changePasswordAuthenticated(
     if (!isMatch) {
       console.log(
         chalk.red(
-          `${getTimestamp} Wrong old password provided by userId: ${id}`
+          `${getTimestamp()} Wrong old password provided by userId: ${id}`
         )
       );
       return res.status(400).json({ message: "Wrong password" });
@@ -536,14 +537,14 @@ export async function changePasswordAuthenticated(
 
     console.log(
       chalk.green(
-        `${getTimestamp} Password changed successfully for userId: ${id}`
+        `${getTimestamp()} Password changed successfully for userId: ${id}`
       )
     );
     return res.status(200).json({user});
   } catch (err) {
     console.log(
       chalk.red(
-        `${getTimestamp} Error changing password for userId: ${id}`
+        `${getTimestamp()} Error changing password for userId: ${id}`
       ),
       err
     );

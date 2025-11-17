@@ -1,25 +1,26 @@
 //expired accesstoken than call refresh-token route
-//access token in authz bearer header
 //need auto refresh so doesnt get logged out
-//maybe add us server to the other fns too
 
 "use server";
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { AccessToken, AuthResponse, EmailSchema, User } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
-import { getCsrfHeader } from "../helpers";
+import { getCsrfHeader, getAllHeaders } from "../serverHelpers";
 
 
 export async function login(
   credentials: LoginSchema,
   captchaToken: string,
 ): Promise<AuthResponse> {
+  const additionalHeaders = await getAllHeaders()
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
+    credentials:"include",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
+      ...additionalHeaders
     },
     body: JSON.stringify(credentials),
   });
@@ -30,11 +31,14 @@ export async function signup(
   credentials: SignupSchema,
   captchaToken: string,
 ): Promise<void> {
+    const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
+      ...additionalHeaders,
     },
     body: JSON.stringify(credentials),
   });
@@ -42,12 +46,19 @@ export async function signup(
 }
 
 export async function logout(accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/auth/logout`, {
     method: "POST",
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      ...getCsrfHeader()
+      ...csrfHeader,
+      ...additionalHeaders
     },
   });
   await handleResponse<void>(res);
@@ -56,9 +67,15 @@ export async function logout(accessToken: AccessToken): Promise<void> {
 export async function verifyAfterEmailLink(
   token: string,
 ): Promise<AuthResponse> {
+    const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...additionalHeaders,
+    },
     body: JSON.stringify({ token }),
   });
   return await handleResponse<AuthResponse>(res);
@@ -68,11 +85,14 @@ export async function sendNewVerificationLink(
   email: EmailSchema,
   captchaToken: string,
 ): Promise<void> {
+    const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
+      ...additionalHeaders,
     },
     body: JSON.stringify({ email }),
   });
@@ -86,13 +106,20 @@ export async function changePasswordAfterLogin(
   },
   accessToken: AccessToken
 ): Promise<User> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const { oldPassword, newPassword } = passwords;
   const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
     body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",
@@ -104,11 +131,14 @@ export async function forgotPasswordSendEmail(
   email: EmailSchema,
   captchaToken: string,
 ): Promise<void> {
+    const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
+      ...additionalHeaders,
     },
     body: JSON.stringify(email),
   });
@@ -116,9 +146,14 @@ export async function forgotPasswordSendEmail(
 }
 
 export async function getNewRefreshToken(): Promise<AuthResponse> {
+      const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
+    headers: {
+      ...additionalHeaders,
+    },
   });
 
   return await handleResponse<AuthResponse>(res);
@@ -128,9 +163,15 @@ export async function changePasswordUnauthenticated(
   token: string,
   password: string,
 ): Promise<AuthResponse> {
+    const additionalHeaders = await getAllHeaders();
+
   const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...additionalHeaders,
+    },
     body: JSON.stringify({ token, password }),
   });
   return await handleResponse<AuthResponse>(res);

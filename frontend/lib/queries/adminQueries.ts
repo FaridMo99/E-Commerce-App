@@ -1,3 +1,4 @@
+"user server"
 //this whole file shouldnt be send when the user is not a admin
 import {
   OrdersQuerySchema,
@@ -18,10 +19,10 @@ import {
   Product,
   ProductCategory,
 } from "@/types/types";
-import { getCsrfHeader } from "../helpers";
+import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
 
 //analytics
-export async function getRevenue(timeframe?: TimeframeQuerySchema, accessToken:AccessToken): Promise<AdminRevenue> {
+export async function getRevenue( accessToken:AccessToken,timeframe?: TimeframeQuerySchema): Promise<AdminRevenue> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -31,10 +32,13 @@ export async function getRevenue(timeframe?: TimeframeQuerySchema, accessToken:A
 
   const url = `${apiBaseUrl}/admin/analytics/revenue?${params.toString()}`;
 
+  const additionalHeaders = await getAllHeaders()
+
   const res = await fetch(url, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
   });
 
@@ -42,8 +46,8 @@ export async function getRevenue(timeframe?: TimeframeQuerySchema, accessToken:A
 }
 
 export async function getTopsellers(
-  timeframe?: TimeframeQuerySchema,
-  accessToken: AccessToken
+    accessToken: AccessToken,
+  timeframe?: TimeframeQuerySchema
 ): Promise<AdminTopseller> {
   const params = new URLSearchParams();
 
@@ -54,16 +58,20 @@ export async function getTopsellers(
 
   const url = `${apiBaseUrl}/admin/analytics/topsellers?${params.toString()}`;
 
+  const additionalHeaders = await getAllHeaders()
+
   const res = await fetch(url, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
   });
 
   return await handleResponse(res);
 }
-export async function getNewUsers(timeframe?: TimeframeQuerySchema,accessToken:AccessToken): Promise<AdminNewUser> {
+
+export async function getNewUsers(accessToken:AccessToken,timeframe?: TimeframeQuerySchema): Promise<AdminNewUser> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -73,10 +81,13 @@ export async function getNewUsers(timeframe?: TimeframeQuerySchema,accessToken:A
 
   const url = `${apiBaseUrl}/admin/analytics/new-users?${params.toString()}`;
 
+  const additionalHeaders = await getAllHeaders()
+
   const res = await fetch(url, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
   });
 
@@ -84,11 +95,13 @@ export async function getNewUsers(timeframe?: TimeframeQuerySchema,accessToken:A
 }
 
 //settings
-export async function getAllSettings(accessToken:AccessToken): Promise<AdminSetting[]> {
+export async function getAllSettings(accessToken: AccessToken): Promise<AdminSetting[]> {
+  const additionalHeaders = await getAllHeaders()
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
   });
 
@@ -96,52 +109,72 @@ export async function getAllSettings(accessToken:AccessToken): Promise<AdminSett
   return await handleResponse(res);
 }
 
-export async function createSetting(setting: SettingsSchema,accessToken:AccessToken): Promise<AdminSetting> {
+export async function createSetting(setting: SettingsSchema, accessToken: AccessToken): Promise<AdminSetting> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader()
-            Authorization: `Bearer ${accessToken}`,
-
+      ...csrfHeader,
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
     body: JSON.stringify(setting),
   });
   return await handleResponse(res);
 }
 
-export async function getSettingBySettingId(id: string,accessToken:AccessToken): Promise<AdminSetting> {
+export async function getSettingBySettingId(id: string, accessToken: AccessToken): Promise<AdminSetting> {
+    const additionalHeaders = await getAllHeaders();
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     headers: {
-            Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     }
   });
   return await handleResponse(res);
 }
 
-export async function deleteAllSettings(accessToken:AccessToken): Promise<void> {
+export async function deleteAllSettings(accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "DELETE",
     headers: {
-      ...getCsrfHeader(),
-            Authorization: `Bearer ${accessToken}`,
-
+      ...csrfHeader,
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
   });
   return await handleResponse(res);
 }
 
-export async function deleteSettingBySettingId(id: string,accessToken:AccessToken): Promise<void> {
+export async function deleteSettingBySettingId(id: string, accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
-      ...getCsrfHeader(),
-            Authorization: `Bearer ${accessToken}`,
-
+      ...csrfHeader,
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
   });
   return await handleResponse(res);
@@ -152,13 +185,20 @@ export async function updateSettingBySettingId(
   content: SettingsSchema,
   accessToken:AccessToken
 ): Promise<AdminSetting> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
     body: JSON.stringify(content),
   });
@@ -168,27 +208,41 @@ export async function updateSettingBySettingId(
 
 //products
 //check how to do with images
-export async function createProduct(content: ProductSchema,accessToken:AccessToken): Promise<Product> {
+export async function createProduct(content: ProductSchema, accessToken: AccessToken): Promise<Product> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
 }
 
-export async function deleteProductByProductId(id: string,accessToken:AccessToken): Promise<void> {
+export async function deleteProductByProductId(id: string, accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
   });
   return await handleResponse(res);
@@ -199,13 +253,21 @@ export async function updateProductByProductId(
   content: UpdateProductSchema,
   accessToken:AccessToken
 ): Promise<Product> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
+
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
     body: JSON.stringify(content),
   });
@@ -215,10 +277,12 @@ export async function updateProductByProductId(
 //orders
 //order search queries type could be wrong since user also uses it
 export async function getOrders(
+  accessToken:AccessToken,
   timeframe?: TimeframeQuerySchema,
   queryParam?: OrdersQuerySchema,
-  accessToken:AccessToken
 ): Promise<Order[]> {
+    const additionalHeaders = await getAllHeaders();
+
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -238,34 +302,51 @@ export async function getOrders(
 
   const res = await fetch(url, {
     credentials: "include",
-    Authorization: `Bearer ${accessToken}`,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
+    },
   });
 
   return await handleResponse(res);
 }
 
 //categories
-export async function createCategory(category: string,accessToken:AccessToken): Promise<ProductCategory> {
+export async function createCategory(category: string, accessToken: AccessToken): Promise<ProductCategory> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/categories`, {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
     body: JSON.stringify({ category }),
   });
   return await handleResponse(res);
 }
 
-export async function deleteCategoryByCategoryId(id: string,accessToken:AccessToken): Promise<void> {
+export async function deleteCategoryByCategoryId(id: string, accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
   });
   return await handleResponse(res);

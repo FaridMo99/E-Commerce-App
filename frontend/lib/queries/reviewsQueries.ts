@@ -1,12 +1,14 @@
+"use server"
 import { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
 import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
-import { getCsrfHeader } from "../helpers";
+import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
 
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,
 ): Promise<ProductReview[]> {
+  const additionalHeaders = await getAllHeaders()
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -24,24 +26,42 @@ export async function getAllReviews(
 
   const url = `${apiBaseUrl}/reviews?${params.toString()}`;
 
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      ...additionalHeaders
+    }
+  });
   return await handleResponse(res);
 }
 
 export async function getReviewByReviewId(id: string): Promise<ProductReview> {
-  const res = await fetch(`${apiBaseUrl}/reviews/${id}`);
+    const additionalHeaders = await getAllHeaders();
+
+  const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
+    headers: {
+      ...additionalHeaders,
+    },
+  });
 
   return await handleResponse(res);
 }
 
-export async function deleteReviewByReviewId(id: string,accessToken:AccessToken): Promise<void> {
+export async function deleteReviewByReviewId(id: string, accessToken: AccessToken): Promise<void> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
     headers: {
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
-    }
+      ...additionalHeaders,
+    },
   });
   return await handleResponse(res);
 }
@@ -51,13 +71,20 @@ export async function setReviewPrivateOrPublic(
   newState: boolean,
   accessToken: AccessToken
 ): Promise<AuthProductReview> {
+  const [additionalHeaders, csrfHeader] = await Promise.all([
+    getAllHeaders(),
+    getCsrfHeader(),
+  ]);
+
+
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      ...getCsrfHeader(),
+      ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders
     },
     body: JSON.stringify({ is_public: newState }),
   });

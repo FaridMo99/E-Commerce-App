@@ -129,8 +129,11 @@ export async function hasRefreshToken(
   res: Response,
   next: NextFunction,
 ) {
+
   console.log(chalk.yellow(getTimestamp(),"Checking for Refresh Token..."))
   const token = req.cookies.refreshToken;
+
+  
   if (!token) {
     console.log(
       chalk.red(getTimestamp(), "No Refresh Token available, access denied!")

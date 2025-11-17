@@ -93,7 +93,7 @@ function makeVerifyCb(provider: UserCreatedBy) {
 
       req.oAuthUser = { user };
 
-      done(null, false);
+      done(null, user);
     } catch (err) {
       console.log(chalk.red(`${getTimestamp()} OAuth verification error for provider ${provider}`,err));
       done(err);

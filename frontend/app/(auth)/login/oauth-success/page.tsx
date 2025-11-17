@@ -14,10 +14,10 @@ async function page({ searchParams }: { searchParams?: { token: string } }) {
   const token = param.token;
 
   try {
-    const user = await getUser();
+    const user = await getUser(token);
     useAuth.setState({ accessToken: token, user });
   } catch (err) {
-    toast.error("Something went wrong. Try again.");
+    //toast.error("Something went wrong. Try again.");
     redirect("/login");
   }
 
