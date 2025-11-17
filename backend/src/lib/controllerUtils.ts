@@ -19,12 +19,3 @@ export async function deleteUserCart(
 
   return [_, cart];
 }
-
-
-export function calculateAverage(numbers:number[]) {
-
-    if (!numbers.length) return 0;
-    const sum = numbers.reduce((total, n) => total + n, 0);
-    return sum / numbers.length;
-
-}

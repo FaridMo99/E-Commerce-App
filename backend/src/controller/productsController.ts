@@ -32,9 +32,6 @@ import { getTimestamp } from "../lib/utils.js";
 import { productSelect, productWhere, reviewSelect, reviewWhere } from "../config/prismaHelpers.js";
 
 
-//render for admin products so he knows which arent public and which are
-//add a search query to get stock amount also for admin(doesnt need to be protected)
-//maybe types wont work bc they always strings
 export async function getAllProducts(
   req: Request<{}, {}, {}, ProductsQuerySchema>,
   res: Response,
@@ -87,7 +84,10 @@ export async function getAllProducts(
 
     console.log(chalk.green(`${getTimestamp()} Retrieved ${products.length} products`));
 
+    //calc rating average
+
     if (products.length > 0 && products[0]?.currency !== currency) {
+
       const formattedProducts = await Promise.all(
         products.map(async (product) => {
           const exchangedProduct = await exchangeToCurrencyInCents(
@@ -128,7 +128,7 @@ export async function getAllProducts(
       return res.status(200).json(formattedProducts);
     }
 
-    console.log(chalk.red(`${getTimestamp()} No products found`));
+    console.log(chalk.cyan(`${getTimestamp()} Products found but empty array`));
     return res.status(200).json(products);
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`,err));
@@ -216,10 +216,10 @@ export async function getProductByProductId(
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
 
     const product = await prisma.product.findUnique({
-      where: { ...productWhere, id},
+      where: { ...productWhere, id },
       select: {
-        ...productSelect
-      }
+        ...productSelect,
+      },
     });
 
     if (!product) {
@@ -345,8 +345,8 @@ export async function updateProductByProductId(
           updated_at: new Date(),
         },
         select: {
-          ...productSelect
-        }
+          ...productSelect,
+        },
       });
 
       if (is_public === false) {
@@ -381,6 +381,7 @@ export async function updateProductByProductId(
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
     );
+
     return res.status(200).json(product);
   } catch (err) {
     console.log(

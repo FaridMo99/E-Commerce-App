@@ -12,32 +12,16 @@ import { Bookmark, CameraIcon } from "lucide-react";
 import { useState } from "react";
 import CurrencySymbol from "./CurrencySymbol";
 import Link from "next/link";
-import useAuth from "@/stores/authStore";
-//make the card links
-
-//just placeholder
-export type Product = {
-  name: string;
-  price: number;
-  created_at: Date;
-  id: string;
-  description: string;
-  sale_price: number | null;
-  currency: CurrencyISO;
-  stock_quantity: number;
-  is_public: boolean;
-  deleted: boolean;
-  imageUrls: string[];
-};
+import { Product } from "@/types/types";
 
 type ProductCardProps = { product: Product };
 
-//move from backend to shared
-export type CurrencyISO = "EUR" | "USD" | "GBP";
 
 //have to be logged in to bookmark, unauthed bookmarking redirects to login page
 //also needs the data of if already bookmarked by user, not available rn
 //have to use server actions and optimistically update then manually
+
+
 function ProductCard({ product }: ProductCardProps) {
   //can do with hover stacking on top and tggling opacity
   const [showSecondImage, setShowSecondImage] = useState<boolean>(false);

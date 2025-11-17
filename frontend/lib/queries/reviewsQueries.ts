@@ -1,10 +1,11 @@
 import { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
 import { apiBaseUrl } from "@/config/constants";
+import { AuthProductReview, ProductReview } from "@/types/types";
 
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,
-): Promise<> {
+): Promise<ProductReview[]> {
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -26,14 +27,13 @@ export async function getAllReviews(
   return await handleResponse(res);
 }
 
-export async function getReviewByReviewId(id: string): Promise<> {
+export async function getReviewByReviewId(id: string): Promise<ProductReview> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`);
-  const data = await res.json();
 
   return await handleResponse(res);
 }
 
-export async function deleteReviewByReviewId(id: string): Promise<> {
+export async function deleteReviewByReviewId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
@@ -44,7 +44,7 @@ export async function deleteReviewByReviewId(id: string): Promise<> {
 export async function setReviewPrivateOrPublic(
   id: string,
   newState: boolean,
-): Promise<> {
+): Promise<AuthProductReview> {
   const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
     credentials: "include",
     method: "POST",

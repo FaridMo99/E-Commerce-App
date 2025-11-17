@@ -13,7 +13,7 @@ import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { cartSelect, orderSelect, productSelect, productWhere, reviewSelect, userSelect } from "../config/prismaHelpers.js";
+import { authenticatedReviewSelect, cartSelect, orderSelect, productSelect, productWhere, reviewSelect, userSelect } from "../config/prismaHelpers.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -268,7 +268,7 @@ export async function getReviewsByUser(
         user_id: userId
       },
       select: {
-        ...reviewSelect
+        ...authenticatedReviewSelect
       }
     });
     console.log(

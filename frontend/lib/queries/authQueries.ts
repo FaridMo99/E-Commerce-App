@@ -7,10 +7,10 @@
 "use server";
 import { LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
-import { AccessToken, AuthResponse, EmailSchema } from "@/types/types";
+import { AccessToken, AuthResponse, EmailSchema, User } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 
-//update error handling in all my fns to handle expected errors
+
 export async function login(
   credentials: LoginSchema,
   captchaToken: string,
@@ -81,7 +81,7 @@ export async function sendNewVerificationLink(
 export async function changePasswordAfterLogin(passwords: {
   oldPassword: string;
   newPassword: string;
-}): Promise<void> {
+}): Promise<User> {
   const { oldPassword, newPassword } = passwords;
   const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
     method: "PATCH",
@@ -89,7 +89,7 @@ export async function changePasswordAfterLogin(passwords: {
     body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",
   });
-  await handleResponse<void>(res);
+  return await handleResponse(res);
 }
 
 export async function forgotPasswordSendEmail(

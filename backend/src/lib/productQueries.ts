@@ -29,7 +29,6 @@ export async function getNewProducts(): Promise<Product[]> {
     orderBy: {
       published_at: "desc",
     },
-    take: limit,
     select: {
       ...productSelect
     }

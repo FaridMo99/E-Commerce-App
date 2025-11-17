@@ -3,8 +3,8 @@
 
 import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
-import { Product } from "@/components/main/ProductCard";
 import { apiBaseUrl } from "@/config/constants";
+import { AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
 
 export async function getProducts(
   queryParam?: ProductsQuerySchema,
@@ -41,7 +41,7 @@ export async function getProductByProductId(id: string): Promise<Product> {
   return await handleResponse(res);
 }
 
-export async function getAllProductReviewsByProductId(id: string): Promise<> {
+export async function getAllProductReviewsByProductId(id: string): Promise<ProductReview[]> {
   const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`);
   return await handleResponse(res);
 }
@@ -49,7 +49,7 @@ export async function getAllProductReviewsByProductId(id: string): Promise<> {
 export async function createProductReviewByProductId(
   id: string,
   content: ReviewSchema,
-): Promise<> {
+): Promise<AuthProductReview[]> {
   const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
@@ -59,13 +59,7 @@ export async function createProductReviewByProductId(
   return await handleResponse(res);
 }
 
-type HomeProducts = {
-  newProducts: Product[];
-  trendingProducts: Product[];
-  productsOnSale: Product[];
-  categoryProducts: Product[];
-  recentlyViewedProducts: Product[];
-};
+
 
 //have to give accesstoken when logged in to get recently viewed ones
 export async function getHomeProducts(): Promise<HomeProducts> {

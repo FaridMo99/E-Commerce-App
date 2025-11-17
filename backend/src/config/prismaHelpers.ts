@@ -16,6 +16,10 @@ export const userAuthenticatedSelect: Prisma.UserSelect = {
     birthdate: true,
 };
 
+export const categorySelect: Prisma.CategorySelect = {
+  name: true,
+  id: true,
+};
 
 export const productSelect: Prisma.ProductSelect = {
     id: true,
@@ -26,11 +30,11 @@ export const productSelect: Prisma.ProductSelect = {
     stock_quantity: true,
     published_at: true,
     imageUrls: true,
+    currency:true,
     category: {
         select:
         {
-            id: true,
-            name: true
+           ...categorySelect
         }
     },
     _count: {
@@ -42,13 +46,6 @@ export const productSelect: Prisma.ProductSelect = {
             }
         },
     },
-    //calc avg server side
-    reviews: {
-        select: {
-            rating:true
-        }
-    }
-    
 };
 
 export const orderSelect: Prisma.OrderSelect = {
@@ -109,10 +106,13 @@ export const reviewSelect: Prisma.ReviewSelect = {
     created_at:true
 };
 
-export const categorySelect: Prisma.CategorySelect = {
-    name: true,
-    id:true
-};
+
+
+//selects for users that are authed and need their own ressources too, like if not public but their own
+export const authenticatedReviewSelect: Prisma.ReviewSelect = {
+    ...reviewSelect,
+    is_public:true
+}
 
 //for admin
 export const settingsSelect: Prisma.SettingsSelect = {
@@ -124,7 +124,6 @@ export const settingsSelect: Prisma.SettingsSelect = {
 
 
 //WHERE CLAUSES that all have to have
-
 export const productWhere: Prisma.ProductWhereInput = {
     is_public: true,
     deleted:false
@@ -138,10 +137,15 @@ export const reviewWhere: Prisma.ReviewWhereInput = {
   is_public: true,
 };
 
+
+
 //change typing of product query fns to resmble these selects here
 
 //block adding products to shopping cart when theres no stock amount
 //make update itemquantity and in general adding product to cart cap at the stockamount limit
     //make this frontend wise and backend wise
-    
-//check how to handle private and public reviews  so this doesn tget out of sync
+
+
+//look how to implement to know if a product is favoredby user to give abilitiy to favor it
+
+// calc avg of product ratigns server side with the heper fn you created

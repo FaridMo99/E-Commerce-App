@@ -8,9 +8,18 @@ import {
 import { apiBaseUrl } from "@/config/constants";
 import { SettingsSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
+import {
+  AdminNewUser,
+  AdminRevenue,
+  AdminSetting,
+  AdminTopseller,
+  Order,
+  Product,
+  ProductCategory,
+} from "@/types/types";
 
 //analytics
-export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<> {
+export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<AdminRevenue> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -27,7 +36,7 @@ export async function getRevenue(timeframe?: TimeframeQuerySchema): Promise<> {
 
 export async function getTopsellers(
   timeframe?: TimeframeQuerySchema,
-): Promise<> {
+): Promise<AdminTopseller> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -41,7 +50,7 @@ export async function getTopsellers(
 
   return await handleResponse(res);
 }
-export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<> {
+export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<AdminNewUser> {
   const params = new URLSearchParams();
 
   if (timeframe) {
@@ -57,7 +66,7 @@ export async function getNewUsers(timeframe?: TimeframeQuerySchema): Promise<> {
 }
 
 //settings
-export async function getAllSettings(): Promise<> {
+export async function getAllSettings(): Promise<AdminSetting[]> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
   });
@@ -66,7 +75,7 @@ export async function getAllSettings(): Promise<> {
   return await handleResponse(res);
 }
 
-export async function createSetting(setting: SettingsSchema): Promise<> {
+export async function createSetting(setting: SettingsSchema): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "POST",
@@ -76,14 +85,14 @@ export async function createSetting(setting: SettingsSchema): Promise<> {
   return await handleResponse(res);
 }
 
-export async function getSettingBySettingId(id: string): Promise<> {
+export async function getSettingBySettingId(id: string): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
   });
   return await handleResponse(res);
 }
 
-export async function deleteAllSettings(): Promise<> {
+export async function deleteAllSettings(): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings`, {
     credentials: "include",
     method: "DELETE",
@@ -91,7 +100,7 @@ export async function deleteAllSettings(): Promise<> {
   return await handleResponse(res);
 }
 
-export async function deleteSettingBySettingId(id: string): Promise<> {
+export async function deleteSettingBySettingId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
@@ -102,7 +111,7 @@ export async function deleteSettingBySettingId(id: string): Promise<> {
 export async function updateSettingBySettingId(
   id: string,
   content: SettingsSchema,
-): Promise<> {
+): Promise<AdminSetting> {
   const res = await fetch(`${apiBaseUrl}/settings/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -117,7 +126,7 @@ export async function updateSettingBySettingId(
 
 //products
 //check how to do with images
-export async function createProduct(content: ProductSchema): Promise<> {
+export async function createProduct(content: ProductSchema): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
     method: "POST",
@@ -127,7 +136,7 @@ export async function createProduct(content: ProductSchema): Promise<> {
   return await handleResponse(res);
 }
 
-export async function deleteProductByProductId(id: string): Promise<> {
+export async function deleteProductByProductId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
@@ -138,7 +147,7 @@ export async function deleteProductByProductId(id: string): Promise<> {
 export async function updateProductByProductId(
   id: string,
   content: UpdateProductSchema,
-): Promise<> {
+): Promise<Product> {
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -153,7 +162,7 @@ export async function updateProductByProductId(
 export async function getOrders(
   timeframe?: TimeframeQuerySchema,
   queryParam?: OrdersQuerySchema,
-): Promise<> {
+): Promise<Order[]> {
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -177,7 +186,7 @@ export async function getOrders(
 }
 
 //categories
-export async function createCategory(category: string): Promise<> {
+export async function createCategory(category: string): Promise<ProductCategory> {
   const res = await fetch(`${apiBaseUrl}/categories`, {
     credentials: "include",
     method: "POST",
@@ -189,7 +198,7 @@ export async function createCategory(category: string): Promise<> {
   return await handleResponse(res);
 }
 
-export async function deleteCategoryByCategoryId(id: string): Promise<> {
+export async function deleteCategoryByCategoryId(id: string): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",

@@ -4,6 +4,7 @@ import { sortOrderSchema } from "@monorepo/shared";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
+import { productSelect } from "../config/prismaHelpers.js";
 
 
 export async function getRevenue(
@@ -40,7 +41,7 @@ export async function getRevenue(
         `${getTimestamp()} Revenue fetched successfully: ${revenue._sum.total_amount}`
       )
     );
-    return res.status(200).json(revenue);
+    return res.status(200).json({revenue:revenue._sum.total_amount});
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch revenue:`, err));
     next(err);
@@ -65,57 +66,61 @@ export async function getTopsellers(
     const validatedOrder = sortOrderSchema.safeParse(sortOrder);
     const orderBy = validatedOrder.data ?? "desc";
 
-    const products = await prisma.product.findMany({
+    // Aggregate total sold per product
+    const topSellers = await prisma.order_Item.groupBy({
+      by: ["product_id"],
       where: {
-        order_items: {
-          some: {
-            order: {
-              ordered_at: {
-                ...(from && { gte: from }),
-                lte: to,
-              },
-            },
+        order: {
+          ordered_at: {
+            ...(from && { gte: from }),
+            ...(to && { lte: to }),
           },
         },
       },
-      include: {
-        order_items: {
-          where: {
-            order: {
-              ordered_at: {
-                ...(from && { gte: from }),
-                lte: to,
-              },
-            },
-          },
-          select: {
-            quantity: true,
-          },
+      _sum: {
+        quantity: true,
+      },
+      orderBy: {
+        _sum: {
+          quantity: orderBy === "asc" ? "asc" : "desc",
         },
+      },
+      take: Number(limit),
+    });
+
+    // Fetch product info for each top seller
+    const productsWithInfo = await prisma.product.findMany({
+      where: {
+        id: { in: topSellers.map((s) => s.product_id) },
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        sale_price: true,
+        currency: true,
       },
     });
 
-    const productsWithSales = products.map((p) => ({
-      product: p,
-      totalSold: p.order_items.reduce((sum, oi) => sum + oi.quantity, 0),
-      price: formatPriceForClient(p.price),
-      sale_price: p.sale_price
-        ? formatPriceForClient(p.sale_price)
-        : p.sale_price,
-    }));
-
-    productsWithSales.sort((a, b) =>
-      orderBy === "asc" ? a.totalSold - b.totalSold : b.totalSold - a.totalSold
-    );
-
-    const topSellers = productsWithSales.slice(0, Number(limit));
+    // Map products to include total sold and formatted prices
+    const response = topSellers.map((s) => {
+      const product = productsWithInfo.find((p) => p.id === s.product_id)!;
+      return {
+        product,
+        totalSold: s._sum.quantity ?? 0,
+        price: formatPriceForClient(product.price),
+        sale_price: product.sale_price
+          ? formatPriceForClient(product.sale_price)
+          : null,
+      };
+    });
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Top sellers fetched successfully. Count: ${topSellers.length}`
+        `${getTimestamp()} Top sellers fetched successfully. Count: ${response.length}`
       )
     );
-    res.json(topSellers);
+    res.json(response);
   } catch (error) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch top sellers:`, error)
@@ -147,7 +152,7 @@ export async function getNewUsers(
     console.log(
       chalk.green(`${getTimestamp()} New users count fetched: ${userCount}`)
     );
-    return res.status(200).json(userCount);
+    return res.status(200).json({count:userCount});
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch new users:`, err));
     next(err);
