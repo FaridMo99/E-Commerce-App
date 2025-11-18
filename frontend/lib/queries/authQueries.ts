@@ -7,7 +7,7 @@ import { handleResponse } from "./utils";
 import { AccessToken, AuthResponse, EmailSchema, User } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../serverHelpers";
-
+import { cookies } from "next/headers";
 
 export async function login(
   credentials: LoginSchema,
@@ -46,9 +46,10 @@ export async function signup(
 }
 
 export async function logout(accessToken: AccessToken): Promise<void> {
-  const [additionalHeaders, csrfHeader] = await Promise.all([
+  const [additionalHeaders, csrfHeader,cookieStore] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
+    cookies()
   ]);
 
 
@@ -62,6 +63,9 @@ export async function logout(accessToken: AccessToken): Promise<void> {
     },
   });
   await handleResponse<void>(res);
+  cookieStore.delete("refreshToken");
+  cookieStore.delete("csrfToken")
+
 }
 
 export async function verifyAfterEmailLink(
@@ -146,7 +150,7 @@ export async function forgotPasswordSendEmail(
 }
 
 export async function getNewRefreshToken(): Promise<AuthResponse> {
-      const additionalHeaders = await getAllHeaders();
+  const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${apiBaseUrl}/auth/refresh-token`, {
     method: "POST",
@@ -155,7 +159,6 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
       ...additionalHeaders,
     },
   });
-
   return await handleResponse<AuthResponse>(res);
 }
 

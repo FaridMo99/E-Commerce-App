@@ -1,14 +1,16 @@
 import ProductsCarousel from "@/components/home/ProductsCarousel";
+import RecentlyViewedProductsCarousel from "@/components/home/RecentlyViewedProductsCarousel";
+import QueryContext from "@/context/QueryContext";
 import { getHomeProducts } from "@/lib/queries/productQueries";
 import "server-only";
 
 export default async function Home() {
+
   const {
     newProducts,
     trendingProducts,
     productsOnSale,
     categoryProducts,
-    recentlyViewedProducts,
   } = await getHomeProducts();
 
   return (
@@ -34,12 +36,9 @@ export default async function Home() {
           products={categoryProducts}
         />
       )}
-      {recentlyViewedProducts.length > 0 && (
-        <ProductsCarousel
-          title="Recently Viewed"
-          products={recentlyViewedProducts}
-        />
-      )}
+      <QueryContext>
+        <RecentlyViewedProductsCarousel />
+      </QueryContext>
     </main>
   );
 }

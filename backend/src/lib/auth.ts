@@ -18,9 +18,12 @@ import chalk from "chalk";
 //issues new refresh and csrf tokens and returns access token
 export async function issueTokens(
   user: User,
-  res: Response
+  res: Response,
+  deviceId?:string,
 ): Promise<AccessToken> {
   try {
+    const finalDeviceId = deviceId ?? v4()
+
     const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       JWT_ACCESS_TOKEN_SECRET,
@@ -29,9 +32,8 @@ export async function issueTokens(
       }
     );
 
-    const deviceId = v4();
     const refreshToken = jwt.sign(
-      { userId: user.id, deviceId },
+      { userId: user.id, deviceId:finalDeviceId },
       JWT_REFRESH_TOKEN_SECRET,
       {
         expiresIn: "7d",
@@ -43,7 +45,7 @@ export async function issueTokens(
         token: await bcrypt.hash(refreshToken, 10),
         userId: user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        deviceId,
+        deviceId:finalDeviceId,
       },
     });
 
@@ -56,19 +58,21 @@ export async function issueTokens(
     const csrfToken = v4();
     const maxAge = 7 * 24 * 60 * 60 * 1000;
 
-    res.cookie("csrfToken", csrfToken, {
-      httpOnly: false,
-      secure: NODE_ENV !== "dev",
-      sameSite: NODE_ENV === "dev" ? "lax" : "none",
-      maxAge,
-    });
+   const isProd = NODE_ENV !== "dev";
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: NODE_ENV !== "dev",
-      sameSite: NODE_ENV === "dev" ? "lax" : "none",
-      maxAge,
-    });
+   res.cookie("csrfToken", csrfToken, {
+     httpOnly: false,
+     secure: isProd,
+     sameSite: "lax",
+     maxAge,
+   });
+
+   res.cookie("refreshToken", refreshToken, {
+     httpOnly: true,
+     secure: isProd,
+     sameSite: "lax",
+     maxAge,
+   });
 
     console.log(
       chalk.green(
@@ -91,14 +95,16 @@ export async function issueTokens(
 export async function OauthLogin(req: Request, res: Response) {
   try {
     const user = req.oAuthUser?.user!;
+
     const accessToken = await issueTokens(user, res);
+    
     console.log(
       chalk.green(
         `${getTimestamp()} OAuth login successful for user ${user.id}`
       )
     );
     return res.redirect(
-      `${CLIENT_ORIGIN}/login/oauth-success?token=${accessToken}`
+      `${CLIENT_ORIGIN}/oauth-success?token=${accessToken}`
     );
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} OAuth login failed`, err));

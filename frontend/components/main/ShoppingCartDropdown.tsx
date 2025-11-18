@@ -1,4 +1,4 @@
-import { Cart } from "@/lib/queries/usersQueries";
+
 import ItemCountDot from "./ItemCountDot";
 import { ShoppingCart } from "lucide-react";
 import {
@@ -10,12 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import useAuth from "@/stores/authStore";
+import { Cart } from "@/types/types";
 
 //check logic if not authed to log in then
 //check how to fetch, maybe after layout just the count and on click here the real items for performance
 function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
-  const itemsLength = cart?.cart?.items.length;
+  const itemsLength = cart?.items.length;
   const accessToken = useAuth.getState().accessToken;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,11 +34,13 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
         <DropdownMenuLabel>Items in Cart</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {itemsLength && itemsLength > 0 ? (
-          cart?.cart?.items.map((item) => (
+          cart?.items.map((item) => (
             <DropdownMenuItem
               className="justify-between"
               key={item.id}
-            ></DropdownMenuItem>
+            >
+              {item.product.name}
+            </DropdownMenuItem>
           ))
         ) : (
           <DropdownMenuItem className="hover:bg-transparent hover:text-inherit focus:bg-transparent focus:text-inherit">

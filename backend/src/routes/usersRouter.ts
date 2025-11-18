@@ -15,6 +15,7 @@ import {
   deleteFavoriteItem,
   updateItemQuantity,
   getRecentlyViewedProducts,
+  addProductToRecentlyViewedProductsByProductId,
 } from "../controller/usersController.js";
 import {
   hasCsrfToken,
@@ -84,6 +85,12 @@ usersRouter.get(
   "/me/recently-viewed",
   isAuthenticated,
   getRecentlyViewedProducts,
+);
+
+usersRouter.post(
+  "/me/recently-viewed",
+  isAuthenticated,
+  addProductToRecentlyViewedProductsByProductId
 );
 
 export default usersRouter;

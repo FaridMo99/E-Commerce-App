@@ -11,7 +11,8 @@ import { validateTurnstile } from "../lib/auth.js";
 import { getTimestamp } from "../lib/utils.js";
 
 export function validateLogin(req: Request, res: Response, next: NextFunction) {
-  console.log(chalk.yellow(getTimestamp(),"Validating Login Input..."))
+  console.log(chalk.yellow(getTimestamp(), "Validating Login Input..."))
+  console.log(req.body)
   const validated = loginSchema.safeParse(req.body);
 
   if (!validated.success){

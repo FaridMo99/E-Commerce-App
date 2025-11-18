@@ -13,7 +13,15 @@ import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { authenticatedReviewSelect, cartSelect, orderSelect, productSelect, productWhere, reviewSelect, userSelect } from "../config/prismaHelpers.js";
+import {
+  authenticatedReviewSelect,
+  cartSelect,
+  orderSelect,
+  productSelect,
+  productWhere,
+  reviewSelect,
+  userSelect,
+} from "../config/prismaHelpers.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -32,11 +40,11 @@ export async function getUserByUserId(
 
     const user = await prisma.user.findUnique({
       where: {
-        id
+        id,
       },
       select: {
-        ...userSelect
-      }
+        ...userSelect,
+      },
     });
 
     if (!user) {
@@ -95,8 +103,8 @@ export async function updateUserByUserId(
       where: { id },
       data,
       select: {
-        ...userSelect
-      }
+        ...userSelect,
+      },
     });
 
     console.log(
@@ -165,7 +173,7 @@ export async function getAllOrdersByUser(
         ...(status ? { status } : {}),
       },
       select: {
-        ...orderSelect
+        ...orderSelect,
       },
       orderBy: {
         [sort]: order,
@@ -217,11 +225,11 @@ export async function getSingleOrderByUser(
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
-        user_id: userId
+        user_id: userId,
       },
       select: {
-        ...orderSelect
-      }
+        ...orderSelect,
+      },
     });
 
     if (!order) {
@@ -265,11 +273,11 @@ export async function getReviewsByUser(
     );
     const reviews = await prisma.review.findMany({
       where: {
-        user_id: userId
+        user_id: userId,
       },
       select: {
-        ...authenticatedReviewSelect
-      }
+        ...authenticatedReviewSelect,
+      },
     });
     console.log(
       chalk.green(
@@ -302,11 +310,11 @@ export async function getUserCart(
     );
     const cart = await prisma.cart.findFirst({
       where: {
-        userId
+        userId,
       },
       select: {
-        ...cartSelect
-      }
+        ...cartSelect,
+      },
     });
 
     if (!cart) {
@@ -395,9 +403,10 @@ export async function addProductToUserCart(
       select: {
         cart: {
           select: {
-          ...cartSelect
-        }
-      } },
+            ...cartSelect,
+          },
+        },
+      },
     });
 
     console.log(
@@ -444,9 +453,10 @@ export async function removeProductFromUserCart(
       select: {
         cart: {
           select: {
-          ...cartSelect
-        }
-      } },
+            ...cartSelect,
+          },
+        },
+      },
     });
 
     if (!cart) {
@@ -509,9 +519,9 @@ export async function updateItemQuantity(
       select: {
         cart: {
           select: {
-            ...cartSelect
-          }
-        }
+            ...cartSelect,
+          },
+        },
       },
     });
 
@@ -559,16 +569,16 @@ export async function getFavoriteItems(
         id: userId,
         favorites: {
           some: {
-            ...productWhere
+            ...productWhere,
           },
         },
       },
       select: {
         favorites: {
           select: {
-            ...productSelect
-          }
-        }
+            ...productSelect,
+          },
+        },
       },
     });
 
@@ -682,7 +692,7 @@ export async function addFavoriteItem(
       data: {
         favorites: {
           connect: {
-            id: productId
+            id: productId,
           },
         },
       },
@@ -709,9 +719,9 @@ export async function addFavoriteItem(
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: {
-        ...productSelect
-      }
-    })
+        ...productSelect,
+      },
+    });
 
     return res.status(200).json(product);
   } catch (err) {
@@ -745,7 +755,7 @@ export async function getRecentlyViewedProducts(
         recentlyViewedProducts: {
           some: {
             product: {
-              ...productWhere
+              ...productWhere,
             },
           },
         },
@@ -755,10 +765,10 @@ export async function getRecentlyViewedProducts(
           select: {
             product: {
               select: {
-                ...productSelect
-              }
-            }
-          }
+                ...productSelect,
+              },
+            },
+          },
         },
       },
     });
@@ -791,6 +801,59 @@ export async function getRecentlyViewedProducts(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch recently viewed products for user ${userId}:`,
+        err
+      )
+    );
+    next(err);
+  }
+}
+
+export async function addProductToRecentlyViewedProductsByProductId(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+  const productId = req.body.productId
+  
+  if (!productId) return res.status(400).json({ message: "No Product provided" })
+  
+  try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} adding product to recently viewed products for user ${userId}`
+      )
+    );
+    const product = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        recentlyViewedProducts: {
+          connect: {
+            userId_productId: {
+              userId,
+              productId,
+            },
+          },
+        },
+      },
+      select: {
+        ...productSelect
+      }
+    });
+
+
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Successfully added recently viewed product for user ${userId}`
+      )
+    );
+    return res.status(200).json(product);
+  } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to add to recently viewed products for user ${userId}:`,
         err
       )
     );

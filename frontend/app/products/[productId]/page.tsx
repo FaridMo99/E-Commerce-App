@@ -1,12 +1,40 @@
 import CurrencySymbol from "@/components/main/CurrencySymbol";
 import { getProductByProductId } from "@/lib/queries/productQueries";
+import { addProductToRecentlyViewedProductsByProductId } from "@/lib/queries/usersQueries";
+import useAuth from "@/stores/authStore";
+import { Product } from "@/types/types";
+import { notFound } from "next/navigation";
 import "server-only";
 
 //nextjs complaint is wrong for await
 //placeholder when theres no image, do that for all components that expect images
+//post requst to recently viewed
 async function page({ params }: { params: { productId: string } }) {
   const { productId } = await params;
-  const product = await getProductByProductId(productId);
+  const accessToken = useAuth.getState().accessToken
+  let product:Product
+  
+  try {
+    
+    if (accessToken) {
+      const [_, productReturn] = await Promise.all([getProductByProductId(productId),
+        addProductToRecentlyViewedProductsByProductId(productId, accessToken)]);
+      
+      if (!productReturn) {
+        return notFound()
+      }
+      product = productReturn
+    }
+    else {
+          product = await getProductByProductId(productId);
+          if (!product) return notFound();
+    }
+  } catch (err) {
+    console.log(err)
+    notFound()
+
+  }
+
   return (
     <main>
       <section className="flex">

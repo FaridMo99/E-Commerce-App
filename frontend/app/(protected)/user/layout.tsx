@@ -1,20 +1,28 @@
+import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { getNewRefreshToken } from "@/lib/queries/authQueries";
-import useAuth from "@/stores/authStore";
+import { AccessToken, ChildrenProps, User } from "@/types/types";
 import { redirect } from "next/navigation";
-import React from "react";
 import "server-only";
 
-async function layout({ children }: { children: React.ReactNode }) {
+async function layout({ children }: ChildrenProps) {
+  let res;
+    let user:User | undefined
+    let accessToken:AccessToken | undefined
+  
   try {
-    const res = await getNewRefreshToken();
-    //maybe move this line inside the fn to avoid deduplication everywhere
-    useAuth.setState({ accessToken: res.accessToken, user: res.user });
+    res = await getNewRefreshToken();
   } catch (err) {
-    console.log("User not logged in, Bad Response: " + err);
-    return redirect("/");
+    console.log("User not logged in: " + err);
   }
 
-  return children;
+  if (!res?.accessToken) {
+    redirect("/");
+  }
+
+  return <>
+    <AuthZustandSetter accessToken={accessToken} user={user} />
+    {children}
+  </>
 }
 
 export default layout;

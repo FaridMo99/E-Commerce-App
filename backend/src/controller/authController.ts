@@ -10,7 +10,7 @@ import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import { sendVerificationEmail } from "../services/email.js";
 import { issueTokens } from "../lib/auth.js";
-import { JWT_EMAIL_TOKEN_SECRET, NODE_ENV } from "../config/env.js";
+import { JWT_EMAIL_TOKEN_SECRET } from "../config/env.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import { userSelect } from "../config/prismaHelpers.js";
@@ -37,7 +37,6 @@ export async function login(
       );
       return res.status(401).json({ message: "Email or Password is wrong" });
     }
-
     if (!user.verified) {
       console.log(user)
       console.log(
@@ -89,7 +88,7 @@ export async function login(
       name: user.name,
       role:user.role
     }
-    return res.status(200).json({ accessToken, safeUser });
+    return res.status(200).json({ accessToken, user:safeUser });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Error during login for email: ${email}`),
@@ -166,13 +165,9 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
       });
     }
 
-    res.cookie("refreshToken", "", {
-      httpOnly: true,
-      secure: NODE_ENV !== "dev",
-      expires: new Date(0),
-      path: "/",
-      sameSite: "strict",
-    });
+    res.clearCookie("refreshToken");
+
+    res.clearCookie("csrfToken");
 
     console.log(
       chalk.green(
@@ -220,9 +215,6 @@ export async function verifyUser(
     const user = await prisma.user.update({
       where: { id: userId },
       data: { verified: true },
-      select: {
-        ...userSelect
-      }
     });
 
     await redis.del(`verifyToken:${userId}`);
@@ -233,7 +225,11 @@ export async function verifyUser(
         `${getTimestamp()} User verified successfully: userId ${userId}`
       )
     );
-    return res.status(200).json({ accessToken, user });
+        const safeUser = {
+          name: user.name,
+          role: user.role,
+        };
+    return res.status(200).json({ accessToken, user:safeUser });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       console.log(chalk.red(`${getTimestamp()} Verification token expired`));
@@ -243,56 +239,6 @@ export async function verifyUser(
     return next(err);
   }
 }
-
-export async function sendNewVerifyLink(
-  req: Request<{}, {}, { email: string }>,
-  res: Response,
-  next: NextFunction
-) {
-  const { email } = req.body;
-  try {
-    console.log(
-      chalk.yellow(
-        `${getTimestamp()} Sending new verification link to email: ${email}`
-      )
-    );
-
-    const user = await prisma.user.findFirst({ where: { email } });
-    if (!user) {
-      console.log(chalk.red(`${getTimestamp()} User not found: ${email}`));
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (user.verified) {
-      console.log(
-        chalk.yellow(`${getTimestamp()} User already verified: ${email}`)
-      );
-      return res.status(400).json({ message: "User already verified" });
-    }
-
-    await redis.del(`verifyToken:${user.id}`);
-    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
-      expiresIn: "1d",
-    });
-    await redis.setEx(`verifyToken:${user.id}`, 60 * 60 * 24, token);
-
-    await sendVerificationEmail(user.email, "verify-success", token);
-    console.log(
-      chalk.green(`${getTimestamp()} New verification link sent to ${email}`)
-    );
-    return res
-      .status(201)
-      .json({ message: "Sent new Link, check your Email." });
-  } catch (err) {
-    console.log(
-      chalk.red(
-        `${getTimestamp()} Error sending new verification link to ${email}`
-      ),
-      err
-    );
-    next(err);
-  }
-}
-
 
 export async function changePassword(
   req: Request<{}, {}, { password?: string; token?: string }>,
@@ -339,9 +285,6 @@ export async function changePassword(
     const user = await prisma.user.update({
       where: { id: payload.id },
       data: { password: hashedPassword },
-      select: {
-        ...userSelect
-      }
     });
 
     await redis.del(redisTokenKey);
@@ -352,10 +295,61 @@ export async function changePassword(
         `${getTimestamp()} Password changed successfully for userId: ${payload.id}`
       )
     );
-    return res.status(200).json({ accessToken, user });
+
+    const safeUser = {
+      name: user.name,
+      role: user.role,
+    };
+    return res.status(200).json({ accessToken, user: safeUser });
+  } catch (err) {
+    console.log(chalk.red(`${getTimestamp()} Error in changePassword`), err);
+    next(err);
+  }
+}
+
+export async function sendNewVerifyLink(
+  req: Request<{}, {}, { email: string }>,
+  res: Response,
+  next: NextFunction
+) {
+  const { email } = req.body;
+  try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Sending new verification link to email: ${email}`
+      )
+    );
+
+    const user = await prisma.user.findFirst({ where: { email } });
+    if (!user) {
+      console.log(chalk.red(`${getTimestamp()} User not found: ${email}`));
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.verified) {
+      console.log(
+        chalk.yellow(`${getTimestamp()} User already verified: ${email}`)
+      );
+      return res.status(400).json({ message: "User already verified" });
+    }
+
+    await redis.del(`verifyToken:${user.id}`);
+    const token = jwt.sign({ id: user.id }, JWT_EMAIL_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+    await redis.setEx(`verifyToken:${user.id}`, 60 * 60 * 24, token);
+
+    await sendVerificationEmail(user.email, "verify-success", token);
+    console.log(
+      chalk.green(`${getTimestamp()} New verification link sent to ${email}`)
+    );
+    return res
+      .status(201)
+      .json({ message: "Sent new Link, check your Email." });
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp()} Error in changePassword`),
+      chalk.red(
+        `${getTimestamp()} Error sending new verification link to ${email}`
+      ),
       err
     );
     next(err);
@@ -418,13 +412,16 @@ export async function issueRefreshToken(
       `${getTimestamp()} issueRefreshToken called for userId: ${token?.userId}`
     )
   );
-
+  
   try {
+
     const dbToken = await prisma.refreshToken.findFirst({
       where: { deviceId: token.deviceId },
     });
+
     if (!dbToken)
       return res.status(401).json({ message: "Invalid refresh token" });
+
     if (dbToken.expiresAt < new Date()) {
       await prisma.refreshToken.delete({ where: { id: dbToken?.id } });
       return res.status(401).json({ message: "Expired refresh token" });
@@ -433,9 +430,6 @@ export async function issueRefreshToken(
     const user = await prisma.user.findUnique({
       where: {
         id: token.userId
-      },
-      select: {
-        ...userSelect
       }
     });
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -446,14 +440,24 @@ export async function issueRefreshToken(
     await prisma.refreshToken.deleteMany({
       where: { deviceId: dbToken.deviceId },
     });
-    const accessToken = await issueTokens(user, res);
+
+    res.clearCookie("refreshToken");
+    res.clearCookie("csrfToken");
+
+    const accessToken = await issueTokens(user, res,token.deviceId);
 
     console.log(
       chalk.green(
         `${getTimestamp()} Refresh token issued successfully for userId: ${token.userId}`
       )
     );
-    return res.status(200).json({ accessToken, user });
+
+    const safeUser = {
+      name: user.name,
+      role: user.role,
+    };
+    
+    return res.status(200).json({ accessToken, user:safeUser });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       console.log(

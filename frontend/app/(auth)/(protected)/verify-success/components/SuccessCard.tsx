@@ -1,13 +1,26 @@
 "use client";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import useAuth from "@/stores/authStore";
+import { AccessToken, User } from "@/types/types";
 import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-function SuccessCard({ action = "Signup" }: { action?: string }) {
+type SuccessCardProps = {
+  action: "Signup" | "Login",
+  accessToken: AccessToken,
+  user:User
+}
+
+function SuccessCard({ action, accessToken, user }:SuccessCardProps) {
   const [counter, setCounter] = useState<number>(3);
   const router = useRouter();
+  const setState = useAuth(state => state.setState)
 
+    useEffect(() => {
+      setState(accessToken, user);
+    }, [accessToken, user, setState]);
+  
   useEffect(() => {
     if (counter === 0) {
       router.push("/");

@@ -8,7 +8,7 @@ import { disconnectAllServices } from "./src/lib/disconnectHandler.js";
 import cookieParser from "cookie-parser";
 import apiRouter from "./src/routes/apiRouter.js";
 import passport from "./src/services/passport.js";
-import { PORT } from "./src/config/env.js";
+import { CLIENT_ORIGIN, PORT } from "./src/config/env.js";
 import "./src/services/cronJobs.js";
 import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
 import prisma from "./src/services/prisma.js";
@@ -25,7 +25,7 @@ app.use(loggerMiddleware);
 
 app.use(
   cors({
-    origin: [process.env.CLIENT_ORIGIN!],
+    origin: [CLIENT_ORIGIN],
     credentials: true,
   }),
 );

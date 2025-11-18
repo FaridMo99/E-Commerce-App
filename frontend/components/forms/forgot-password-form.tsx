@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ import { EmailSchema } from "@/types/types";
 import { forgotPasswordSendEmail } from "@/lib/queries/authQueries";
 import InputValidationFailedText from "../main/InputValidationFailedText";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 //redirect on success
 function ForgotPasswordForm({ headerText }: { headerText: string }) {
@@ -103,6 +104,11 @@ function ForgotPasswordForm({ headerText }: { headerText: string }) {
                 )}
               </Button>
             </FieldGroup>
+            <Field className="mt-4">
+              <FieldDescription className="text-center">
+                <Link href="/login"> Back to Login</Link>
+              </FieldDescription>
+            </Field>
           </form>
         </CardContent>
       </Card>

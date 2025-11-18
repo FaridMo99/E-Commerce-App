@@ -29,8 +29,12 @@ import redis from "../services/redis.js";
 import type { Product } from "../generated/prisma/client.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { productSelect, productWhere, reviewSelect, reviewWhere } from "../config/prismaHelpers.js";
-
+import {
+  productSelect,
+  productWhere,
+  reviewSelect,
+  reviewWhere,
+} from "../config/prismaHelpers.js";
 
 export async function getAllProducts(
   req: Request<{}, {}, {}, ProductsQuerySchema>,
@@ -56,7 +60,11 @@ export async function getAllProducts(
   }
 
   try {
-    console.log(chalk.yellow(`${getTimestamp()} Fetching all products for role ${role || "guest"}`));
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Fetching all products for role ${role || "guest"}`
+      )
+    );
 
     const products = await prisma.product.findMany({
       where: {
@@ -78,16 +86,17 @@ export async function getAllProducts(
       ...(limit && { take: parseInt(limit) }),
       ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
       select: {
-        ...productSelect
-      }
+        ...productSelect,
+      },
     });
 
-    console.log(chalk.green(`${getTimestamp()} Retrieved ${products.length} products`));
+    console.log(
+      chalk.green(`${getTimestamp()} Retrieved ${products.length} products`)
+    );
 
     //calc rating average
 
     if (products.length > 0 && products[0]?.currency !== currency) {
-
       const formattedProducts = await Promise.all(
         products.map(async (product) => {
           const exchangedProduct = await exchangeToCurrencyInCents(
@@ -112,7 +121,9 @@ export async function getAllProducts(
           return product;
         })
       );
-      console.log(chalk.green(`${getTimestamp()} Products converted to ${currency}`));
+      console.log(
+        chalk.green(`${getTimestamp()} Products converted to ${currency}`)
+      );
       return res.status(200).json(formattedProducts);
     }
 
@@ -124,14 +135,16 @@ export async function getAllProducts(
         }
         return product;
       });
-      console.log(chalk.green(`${getTimestamp()} Products formatted in original currency`));
+      console.log(
+        chalk.green(`${getTimestamp()} Products formatted in original currency`)
+      );
       return res.status(200).json(formattedProducts);
     }
 
     console.log(chalk.cyan(`${getTimestamp()} Products found but empty array`));
     return res.status(200).json(products);
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`,err));
+    console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`, err));
     next(err);
   }
 }
@@ -145,7 +158,9 @@ export async function createProduct(
   const images = req.files;
 
   try {
-    console.log(chalk.yellow(`${getTimestamp()} Creating product ${product.name}`));
+    console.log(
+      chalk.yellow(`${getTimestamp()} Creating product ${product.name}`)
+    );
 
     let imageUrls: string[] | undefined;
     if (images && Array.isArray(images)) {
@@ -153,7 +168,9 @@ export async function createProduct(
         images.map((image) => handleCloudUpload(image))
       );
       imageUrls = results.map((result) => result.secure_url);
-      console.log(chalk.green(`${getTimestamp()} Uploaded ${imageUrls.length} images`));
+      console.log(
+        chalk.green(`${getTimestamp()} Uploaded ${imageUrls.length} images`)
+      );
     }
 
     const newProduct = await prisma.$transaction(async (tx) => {
@@ -176,8 +193,8 @@ export async function createProduct(
           category: { connect: { name: product.category } },
         },
         select: {
-          ...productSelect
-        }
+          ...productSelect,
+        },
       });
     });
 
@@ -192,10 +209,19 @@ export async function createProduct(
       newProduct.sale_price = formatPriceForClient(newProduct.sale_price);
     }
 
-    console.log(chalk.green(`${getTimestamp()} Product ${product.name} created successfully`));
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Product ${product.name} created successfully`
+      )
+    );
     return res.status(201).json(newProduct);
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Failed to create product ${product.name}:`,err));
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to create product ${product.name}:`,
+        err
+      )
+    );
     next(err);
   }
 }
@@ -246,10 +272,14 @@ export async function getProductByProductId(
       );
     }
 
-    console.log(chalk.green(`${getTimestamp()} Product ${id} fetched successfully`));
+    console.log(
+      chalk.green(`${getTimestamp()} Product ${id} fetched successfully`)
+    );
     return res.status(200).json(product);
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Failed to fetch product ${id}:`,err));
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to fetch product ${id}:`, err)
+    );
     next(err);
   }
 }
@@ -281,7 +311,7 @@ export async function deleteProductByProductId(
       await Promise.all(imagesToDelete.map((url) => deleteCloudAsset(url)));
     }
 
-      await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const updatedProduct = await tx.product.update({
         where: { id },
         data: { deleted: true, imageUrls: preProduct.imageUrls.slice(0, 1) },
@@ -408,11 +438,11 @@ export async function getAllReviewsByProductId(
     const reviews = await prisma.review.findMany({
       where: {
         product_id: productId,
-        ...reviewWhere
+        ...reviewWhere,
       },
       select: {
-        ...reviewSelect
-      }
+        ...reviewSelect,
+      },
     });
 
     console.log(
@@ -457,8 +487,8 @@ export async function createReviewByProductId(
         ...(isPublic !== undefined && { is_public: isPublic }),
       },
       select: {
-        ...reviewSelect
-      }
+        ...reviewSelect,
+      },
     });
 
     console.log(
@@ -482,18 +512,13 @@ export async function getHomeProducts(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id;
   let currency: CurrencyISO | undefined = req.cookies.currency;
 
   if (!currency || !currencySchema.safeParse(currency).success)
     currency = "USD";
 
   try {
-    console.log(
-      chalk.yellow(
-        `${getTimestamp()} Fetching home products for user ${userId || "guest"}`
-      )
-    );
+    console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));
 
     const categories = await prisma.category.findMany();
     const randomCategory =
@@ -506,8 +531,8 @@ export async function getHomeProducts(
       getTrendingProducts(),
       getSaleProducts(),
     ];
+
     if (randomCategory) promises.push(getCategoryProducts(randomCategory));
-    if (userId) promises.push(getRecentlyViewedProducts(userId));
 
     const results = await Promise.all(promises);
 
@@ -516,7 +541,6 @@ export async function getHomeProducts(
       trendingProducts,
       productsOnSale,
       categoryProducts = [],
-      recentlyViewedProducts = [],
     ] = results;
 
     console.log(
@@ -527,7 +551,6 @@ export async function getHomeProducts(
       trendingProducts,
       productsOnSale,
       categoryProducts,
-      recentlyViewedProducts,
     });
   } catch (err) {
     console.log(

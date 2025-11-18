@@ -1,4 +1,5 @@
 import { changePasswordSchema, emailSchema } from "@/schemas/schemas";
+import { ReactNode } from "react";
 import z from "zod";
 
 
@@ -34,7 +35,7 @@ export type Product = {
     sale_price: number | null,
     name: string,
     description: string,
-    curreny:CurrencyISO,
+    currency:CurrencyISO,
     stock_quantity: number,
     published_at: Date | null, // can be only null when user is not admin, and admin also gets is_public field with boolean value
     imageUrls: string[],
@@ -87,7 +88,6 @@ export type HomeProducts = {
   trendingProducts: Product[];
   productsOnSale: Product[];
   categoryProducts: Product[];
-  recentlyViewedProducts: Product[];
 };
 
 
@@ -136,3 +136,13 @@ export type AdminTopseller = {
 //move all types from other files here
 
 //somehow select on backend returns way too much even though it should limit
+
+//utility nextjs type
+
+export type SearchParams = Record<string, string | string[] | undefined>;
+export type Params = Record<string, string | undefined>;
+export type ParamsProps = { params: Params };
+export type SearchParamsProps = { searchParams: SearchParams };
+export type ParamsAndSearchParamsProps = ParamsProps & SearchParamsProps;
+export type Children = ReactNode;
+export type ChildrenProps = { children: Children };

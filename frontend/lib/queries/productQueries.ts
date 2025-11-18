@@ -90,12 +90,15 @@ export async function createProductReviewByProductId(
   return await handleResponse(res);
 }
 
-
-
-//have to give accesstoken when logged in to get recently viewed ones
-export async function getHomeProducts(): Promise<HomeProducts> {
+export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
+  const additionalHeaders = await getAllHeaders();
+  
   const res = await fetch(`${apiBaseUrl}/products/home`, {
     credentials: "include",
+    headers: {
+      ...additionalHeaders,
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    },
   });
   return await handleResponse(res);
 }

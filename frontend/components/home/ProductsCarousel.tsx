@@ -1,8 +1,9 @@
 "use client";
-import ProductCard, { Product } from "../main/ProductCard";
+import ProductCard from "../main/ProductCard";
 import Slider, { type Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Product } from "@/types/types";
 
 type ProductsCarouselProps = {
   title: string;

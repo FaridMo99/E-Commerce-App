@@ -49,7 +49,6 @@ function ChangePasswordForm({ token }: { token: string }) {
       toast.success("Password changed successfully!");
       useAuth.setState({
         user: res.user,
-        isAuthenticated: true,
         accessToken: res.accessToken,
       });
       router.push("/");

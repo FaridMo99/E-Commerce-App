@@ -1,9 +1,9 @@
 import "server-only";
-import SuccessCard from "../../verify-success/components/SuccessCard";
+import SuccessCard from "@/app/(auth)/(protected)/verify-success/components/SuccessCard";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/queries/usersQueries";
 import { toast } from "sonner";
-import useAuth from "@/stores/authStore";
+import { User } from "@/types/types";
 
 //access token in searchparam, but not user info
 //have to grab that seperately, auto redirect to home after that
@@ -12,16 +12,16 @@ async function page({ searchParams }: { searchParams?: { token: string } }) {
   if (!param?.token) redirect("/");
 
   const token = param.token;
-
+  let user: User
+  
   try {
-    const user = await getUser(token);
-    useAuth.setState({ accessToken: token, user });
+    user = await getUser(token);
   } catch (err) {
-    //toast.error("Something went wrong. Try again.");
+    toast.error("Something went wrong. Try again.");
     redirect("/login");
   }
 
-  return <SuccessCard action="Login" />;
+  return <SuccessCard action="Login" user={user} accessToken={token} />;
 }
 
 export default page;

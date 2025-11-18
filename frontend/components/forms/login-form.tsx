@@ -20,7 +20,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@monorepo/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { login } from "@/lib/queries/authQueries";
 import { useRef, useState } from "react";
 import useAuth from "@/stores/authStore";
 import { toast } from "sonner";
@@ -31,6 +30,7 @@ import InputValidationFailedText from "../main/InputValidationFailedText";
 import Facebook from "../icons/Facebook";
 import Google from "../icons/Google";
 import OAuthButton from "./OAuthButton";
+import { clientLogin } from "@/lib/queries/clientSideQueries";
 
 export function LoginForm({
   className,
@@ -40,8 +40,7 @@ export function LoginForm({
   const [isLoginLoading, setIsLoginLoading] = useState<boolean>(false);
 
   //auth store
-  const setAccessToken = useAuth((state) => state.setAccessToken);
-  const setUser = useAuth((state) => state.setUser);
+  const setState = useAuth((state) => state.setState);
 
   //form states
   const { register, handleSubmit, formState } = useForm({
@@ -55,6 +54,8 @@ export function LoginForm({
   const router = useRouter();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
+
+
   async function submitHandler(credentials: LoginSchema) {
     try {
       setIsLoginLoading(true);
@@ -63,12 +64,12 @@ export function LoginForm({
       const captchaToken = await turnstileRef.current?.getResponsePromise();
       if (!captchaToken) throw new Error("Failed Captcha");
 
-      const result = await login(credentials, captchaToken);
+      const result = await clientLogin(credentials, captchaToken);
+      setState(result.accessToken, result.user)
 
-      setAccessToken(result.accessToken);
-      setUser(result.user);
-      toast.success("Login successful");
       router.push("/");
+      toast.success("Login successful");
+
     } catch (err: Error) {
       toast.error(err.message);
     } finally {
@@ -163,6 +164,9 @@ export function LoginForm({
                 </FieldDescription>
                 <FieldDescription className="text-center">
                   <Link href="/forgot-password"> Forgot Password?</Link>
+                </FieldDescription>
+                <FieldDescription className="text-center">
+                  <Link href="/new-verification-link"> Send New Verification Link</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
