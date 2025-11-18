@@ -1,15 +1,21 @@
 import z from "zod";
 
-const priceSchema = z
-  .int()
-  .nonnegative("Price must be 0 or greater")
+/** --- Price Schema --- */
+export const priceSchema = z
+  .preprocess((val) => {
+    // allow strings that can be converted to number
+    const n = typeof val === "string" ? Number(val) : val;
+    return n;
+  }, z.number().int().nonnegative("Price must be 0 or greater"))
   .refine((val) => {
     const cents = Math.round((val % 1) * 100);
     return cents === 95 || cents === 99;
-  }, "Price must end with .95, or .99");
+  }, "Price must end with .95 or .99");
 
-export const currencySchema = z.enum(["USD", "EUR", "GBP"]);
+/** --- Currency Schema --- */
+export const currencySchema = z.enum(["USD", "EUR", "GBP"],"Must be USD EUR or GBP");
 
+/** --- Password Schema --- */
 export const passwordSchema = z
   .string()
   .min(5, "Password must be at least 5 characters long")
@@ -17,94 +23,125 @@ export const passwordSchema = z
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/\d/, "Password must contain at least one number");
 
-export const emailSchema = z.email("Invalid email");
+/** --- Email Schema --- */
+export const emailSchema = z.string().email("Invalid email address");
 
+/** --- Login Schema --- */
 export const loginSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
 
+/** --- Signup Schema --- */
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   birthdate: z
-    .date()
-    .transform((dateStr) => new Date(dateStr))
-    .optional(),
-  address: z
-    .string()
-    .regex(
-      /^[a-zA-Z0-9\s,.-]{10,100}$/,
-      "Address must be valid (street, house number, postal code, country)",
+    .preprocess(
+      (val) => (val ? new Date(val as string) : undefined),
+      z.date().optional()
     )
-    .optional(),
+    .refine((val) => !val || !isNaN(val.getTime()), {
+      message: "Birthdate must be a valid date",
+    }),
 });
 
+/** --- Update User Schema --- */
+  //should also have address adding 
 export const updateUserSchema = signupSchema.partial();
 
+/** --- Orders Query Schema --- */
 export const ordersQuerySchema = z.object({
   sort: z.enum(["status", "ordered_at"]).optional().default("ordered_at"),
   order: z.enum(["asc", "desc"]).optional().default("desc"),
   limit: z
-    .string()
-    .refine((val) => Number(val) > 0 && Number(val) % 5 === 0, {
+    .preprocess(
+      (val) => (typeof val === "string" ? Number(val) : val),
+      z.number()
+    )
+    .refine((val) => val > 0 && val % 5 === 0, {
       message: "Limit must be a positive number divisible by 5",
     })
     .optional()
-    .default("10"),
+    .default(10),
   page: z
-    .string()
-    .refine((val) => Number(val) > 0, {
-      message: "Page must be a positive number",
-    })
+    .preprocess(
+      (val) => (typeof val === "string" ? Number(val) : val),
+      z.number()
+    )
+    .refine((val) => val > 0, { message: "Page must be a positive number" })
     .optional()
-    .default("1"),
+    .default(1),
   status: z
     .enum(["ORDERED", "DELIVERING", "DELIVERED", "PENDING", "CANCELLED"])
     .optional(),
 });
 
+/** --- Sort / Pagination Reusable Schemas --- */
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();
 export const paginationSchema = z.object({
-  page: z.string().regex(/^\d+$/).optional(),
-  limit: z.string().regex(/^\d+$/).optional(),
+  page: z
+    .preprocess(
+      (val) => (typeof val === "string" ? Number(val) : val),
+      z.number()
+    )
+    .optional(),
+  limit: z
+    .preprocess(
+      (val) => (typeof val === "string" ? Number(val) : val),
+      z.number()
+    )
+    .optional(),
 });
 
-//should have sorting(also through categories), filtering, pagination, search functionality,
+/** --- Products Query Schema --- */
 export const productsQuerySchema = paginationSchema.extend({
-  search: z.string().max(255).optional(),
-  // Filtering
-  category: z.string().optional(),
-  minPrice: z.int().nonnegative().optional(),
-  maxPrice: z.int().nonnegative().optional(),
-  sale: z
-    .preprocess((val) => {
-      if (val === "true") return true;
-      if (val === "false") return false;
-      return val;
-    }, z.boolean())
+  search: z
+    .string()
+    .max(255, "Search is too long, max 255 Characters")
     .optional(),
-  // Sorting
+  category: z.string().optional(),
+  minPrice: z.preprocess(
+    (val) => Number(val),
+    z.number().nonnegative().optional()
+  ),
+  maxPrice: z.preprocess(
+    (val) => Number(val),
+    z.number().nonnegative().optional()
+  ),
+  sale: z
+    .preprocess(
+      (val) => (val === "true" ? true : val === "false" ? false : val),
+      z.boolean()
+    )
+    .optional(),
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
 });
 
+/** --- Reviews Query Schema --- */
 export const reviewsQuerySchema = paginationSchema.extend({
-  //filter
-  rating: z.number().min(0).max(5).optional(),
-  created_at: z.date().optional(),
-  //sort
+  rating: z.preprocess(
+    (val) => Number(val),
+    z.number().min(0).max(5).optional()
+  ),
+  created_at: z
+    .preprocess(
+      (val) => (val ? new Date(val as string) : undefined),
+      z.date().optional()
+    )
+    .refine((val) => !val || !isNaN(val.getTime()), {
+      message: "Invalid created_at date",
+    }),
   sortBy: z.enum(["rating", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
-  // Pagination
-  page: z.string().regex(/^\d+$/).optional(),
-  limit: z.string().regex(/^\d+$/).optional(),
 });
 
+/** --- Product Schema --- */
 export const productSchema = z.object({
   name: z.string(),
   description: z.string(),
   price: priceSchema,
-  stock_quantity: z.number().int(),
+  stock_quantity: z.preprocess((val) => Number(val), z.number().int()),
   is_public: z.boolean().default(false),
   category: z.string(),
   sale_price: priceSchema,
@@ -112,46 +149,51 @@ export const productSchema = z.object({
 
 export const updateProductSchema = productSchema.partial();
 
+/** --- Timeframe Query Schema --- */
 export const timeframeQuerySchema = z.object({
   from: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined))
+    .preprocess(
+      (val) => (val ? new Date(val as string) : undefined),
+      z.date().optional()
+    )
     .refine((val) => !val || !isNaN(val.getTime()), {
       message: "Invalid 'from' date",
     }),
   to: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined))
+    .preprocess(
+      (val) => (val ? new Date(val as string) : undefined),
+      z.date().optional()
+    )
     .refine((val) => !val || !isNaN(val.getTime()), {
       message: "Invalid 'to' date",
     }),
 });
 
+/** --- Review Schema --- */
 export const reviewSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
-  rating: z.number().min(0).max(5),
+  rating: z.preprocess((val) => Number(val), z.number().min(0).max(5)),
   isPublic: z.boolean().optional(),
 });
 
-const itemQuantity = z
-  .number("Quantity must be a number")
-  .int("Quantity must be an integer")
-  .min(1, "Quantity must be at least 1");
-const uuid = z.uuid("Invalid ID");
+/** --- Item / Cart Schemas --- */
+const itemQuantity = z.preprocess(
+  (val) => Number(val),
+  z.number().int().min(1, "Quantity must be at least 1")
+);
 
 export const itemQuantitySchema = z.object({
   quantity: itemQuantity,
 });
 
 export const addCartItemSchema = z.object({
-  productId: uuid,
+  productId: z.string(),
   quantity: itemQuantity,
 });
 
+/** --- Settings Schema --- */
 export const settingsSchema = z.object({
-  key: z.string().nonempty(),
-  value: z.string().nonempty(),
+  key: z.string().nonempty("Key cannot be empty"),
+  value: z.string().nonempty("Value cannot be empty"),
 });

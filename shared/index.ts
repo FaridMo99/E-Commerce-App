@@ -34,6 +34,12 @@ import type {
   SettingsSchema,
 } from "./types.ts";
 
+import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES } from "./constants.ts";
+export {
+  IMAGE_ALLOWED_TYPES,
+  IMAGE_MAX_SIZE
+}
+
 export {
   loginSchema,
   signupSchema,

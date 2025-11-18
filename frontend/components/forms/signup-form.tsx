@@ -104,17 +104,6 @@ export function SignupForm({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="address">
-                  Address
-                  <OptionalFieldMarker />
-                </FieldLabel>
-                <Input {...register("address")} id="address" type="text" />
-                <InputValidationFailedText
-                  trigger={errors.address}
-                  text={errors.address?.message}
-                />
-              </Field>
-              <Field>
                 <FieldLabel htmlFor="birthdate">
                   Birthdate
                   <OptionalFieldMarker />

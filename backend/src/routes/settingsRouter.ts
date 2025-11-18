@@ -1,10 +1,6 @@
 import { Router } from "express";
-import {
-  hasCsrfToken,
-  isAdmin,
-  isAuthenticated,
-} from "../middleware/authMiddleware.js";
-import { validateSettings } from "../middleware/validationMiddleware.js";
+import {hasCsrfToken} from "../middleware/authMiddleware.js";
+import { validateBody } from "../middleware/validationMiddleware.js";
 import {
   createSetting,
   deleteAllSettings,
@@ -13,13 +9,14 @@ import {
   getSettingBySettingId,
   updateSettingBySettingId,
 } from "../controller/settingsController.js";
+import { settingsSchema } from "@monorepo/shared";
 
 const settingsRouter = Router();
 
 //get all settings
 settingsRouter.get("/", getAllSettings);
 //create a setting
-settingsRouter.post("/", validateSettings, hasCsrfToken, createSetting);
+settingsRouter.post("/", validateBody(settingsSchema), hasCsrfToken, createSetting);
 //delete all except base currency
 settingsRouter.delete("/", hasCsrfToken, deleteAllSettings);
 //get a setting
@@ -29,7 +26,7 @@ settingsRouter.delete("/:settingId", hasCsrfToken, deleteSettingBySettingId);
 //update a setting
 settingsRouter.patch(
   "/:settingId",
-  validateSettings,
+  validateBody(settingsSchema),
   hasCsrfToken,
   updateSettingBySettingId,
 );

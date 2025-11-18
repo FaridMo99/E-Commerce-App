@@ -5,7 +5,6 @@ import {
   isAdmin,
   isAuthenticated,
 } from "../middleware/authMiddleware.js";
-import { validateProductSearchQueries } from "../middleware/queryMiddleware.js";
 import {
   createProduct,
   createReviewByProductId,
@@ -17,15 +16,16 @@ import {
   updateProductByProductId,
 } from "../controller/productsController.js";
 import {
-  validateProduct,
-  validateReview,
-  validateUpdateProduct,
+  validateBody,
+  validateImages,
+  validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
 import { upload } from "../services/cloud.js";
+import { productSchema, productsQuerySchema, reviewSchema, updateProductSchema } from "@monorepo/shared";
 
 const productsRouter = Router();
 
-productsRouter.get("/", validateProductSearchQueries, getAllProducts);
+productsRouter.get("/", validateSearchQueries(productsQuerySchema), getAllProducts);
 productsRouter.get("/home", attachUserIfExists, getHomeProducts);
 productsRouter.post(
   "/",
@@ -33,13 +33,14 @@ productsRouter.post(
   isAdmin,
   hasCsrfToken,
   upload.array("images"),
-  validateProduct,
+  validateImages,
+  validateBody(productSchema),
   createProduct,
 );
 productsRouter.get("/:productId/reviews", getAllReviewsByProductId);
 productsRouter.post(
   "/:productId/reviews",
-  validateReview,
+  validateBody(reviewSchema),
   isAuthenticated,
   hasCsrfToken,
   createReviewByProductId,
@@ -54,7 +55,7 @@ productsRouter.delete(
 );
 productsRouter.patch(
   "/:productId",
-  validateUpdateProduct,
+  validateBody(updateProductSchema),
   isAuthenticated,
   isAdmin,
   hasCsrfToken,

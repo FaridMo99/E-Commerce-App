@@ -19,21 +19,19 @@ import {
 } from "../controller/usersController.js";
 import {
   hasCsrfToken,
-  isAuthenticated,
-  validateUpdateUser,
+  isAuthenticated
 } from "../middleware/authMiddleware.js";
-import { validateOrderSearchQueries } from "../middleware/queryMiddleware.js";
 import {
-  validateCartItem,
-  validateItemQuantity,
-  validateProductId,
+  validateBody,
+  validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
+import { addCartItemSchema, itemQuantitySchema, ordersQuerySchema, productSchema, updateUserSchema } from "@monorepo/shared";
 
 const usersRouter = Router();
 
 //user related routes
 usersRouter.get("/me", getUserByUserId);
-usersRouter.patch("/me", validateUpdateUser, hasCsrfToken, updateUserByUserId);
+usersRouter.patch("/me",validateBody(updateUserSchema), hasCsrfToken, updateUserByUserId);
 usersRouter.delete("/me", hasCsrfToken, deleteUserByUserId);
 
 //cart related routes
@@ -43,7 +41,7 @@ usersRouter.delete("/me/cart", hasCsrfToken, emptyCart);
 //cart items related routes
 usersRouter.post(
   "/me/cart/items",
-  validateCartItem,
+  validateBody(addCartItemSchema),
   hasCsrfToken,
   addProductToUserCart,
 );
@@ -54,7 +52,7 @@ usersRouter.delete(
 );
 usersRouter.patch(
   "/me/cart/items/:itemId",
-  validateItemQuantity,
+  validateBody(itemQuantitySchema),
   hasCsrfToken,
   updateItemQuantity,
 );
@@ -63,15 +61,15 @@ usersRouter.patch(
 usersRouter.get("/me/reviews", getReviewsByUser);
 
 //orders related routes
-usersRouter.get("/me/orders", validateOrderSearchQueries, getAllOrdersByUser);
+usersRouter.get("/me/orders", validateSearchQueries(ordersQuerySchema), getAllOrdersByUser);
 usersRouter.get("/me/orders/:orderId", getSingleOrderByUser);
 
 //favorite articles routes
 usersRouter.get("/me/favorites", getFavoriteItems);
 usersRouter.post(
   "/me/favorites",
-  validateProductId,
   hasCsrfToken,
+  validateBody(addCartItemSchema.shape.productId),
   addFavoriteItem,
 );
 usersRouter.delete(

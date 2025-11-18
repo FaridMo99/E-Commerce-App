@@ -83,8 +83,8 @@ export async function getAllProducts(
           : {}),
       },
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
-      ...(limit && { take: parseInt(limit) }),
-      ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
+      ...(limit && { take: limit }),
+      ...(page && limit && { skip: (page - 1) * limit }),
       select: {
         ...productSelect,
       },

@@ -153,10 +153,8 @@ export async function getAllOrdersByUser(
   res: Response,
   next: NextFunction
 ) {
-  const userId = (req.user as JWTUserPayload).id;
+  const userId = req.user?.id!
   const { sort, order, page, limit, status } = req.query;
-  const pageNum = parseInt(page);
-  const limitNum = parseInt(limit);
 
   if (!userId) {
     console.log(chalk.red(`${getTimestamp()} User not authenticated`));
@@ -178,8 +176,8 @@ export async function getAllOrdersByUser(
       orderBy: {
         [sort]: order,
       },
-      skip: (pageNum - 1) * limitNum,
-      take: limitNum,
+      skip: (page - 1) * limit,
+      take: page,
     });
 
     orders.forEach(
@@ -679,7 +677,7 @@ export async function addFavoriteItem(
   next: NextFunction
 ) {
   const userId = req.user?.id!;
-  const productId = req.body.productId as string;
+  const productId = req.body.productId
 
   try {
     console.log(

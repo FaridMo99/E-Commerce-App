@@ -10,57 +10,6 @@ import {
 import { validateTurnstile } from "../lib/auth.js";
 import { getTimestamp } from "../lib/utils.js";
 
-export function validateLogin(req: Request, res: Response, next: NextFunction) {
-  console.log(chalk.yellow(getTimestamp(), "Validating Login Input..."))
-  console.log(req.body)
-  const validated = loginSchema.safeParse(req.body);
-
-  if (!validated.success){
-      console.log(chalk.red(getTimestamp(), "Login Input validation failed"));
-    return res.status(400).json({ message: validated.error.message });
-  }
-  console.log(chalk.green(getTimestamp(), "Login input validation success"));
-
-  return next();
-}
-
-export function validateSignup(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-    console.log(chalk.yellow(getTimestamp(), "Validating Signup Input..."));
-  const validated = signupSchema.safeParse(req.body);
-
-  if (!validated.success){
-      console.log(chalk.red(getTimestamp(), "Signup Input validation failed."));
-    return res.status(400).json({ message: validated.error.message });
-  }
-  console.log(chalk.green(getTimestamp(), "Signup validation successful"));
-
-  req.body = validated.data;
-  return next();
-}
-
-export function validateUpdateUser(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  console.log(chalk.yellow(getTimestamp(), "Validating Update User Input..."));
-  const validated = updateUserSchema.safeParse(req.body);
-
-  if (!validated.success){
-    console.log(
-      chalk.red(getTimestamp(), "Update User Input validation failed.")
-    );
-    return res.status(400).json({ message: validated.error.message })
-  }
-  
-  console.log(chalk.green(getTimestamp(), "Update User validation successful"));
-  req.body = validated.data;
-  return next();
-}
 
 export async function isAdmin(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id!;

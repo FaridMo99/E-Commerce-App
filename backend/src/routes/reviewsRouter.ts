@@ -6,11 +6,12 @@ import {
   setPublicByReviewId,
 } from "../controller/reviewsController.js";
 import { hasCsrfToken, isAuthenticated } from "../middleware/authMiddleware.js";
-import { validateReviewSearchQueries } from "../middleware/queryMiddleware.js";
+import { reviewsQuerySchema } from "@monorepo/shared";
+import { validateSearchQueries } from "../middleware/validationMiddleware.js";
 
 const reviewsRouter = Router();
 
-reviewsRouter.get("/", validateReviewSearchQueries, getAllReviews);
+reviewsRouter.get("/", validateSearchQueries(reviewsQuerySchema), getAllReviews);
 reviewsRouter.get("/:reviewId", getReviewByReviewId);
 reviewsRouter.delete(
   "/:reviewId",
