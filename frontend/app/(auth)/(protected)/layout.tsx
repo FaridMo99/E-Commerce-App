@@ -1,3 +1,4 @@
+import QueryContext from "@/context/QueryContext";
 import { getNewRefreshToken } from "@/lib/queries/authQueries";
 import { ChildrenProps } from "@/types/types";
 import { redirect } from "next/navigation";
@@ -15,7 +16,9 @@ async function layout({ children }:ChildrenProps) {
     redirect("/"); 
   }
 
-  return children
+  return <QueryContext>
+    {children}
+  </QueryContext>
 }
 
 export default layout;

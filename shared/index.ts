@@ -32,6 +32,7 @@ import type {
   AddCartItemSchema,
   ItemQuantitySchema,
   SettingsSchema,
+  EmailSchema
 } from "./types.ts";
 
 import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES } from "./constants.ts";
@@ -62,6 +63,7 @@ export {
 export type {
   LoginSchema,
   SignupSchema,
+  EmailSchema,
   OrdersQuerySchema,
   UpdateUserSchema,
   ProductsQuerySchema,

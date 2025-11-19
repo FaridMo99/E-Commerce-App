@@ -12,21 +12,42 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { emailSchema } from "@/schemas/schemas";
-import { EmailSchema } from "@/types/types";
-import { forgotPasswordSendEmail } from "@/lib/queries/authQueries";
 import InputValidationFailedText from "../main/InputValidationFailedText";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { EmailSchema, emailSchema } from "@monorepo/shared";
+import { clientForgotPasswordSendEmail } from "@/lib/queries/clientSideQueries";
+import { useMutation } from "@tanstack/react-query";
 
 //redirect on success
 function ForgotPasswordForm({ headerText }: { headerText: string }) {
-  //submission states
-  const [isRequestLoading, setIsRequestLoading] = useState<boolean>(false);
+
+    const { mutate, isPending } = useMutation({
+      mutationKey: ["change password for unauthenticated user"],
+      mutationFn: ({
+        email,
+        captchaToken,
+      }: {
+        email: EmailSchema;
+        captchaToken: string;
+      }) => clientForgotPasswordSendEmail(email, captchaToken),
+      onSuccess: () => {
+        toast.success(
+          "Submit successful! Check your E-Mails and follow the link."
+        );
+        router.push("/");
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+      onSettled: () => {
+        turnstileRef.current?.reset();
+      },
+    });
 
   //form states
   const { register, handleSubmit, formState } = useForm({
@@ -36,31 +57,24 @@ function ForgotPasswordForm({ headerText }: { headerText: string }) {
   });
   const { errors, isSubmitting, isValid, isSubmitted } = formState;
   const buttonDisabledReasons =
-    isSubmitting || (!isValid && isSubmitted) || isRequestLoading;
+    isSubmitting || (!isValid && isSubmitted) || isPending;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const router = useRouter();
 
-  async function submitHandler(credentials: EmailSchema) {
-    try {
-      setIsRequestLoading(true);
+    async function submitHandler(credentials: EmailSchema) {
+      try {
+        // Execute Turnstile captcha
+        turnstileRef.current?.execute();
+        const captchaToken = await turnstileRef.current?.getResponsePromise();
 
-      turnstileRef.current?.execute();
-      const captchaToken = await turnstileRef.current?.getResponsePromise();
-      if (!captchaToken) throw new Error("Failed Captcha");
+        if (!captchaToken) throw new Error("Failed Captcha");
 
-      await forgotPasswordSendEmail(credentials, captchaToken);
-
-      toast.success(
-        "Submit successful! Check your E-Mails and follow the link.",
-      );
-      router.push("/");
-    } catch (err: Error) {
-      toast.error(err.message);
-    } finally {
-      setIsRequestLoading(false);
-      turnstileRef.current?.reset();
+        // Pass a single object to mutate
+        mutate({ email:credentials, captchaToken });
+      } catch (err: any) {
+        toast.error(err.message || "Something went wrong");
+      }
     }
-  }
 
   return (
     <div className={cn("flex flex-col gap-6")}>
@@ -97,7 +111,7 @@ function ForgotPasswordForm({ headerText }: { headerText: string }) {
                 }}
               />
               <Button disabled={buttonDisabledReasons} type="submit">
-                {isRequestLoading ? (
+                {isPending ? (
                   <Loader2 className="animate-spin" />
                 ) : (
                   "Submit"

@@ -1,15 +1,4 @@
-import {
-  addCartItemSchema,
-  itemQuantitySchema,
-  loginSchema,
-  productSchema,
-  reviewSchema,
-  settingsSchema,
-  signupSchema,
-  timeframeQuerySchema,
-  updateProductSchema,
-  updateUserSchema,
-} from "@monorepo/shared";
+import { timeframeQuerySchema } from "@monorepo/shared";
 import type { NextFunction, Request, Response } from "express";
 import z, { ZodType } from "zod";
 import { getTimestamp } from "../lib/utils.js";
@@ -17,17 +6,17 @@ import chalk from "chalk";
 import { imageSchema } from "../config/schemas.js";
 
 
-//zods validated.error.message could be wrong to send back, check later
+//error message wrong
 export function validateBody<T>(schema: ZodType<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     const parsed = schema.safeParse(req.body);
-
+    
     if (!parsed.success) {
       console.log(
         chalk.red(`${getTimestamp()} Body validation failed:`),
         req.body
       );
-      return res.status(400).json({ message: parsed.error.message });
+      return res.status(400).json({ message:parsed.error.message  });
     }
 
     req.body = parsed.data;

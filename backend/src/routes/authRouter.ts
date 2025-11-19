@@ -21,7 +21,7 @@ import { authRateLimiter } from "../middleware/utilityMiddleware.js";
 import passport from "../services/passport.js";
 import { OauthLogin } from "../lib/auth.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
-import { loginSchema, signupSchema } from "@monorepo/shared";
+import { emailSchema, loginSchema, signupSchema } from "@monorepo/shared";
 
 const authRouter = Router();
 
@@ -44,7 +44,7 @@ authRouter.post("/verify", verifyUser);
 authRouter.post(
   "/new-verify-Link",
   authRateLimiter,
-  validateBody(loginSchema.shape.email),
+  validateBody(emailSchema),
   verifyCaptcha,
   sendNewVerifyLink
 );
@@ -62,7 +62,7 @@ authRouter.patch("/change-password", authRateLimiter, changePassword);
 authRouter.post(
   "/forgot-password",
   authRateLimiter,
-  validateBody(loginSchema.shape.email),
+  validateBody(emailSchema),
   verifyCaptcha,
   sendEmailToChangePassword,
 );

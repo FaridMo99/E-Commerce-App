@@ -2,12 +2,13 @@
 //need auto refresh so doesnt get logged out
 
 "use server";
-import { LoginSchema, SignupSchema } from "@monorepo/shared";
+import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "./utils";
-import { AccessToken, AuthResponse, EmailSchema, User } from "@/types/types";
+import { AccessToken, AuthResponse, User } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../serverHelpers";
 import { cookies } from "next/headers";
+import { stripContentLengthHeader } from "../helpers";
 
 export async function login(
   credentials: LoginSchema,
@@ -31,14 +32,15 @@ export async function signup(
   credentials: SignupSchema,
   captchaToken: string,
 ): Promise<void> {
-    const additionalHeaders = await getAllHeaders();
+  const additionalHeaders = await getAllHeaders();
+  const safeHeader = stripContentLengthHeader(additionalHeaders)
 
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
-      ...additionalHeaders,
+      ...safeHeader
     },
     body: JSON.stringify(credentials),
   });
@@ -72,13 +74,14 @@ export async function verifyAfterEmailLink(
   token: string,
 ): Promise<AuthResponse> {
     const additionalHeaders = await getAllHeaders();
+  const safeHeader = stripContentLengthHeader(additionalHeaders);
 
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...additionalHeaders,
+      ...safeHeader,
     },
     body: JSON.stringify({ token }),
   });
@@ -90,15 +93,16 @@ export async function sendNewVerificationLink(
   captchaToken: string,
 ): Promise<void> {
     const additionalHeaders = await getAllHeaders();
+  const safeHeader = stripContentLengthHeader(additionalHeaders);
 
   const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
-      ...additionalHeaders,
+      ...safeHeader,
     },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify(email),
   });
   await handleResponse<void>(res);
 }
@@ -114,6 +118,7 @@ export async function changePasswordAfterLogin(
     getAllHeaders(),
     getCsrfHeader(),
   ]);
+  const safeHeader = stripContentLengthHeader(additionalHeaders);
 
 
   const { oldPassword, newPassword } = passwords;
@@ -123,7 +128,7 @@ export async function changePasswordAfterLogin(
       "Content-Type": "application/json",
       ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
-      ...additionalHeaders,
+      ...safeHeader,
     },
     body: JSON.stringify({ oldPassword, newPassword }),
     credentials: "include",
@@ -136,15 +141,16 @@ export async function forgotPasswordSendEmail(
   captchaToken: string,
 ): Promise<void> {
     const additionalHeaders = await getAllHeaders();
-
+  const safeHeader = stripContentLengthHeader(additionalHeaders);
+  console.log(email)
   const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
-      ...additionalHeaders,
+      ...safeHeader,
     },
-    body: JSON.stringify(email),
+    body:JSON.stringify(email),
   });
   await handleResponse<void>(res);
 }
@@ -167,13 +173,14 @@ export async function changePasswordUnauthenticated(
   password: string,
 ): Promise<AuthResponse> {
     const additionalHeaders = await getAllHeaders();
+  const safeHeader = stripContentLengthHeader(additionalHeaders);
 
   const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
     method: "PATCH",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...additionalHeaders,
+      ...safeHeader,
     },
     body: JSON.stringify({ token, password }),
   });

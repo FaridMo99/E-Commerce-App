@@ -1,4 +1,4 @@
-import { changePasswordSchema, emailSchema } from "@/schemas/schemas";
+import { changePasswordSchema } from "@/schemas/schemas";
 import { ReactNode } from "react";
 import z from "zod";
 
@@ -8,8 +8,6 @@ export type AccessToken = string;
 export type SeachParams = { [key: string]: string };
 export type OAuthProvider = "google" | "facebook";
 
-
-export type EmailSchema = z.infer<typeof emailSchema>;
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
 
 //prisma enums

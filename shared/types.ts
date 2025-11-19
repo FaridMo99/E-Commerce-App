@@ -1,6 +1,7 @@
 import z from "zod";
 import {
   addCartItemSchema,
+  emailSchema,
   itemQuantitySchema,
   loginSchema,
   ordersQuerySchema,
@@ -28,3 +29,4 @@ export type ReviewsQuerySchema = z.infer<typeof reviewsQuerySchema>;
 export type AddCartItemSchema = z.infer<typeof addCartItemSchema>;
 export type ItemQuantitySchema = z.infer<typeof itemQuantitySchema>;
 export type SettingsSchema = z.infer<typeof settingsSchema>;
+export type EmailSchema = z.infer<typeof emailSchema>;

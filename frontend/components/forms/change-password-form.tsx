@@ -12,20 +12,33 @@ import { Field, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { changePasswordSchema } from "@/schemas/schemas";
-import { changePasswordUnauthenticated } from "@/lib/queries/authQueries";
 import InputValidationFailedText from "../main/InputValidationFailedText";
 import { useRouter } from "next/navigation";
 import { ChangePasswordSchema } from "@/types/types";
 import useAuth from "@/stores/authStore";
+import { useMutation } from "@tanstack/react-query";
+import { clientChangePasswordUnauthenticated } from "@/lib/queries/clientSideQueries";
 
 //redirect on success
 function ChangePasswordForm({ token }: { token: string }) {
-  //submission states
-  const [isRequestLoading, setIsRequestLoading] = useState<boolean>(false);
+
+  const setState = useAuth(state=>state.setState)
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["change password for unauthenticated user"],
+    mutationFn: ({ token, password }: { token: string; password: string }) =>
+      clientChangePasswordUnauthenticated(token, password),
+    onSuccess: (res) => {
+      toast.success("Password changed successfully!");
+      setState(res.accessToken, res.user);
+      router.push("/");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   //form states
   const { register, handleSubmit, formState } = useForm({
@@ -35,28 +48,11 @@ function ChangePasswordForm({ token }: { token: string }) {
   });
   const { errors, isSubmitting, isValid, isSubmitted } = formState;
   const buttonDisabledReasons =
-    isSubmitting || (!isValid && isSubmitted) || isRequestLoading;
+    isSubmitting || (!isValid && isSubmitted) || isPending;
   const router = useRouter();
 
-  async function submitHandler(passwords: ChangePasswordSchema) {
-    try {
-      setIsRequestLoading(true);
-      const res = await changePasswordUnauthenticated(
-        token,
-        passwords.password,
-      );
-
-      toast.success("Password changed successfully!");
-      useAuth.setState({
-        user: res.user,
-        accessToken: res.accessToken,
-      });
-      router.push("/");
-    } catch (err: Error) {
-      toast.error(err.message);
-    } finally {
-      setIsRequestLoading(false);
-    }
+  function submitHandler(passwords: ChangePasswordSchema) {
+    mutate({token,password:passwords.password})
   }
 
   return (
@@ -73,7 +69,7 @@ function ChangePasswordForm({ token }: { token: string }) {
                 <FieldLabel htmlFor="password">Password:</FieldLabel>
                 <Input
                   id="password"
-                  type="text"
+                  type="password"
                   {...register("password")}
                   required
                 />
@@ -88,7 +84,7 @@ function ChangePasswordForm({ token }: { token: string }) {
                 </FieldLabel>
                 <Input
                   id="confirmPassword"
-                  type="text"
+                  type="password"
                   {...register("confirmPassword")}
                   required
                 />
@@ -98,7 +94,7 @@ function ChangePasswordForm({ token }: { token: string }) {
                 />
               </Field>
               <Button disabled={buttonDisabledReasons} type="submit">
-                {isRequestLoading ? (
+                {isPending ? (
                   <Loader2 className="animate-spin" />
                 ) : (
                   "Submit"

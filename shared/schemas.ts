@@ -24,11 +24,12 @@ export const passwordSchema = z
   .regex(/\d/, "Password must contain at least one number");
 
 /** --- Email Schema --- */
-export const emailSchema = z.string().email("Invalid email address");
+export const emailShape = z.email("Invalid email address");
+
+export const emailSchema = z.object({ email: emailShape });
 
 /** --- Login Schema --- */
-export const loginSchema = z.object({
-  email: emailSchema,
+export const loginSchema = emailSchema.extend({
   password: passwordSchema,
 });
 

@@ -14,3 +14,13 @@ export function getCsrfHeaderClientSide(): Record<string, string> {
 
   return { "x-csrf-token": csrfToken };
 }
+
+export function stripContentLengthHeader(header:Record<string,string>):Record<string,string> {
+    const {
+      "content-length": _,
+      "Content-Length": __,
+      ...safeHeaders
+    } = header;
+  
+  return safeHeaders
+}
