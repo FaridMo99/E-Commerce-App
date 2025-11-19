@@ -4,7 +4,6 @@ import { sortOrderSchema } from "@monorepo/shared";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { productSelect } from "../config/prismaHelpers.js";
 
 
 export async function getRevenue(

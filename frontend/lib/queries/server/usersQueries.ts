@@ -6,7 +6,7 @@ import {
   OrdersQuerySchema,
   UpdateUserSchema,
 } from "@monorepo/shared";
-import { handleResponse } from "./utils";
+import { handleResponse } from "../utils";
 import { apiBaseUrl } from "@/config/constants";
 import {
   AccessToken,
@@ -16,7 +16,7 @@ import {
   Product,
   User,
 } from "@/types/types";
-import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
+import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 export async function getUser(accessToken: AccessToken): Promise<User> {
   const additionalHeaders = await getAllHeaders();
@@ -295,7 +295,7 @@ export async function deleteFavoriteItemByProductId(
 export async function getRecentlyViewedProducts(
   accessToken: AccessToken
 ): Promise<Product[]> {
-  const additionalHeaders = await getAllHeaders()
+  const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${apiBaseUrl}/users/me/recently-viewed-products`, {
     credentials: "include",
@@ -323,9 +323,9 @@ export async function addProductToRecentlyViewedProductsByProductId(
       ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
       ...additionalHeaders,
-      "Content-Type":"application/json"
+      "Content-Type": "application/json",
     },
-    body:JSON.stringify({productId})
+    body: JSON.stringify({ productId }),
   });
   return await handleResponse(res);
 }

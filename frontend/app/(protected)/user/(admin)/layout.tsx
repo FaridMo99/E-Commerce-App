@@ -1,5 +1,5 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { getNewRefreshToken } from "@/lib/queries/authQueries";
+import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
@@ -23,7 +23,7 @@ async function layout({ children }: ChildrenProps) {
     redirect("/");
   }
   if (res.user.role !== "ADMIN") {
-    redirect("/user")
+    redirect("/user");
   }
 
   return (

@@ -1,7 +1,6 @@
 import ProductsCarousel from "@/components/home/ProductsCarousel";
 import RecentlyViewedProductsCarousel from "@/components/home/RecentlyViewedProductsCarousel";
-import QueryContext from "@/context/QueryContext";
-import { getHomeProducts } from "@/lib/queries/productQueries";
+import { getHomeProducts } from "@/lib/queries/server/productQueries";
 import "server-only";
 
 export default async function Home() {
@@ -36,9 +35,7 @@ export default async function Home() {
           products={categoryProducts}
         />
       )}
-      <QueryContext>
         <RecentlyViewedProductsCarousel />
-      </QueryContext>
     </main>
   );
 }

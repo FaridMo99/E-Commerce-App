@@ -9,7 +9,6 @@ import {
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
-  exchangeToCurrencyInCents,
   formatPriceForClient,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
@@ -21,7 +20,6 @@ import {
 import {
   getCategoryProducts,
   getNewProducts,
-  getRecentlyViewedProducts,
   getSaleProducts,
   getTrendingProducts,
 } from "../lib/productQueries.js";
@@ -96,52 +94,7 @@ export async function getAllProducts(
 
     //calc rating average
 
-    if (products.length > 0 && products[0]?.currency !== currency) {
-      const formattedProducts = await Promise.all(
-        products.map(async (product) => {
-          const exchangedProduct = await exchangeToCurrencyInCents(
-            product.currency,
-            product.price,
-            currency
-          );
-          product.price = formatPriceForClient(
-            exchangedProduct.exchangedPriceInCents
-          );
-          product.currency = exchangedProduct.currency;
-          if (product.sale_price) {
-            const exchangedSaleProduct = await exchangeToCurrencyInCents(
-              product.currency,
-              product.sale_price,
-              currency
-            );
-            product.sale_price = formatPriceForClient(
-              exchangedSaleProduct.exchangedPriceInCents
-            );
-          }
-          return product;
-        })
-      );
-      console.log(
-        chalk.green(`${getTimestamp()} Products converted to ${currency}`)
-      );
-      return res.status(200).json(formattedProducts);
-    }
-
-    if (products.length > 0) {
-      const formattedProducts = products.map((product) => {
-        product.price = formatPriceForClient(product.price);
-        if (product.sale_price) {
-          product.sale_price = formatPriceForClient(product.sale_price);
-        }
-        return product;
-      });
-      console.log(
-        chalk.green(`${getTimestamp()} Products formatted in original currency`)
-      );
-      return res.status(200).json(formattedProducts);
-    }
-
-    console.log(chalk.cyan(`${getTimestamp()} Products found but empty array`));
+    console.log(chalk.green(`${getTimestamp()} Products fetched successfully`));
     return res.status(200).json(products);
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`, err));
@@ -204,11 +157,6 @@ export async function createProduct(
       ...(newProduct.sale_price ? [redis.del(SALE_PRODUCTS_REDIS_KEY)] : []),
     ]);
 
-    newProduct.price = formatPriceForClient(newProduct.price);
-    if (newProduct.sale_price) {
-      newProduct.sale_price = formatPriceForClient(newProduct.sale_price);
-    }
-
     console.log(
       chalk.green(
         `${getTimestamp()} Product ${product.name} created successfully`
@@ -232,11 +180,6 @@ export async function getProductByProductId(
   next: NextFunction
 ) {
   const id = req.params.productId!;
-  let currency: CurrencyISO | undefined = req.cookies.currency;
-
-  if (!currency || !currencySchema.safeParse(currency).success) {
-    currency = "USD";
-  }
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
@@ -251,25 +194,6 @@ export async function getProductByProductId(
     if (!product) {
       console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
       return res.status(404).json({ message: "Product not found" });
-    }
-
-    const exchangedPrice = await exchangeToCurrencyInCents(
-      product.currency,
-      product.price,
-      currency
-    );
-    product.price = formatPriceForClient(exchangedPrice.exchangedPriceInCents);
-    product.currency = exchangedPrice.currency;
-
-    if (product.sale_price) {
-      const saleExchangedPrice = await exchangeToCurrencyInCents(
-        product.currency,
-        product.sale_price,
-        currency
-      );
-      product.sale_price = formatPriceForClient(
-        saleExchangedPrice.exchangedPriceInCents
-      );
     }
 
     console.log(
@@ -512,10 +436,6 @@ export async function getHomeProducts(
   res: Response,
   next: NextFunction
 ) {
-  let currency: CurrencyISO | undefined = req.cookies.currency;
-
-  if (!currency || !currencySchema.safeParse(currency).success)
-    currency = "USD";
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));

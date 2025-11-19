@@ -25,7 +25,7 @@ import {
   validateBody,
   validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
-import { addCartItemSchema, itemQuantitySchema, ordersQuerySchema, productSchema, updateUserSchema } from "@monorepo/shared";
+import { addCartItemSchema, itemQuantitySchema, ordersQuerySchema, productIdSchema, updateUserSchema } from "@monorepo/shared";
 
 const usersRouter = Router();
 
@@ -69,7 +69,7 @@ usersRouter.get("/me/favorites", getFavoriteItems);
 usersRouter.post(
   "/me/favorites",
   hasCsrfToken,
-  validateBody(addCartItemSchema.shape.productId),
+  validateBody(productIdSchema),
   addFavoriteItem,
 );
 usersRouter.delete(

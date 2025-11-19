@@ -188,8 +188,11 @@ export const itemQuantitySchema = z.object({
   quantity: itemQuantity,
 });
 
-export const addCartItemSchema = z.object({
+export const productIdSchema = z.object({
   productId: z.string(),
+})
+
+export const addCartItemSchema = productIdSchema.extend({
   quantity: itemQuantity,
 });
 

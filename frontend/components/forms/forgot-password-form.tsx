@@ -20,8 +20,8 @@ import InputValidationFailedText from "../main/InputValidationFailedText";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { EmailSchema, emailSchema } from "@monorepo/shared";
-import { clientForgotPasswordSendEmail } from "@/lib/queries/clientSideQueries";
 import { useMutation } from "@tanstack/react-query";
+import { forgotPasswordSendEmail } from "@/lib/queries/client/authQueries";
 
 //redirect on success
 function ForgotPasswordForm({ headerText }: { headerText: string }) {
@@ -34,7 +34,7 @@ function ForgotPasswordForm({ headerText }: { headerText: string }) {
       }: {
         email: EmailSchema;
         captchaToken: string;
-      }) => clientForgotPasswordSendEmail(email, captchaToken),
+      }) => forgotPasswordSendEmail(email, captchaToken),
       onSuccess: () => {
         toast.success(
           "Submit successful! Check your E-Mails and follow the link."

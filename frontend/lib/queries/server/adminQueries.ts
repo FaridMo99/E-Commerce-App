@@ -8,7 +8,7 @@ import {
 } from "@monorepo/shared";
 import { apiBaseUrl } from "@/config/constants";
 import { SettingsSchema } from "@monorepo/shared";
-import { handleResponse } from "./utils";
+import { handleResponse } from "../utils";
 import {
   AccessToken,
   AdminNewUser,
@@ -19,7 +19,7 @@ import {
   Product,
   ProductCategory,
 } from "@/types/types";
-import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
+import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 //analytics
 export async function getRevenue( accessToken:AccessToken,timeframe?: TimeframeQuerySchema): Promise<AdminRevenue> {
@@ -105,7 +105,6 @@ export async function getAllSettings(accessToken: AccessToken): Promise<AdminSet
     },
   });
 
-  const data = await res.json();
   return await handleResponse(res);
 }
 

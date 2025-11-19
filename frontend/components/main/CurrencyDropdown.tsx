@@ -6,8 +6,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CurrencyISO } from "@/types/types";
 import { DollarSign, Euro, PoundSterling, type LucideIcon } from "lucide-react";
-import { CurrencyISO } from "./ProductCard";
 
 export type CurrencyElement = { currency: CurrencyISO; Icon: LucideIcon };
 

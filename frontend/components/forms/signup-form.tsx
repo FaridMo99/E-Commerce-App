@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signup } from "@/lib/queries/authQueries";
-import { useRef, useState } from "react";
+import { signup } from "@/lib/queries/client/authQueries";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { Loader2 } from "lucide-react";
@@ -24,50 +24,67 @@ import { clientSignupSchema } from "@/schemas/schemas";
 import { z } from "zod";
 import OAuthButton from "./OAuthButton";
 import Facebook from "../icons/Facebook";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { SignupSchema } from "@monorepo/shared";
 
 //add rerequesting the email logic
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  //submission states
-  const [isSignupLoading, setIsSignupLoading] = useState<boolean>(false);
+  const router = useRouter()
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["signing up user"],
+    mutationFn: ({
+      mutateCredentials,
+      captchaToken,
+    }: {
+      mutateCredentials:SignupSchema;
+      captchaToken: string;
+    }) => signup(mutateCredentials, captchaToken),
+    onSettled: () => {
+      turnstileRef.current?.reset();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      toast.success(
+        "Signup successful. Check your E-Mails and follow the link"
+      );
+      router.push("/");
+    },
+  });
 
   //form states
-  const { register, handleSubmit, formState, reset } = useForm({
+  const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(clientSignupSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
   const { errors, isSubmitting, isValid, isSubmitted } = formState;
   const buttonDisabledReasons =
-    isSubmitting || (!isValid && isSubmitted) || isSignupLoading;
+    isSubmitting || (!isValid && isSubmitted) || isPending;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
-  async function submitHandler(
-    credentials: z.infer<typeof clientSignupSchema>,
-  ) {
-    try {
-      setIsSignupLoading(true);
-      const { confirmPassword, ...rest } = credentials;
 
-      turnstileRef.current?.execute();
-      const captchaToken = await turnstileRef.current?.getResponsePromise();
-      if (!captchaToken) throw new Error("Failed Captcha");
+  
+    async function submitHandler(credentials:z.infer<typeof clientSignupSchema>) {
+      try {
+        // Execute Turnstile captcha
+        turnstileRef.current?.execute();
+        const captchaToken = await turnstileRef.current?.getResponsePromise();
 
-      await signup(rest, captchaToken);
+        if (!captchaToken) throw new Error("Failed Captcha");
 
-      toast.success(
-        "Signup successful. Check your E-Mails and follow the link",
-      );
-      reset();
-    } catch (err: Error) {
-      toast.error(err.message);
-    } finally {
-      turnstileRef.current?.reset();
-      setIsSignupLoading(false);
+        const {confirmPassword, ...rest} = credentials
+        // Pass a single object to mutate
+        mutate({ mutateCredentials: rest, captchaToken });
+      } catch (err) {
+        toast.error(err.message || "Something went wrong");
+      }
     }
-  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -156,7 +173,7 @@ export function SignupForm({
               />
               <Field>
                 <Button disabled={buttonDisabledReasons} type="submit">
-                  {isSignupLoading ? (
+                  {isPending ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     "Sign up"
@@ -169,14 +186,14 @@ export function SignupForm({
               <Field className="flex justify-center items-center">
                 <OAuthButton
                   bgColor="#DB4437"
-                  disabled={isSubmitting || isSignupLoading}
+                  disabled={isSubmitting || isPending}
                   logoSvg={<Facebook />}
                   text="Sign up with Google"
                   provider="google"
                 />
                 <OAuthButton
                   bgColor="#1877F2"
-                  disabled={isSubmitting || isSignupLoading}
+                  disabled={isSubmitting || isPending}
                   logoSvg={<Facebook />}
                   text="Sign up with Facebook"
                   provider="facebook"

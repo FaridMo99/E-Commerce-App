@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "../ui/input";
 import { Search } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/lib/queries/productQueries";
 import { useRouter, useSearchParams } from "next/navigation";
 import Searchlist from "./Searchlist";
+import { getProducts } from "@/lib/queries/client/productQueries";
 
 function Searchbar() {
   const searchParam = useSearchParams();

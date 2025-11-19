@@ -20,7 +20,7 @@ import InputValidationFailedText from "@/components/main/InputValidationFailedTe
 import { useRouter } from "next/navigation";
 import { EmailSchema, emailSchema } from "@monorepo/shared";
 import { useMutation } from "@tanstack/react-query";
-import { clientSendNewVerificationLink } from "@/lib/queries/clientSideQueries";
+import { sendNewVerificationLink } from "@/lib/queries/client/authQueries";
 
 //redirect on success
 function NewVerifyLinkForm({ headerText }: { headerText: string }) {
@@ -33,7 +33,7 @@ function NewVerifyLinkForm({ headerText }: { headerText: string }) {
         }: {
           email: EmailSchema;
           captchaToken: string;
-        }) => clientSendNewVerificationLink(email, captchaToken),
+        }) => sendNewVerificationLink(email, captchaToken),
         onSuccess: () => {
           toast.success(
             "Submit successful! Check your E-Mails and follow the link."

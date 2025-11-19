@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@monorepo/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import useAuth from "@/stores/authStore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -30,14 +30,30 @@ import InputValidationFailedText from "../main/InputValidationFailedText";
 import Facebook from "../icons/Facebook";
 import Google from "../icons/Google";
 import OAuthButton from "./OAuthButton";
-import { clientLogin } from "@/lib/queries/clientSideQueries";
+import { login } from "@/lib/queries/client/authQueries";
+import { useMutation } from "@tanstack/react-query";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   //submission states
-  const [isLoginLoading, setIsLoginLoading] = useState<boolean>(false);
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["login user"],
+    mutationFn: ({ credentials, captchaToken }: { credentials: LoginSchema, captchaToken: string }) => login(credentials, captchaToken),
+    onSuccess: (result) => {
+      setState(result.accessToken, result.user);
+
+      router.push("/");
+      toast.success("Login successful");
+    },
+    onError: (err) => {
+      toast.error(err.message)
+    },
+    onSettled: () => {
+        turnstileRef.current?.reset();
+    }
+  })
 
   //auth store
   const setState = useAuth((state) => state.setState);
@@ -50,7 +66,7 @@ export function LoginForm({
   });
   const { errors, isSubmitting, isValid, isSubmitted } = formState;
   const buttonDisabledReasons =
-    isSubmitting || (!isValid && isSubmitted) || isLoginLoading;
+    isSubmitting || (!isValid && isSubmitted) || isPending;
   const router = useRouter();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
@@ -58,24 +74,16 @@ export function LoginForm({
 
   async function submitHandler(credentials: LoginSchema) {
     try {
-      setIsLoginLoading(true);
 
       turnstileRef.current?.execute();
       const captchaToken = await turnstileRef.current?.getResponsePromise();
       if (!captchaToken) throw new Error("Failed Captcha");
 
-      const result = await clientLogin(credentials, captchaToken);
-      setState(result.accessToken, result.user)
+      mutate({credentials, captchaToken});
 
-      router.push("/");
-      toast.success("Login successful");
-
-    } catch (err: Error) {
+    } catch (err) {
       toast.error(err.message);
-    } finally {
-      turnstileRef.current?.reset();
-      setIsLoginLoading(false);
-    }
+    } 
   }
 
   return (
@@ -135,7 +143,7 @@ export function LoginForm({
               />
               <Field>
                 <Button disabled={buttonDisabledReasons} type="submit">
-                  {isLoginLoading ? (
+                  {isPending ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     "Sign in"
@@ -146,14 +154,14 @@ export function LoginForm({
                 </FieldSeparator>
                 <OAuthButton
                   bgColor="#DB4437"
-                  disabled={isSubmitting || isLoginLoading}
+                  disabled={isSubmitting || isPending}
                   logoSvg={<Google />}
                   text="Sign in with Google"
                   provider="google"
                 />
                 <OAuthButton
                   bgColor="#1877F2"
-                  disabled={isSubmitting || isLoginLoading}
+                  disabled={isSubmitting || isPending}
                   logoSvg={<Facebook />}
                   text="Sign in with Facebook"
                   provider="facebook"

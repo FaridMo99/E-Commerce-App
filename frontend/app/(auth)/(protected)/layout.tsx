@@ -1,10 +1,9 @@
-import QueryContext from "@/context/QueryContext";
-import { getNewRefreshToken } from "@/lib/queries/authQueries";
+import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import { ChildrenProps } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 
-async function layout({ children }:ChildrenProps) {
+async function layout({ children }: ChildrenProps) {
   let res;
   try {
     res = await getNewRefreshToken();
@@ -13,12 +12,10 @@ async function layout({ children }:ChildrenProps) {
   }
 
   if (res?.accessToken) {
-    redirect("/"); 
+    redirect("/");
   }
 
-  return <QueryContext>
-    {children}
-  </QueryContext>
+  return children;
 }
 
 export default layout;

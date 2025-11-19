@@ -1,4 +1,4 @@
-import { CurrencyISO } from "./ProductCard";
+import { CurrencyISO } from "@/types/types";
 import { DollarSignIcon, EuroIcon, PoundSterling } from "lucide-react";
 
 function CurrencySymbol({ currency }: { currency: CurrencyISO }) {

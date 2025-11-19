@@ -1,9 +1,9 @@
 "use server"
 import { ReviewsQuerySchema } from "@monorepo/shared";
-import { handleResponse } from "./utils";
+import { handleResponse } from "../utils";
 import { apiBaseUrl } from "@/config/constants";
 import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
-import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
+import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,
@@ -16,8 +16,8 @@ export async function getAllReviews(
       params.set("page", String(queryParam.page));
     if (queryParam.limit !== undefined)
       params.set("limit", String(queryParam.limit));
-    if (queryParam.created_at) params.set("created_at", queryParam.created_at);
-    if (queryParam.rating) params.set("rating", queryParam.rating);
+    if (queryParam.created_at) params.set("created_at", String(queryParam.created_at));
+    if (queryParam.rating) params.set("rating", String(queryParam.rating));
     if (queryParam.sortBy !== undefined)
       params.set("sortBy", String(queryParam.sortBy));
     if (queryParam.sortOrder !== undefined)

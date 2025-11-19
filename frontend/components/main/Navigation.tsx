@@ -1,5 +1,5 @@
-"use client"
-import { getUserCart } from "@/lib/queries/usersQueries";
+"use client";
+import { getUserCart } from "@/lib/queries/server/usersQueries";
 import { Loader2, LogIn, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import CurrencyDropdown from "./CurrencyDropdown";
@@ -13,12 +13,12 @@ import { toast } from "sonner";
 
 //dont forget the popup for mobile
 function Navigation() {
-  const { accessToken } = useAuth(state => state)
+  const { accessToken } = useAuth((state) => state);
   const {
     data: cart,
     isLoading,
     isError,
-    error
+    error,
   } = useQuery({
     queryKey: ["get user shopping cart", accessToken],
     queryFn: () => {
@@ -27,19 +27,23 @@ function Navigation() {
     },
     enabled: !!accessToken,
   });
-  
+
   useEffect(() => {
     if (isError) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  },[isError,error])
+  }, [isError, error]);
 
   return (
     <nav className="w-1/3 h-full flex justify-evenly items-center z-10">
       <button className="block md:hidden">
         <MenuIcon size={40} />
       </button>
-      {isLoading ? <Loader2 className="animate-spin" /> : <ShoppingCartDropdown cart={cart ?? null} />}
+      {isLoading ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <ShoppingCartDropdown cart={cart ?? null} />
+      )}
       {accessToken && (
         <>
           <UserDropdown />

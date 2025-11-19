@@ -1,20 +1,16 @@
 import { apiBaseUrl } from "@/config/constants";
 import { AccessToken, AuthResponse, User } from "@/types/types";
-import { EmailSchema, LoginSchema } from "@monorepo/shared";
-import { handleResponse } from "./utils";
-import { getCsrfHeaderClientSide } from "../helpers";
+import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
+import { handleResponse } from "../utils";
+import { getCsrfHeaderClientSide } from "../../helpers";
 
-
-//expired accesstoken than call refresh-token route
-//need auto refresh so doesnt get logged out
-
-export async function clientLogin(
+export async function login(
   credentials: LoginSchema,
-  captchaToken: string,
+  captchaToken: string
 ): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
-    credentials:"include",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       "x-cf-turnstile-token": captchaToken,
@@ -24,9 +20,25 @@ export async function clientLogin(
   return await handleResponse<AuthResponse>(res);
 }
 
-export async  function clientForgotPasswordSendEmail(
-  email: EmailSchema,
+export async function signup(
+  credentials: SignupSchema,
   captchaToken: string,
+): Promise<void> {
+
+  const res = await fetch(`${apiBaseUrl}/auth/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-cf-turnstile-token": captchaToken,
+    },
+    body: JSON.stringify(credentials),
+  });
+  return await handleResponse<void>(res);
+}
+
+export async function forgotPasswordSendEmail(
+  email: EmailSchema,
+  captchaToken: string
 ): Promise<void> {
   const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
     method: "POST",
@@ -36,13 +48,12 @@ export async  function clientForgotPasswordSendEmail(
     },
     body: JSON.stringify(email),
   });
-  await handleResponse(res)
+  await handleResponse(res);
 }
 
-export async function clientVerifyAfterEmailLink(
-  token: string,
+export async function verifyAfterEmailLink(
+  token: string
 ): Promise<AuthResponse> {
-
   const res = await fetch(`${apiBaseUrl}/auth/verify`, {
     method: "POST",
     credentials: "include",
@@ -54,11 +65,10 @@ export async function clientVerifyAfterEmailLink(
   return await handleResponse<AuthResponse>(res);
 }
 
-export async function clientSendNewVerificationLink(
+export async function sendNewVerificationLink(
   email: EmailSchema,
-  captchaToken: string,
+  captchaToken: string
 ): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
     method: "POST",
     headers: {
@@ -70,7 +80,7 @@ export async function clientSendNewVerificationLink(
   await handleResponse<void>(res);
 }
 
-export async function clientChangePasswordAfterLogin(
+export async function changePasswordAfterLogin(
   passwords: {
     oldPassword: string;
     newPassword: string;
@@ -90,8 +100,7 @@ export async function clientChangePasswordAfterLogin(
   return await handleResponse(res);
 }
 
-export async function clientGetNewRefreshToken(): Promise<AuthResponse> {
-
+export async function getNewRefreshToken(): Promise<AuthResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
@@ -99,11 +108,10 @@ export async function clientGetNewRefreshToken(): Promise<AuthResponse> {
   return await handleResponse<AuthResponse>(res);
 }
 
-export async function clientChangePasswordUnauthenticated(
+export async function changePasswordUnauthenticated(
   token: string,
-  password: string,
+  password: string
 ): Promise<AuthResponse> {
-
   const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
     method: "PATCH",
     credentials: "include",
@@ -113,4 +121,20 @@ export async function clientChangePasswordUnauthenticated(
     body: JSON.stringify({ token, password }),
   });
   return await handleResponse<AuthResponse>(res);
+}
+
+export async function logout(accessToken: AccessToken): Promise<void> {
+
+  const res = await fetch(`${apiBaseUrl}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      ...getCsrfHeaderClientSide(),
+    },
+  });
+  await handleResponse<void>(res);
+  cookieStore.delete("refreshToken");
+  cookieStore.delete("csrfToken")
+
 }

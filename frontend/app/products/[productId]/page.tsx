@@ -1,7 +1,6 @@
 import CurrencySymbol from "@/components/main/CurrencySymbol";
-import { getProductByProductId } from "@/lib/queries/productQueries";
-import { addProductToRecentlyViewedProductsByProductId } from "@/lib/queries/usersQueries";
-import useAuth from "@/stores/authStore";
+import FavoriteProduct from "@/components/main/FavoriteProduct";
+import { getProductByProductId } from "@/lib/queries/server/productQueries";
 import { Product } from "@/types/types";
 import { notFound } from "next/navigation";
 import "server-only";
@@ -11,24 +10,15 @@ import "server-only";
 //post requst to recently viewed
 async function page({ params }: { params: { productId: string } }) {
   const { productId } = await params;
-  const accessToken = useAuth.getState().accessToken
   let product:Product
   
   try {
-    
-    if (accessToken) {
-      const [_, productReturn] = await Promise.all([getProductByProductId(productId),
-        addProductToRecentlyViewedProductsByProductId(productId, accessToken)]);
-      
-      if (!productReturn) {
-        return notFound()
-      }
-      product = productReturn
+    const productReturn = await getProductByProductId(productId)
+    if (!productReturn) {
+      return notFound()
     }
-    else {
-          product = await getProductByProductId(productId);
-          if (!product) return notFound();
-    }
+    product = productReturn
+
   } catch (err) {
     console.log(err)
     notFound()
@@ -50,6 +40,7 @@ async function page({ params }: { params: { productId: string } }) {
           {product.imageUrls.map((imageUrl) => (
             <img key={imageUrl} src={imageUrl} className="w-10 h-10" />
           ))}
+          <FavoriteProduct productId={productId} />
         </section>
       </section>
       <section></section>

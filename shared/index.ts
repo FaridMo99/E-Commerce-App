@@ -16,6 +16,7 @@ import {
   settingsSchema,
   passwordSchema,
   emailSchema,
+  productIdSchema
 } from "./schemas.ts";
 
 import type {
@@ -42,6 +43,7 @@ export {
 }
 
 export {
+  productIdSchema,
   loginSchema,
   signupSchema,
   ordersQuerySchema,

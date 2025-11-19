@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { ChangePasswordSchema } from "@/types/types";
 import useAuth from "@/stores/authStore";
 import { useMutation } from "@tanstack/react-query";
-import { clientChangePasswordUnauthenticated } from "@/lib/queries/clientSideQueries";
+import { changePasswordUnauthenticated } from "@/lib/queries/client/authQueries";
 
 //redirect on success
 function ChangePasswordForm({ token }: { token: string }) {
@@ -29,7 +29,7 @@ function ChangePasswordForm({ token }: { token: string }) {
   const { mutate, isPending } = useMutation({
     mutationKey: ["change password for unauthenticated user"],
     mutationFn: ({ token, password }: { token: string; password: string }) =>
-      clientChangePasswordUnauthenticated(token, password),
+      changePasswordUnauthenticated(token, password),
     onSuccess: (res) => {
       toast.success("Password changed successfully!");
       setState(res.accessToken, res.user);

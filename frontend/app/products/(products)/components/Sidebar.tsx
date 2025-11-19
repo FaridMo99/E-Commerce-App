@@ -2,7 +2,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Category } from "@/lib/queries/categoryQueries";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Select,
@@ -14,10 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { ProductCategory } from "@/types/types";
 
 //costraint the slider somehow with min and max values from db
 //debounce the slider so only when he let go it fetches
-function Sidebar({ categories }: { categories: Category[] }) {
+function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 

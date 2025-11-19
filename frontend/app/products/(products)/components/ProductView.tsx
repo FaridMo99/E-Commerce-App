@@ -1,5 +1,5 @@
 import CurrencySymbol from "@/components/main/CurrencySymbol";
-import { Product } from "@/components/main/ProductCard";
+import { Product } from "@/types/types";
 import Link from "next/link";
 
 type ProductViewProps = {

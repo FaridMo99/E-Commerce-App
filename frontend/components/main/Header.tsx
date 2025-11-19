@@ -3,12 +3,10 @@ import Navigation from "./Navigation";
 import Searchbar from "./Searchbar";
 import { AxeIcon } from "lucide-react";
 import Link from "next/link";
-import QueryContext from "@/context/QueryContext";
 
 export async function Header() {
   return (
     <header className="w-screen min-h-[15vh] bg-foreground text-primary-foreground flex relative items-center justify-between">
-      <QueryContext>
         <Searchbar />
         <Link
           href="/"
@@ -18,7 +16,6 @@ export async function Header() {
           <AxeIcon size={100} />
         </Link>
         <Navigation />
-      </QueryContext>
     </header>
   );
 }

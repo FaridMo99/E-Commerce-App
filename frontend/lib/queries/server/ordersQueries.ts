@@ -1,8 +1,8 @@
 "use server"
 import { apiBaseUrl } from "@/config/constants";
-import { handleResponse } from "./utils";
+import { handleResponse } from "../utils";
 import { AccessToken } from "@/types/types";
-import { getAllHeaders, getCsrfHeader } from "../serverHelpers";
+import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 
 //returns sessionid from stripe to then route to stripe checkout

@@ -71,6 +71,7 @@ export function validateSearchQueries<T>(schema: ZodType<T>) {
     res: Response,
     next: NextFunction
   ) {
+    console.log(req.query)
     const validated = schema.safeParse(req.query);
 
     if (!validated.success) {
@@ -87,4 +88,4 @@ export function validateSearchQueries<T>(schema: ZodType<T>) {
 
     next();
   };
-}
+} 

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Product } from "./ProductCard";
 import { Camera, Loader2 } from "lucide-react";
+import { Product } from "@/types/types";
 
 type SearchlistProps = {
   products: Product[];

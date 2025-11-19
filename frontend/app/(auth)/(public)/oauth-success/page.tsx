@@ -1,7 +1,7 @@
 import "server-only";
 import SuccessCard from "@/app/(auth)/(protected)/verify-success/components/SuccessCard";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/queries/usersQueries";
+import { getUser } from "@/lib/queries/server/usersQueries";
 import { toast } from "sonner";
 import { User } from "@/types/types";
 
@@ -12,8 +12,8 @@ async function page({ searchParams }: { searchParams?: { token: string } }) {
   if (!param?.token) redirect("/");
 
   const token = param.token;
-  let user: User
-  
+  let user: User;
+
   try {
     user = await getUser(token);
   } catch (err) {
