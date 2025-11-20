@@ -36,12 +36,20 @@ export const productSelect: Prisma.ProductSelect = {
     stock_quantity: true,
     published_at: true,
     imageUrls: true,
-    currency:true,
+    currency: true,
     category: {
         select:
         {
            ...categorySelect
         }
+    },
+    reviews: {
+        where: {
+            is_public: true,
+        },
+        select: {
+          rating:true
+      }  
     },
     _count: {
         select: {
@@ -54,7 +62,7 @@ export const productSelect: Prisma.ProductSelect = {
     },
 };
 
-export function productSelector(currency:CurrencyISO) {
+export function productSelector(currency:CurrencyISO):Prisma.ProductSelect {
   const priceField = `price_in_${currency}`
   const salePriceField = `sale_price_in_${currency}`
 
@@ -76,7 +84,15 @@ export function productSelector(currency:CurrencyISO) {
         ...categorySelect,
       },
     },
-
+      reviews: {
+          where: {
+            is_public:true
+          },
+          
+      select: {
+        rating: true,
+      },
+    },
     _count: {
       select: {
         reviews: { where: { is_public: true } },
@@ -175,14 +191,11 @@ export const reviewWhere: Prisma.ReviewWhereInput = {
 };
 
 
+export type ProductWithSelectedFields = Prisma.ProductGetPayload<{
+  select: typeof productSelect;
+}>;
 
-//change typing of product query fns to resmble these selects here
 
 //block adding products to shopping cart when theres no stock amount
 //make update itemquantity and in general adding product to cart cap at the stockamount limit
     //make this frontend wise and backend wise
-
-
-//look how to implement to know if a product is favoredby user to give abilitiy to favor it
-
-// calc avg of product ratigns server side with the heper fn you created

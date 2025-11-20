@@ -4,7 +4,7 @@ import { sortOrderSchema } from "@monorepo/shared";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { productSelector } from "../config/prismaHelpers.js";
+import { productSelect, productSelector } from "../config/prismaHelpers.js";
 
 
 export async function getRevenue(
@@ -56,8 +56,8 @@ export async function getTopsellers(
   const { sortOrder = "desc", limit = 10 } = req.query;
   const currency = req.currency!
 
-    const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+    const priceField = `price_in_${currency}` as keyof typeof productSelect;
+    const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(

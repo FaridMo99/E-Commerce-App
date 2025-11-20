@@ -43,18 +43,19 @@ export type PriceTypes =
     }
 
 export type Product = {
-      id: string;
-      name: string;
-      description: string;
-      currency: CurrencyISO;
-      stock_quantity: number;
-      published_at: Date | null; // can be only null when user is not admin, and admin also gets is_public field with boolean value
-      imageUrls: string[];
-      category: ProductCategory;
-      _count: {
-        reviews: number;
-      };
-    } & PriceTypes
+  id: string;
+  name: string;
+  description: string;
+  currency: CurrencyISO;
+  stock_quantity: number;
+  averageRating:number;
+  published_at: Date | null; // can be only null when user is not admin, and admin also gets is_public field with boolean value
+  imageUrls: string[];
+  category: ProductCategory;
+  _count: {
+    reviews: number;
+  };
+} & PriceTypes;
 
 
 

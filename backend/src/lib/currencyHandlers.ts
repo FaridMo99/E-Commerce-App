@@ -13,8 +13,8 @@ import type {
   OpenExchangeRateApiReturn,
 } from "../types/types.js";
 import chalk from "chalk";
-import { getTimestamp } from "./utils.js";
-import type { Product } from "../generated/prisma/client.js";
+import { calcAvgRating, getTimestamp } from "./utils.js";
+import type { ProductWithSelectedFields } from "../config/prismaHelpers.js";
 
 //cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
@@ -42,7 +42,7 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
 
 }
 
-function roundPriceUpInCents(
+export function roundPriceUpInCents(
   amount: number,
   ending: NicePrice = DEFAULT_NICE_PRICE,
 ): number {
@@ -93,7 +93,7 @@ export function formatPriceForClient(cents: number): number {
   return result;
 }
 
-export function formatPricesForClient<T extends Partial<Product>>(
+export function formatPricesForClient<T extends ProductWithSelectedFields>(
   product: T,
   priceField: Extract<keyof T, string>,
   salePriceField: Extract<keyof T, string>
@@ -113,4 +113,11 @@ export function formatPricesForClient<T extends Partial<Product>>(
   }
 }
 
-//also transform the product u send in cartitem/cart for user
+export function formatPricesForClientAndCalculateAverageRating<T extends ProductWithSelectedFields>(
+  product: T,
+  priceField: Extract<keyof T, string>,
+  salePriceField: Extract<keyof T, string>
+ ):void {
+  formatPricesForClient(product,priceField,salePriceField);
+  calcAvgRating(product);
+}

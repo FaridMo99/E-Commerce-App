@@ -8,7 +8,7 @@ import type {
 } from "@monorepo/shared";
 import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
-import { formatPricesForClient,formatPriceForClient } from "../lib/currencyHandlers.js";
+import { formatPriceForClient, formatPricesForClientAndCalculateAverageRating } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
@@ -16,6 +16,7 @@ import {
   authenticatedReviewSelect,
   cartSelect,
   orderSelect,
+  productSelect,
   productSelector,
   productWhere,
   userSelect,
@@ -301,8 +302,8 @@ export async function getUserCart(
   const userId = req.user?.id!;
   const currency = req.currency!
 
-    const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -347,7 +348,7 @@ export async function getUserCart(
     );
 
     cart.items.forEach(item => {
-      formatPricesForClient(item.product,priceField,salePriceField)
+      formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField)
     })
 
     return res.status(200).json(cart);
@@ -410,8 +411,9 @@ export async function addProductToUserCart(
   const { productId, quantity } = req.body;
   const currency = req.currency!
 
-      const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField =
+    `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -457,7 +459,7 @@ export async function addProductToUserCart(
     );
 
     newCartItem.cart.items.forEach(item => {
-      formatPricesForClient(item.product,priceField,salePriceField)
+      formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField)
     })
 
     return res.status(200).json(newCartItem.cart);
@@ -542,8 +544,9 @@ export async function updateItemQuantity(
   const { quantity } = req.body;
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField =
+    `sale_price_in_${currency}` as keyof typeof productSelect;
   
   if (!itemId) {
     console.log(chalk.red(`${getTimestamp()} No ProductId received`));
@@ -606,7 +609,7 @@ export async function updateItemQuantity(
       )
     );
 
-    cart.cart.items.forEach(item=> formatPricesForClient(item.product,priceField,salePriceField))
+    cart.cart.items.forEach(item=> formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField))
 
     return res.status(200).json(cart.cart);
 
@@ -630,8 +633,9 @@ export async function getFavoriteItems(
   const userId = req.user?.id!;
     const currency = req.currency!;
 
-      const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+    const priceField = `price_in_${currency}` as keyof typeof productSelect;
+    const salePriceField =
+      `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -672,7 +676,7 @@ export async function getFavoriteItems(
       )
     );
 
-    favorites.favorites.forEach(favorite=> formatPricesForClient(favorite,priceField,salePriceField))
+    favorites.favorites.forEach(favorite=> formatPricesForClientAndCalculateAverageRating(favorite,priceField,salePriceField))
     
     return res.status(200).json(favorites.favorites);
   } catch (err) {
@@ -753,8 +757,9 @@ export async function addFavoriteItem(
   const productId = req.body.productId
   const currency = req.currency!;
 
-      const priceField = `price_in_${currency}`;
-      const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField =
+    `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(
@@ -799,7 +804,7 @@ export async function addFavoriteItem(
     });
 
     if (product) {
-      formatPricesForClient(product, priceField, salePriceField);
+      formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField);
     }
 
     return res.status(200).json(product);
@@ -823,8 +828,9 @@ export async function getRecentlyViewedProducts(
   const userId = req.user?.id!;
   const currency = req.currency!;
 
-  const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField =
+    `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(
@@ -876,7 +882,7 @@ export async function getRecentlyViewedProducts(
     );
     console.log(recentlyViewedProducts)
 
-    recentlyViewedProducts.forEach(product=>formatPricesForClient(product,priceField,salePriceField))
+    recentlyViewedProducts.forEach(product=>formatPricesForClientAndCalculateAverageRating(product,priceField,salePriceField))
 
 
     return res.status(200).json(recentlyViewedProducts);
@@ -900,8 +906,9 @@ export async function addProductToRecentlyViewedProductsByProductId(
   const productId = req.body.productId
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+    const priceField = `price_in_${currency}` as keyof typeof productSelect;
+    const salePriceField =
+      `sale_price_in_${currency}` as keyof typeof productSelect;
 
 
   if (!productId) return res.status(400).json({ message: "No Product provided" })
@@ -952,7 +959,7 @@ export async function addProductToRecentlyViewedProductsByProductId(
     const product = recentlyViewed.recentlyViewedProducts[0]?.product;
 
     if (product) {
-    formatPricesForClient(product, priceField, salePriceField);  
+    formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField);  
     }
 
     return res.status(200).json(product);

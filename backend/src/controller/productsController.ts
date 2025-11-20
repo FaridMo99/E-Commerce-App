@@ -8,7 +8,7 @@ import {
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
-  formatPricesForClient,
+  formatPricesForClientAndCalculateAverageRating,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import {
@@ -27,6 +27,7 @@ import type { Product } from "../generated/prisma/client.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import {
+  productSelect,
   productSelector,
   productWhere,
   reviewSelect,
@@ -52,8 +53,8 @@ export async function getAllProducts(
   } = req.query;
 
   const currency = req.currency!
-  const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -92,10 +93,8 @@ export async function getAllProducts(
 
     //format price from cent to .niceprice
     products.forEach(product => {
-      formatPricesForClient(product, priceField, salePriceField)
+      formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField)
     })
-
-    //calc rating average
 
     console.log(chalk.green(`${getTimestamp()} Products fetched successfully`));
     return res.status(200).json(products);
@@ -137,7 +136,7 @@ export async function createProduct(
 
       if (!currency) throw new Error("Base currency not found");
 
-      const priceField = `price_in_${currency.value}` as keyof typeof product;
+      const priceField = `price_in_${currency.value}` as keyof typeof productSelect;
 
       return tx.product.create({
         data: {
@@ -188,8 +187,8 @@ export async function getProductByProductId(
   const id = req.params.productId!;
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}`;
-  const salePriceField = `sale_price_in_${currency}`;
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
@@ -211,9 +210,7 @@ export async function getProductByProductId(
     );
 
     //format price to nice price
-    formatPricesForClient(product,priceField, salePriceField)
-
-    //calculate the average rating
+    formatPricesForClientAndCalculateAverageRating(product,priceField, salePriceField)
 
     return res.status(200).json(product);
   } catch (err) {
@@ -347,9 +344,7 @@ export async function updateProductByProductId(
       ]);
     }
 
-    //format price for client
-
-    //calc avg rating
+    //format and calc avg
 
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
