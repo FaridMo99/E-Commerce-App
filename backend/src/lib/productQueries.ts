@@ -1,5 +1,5 @@
 import { TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS } from "../config/constants.js";
-import type { Category, Product } from "../generated/prisma/client.js";
+import type { Category, CurrencyISO, Product } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import {
@@ -8,11 +8,11 @@ import {
   SALE_PRODUCTS_REDIS_KEY,
   TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
-import { productSelect, productWhere } from "../config/prismaHelpers.js";
+import { productSelector, productWhere } from "../config/prismaHelpers.js";
 
 const limit = 10;
 
-export async function getNewProducts(): Promise<Product[]> {
+export async function getNewProducts(currency:CurrencyISO): Promise<Product[]> {
   const cached = await redis.get(NEW_PRODUCTS_REDIS_KEY);
   if (cached) return JSON.parse(cached) as Product[];
 
@@ -30,7 +30,7 @@ export async function getNewProducts(): Promise<Product[]> {
       published_at: "desc",
     },
     select: {
-      ...productSelect
+      ...productSelector(currency)
     }
   });
 
@@ -41,23 +41,25 @@ export async function getNewProducts(): Promise<Product[]> {
   return products;
 }
 
-export async function getSaleProducts(): Promise<Product[]> {
+export async function getSaleProducts(currency: CurrencyISO): Promise<Product[]> {
   const cached = await redis.get(SALE_PRODUCTS_REDIS_KEY);
   if (cached) return JSON.parse(cached) as Product[];
 
   const products = await prisma.product.findMany({
     where: {
       ...productWhere,
-      sale_price: {
-        not: null,
-      },
+      OR: [
+        { sale_price_in_USD: { not: null } },
+        { sale_price_in_EUR: { not: null } },
+        { sale_price_in_GBP: { not: null } },
+      ],
     },
     orderBy: {
       published_at: "desc",
     },
     take: limit,
     select: {
-      ...productSelect,
+      ...productSelector(currency),
     },
   });
 
@@ -70,6 +72,7 @@ export async function getSaleProducts(): Promise<Product[]> {
 
 export async function getCategoryProducts(
   category: Category["name"],
+  currency: CurrencyISO
 ): Promise<Product[]> {
   const key = `categoryProducts:${category}`;
   const cached = await redis.get(key);
@@ -87,7 +90,7 @@ export async function getCategoryProducts(
     },
     take: limit,
     select: {
-      ...productSelect,
+      ...productSelector(currency),
     },
   });
 
@@ -97,6 +100,7 @@ export async function getCategoryProducts(
 
 export async function getRecentlyViewedProducts(
   userId: string,
+  currency:CurrencyISO
 ): Promise<Product[]> {
   const recentlyViewed = await prisma.recentlyViewed.findMany({
     where: { userId },
@@ -107,7 +111,7 @@ export async function getRecentlyViewedProducts(
     select: {
       product: {
         select: {
-          ...productSelect,
+          ...productSelector(currency),
         },
       },
     },
@@ -116,7 +120,7 @@ export async function getRecentlyViewedProducts(
   return recentlyViewed.map((rv) => rv.product);
 }
 
-export async function getTrendingProducts(): Promise<Product[]> {
+export async function getTrendingProducts(currency:CurrencyISO): Promise<Product[]> {
   const cached = await redis.get(TRENDING_PRODUCTS_REDIS_KEY);
   if (cached) return JSON.parse(cached) as Product[];
   const timeDifference = new Date();
@@ -131,7 +135,7 @@ export async function getTrendingProducts(): Promise<Product[]> {
       published_at: { not: null },
     },
       select: {
-        ...productSelect,
+        ...productSelector(currency),
       },
   });
 

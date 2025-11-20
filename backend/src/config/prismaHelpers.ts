@@ -1,11 +1,13 @@
-import type { Prisma } from "../generated/prisma/client.js";
+import type { CurrencyISO, Prisma } from "../generated/prisma/client.js";
 
 
 // SELECT CLAUSES
 
 export const userSelect: Prisma.UserSelect = {
     name: true,
-    role:true
+    role: true,
+    countryCode: true,
+    currency:true
 };
 
 export const userAuthenticatedSelect: Prisma.UserSelect = {
@@ -23,8 +25,12 @@ export const categorySelect: Prisma.CategorySelect = {
 
 export const productSelect: Prisma.ProductSelect = {
     id: true,
-    price: true,
-    sale_price: true,
+    price_in_USD:true,
+    price_in_GBP:true,
+    price_in_EUR:true,
+    sale_price_in_USD:true,
+    sale_price_in_GBP:true,
+    sale_price_in_EUR:true,
     name: true,
     description: true,
     stock_quantity: true,
@@ -47,6 +53,37 @@ export const productSelect: Prisma.ProductSelect = {
         },
     },
 };
+
+export function productSelector(currency:CurrencyISO) {
+  const priceField = `price_in_${currency}`
+  const salePriceField = `sale_price_in_${currency}`
+
+  return {
+    id: true,
+    name: true,
+    description: true,
+    stock_quantity: true,
+    published_at: true,
+    imageUrls: true,
+    currency: true,
+
+    // dynamic fields
+    [priceField]: true,
+    [salePriceField]: true,
+
+    category: {
+      select: {
+        ...categorySelect,
+      },
+    },
+
+    _count: {
+      select: {
+        reviews: { where: { is_public: true } },
+      },
+    },
+  } satisfies Prisma.ProductSelect;
+}
 
 export const orderSelect: Prisma.OrderSelect = {
     id: true,

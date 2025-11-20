@@ -26,6 +26,8 @@ model User {
   createdBy  UserCreatedBy
   providerId String?
   address    String?
+  countryCode String     @default("US")
+  currency   CurrencyISO @default(USD)
   orders     Order[]
   reviews    Review[]
   refreshTokens RefreshToken[]
@@ -60,8 +62,12 @@ model Product {
   id             String       @id @default(uuid())
   name           String
   description    String
-  price          Int
-  sale_price     Int?
+  price_in_USD   Int
+  price_in_GBP   Int
+  price_in_EUR   Int
+  sale_price_in_USD     Int?
+  sale_price_in_GBP     Int?
+  sale_price_in_EUR     Int?
   currency       CurrencyISO
   stock_quantity Int
   is_public      Boolean      @default(false)

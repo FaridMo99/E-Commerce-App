@@ -20,28 +20,43 @@ export type CurrencyISO = "EUR" | "USD" | "GBP";
 
 //frontend types for return of api
 export type UserRole = "ADMIN" | "USER";
-export type User = { name: string; role: UserRole };
+export type User = { name: string; role: UserRole, countryCode:string, currency:CurrencyISO };
 export type AuthResponse = { accessToken: AccessToken; user: User };
 
 export type ProductCategory = {
     id: string,
     name:string
 }
+
+export type PriceTypes =
+    {
+      price_in_GBP: number;
+      sale_price_in_GBP: number | null;
+    }
+  | {
+      price_in_EUR: number;
+      sale_price_in_EUR: number | null;
+    }
+  | {
+      price_in_USD: number;
+      sale_price_in_USD: number | null;
+    }
+
 export type Product = {
-    id: string,
-    price: number,
-    sale_price: number | null,
-    name: string,
-    description: string,
-    currency:CurrencyISO,
-    stock_quantity: number,
-    published_at: Date | null, // can be only null when user is not admin, and admin also gets is_public field with boolean value
-    imageUrls: string[],
-    category:ProductCategory,
-    _count: {
-        reviews:number
-    },
-};
+      id: string;
+      name: string;
+      description: string;
+      currency: CurrencyISO;
+      stock_quantity: number;
+      published_at: Date | null; // can be only null when user is not admin, and admin also gets is_public field with boolean value
+      imageUrls: string[];
+      category: ProductCategory;
+      _count: {
+        reviews: number;
+      };
+    } & PriceTypes
+
+
 
 export type Order = {
     id: string,

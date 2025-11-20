@@ -47,8 +47,12 @@ export const signupSchema = loginSchema.extend({
 });
 
 /** --- Update User Schema --- */
-  //should also have address adding 
-export const updateUserSchema = signupSchema.partial();
+    //make this proper, this rn just momentarily
+export const updateUserSchema = signupSchema.partial().extend({
+  address: z.string().optional(),
+  countryCode: z.string(),
+  currency:currencySchema
+});
 
 /** --- Orders Query Schema --- */
 export const ordersQuerySchema = z.object({

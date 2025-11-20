@@ -15,8 +15,15 @@ import prisma from "./src/services/prisma.js";
 import cors from "cors";
 import { loggerMiddleware } from "./src/middleware/utilityMiddleware.js";
 import { getTimestamp } from "./src/lib/utils.js";
+import path from "path";
+import maxmind from "maxmind";
 
-export const app = express();
+//ip to country reader
+const dbPath = path.join(import.meta.dirname, "src" ,"data", "ip-to-country.mmdb");
+export const lookup = await maxmind.open(dbPath);
+
+
+export const app = express(); 
 
 //proxy support middleware to access ip
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
@@ -51,7 +58,7 @@ app.use("/webhooks", webhookRouter);
 
 //add another handler here for webapp serving
 export const server = app.listen(PORT, async () => {
-
+  
 
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
 });

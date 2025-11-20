@@ -25,7 +25,7 @@ export async function issueTokens(
     const finalDeviceId = deviceId ?? v4()
 
     const accessToken = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role,countryCode:user.countryCode,currency:user.currency },
       JWT_ACCESS_TOKEN_SECRET,
       {
         expiresIn: "15m",
@@ -112,7 +112,7 @@ export async function OauthLogin(req: Request, res: Response) {
   }
 }
 
-//this isnt auth, this is bot protect, move this somewhere else
+
 export async function validateTurnstile(
   token: string,
   remoteip: string

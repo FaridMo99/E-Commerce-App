@@ -4,6 +4,8 @@ import type { CurrencyISO, UserRole } from "../generated/prisma/enums.js";
 export type JWTUserPayload = {
   id: string;
   role: UserRole;
+  countryCode: string;
+  currency:CurrencyISO
 };
 
 export type JWTRefreshTokenPayload = {

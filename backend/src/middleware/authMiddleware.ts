@@ -1,4 +1,3 @@
-import { loginSchema, signupSchema, updateUserSchema } from "@monorepo/shared";
 import chalk from "chalk";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";

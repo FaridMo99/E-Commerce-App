@@ -8,8 +8,7 @@ import type {
 } from "@monorepo/shared";
 import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
-import type { JWTUserPayload } from "../types/types.js";
-import { formatPriceForClient } from "../lib/currencyHandlers.js";
+import { formatPricesForClient,formatPriceForClient } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
@@ -17,9 +16,8 @@ import {
   authenticatedReviewSelect,
   cartSelect,
   orderSelect,
-  productSelect,
+  productSelector,
   productWhere,
-  reviewSelect,
   userSelect,
 } from "../config/prismaHelpers.js";
 
@@ -70,7 +68,7 @@ export async function updateUserByUserId(
   res: Response,
   next: NextFunction
 ) {
-  const { email, name, password, birthdate, address } = req.body;
+  const { email, name, password, birthdate, address, countryCode, currency } = req.body;
   const id = req.user?.id;
 
   if (!id) {
@@ -301,7 +299,11 @@ export async function getUserCart(
   next: NextFunction
 ) {
   const userId = req.user?.id!;
+  const currency = req.currency!
 
+    const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+  
   try {
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching cart for user ${userId}`)
@@ -311,7 +313,23 @@ export async function getUserCart(
         userId,
       },
       select: {
-        ...cartSelect,
+        id:true,
+        _count: {
+            select: {
+                items:true
+            }
+        },
+        items: {
+            select: {
+                quantity: true,
+                id: true,
+                product: {
+                    select: {
+                        ...productSelector(currency)
+                    }
+                }
+            }
+        }
       },
     });
 
@@ -327,6 +345,11 @@ export async function getUserCart(
         `${getTimestamp()} Cart fetched successfully for user ${userId}`
       )
     );
+
+    cart.items.forEach(item => {
+      formatPricesForClient(item.product,priceField,salePriceField)
+    })
+
     return res.status(200).json(cart);
   } catch (err) {
     console.log(
@@ -345,7 +368,7 @@ export async function emptyCart(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id;
+  const userId = req.user?.id!;
 
   try {
     console.log(
@@ -385,7 +408,11 @@ export async function addProductToUserCart(
 ) {
   const userId = req.user?.id!;
   const { productId, quantity } = req.body;
+  const currency = req.currency!
 
+      const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+  
   try {
     console.log(
       chalk.yellow(
@@ -401,8 +428,24 @@ export async function addProductToUserCart(
       select: {
         cart: {
           select: {
-            ...cartSelect,
+          id:true,
+          _count: {
+              select: {
+                  items:true
+              }
           },
+          items: {
+              select: {
+                  quantity: true,
+                  id: true,
+                  product: {
+                      select: {
+                          ...productSelector(currency)
+                      }
+                  }
+              }
+          }
+      },
         },
       },
     });
@@ -412,6 +455,11 @@ export async function addProductToUserCart(
         `${getTimestamp()} Product ${productId} added to cart successfully for user ${userId}`
       )
     );
+
+    newCartItem.cart.items.forEach(item => {
+      formatPricesForClient(item.product,priceField,salePriceField)
+    })
+
     return res.status(200).json(newCartItem.cart);
   } catch (err) {
     console.log(
@@ -492,7 +540,11 @@ export async function updateItemQuantity(
   const userId = req.user?.id!;
   const itemId = req.params.itemId;
   const { quantity } = req.body;
+  const currency = req.currency!
 
+  const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+  
   if (!itemId) {
     console.log(chalk.red(`${getTimestamp()} No ProductId received`));
     return res.status(400).json({ message: "No ProductId received" });
@@ -517,8 +569,24 @@ export async function updateItemQuantity(
       select: {
         cart: {
           select: {
-            ...cartSelect,
-          },
+            id:true,
+            _count: {
+                select: {
+                    items:true
+                }
+            },
+            items: {
+                select: {
+                    quantity: true,
+                    id: true,
+                    product: {
+                        select: {
+                            ...productSelector(currency)
+                        }
+                    }
+                }
+            }
+        },
         },
       },
     });
@@ -537,7 +605,11 @@ export async function updateItemQuantity(
         `${getTimestamp()} Quantity updated for item ${itemId}, user ${userId}`
       )
     );
+
+    cart.cart.items.forEach(item=> formatPricesForClient(item.product,priceField,salePriceField))
+
     return res.status(200).json(cart.cart);
+
   } catch (err) {
     console.log(
       chalk.red(
@@ -556,6 +628,11 @@ export async function getFavoriteItems(
   next: NextFunction
 ) {
   const userId = req.user?.id!;
+    const currency = req.currency!;
+
+      const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+  
   try {
     console.log(
       chalk.yellow(
@@ -574,7 +651,7 @@ export async function getFavoriteItems(
       select: {
         favorites: {
           select: {
-            ...productSelect,
+            ...productSelector(currency),
           },
         },
       },
@@ -589,19 +666,15 @@ export async function getFavoriteItems(
       return res.status(404).json({ message: "Favorite products not found" });
     }
 
-    favorites.favorites.forEach((favorite) => {
-      favorite.price = formatPriceForClient(favorite.price);
-      if (favorite.sale_price) {
-        favorite.sale_price = formatPriceForClient(favorite.sale_price);
-      }
-    });
-
     console.log(
       chalk.green(
         `${getTimestamp()} Successfully fetched favorite items for user ${userId}`
       )
     );
-    return res.status(200).json(favorites);
+
+    favorites.favorites.forEach(favorite=> formatPricesForClient(favorite,priceField,salePriceField))
+    
+    return res.status(200).json(favorites.favorites);
   } catch (err) {
     console.log(
       chalk.red(
@@ -678,6 +751,10 @@ export async function addFavoriteItem(
 ) {
   const userId = req.user?.id!;
   const productId = req.body.productId
+  const currency = req.currency!;
+
+      const priceField = `price_in_${currency}`;
+      const salePriceField = `sale_price_in_${currency}`;
 
   try {
     console.log(
@@ -717,9 +794,13 @@ export async function addFavoriteItem(
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: {
-        ...productSelect,
+        ...productSelector(currency),
       },
     });
+
+    if (product) {
+      formatPricesForClient(product, priceField, salePriceField);
+    }
 
     return res.status(200).json(product);
   } catch (err) {
@@ -740,6 +821,10 @@ export async function getRecentlyViewedProducts(
   next: NextFunction
 ) {
   const userId = req.user?.id!;
+  const currency = req.currency!;
+
+  const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
 
   try {
     console.log(
@@ -747,31 +832,29 @@ export async function getRecentlyViewedProducts(
         `${getTimestamp()} Fetching recently viewed products for user ${userId}`
       )
     );
-    const recentlyViewedProducts = await prisma.user.findUnique({
-      where: {
-        id: userId,
-        recentlyViewedProducts: {
-          some: {
-            product: {
-              ...productWhere,
-            },
-          },
-        },
-      },
+    const recentlyViewedProductsObj = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         recentlyViewedProducts: {
-          select: {
+          where: {
             product: {
-              select: {
-                ...productSelect,
-              },
+              ...productWhere, 
             },
           },
+          select: {
+            product: {
+              select: { ...productSelector(currency) },
+            },
+          },
+          orderBy: {
+            viewedAt: "desc",
+          },
+          take:15
         },
       },
     });
 
-    if (!recentlyViewedProducts) {
+    if (!recentlyViewedProductsObj) {
       console.log(
         chalk.red(
           `${getTimestamp()} No recently viewed products found for user ${userId}`
@@ -780,20 +863,22 @@ export async function getRecentlyViewedProducts(
       return res.status(404).json({ message: "Favorite products not found" });
     }
 
-    recentlyViewedProducts.recentlyViewedProducts.forEach((product) => {
-      product.product.price = formatPriceForClient(product.product.price);
-      if (product.product.sale_price) {
-        product.product.sale_price = formatPriceForClient(
-          product.product.sale_price
-        );
-      }
-    });
+    const recentlyViewedProducts =
+      recentlyViewedProductsObj?.recentlyViewedProducts.map(
+        (rv) => rv.product
+      ) || [];
+
 
     console.log(
       chalk.green(
         `${getTimestamp()} Successfully fetched recently viewed products for user ${userId}`
       )
     );
+    console.log(recentlyViewedProducts)
+
+    recentlyViewedProducts.forEach(product=>formatPricesForClient(product,priceField,salePriceField))
+
+
     return res.status(200).json(recentlyViewedProducts);
   } catch (err) {
     console.log(
@@ -813,7 +898,12 @@ export async function addProductToRecentlyViewedProductsByProductId(
 ) {
   const userId = req.user?.id!;
   const productId = req.body.productId
-  
+  const currency = req.currency!
+
+  const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+
+
   if (!productId) return res.status(400).json({ message: "No Product provided" })
   
   try {
@@ -822,23 +912,35 @@ export async function addProductToRecentlyViewedProductsByProductId(
         `${getTimestamp()} adding product to recently viewed products for user ${userId}`
       )
     );
-    const product = await prisma.user.update({
+
+    const recentlyViewed = await prisma.user.update({
       where: {
         id: userId,
       },
       data: {
         recentlyViewedProducts: {
-          connect: {
-            userId_productId: {
-              userId,
-              productId,
+          connectOrCreate: {
+            where: {
+              userId_productId: { userId, productId },
+            },
+            create: {
+              product: { connect: { id: productId } },
             },
           },
         },
       },
       select: {
-        ...productSelect
-      }
+        recentlyViewedProducts: {
+          where: {
+            productId,
+          },
+          select: {
+            product: {
+              select: { ...productSelector(currency) },
+            },
+          },
+        },
+      },
     });
 
 
@@ -847,6 +949,12 @@ export async function addProductToRecentlyViewedProductsByProductId(
         `${getTimestamp()} Successfully added recently viewed product for user ${userId}`
       )
     );
+    const product = recentlyViewed.recentlyViewedProducts[0]?.product;
+
+    if (product) {
+    formatPricesForClient(product, priceField, salePriceField);  
+    }
+
     return res.status(200).json(product);
   } catch (err) {
     console.log(

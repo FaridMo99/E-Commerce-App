@@ -11,15 +11,10 @@ import { useState } from "react";
 import CurrencySymbol from "./CurrencySymbol";
 import Link from "next/link";
 import { Product } from "@/types/types";
-import ProductTag from "./ProductTag";
 import { CameraIcon } from "lucide-react";
+import ProductCardTags from "./ProductCardTags";
 
 type ProductCardProps = { product: Product };
-
-
-//have to be logged in to bookmark, unauthed bookmarking redirects to login page
-//also needs the data of if already bookmarked by user, not available rn
-//have to use server actions and optimistically update then manually
 
 
 function ProductCard({ product }: ProductCardProps) {
@@ -38,22 +33,9 @@ function ProductCard({ product }: ProductCardProps) {
         onMouseLeave={() => {
           setShowSecondImage(false);
         }}
-        className="bg-foreground relative pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer"
+        className={`bg-foreground relative pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer ${product.stock_quantity === 0 ? "bg-muted opacity-35 " : ""}`}
       >
-        {product.sale_price && (
-          <ProductTag
-            type="Sale"
-            styles="absolute top-4 right-0 w-10 rounded-l-lg"
-          />
-        )}
-        {product.published_at &&
-          new Date(product.published_at) >=
-            new Date(new Date().setDate(new Date().getDate() - 7)) && (
-            <ProductTag
-              type="New"
-              styles="absolute top-12 right-0 w-10 rounded-l-lg"
-            />
-          )}
+        <ProductCardTags stock_quantity={product.stock_quantity} sale_price={product.sale_price} published_at={product.published_at} />
         <CardContent className="w-full h-35 flex justify-center items-center bg-white">
           {!showSecondImage &&
             (firstImage ? <img src={firstImage} /> : <CameraIcon />)}

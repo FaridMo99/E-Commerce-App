@@ -1,5 +1,3 @@
-"use server";
-
 import {
   AddCartItemSchema,
   ItemQuantitySchema,

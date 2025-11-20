@@ -17,7 +17,7 @@ import {
   verifyCaptcha,
 } from "../middleware/authMiddleware.js";
 import { validateBody } from "../middleware/validationMiddleware.js";
-import { authRateLimiter } from "../middleware/utilityMiddleware.js";
+import { authRateLimiter, geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
 import passport from "../services/passport.js";
 import { OauthLogin } from "../lib/auth.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
@@ -31,6 +31,7 @@ authRouter.post(
   authRateLimiter,
   validateBody(signupSchema),
   verifyCaptcha,
+  geoCurrencyMiddleware,
   signup,
 );
 authRouter.post(
@@ -91,20 +92,20 @@ authRouter.get(
   }),
 );
 
-//failure redirect should be a real frontend route to let try again
-//even on success redirects there
 authRouter.get(
   "/oauth/google/callback",
   authRateLimiter,
+  geoCurrencyMiddleware,
   passport.authenticate("google", {
     session: false,
     failureRedirect: `${CLIENT_ORIGIN}/login`,
   }),
-  OauthLogin,
+  OauthLogin
 );
 authRouter.get(
   "/oauth/facebook/callback",
   authRateLimiter,
+  geoCurrencyMiddleware,
   passport.authenticate("facebook", {
     session: false,
     failureRedirect: `${CLIENT_ORIGIN}/login`,
@@ -113,6 +114,3 @@ authRouter.get(
 );
 
 export default authRouter;
-
-//watch out how to exactly handle oAuth users since there password is optional, like what happens if they hit certain routes
-//like change password, verify account, send email etc

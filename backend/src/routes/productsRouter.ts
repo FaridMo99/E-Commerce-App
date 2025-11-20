@@ -22,11 +22,12 @@ import {
 } from "../middleware/validationMiddleware.js";
 import { upload } from "../services/cloud.js";
 import { productSchema, productsQuerySchema, reviewSchema, updateProductSchema } from "@monorepo/shared";
+import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
 
 const productsRouter = Router();
 
-productsRouter.get("/", validateSearchQueries(productsQuerySchema), getAllProducts);
-productsRouter.get("/home", attachUserIfExists, getHomeProducts);
+productsRouter.get("/", validateSearchQueries(productsQuerySchema),geoCurrencyMiddleware, getAllProducts);
+productsRouter.get("/home", attachUserIfExists,geoCurrencyMiddleware, getHomeProducts);
 productsRouter.post(
   "/",
   isAuthenticated,
@@ -35,6 +36,7 @@ productsRouter.post(
   upload.array("images"),
   validateImages,
   validateBody(productSchema),
+  geoCurrencyMiddleware,
   createProduct,
 );
 productsRouter.get("/:productId/reviews", getAllReviewsByProductId);
@@ -45,7 +47,7 @@ productsRouter.post(
   hasCsrfToken,
   createReviewByProductId,
 );
-productsRouter.get("/:productId", getProductByProductId);
+productsRouter.get("/:productId", geoCurrencyMiddleware,getProductByProductId);
 productsRouter.delete(
   "/:productId",
   isAuthenticated,
@@ -59,6 +61,7 @@ productsRouter.patch(
   isAuthenticated,
   isAdmin,
   hasCsrfToken,
+  geoCurrencyMiddleware,
   updateProductByProductId,
 );
 

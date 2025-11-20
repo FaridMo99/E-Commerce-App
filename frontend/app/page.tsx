@@ -35,7 +35,7 @@ export default async function Home() {
           products={categoryProducts}
         />
       )}
-        <RecentlyViewedProductsCarousel />
+      <RecentlyViewedProductsCarousel />
     </main>
   );
 }

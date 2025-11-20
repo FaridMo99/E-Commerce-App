@@ -76,11 +76,14 @@ function makeVerifyCb(provider: UserCreatedBy) {
       if (!user) {
 
         console.log(chalk.yellow(`${getTimestamp()} Creating new user via ${provider} OAuth: ${email}...`));
-
+        const currency = req.currency!
+        const countryCode = req.countryCode!;
         user = await prisma.user.create({
           data: {
             email,
             name,
+            currency,
+            countryCode,
             verified: true,
             providerId: profile.id,
             createdBy: provider,

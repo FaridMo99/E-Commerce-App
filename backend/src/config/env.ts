@@ -55,4 +55,7 @@ export const CLOUDFLARE_DUMMY_KEY_FAIL =
 export const OPEN_EXCHANGE_RATE_APP_KEY =
   process.env.OPEN_EXCHANGE_RATE_APP_KEY!;
 
-export const DEV_EMAIL_FALLBACK_IF_NO_ADMIN =process.env.DEV_EMAIL_FALLBACK_IF_NO_ADMIN!
+export const DEV_EMAIL_FALLBACK_IF_NO_ADMIN = process.env.DEV_EMAIL_FALLBACK_IF_NO_ADMIN!
+
+//Ip locate
+export const IP_LOCATE_API_KEY = process.env.IP_LOCATE_API_KEY;

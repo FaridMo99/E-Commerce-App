@@ -1,5 +1,4 @@
 //this is the error handling for react query, maybe nextjs expects it differently
-//include cookies for currency
 "use server"
 import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";

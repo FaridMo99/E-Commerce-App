@@ -14,6 +14,7 @@ import type {
 } from "../types/types.js";
 import chalk from "chalk";
 import { getTimestamp } from "./utils.js";
+import type { Product } from "../generated/prisma/client.js";
 
 //cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
@@ -90,6 +91,26 @@ export async function exchangeToCurrencyInCents(
 export function formatPriceForClient(cents: number): number {
   const result = Number((cents / 100).toFixed(2));
   return result;
+}
+
+export function formatPricesForClient<T extends Partial<Product>>(
+  product: T,
+  priceField: Extract<keyof T, string>,
+  salePriceField: Extract<keyof T, string>
+): void {
+  if (typeof product[priceField] === "number") {
+    product[priceField] = formatPriceForClient(
+      product[priceField] as number
+    ) as any;
+  }
+  if (
+    product[salePriceField] != null &&
+    typeof product[salePriceField] === "number"
+  ) {
+    product[salePriceField] = formatPriceForClient(
+      product[salePriceField] as number
+    ) as any;
+  }
 }
 
 //also transform the product u send in cartitem/cart for user

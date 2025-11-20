@@ -3,7 +3,7 @@ import ProductCard from "../main/ProductCard";
 import Slider, { type Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { getRecentlyViewedProducts } from "@/lib/queries/server/usersQueries";
+import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/stores/authStore";
 

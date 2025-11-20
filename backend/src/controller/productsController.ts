@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import {
-  currencySchema,
   type ProductSchema,
   type ProductsQuerySchema,
   type ReviewSchema,
@@ -9,7 +8,7 @@ import {
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
-  formatPriceForClient,
+  formatPricesForClient,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import {
@@ -28,7 +27,7 @@ import type { Product } from "../generated/prisma/client.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import {
-  productSelect,
+  productSelector,
   productWhere,
   reviewSelect,
   reviewWhere,
@@ -51,12 +50,11 @@ export async function getAllProducts(
     limit,
     sale,
   } = req.query;
-  let currency: CurrencyISO | undefined = req.cookies.currency;
 
-  if (!currency || !currencySchema.safeParse(currency).success) {
-    currency = "USD";
-  }
-
+  const currency = req.currency!
+  const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
+  
   try {
     console.log(
       chalk.yellow(
@@ -70,10 +68,10 @@ export async function getAllProducts(
         deleted: false,
         ...(search && { name: { startsWith: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
-        ...(sale && { sale }),
+        ...(sale && { [salePriceField]:{not:null} }),
         ...(minPrice || maxPrice
           ? {
-              price: {
+              [priceField]: {
                 ...(minPrice && { gte: minPrice }),
                 ...(maxPrice && { lte: maxPrice }),
               },
@@ -84,13 +82,18 @@ export async function getAllProducts(
       ...(limit && { take: limit }),
       ...(page && limit && { skip: (page - 1) * limit }),
       select: {
-        ...productSelect,
+        ...productSelector(currency)
       },
     });
 
     console.log(
       chalk.green(`${getTimestamp()} Retrieved ${products.length} products`)
     );
+
+    //format price from cent to .niceprice
+    products.forEach(product => {
+      formatPricesForClient(product, priceField, salePriceField)
+    })
 
     //calc rating average
 
@@ -102,6 +105,7 @@ export async function getAllProducts(
   }
 }
 
+//take your time with this one
 export async function createProduct(
   req: Request<{}, {}, ProductSchema>,
   res: Response,
@@ -133,11 +137,13 @@ export async function createProduct(
 
       if (!currency) throw new Error("Base currency not found");
 
+      const priceField = `price_in_${currency.value}` as keyof typeof product;
+
       return tx.product.create({
         data: {
           name: product.name,
           ...(imageUrls && { imageUrls: [...imageUrls] }),
-          price: product.price,
+          [priceField]: product.price,
           currency: currency.value as CurrencyISO,
           description: product.description,
           stock_quantity: product.stock_quantity,
@@ -146,7 +152,7 @@ export async function createProduct(
           category: { connect: { name: product.category } },
         },
         select: {
-          ...productSelect,
+          ...productSelector(currency.value as CurrencyISO),
         },
       });
     });
@@ -180,6 +186,10 @@ export async function getProductByProductId(
   next: NextFunction
 ) {
   const id = req.params.productId!;
+  const currency = req.currency!
+
+  const priceField = `price_in_${currency}`;
+  const salePriceField = `sale_price_in_${currency}`;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
@@ -187,7 +197,7 @@ export async function getProductByProductId(
     const product = await prisma.product.findUnique({
       where: { ...productWhere, id },
       select: {
-        ...productSelect,
+        ...productSelector(currency),
       },
     });
 
@@ -199,6 +209,12 @@ export async function getProductByProductId(
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} fetched successfully`)
     );
+
+    //format price to nice price
+    formatPricesForClient(product,priceField, salePriceField)
+
+    //calculate the average rating
+
     return res.status(200).json(product);
   } catch (err) {
     console.log(
@@ -264,6 +280,7 @@ export async function deleteProductByProductId(
   }
 }
 
+//take your time with this one
 // Update a product
 export async function updateProductByProductId(
   req: Request<{ productId: string }, {}, UpdateProductSchema>,
@@ -281,6 +298,8 @@ export async function updateProductByProductId(
     sale_price,
   } = req.body;
 
+  const currency = req.currency!
+  
   try {
     console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
 
@@ -299,7 +318,7 @@ export async function updateProductByProductId(
           updated_at: new Date(),
         },
         select: {
-          ...productSelect,
+          ...productSelector(currency),
         },
       });
 
@@ -328,9 +347,9 @@ export async function updateProductByProductId(
       ]);
     }
 
-    product.price = formatPriceForClient(product.price);
-    if (product.sale_price)
-      product.sale_price = formatPriceForClient(product.sale_price);
+    //format price for client
+
+    //calc avg rating
 
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
@@ -430,12 +449,15 @@ export async function createReviewByProductId(
   }
 }
 
+//take your time with this one
 // Get home page products
 export async function getHomeProducts(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
+  const currency = req.currency!
+
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));
@@ -447,12 +469,12 @@ export async function getHomeProducts(
         : null;
 
     const promises: Promise<Product[]>[] = [
-      getNewProducts(),
-      getTrendingProducts(),
-      getSaleProducts(),
+      getNewProducts(currency),
+      getTrendingProducts(currency),
+      getSaleProducts(currency),
     ];
 
-    if (randomCategory) promises.push(getCategoryProducts(randomCategory));
+    if (randomCategory) promises.push(getCategoryProducts(randomCategory, currency));
 
     const results = await Promise.all(promises);
 
@@ -462,6 +484,10 @@ export async function getHomeProducts(
       productsOnSale,
       categoryProducts = [],
     ] = results;
+
+    //format price for client
+
+    //calc avg rating
 
     console.log(
       chalk.green(`${getTimestamp()} Home products fetched successfully`)

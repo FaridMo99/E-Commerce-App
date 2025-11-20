@@ -4,7 +4,6 @@ import {
   exchangeToCurrencyInCents,
   formatPriceForClient,
 } from "../lib/currencyHandlers.js";
-import type { CurrencyISO } from "../generated/prisma/enums.js";
 import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
 import chalk from "chalk";
@@ -79,7 +78,6 @@ export async function makeOrder(
   next: NextFunction
 ) {
   const userId = req.user?.id!;
-  const currency: CurrencyISO = req.cookies.currency ?? "USD";
 
   try {
     console.log(

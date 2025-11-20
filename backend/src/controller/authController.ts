@@ -84,10 +84,14 @@ export async function login(
     console.log(
       chalk.green(`${getTimestamp()} Login successful for email: ${email}`)
     );
+
     const safeUser = {
       name: user.name,
-      role:user.role
+      role: user.role,
+      countryCode: user.countryCode,
+      currency:user.currency
     }
+
     return res.status(200).json({ accessToken, user:safeUser });
   } catch (err) {
     console.log(
@@ -104,6 +108,9 @@ export async function signup(
   next: NextFunction
 ) {
   const { email } = req.body;
+  const currency = req.currency!
+  const countryCode = req.countryCode!
+
   try {
     console.log(
       chalk.yellow(`${getTimestamp()} Signup attempt for email: ${email}`)
@@ -123,8 +130,9 @@ export async function signup(
       data: {
         email,
         name: req.body.name,
+        currency,
+        countryCode,
         ...(req.body.birthdate && { birthdate: req.body.birthdate }),
-        ...(req.body.address && { address: req.body.address }),
         password: await bcrypt.hash(req.body.password, 10),
         createdBy: "SELF",
         cart: { create: {} },
@@ -225,10 +233,13 @@ export async function verifyUser(
         `${getTimestamp()} User verified successfully: userId ${userId}`
       )
     );
-        const safeUser = {
-          name: user.name,
-          role: user.role,
-        };
+    const safeUser = {
+      name: user.name,
+      role: user.role,
+      countryCode: user.countryCode,
+      currency: user.currency,
+    };
+    
     return res.status(200).json({ accessToken, user:safeUser });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
@@ -299,7 +310,10 @@ export async function changePassword(
     const safeUser = {
       name: user.name,
       role: user.role,
+      countryCode: user.countryCode,
+      currency: user.currency,
     };
+
     return res.status(200).json({ accessToken, user: safeUser });
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Error in changePassword`), err);
@@ -455,6 +469,8 @@ export async function issueRefreshToken(
     const safeUser = {
       name: user.name,
       role: user.role,
+      countryCode: user.countryCode,
+      currency: user.currency,
     };
     
     return res.status(200).json({ accessToken, user:safeUser });
@@ -544,7 +560,7 @@ export async function changePasswordAuthenticated(
         `${getTimestamp()} Password changed successfully for userId: ${id}`
       )
     );
-    return res.status(200).json({user});
+    return res.status(200).json({user:newUser});
   } catch (err) {
     console.log(
       chalk.red(
