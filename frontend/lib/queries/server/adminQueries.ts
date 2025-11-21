@@ -207,7 +207,7 @@ export async function updateSettingBySettingId(
 
 //products
 //check how to do with images
-export async function createProduct(content: ProductSchema, accessToken: AccessToken): Promise<Product> {
+export async function createProduct(content: ProductSchema, accessToken: AccessToken): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
@@ -225,7 +225,7 @@ export async function createProduct(content: ProductSchema, accessToken: AccessT
     },
     body: JSON.stringify(content),
   });
-  return await handleResponse(res);
+  await handleResponse(res);
 }
 
 export async function deleteProductByProductId(id: string, accessToken: AccessToken): Promise<void> {
@@ -251,7 +251,7 @@ export async function updateProductByProductId(
   id: string,
   content: UpdateProductSchema,
   accessToken:AccessToken
-): Promise<Product> {
+): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
@@ -270,7 +270,7 @@ export async function updateProductByProductId(
     },
     body: JSON.stringify(content),
   });
-  return await handleResponse(res);
+  await handleResponse(res);
 }
 
 //orders

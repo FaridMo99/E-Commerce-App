@@ -1,5 +1,8 @@
 import { TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS } from "../config/constants.js";
-import type { Category, CurrencyISO, Product } from "../generated/prisma/client.js";
+import type {
+  Category,
+  CurrencyISO,
+} from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import {
@@ -8,17 +11,21 @@ import {
   SALE_PRODUCTS_REDIS_KEY,
   TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
-import { productSelector, productWhere } from "../config/prismaHelpers.js";
+import { productSelect, productSelector, productWhere, type ProductWithSelectedFields } from "../config/prismaHelpers.js";
 
 const limit = 10;
 
-export async function getNewProducts(currency:CurrencyISO): Promise<Product[]> {
-  const cached = await redis.get(NEW_PRODUCTS_REDIS_KEY);
-  if (cached) return JSON.parse(cached) as Product[];
+export async function getNewProducts(
+  currency: CurrencyISO
+): Promise<ProductWithSelectedFields[]> {
+  const redisKey = `${NEW_PRODUCTS_REDIS_KEY}:${currency}`;
+
+  const cached = await redis.get(redisKey);
+  if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
 
   const timeDifference = new Date();
   timeDifference.setDate(
-    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS,
+    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS
   );
 
   const products = await prisma.product.findMany({
@@ -30,29 +37,34 @@ export async function getNewProducts(currency:CurrencyISO): Promise<Product[]> {
       published_at: "desc",
     },
     select: {
-      ...productSelector(currency)
-    }
+      ...productSelector(currency),
+    },
   });
 
-  await redis.set(NEW_PRODUCTS_REDIS_KEY, JSON.stringify(products), {
+  await redis.set(redisKey, JSON.stringify(products), {
     EX: TWELVE_HOURS_IN_SECONDS,
   });
 
   return products;
 }
 
-export async function getSaleProducts(currency: CurrencyISO): Promise<Product[]> {
-  const cached = await redis.get(SALE_PRODUCTS_REDIS_KEY);
-  if (cached) return JSON.parse(cached) as Product[];
+export async function getSaleProducts(
+  currency: CurrencyISO
+): Promise<ProductWithSelectedFields[]> {
+    const redisKey = `${SALE_PRODUCTS_REDIS_KEY}:${currency}`;
+
+  const cached = await redis.get(redisKey);
+  if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
+
+  const salePriceField =
+    `sale_price_in_${currency}` as keyof typeof productSelect;
 
   const products = await prisma.product.findMany({
     where: {
       ...productWhere,
-      OR: [
-        { sale_price_in_USD: { not: null } },
-        { sale_price_in_EUR: { not: null } },
-        { sale_price_in_GBP: { not: null } },
-      ],
+      [salePriceField]: {
+        not: null,
+      },
     },
     orderBy: {
       published_at: "desc",
@@ -63,7 +75,7 @@ export async function getSaleProducts(currency: CurrencyISO): Promise<Product[]>
     },
   });
 
-  await redis.set(SALE_PRODUCTS_REDIS_KEY, JSON.stringify(products), {
+  await redis.set(redisKey, JSON.stringify(products), {
     EX: TWELVE_HOURS_IN_SECONDS,
   });
 
@@ -73,10 +85,10 @@ export async function getSaleProducts(currency: CurrencyISO): Promise<Product[]>
 export async function getCategoryProducts(
   category: Category["name"],
   currency: CurrencyISO
-): Promise<Product[]> {
-  const key = `categoryProducts:${category}`;
-  const cached = await redis.get(key);
-  if (cached) return JSON.parse(cached) as Product[];
+): Promise<ProductWithSelectedFields[]> {
+  const redisKey = `categoryProducts:${category}:currency:${currency}`;
+  const cached = await redis.get(redisKey);
+  if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
 
   const products = await prisma.product.findMany({
     where: {
@@ -94,38 +106,21 @@ export async function getCategoryProducts(
     },
   });
 
-  await redis.set(key, JSON.stringify(products), { EX: 1800 });
+  await redis.set(redisKey, JSON.stringify(products), { EX: 1800 });
   return products;
 }
 
-export async function getRecentlyViewedProducts(
-  userId: string,
-  currency:CurrencyISO
-): Promise<Product[]> {
-  const recentlyViewed = await prisma.recentlyViewed.findMany({
-    where: { userId },
-    orderBy: {
-      viewedAt: "desc",
-    },
-    take: limit,
-    select: {
-      product: {
-        select: {
-          ...productSelector(currency),
-        },
-      },
-    },
-  });
+export async function getTrendingProducts(
+  currency: CurrencyISO
+): Promise<ProductWithSelectedFields[]> {
+  const redisKey = `${TRENDING_PRODUCTS_REDIS_KEY}:${currency}`;
 
-  return recentlyViewed.map((rv) => rv.product);
-}
+  const cached = await redis.get(redisKey);
+  if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
 
-export async function getTrendingProducts(currency:CurrencyISO): Promise<Product[]> {
-  const cached = await redis.get(TRENDING_PRODUCTS_REDIS_KEY);
-  if (cached) return JSON.parse(cached) as Product[];
   const timeDifference = new Date();
   timeDifference.setDate(
-    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS,
+    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS
   );
 
   // fetch all products with computed metrics
@@ -134,20 +129,27 @@ export async function getTrendingProducts(currency:CurrencyISO): Promise<Product
       ...productWhere,
       published_at: { not: null },
     },
-      select: {
-        ...productSelector(currency),
-      },
+    select: {
+      ...productSelector(currency),
+      _count: {
+        select: {
+          order_items: true,
+          favoredBy: true,
+          recentlyViewed: true
+        }
+      }
+    }
   });
 
   // compute trending score
   const productsWithScore = trending.map((p) => {
-    const salesCount = p.order_items.length;
-    const favoritesCount = p.favoredBy.length;
-    const viewsCount = p.recentlyViewed.length;
+      const salesCount = p._count.order_items;
+      const favoritesCount = p._count.favoredBy;
+      const viewsCount = p._count.recentlyViewed;
 
-    const score = salesCount * 0.5 + favoritesCount * 0.3 + viewsCount * 0.2;
+      const score = salesCount * 0.5 + favoritesCount * 0.3 + viewsCount * 0.2;
 
-    return { ...p, score };
+      return { ...p, score };
   });
 
   // sort by score descending and take limit
@@ -156,11 +158,15 @@ export async function getTrendingProducts(currency:CurrencyISO): Promise<Product
     .slice(0, limit);
 
   // remove metrics, only keep product fields
-  const returnProducts = topTrending.map(
-    ({ order_items, favoredBy, recentlyViewed, score, ...product }) => product,
-  );
+  const returnProducts = topTrending.map(product => {
+    const { _count, score, ...productRest } = product
+    const { favoredBy, order_items, recentlyViewed, ...countRest } = _count
+    
+    productRest._count = {...countRest}
+    return productRest as ProductWithSelectedFields
+  })
 
-  await redis.set(TRENDING_PRODUCTS_REDIS_KEY, JSON.stringify(returnProducts), {
+  await redis.set(redisKey, JSON.stringify(returnProducts), {
     EX: 1800,
   });
 

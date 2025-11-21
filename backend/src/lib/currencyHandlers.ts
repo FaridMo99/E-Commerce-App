@@ -2,13 +2,12 @@ import { productSchema } from "@monorepo/shared";
 import {
   EXCHANGE_RATE_REDIS_KEY,
   DEFAULT_NICE_PRICE,
-  FIVE_DAYS_IN_SECONDS,
+  ONE_DAY_IN_SECONDS,
 } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
 import redis from "../services/redis.js";
 import type {
-  ExchangePrice,
   NicePrice,
   OpenExchangeRateApiReturn,
 } from "../types/types.js";
@@ -32,11 +31,11 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
   const data: OpenExchangeRateApiReturn = await res.json();
 
   await redis.set(EXCHANGE_RATE_REDIS_KEY, JSON.stringify(data), {
-    EX: FIVE_DAYS_IN_SECONDS,
+    EX: ONE_DAY_IN_SECONDS
   });
   return data;
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Exhcange Rate Api failure: ` + err))
+    console.log(chalk.red(`${getTimestamp()} Exchange Rate Api failure: ` + err))
     throw err
   }
 
@@ -55,36 +54,70 @@ export function roundPriceUpInCents(
   return result;
 }
 
-export async function exchangeToCurrencyInCents(
+type MultiCurrencyPrice = {
+  [key in CurrencyISO]: {
+    priceInCents: number;
+    salePriceInCents?: number;
+  };
+};
+
+export async function exchangeAllPricesInCents(
   baseCurrency: CurrencyISO,
   priceInCents: number,
-  wantedCurrency: CurrencyISO,
-): Promise<ExchangePrice> {
+  salePriceInCents?: number
+): Promise<MultiCurrencyPrice> {
   const exchangeRates = await getExchangeRates();
-  if (baseCurrency === wantedCurrency) {
-    return { exchangedPriceInCents: priceInCents, currency: wantedCurrency };
-  }
-  // Convert base currency -> USD if needed
-  const baseToUSD =
-    baseCurrency === "USD" ? 1 : 1 / exchangeRates.rates[baseCurrency]!;
-  // Convert USD -> wanted currency
-  const usdToTarget = exchangeRates.rates[wantedCurrency]!;
 
-  // Full conversion rate: baseCurrency -> wantedCurrency
-  const conversionRate = baseToUSD * usdToTarget;
-  // Convert price in cents
-  const convertedCents = priceInCents * conversionRate;
+  const currencies: CurrencyISO[] = ["USD", "GBP", "EUR"];
 
-  // Round up to a nice ending
-  let ending = priceInCents % 100;
-  if (!productSchema.shape.price.safeParse(ending).success) {
-    ending = DEFAULT_NICE_PRICE;
+  const result: MultiCurrencyPrice = {} as MultiCurrencyPrice;
+
+  for (const targetCurrency of currencies) {
+    let conversionRate = 1;
+
+    if (baseCurrency !== targetCurrency) {
+      // Convert baseCurrency -> USD
+      const baseToUSD =
+        baseCurrency === "USD" ? 1 : 1 / exchangeRates.rates[baseCurrency]!;
+      // Convert USD -> targetCurrency
+      const usdToTarget = exchangeRates.rates[targetCurrency]!;
+
+      conversionRate = baseToUSD * usdToTarget;
+    }
+
+    // Convert main price
+    const convertedPrice = priceInCents * conversionRate;
+    let ending = priceInCents % 100;
+    if (!productSchema.shape.price.safeParse(ending).success) {
+      ending = DEFAULT_NICE_PRICE;
+    }
+    const finalPrice = roundPriceUpInCents(convertedPrice, ending as NicePrice);
+
+    // Convert sale price if provided
+    let finalSalePrice: number | undefined;
+    if (salePriceInCents != null) {
+      const convertedSale = salePriceInCents * conversionRate;
+      let saleEnding = salePriceInCents % 100;
+      if (!productSchema.shape.price.safeParse(saleEnding).success) {
+        saleEnding = DEFAULT_NICE_PRICE;
+      }
+      finalSalePrice = roundPriceUpInCents(
+        convertedSale,
+        saleEnding as NicePrice
+      );
+    }
+
+    result[targetCurrency] = {
+      priceInCents: finalPrice,
+      salePriceInCents: finalSalePrice,
+    };
   }
-  const exchangedPriceInCents = roundPriceUpInCents(
-    convertedCents,
-    ending as NicePrice,
-  );
-  return { exchangedPriceInCents, currency: wantedCurrency };
+
+  return result;
+}
+
+export function turnPriceToPriceInCents(price:number):number {
+  return price * 100
 }
 
 //future reference, when implementing .00 this wont return floats to display

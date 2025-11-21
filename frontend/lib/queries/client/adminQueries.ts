@@ -195,7 +195,7 @@ export async function updateSettingBySettingId(
 export async function createProduct(
   content: ProductSchema,
   accessToken: AccessToken
-): Promise<Product> {
+): Promise<void> {
 
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
@@ -207,7 +207,7 @@ export async function createProduct(
     },
     body: JSON.stringify(content),
   });
-  return await handleResponse(res);
+   await handleResponse(res);
 }
 
 export async function deleteProductByProductId(
@@ -230,7 +230,7 @@ export async function updateProductByProductId(
   id: string,
   content: UpdateProductSchema,
   accessToken: AccessToken
-): Promise<Product> {
+): Promise<void> {
 
   const res = await fetch(`${apiBaseUrl}/products/${id}`, {
     credentials: "include",
@@ -242,7 +242,7 @@ export async function updateProductByProductId(
     },
     body: JSON.stringify(content),
   });
-  return await handleResponse(res);
+  await handleResponse(res);
 }
 
 //orders

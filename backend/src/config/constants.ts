@@ -1,6 +1,8 @@
+import type { CurrencyISO } from "../generated/prisma/enums.js";
+
 //redis store exchange rates, key name
 export const EXCHANGE_RATE_REDIS_KEY = "exchangeRates";
-export const FIVE_DAYS_IN_SECONDS = 43200 * 2 * 5;
+export const ONE_DAY_IN_SECONDS = 43200 * 2;
 export const TWELVE_HOURS_IN_SECONDS = 43200;
 export const DEFAULT_NICE_PRICE = 99;
 export const BASE_CURRENCY_KEY = "baseCurrency";
@@ -39,3 +41,5 @@ export const GBP_COUNTRIES = ["GB"];
 
 export const FALLBACK_COUNTRY_ISO_CODE = "US";
 export const FALLBACK_COUNTRY_CURRENCY_ISO = "USD";
+
+export const SUPPORTED_CURRENCIES:CurrencyISO[] = ["USD","GBP","EUR"]

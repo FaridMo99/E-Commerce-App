@@ -1,6 +1,7 @@
 import z from "zod";
 
 /** --- Price Schema --- */
+//here as float, in controller turn to cents
 export const priceSchema = z
   .preprocess((val) => {
     // allow strings that can be converted to number
@@ -149,7 +150,7 @@ export const productSchema = z.object({
   stock_quantity: z.preprocess((val) => Number(val), z.number().int()),
   is_public: z.boolean().default(false),
   category: z.string(),
-  sale_price: priceSchema,
+  sale_price: priceSchema.optional(),
 });
 
 export const updateProductSchema = productSchema.partial();

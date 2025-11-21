@@ -8,13 +8,16 @@ import {
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
+  exchangeAllPricesInCents,
   formatPricesForClientAndCalculateAverageRating,
+  turnPriceToPriceInCents,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import {
   BASE_CURRENCY_KEY,
   NEW_PRODUCTS_REDIS_KEY,
   SALE_PRODUCTS_REDIS_KEY,
+  SUPPORTED_CURRENCIES,
 } from "../config/constants.js";
 import {
   getCategoryProducts,
@@ -32,6 +35,7 @@ import {
   productWhere,
   reviewSelect,
   reviewWhere,
+  type ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
 
 export async function getAllProducts(
@@ -104,7 +108,7 @@ export async function getAllProducts(
   }
 }
 
-//take your time with this one
+
 export async function createProduct(
   req: Request<{}, {}, ProductSchema>,
   res: Response,
@@ -118,6 +122,7 @@ export async function createProduct(
       chalk.yellow(`${getTimestamp()} Creating product ${product.name}`)
     );
 
+    //add images to cloud
     let imageUrls: string[] | undefined;
     if (images && Array.isArray(images)) {
       const results = await Promise.all(
@@ -130,36 +135,78 @@ export async function createProduct(
     }
 
     const newProduct = await prisma.$transaction(async (tx) => {
-      const currency = await tx.settings.findFirst({
+      const currencySetting = await tx.settings.findFirst({
         where: { key: BASE_CURRENCY_KEY },
       });
+      if (!currencySetting) throw new Error("Base currency not set");
 
-      if (!currency) throw new Error("Base currency not found");
+      const baseCurrency = currencySetting.value as CurrencyISO;
 
-      const priceField = `price_in_${currency.value}` as keyof typeof productSelect;
+      //prices come as float gotta transform to cents
+      product.price = turnPriceToPriceInCents(product.price);
+      if (product.sale_price) {
+        product.sale_price = turnPriceToPriceInCents(product.sale_price);
+      }
+
+      //convert to all supported prices
+      const allPrices = await exchangeAllPricesInCents(
+        baseCurrency,
+        product.price,
+        product.sale_price
+      );
+
+      //create product
+      const createData = {
+        name: product.name,
+        ...(imageUrls && { imageUrls }),
+        currency: baseCurrency,
+        description: product.description,
+        stock_quantity: product.stock_quantity,
+        is_public: product.is_public,
+        ...(product.is_public && { published_at: new Date() }),
+        category: { connect: { name: product.category } },
+        price_in_USD: allPrices.USD.priceInCents,
+        price_in_GBP: allPrices.GBP.priceInCents,
+        price_in_EUR: allPrices.EUR.priceInCents,
+        ...(allPrices.USD.salePriceInCents && {
+          sale_price_in_USD: allPrices.USD.salePriceInCents,
+        }),
+        ...(allPrices.GBP.salePriceInCents && {
+          sale_price_in_GBP: allPrices.GBP.salePriceInCents,
+        }),
+        ...(allPrices.EUR.salePriceInCents && {
+          sale_price_in_EUR: allPrices.EUR.salePriceInCents,
+        }),
+      };
 
       return tx.product.create({
-        data: {
-          name: product.name,
-          ...(imageUrls && { imageUrls: [...imageUrls] }),
-          [priceField]: product.price,
-          currency: currency.value as CurrencyISO,
-          description: product.description,
-          stock_quantity: product.stock_quantity,
-          is_public: product.is_public,
-          ...(product.is_public && { published_at: new Date() }),
-          category: { connect: { name: product.category } },
-        },
+        data: createData,
         select: {
-          ...productSelector(currency.value as CurrencyISO),
+          ...productSelector(baseCurrency),
         },
       });
     });
 
+    //build redis keys
+    const productsRedisKeys = SUPPORTED_CURRENCIES.map(
+      (currency) => `${NEW_PRODUCTS_REDIS_KEY}:${currency}`
+    );
+
+    const saleProductsRedisKeys = SUPPORTED_CURRENCIES.map(
+      (currency) => `${SALE_PRODUCTS_REDIS_KEY}:${currency}`
+    );
+
+    const categoryRedisKeys = SUPPORTED_CURRENCIES.map(
+      (currency) => `categoryProducts:${product.category}:currency:${currency}`
+    );
+
+    //clear all relevant caches
     await Promise.all([
-      redis.del(`category:${product.category}`),
-      redis.del(NEW_PRODUCTS_REDIS_KEY),
-      ...(newProduct.sale_price ? [redis.del(SALE_PRODUCTS_REDIS_KEY)] : []),
+      ...productsRedisKeys.map((key) => redis.del(key)),
+      ...categoryRedisKeys.map((key) => redis.del(key)),
+      ...(product.sale_price
+        ? saleProductsRedisKeys.map((key) => redis.del(key))
+        : []),
     ]);
 
     console.log(
@@ -167,7 +214,8 @@ export async function createProduct(
         `${getTimestamp()} Product ${product.name} created successfully`
       )
     );
-    return res.status(201).json(newProduct);
+
+    return res.status(201).json({ message: "Added Product successfully" });
   } catch (err) {
     console.log(
       chalk.red(
@@ -277,7 +325,6 @@ export async function deleteProductByProductId(
   }
 }
 
-//take your time with this one
 // Update a product
 export async function updateProductByProductId(
   req: Request<{ productId: string }, {}, UpdateProductSchema>,
@@ -285,7 +332,9 @@ export async function updateProductByProductId(
   next: NextFunction
 ) {
   const id = req.params.productId;
-  const {
+
+
+  let {
     name,
     description,
     price,
@@ -295,62 +344,124 @@ export async function updateProductByProductId(
     sale_price,
   } = req.body;
 
-  const currency = req.currency!
-  
   try {
     console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
 
-    const product = await prisma.$transaction(async (tx) => {
-      const updatedProduct = await tx.product.update({
+    const updatedProduct = await prisma.$transaction(async (tx) => {
+      
+      //get base currency
+      const currencySetting = await tx.settings.findFirst({
+        where: { key: BASE_CURRENCY_KEY },
+      });
+      if (!currencySetting) throw new Error("Base currency not set");
+      const baseCurrency = currencySetting.value as CurrencyISO;
+
+      //prices to cent
+      let priceInCents: number | undefined;
+      let salePriceInCents: number | undefined;
+
+      if (typeof price === "number") {
+        priceInCents = turnPriceToPriceInCents(price);
+      }
+      if (typeof sale_price === "number") {
+        salePriceInCents = turnPriceToPriceInCents(sale_price);
+      }
+
+      //all supported prices cnvert
+      let allPrices:
+        | Awaited<ReturnType<typeof exchangeAllPricesInCents>>
+        | undefined;
+
+      if (priceInCents !== undefined) {
+        allPrices = await exchangeAllPricesInCents(
+          baseCurrency,
+          priceInCents,
+          salePriceInCents
+        );
+      }
+
+      const updateData: any = { updated_at: new Date() };
+
+      if (name) updateData.name = name;
+      if (description) updateData.description = description;
+      if (typeof stock_quantity === "number")
+        updateData.stock_quantity = stock_quantity;
+
+      if (typeof is_public === "boolean") {
+        updateData.is_public = is_public;
+        if (is_public) updateData.published_at = new Date();
+      }
+
+      if (category) updateData.category = { connect: { name: category } };
+
+      if (priceInCents !== undefined && allPrices) {
+        updateData.price_in_USD = allPrices.USD.priceInCents;
+        updateData.price_in_GBP = allPrices.GBP.priceInCents;
+        updateData.price_in_EUR = allPrices.EUR.priceInCents;
+
+        if (allPrices.USD.salePriceInCents)
+          updateData.sale_price_in_USD = allPrices.USD.salePriceInCents;
+
+        if (allPrices.GBP.salePriceInCents)
+          updateData.sale_price_in_GBP = allPrices.GBP.salePriceInCents;
+
+        if (allPrices.EUR.salePriceInCents)
+          updateData.sale_price_in_EUR = allPrices.EUR.salePriceInCents;
+      }
+
+      //update
+      const product = await tx.product.update({
         where: { id },
-        data: {
-          ...(name && { name }),
-          ...(description && { description }),
-          ...(price && { price }),
-          ...(stock_quantity && { stock_quantity }),
-          ...(typeof is_public === "boolean" && { is_public }),
-          ...(is_public === true && { published_at: new Date() }),
-          ...(sale_price && { sale_price }),
-          ...(category && { category: { connect: { name: category } } }),
-          updated_at: new Date(),
-        },
+        data: updateData,
         select: {
-          ...productSelector(currency),
+          ...productSelector(baseCurrency),
         },
       });
 
+      //if made not public, clean favorites and carts
       if (is_public === false) {
         await tx.product.update({
           where: { id },
           data: { favoredBy: { set: [] } },
         });
+
         await tx.cartItem.deleteMany({ where: { productId: id } });
       }
 
       await tx.recentlyViewed.deleteMany({ where: { productId: id } });
 
-      return updatedProduct;
+      return product;
     });
 
-    if (!product) {
+    if (!updatedProduct) {
       console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
       return res.status(404).json({ message: "Product not found" });
     }
 
+    //redis invalidation
     if (is_public) {
+      const newProductsKeys = SUPPORTED_CURRENCIES.map(
+        (currency) => `${NEW_PRODUCTS_REDIS_KEY}:${currency}`
+      );
+      const saleProductsKeys = SUPPORTED_CURRENCIES.map(
+        (currency) => `${SALE_PRODUCTS_REDIS_KEY}:${currency}`
+      );
+      const categoryKeys = SUPPORTED_CURRENCIES.map(
+        (currency) => `categoryProducts:${category}:currency:${currency}`
+      );
+
       await Promise.all([
-        redis.del(NEW_PRODUCTS_REDIS_KEY),
-        ...(sale_price ? [redis.del(SALE_PRODUCTS_REDIS_KEY)] : []),
+        ...newProductsKeys.map((key) => redis.del(key)),
+        ...(sale_price ? saleProductsKeys.map((key) => redis.del(key)) : []),
+        ...categoryKeys.map((key) => redis.del(key)),
       ]);
     }
-
-    //format and calc avg
 
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
     );
 
-    return res.status(200).json(product);
+    return res.status(200).json({message:"Updated product successfully"});
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update product ${id}:`, err)
@@ -444,7 +555,6 @@ export async function createReviewByProductId(
   }
 }
 
-//take your time with this one
 // Get home page products
 export async function getHomeProducts(
   req: Request,
@@ -453,6 +563,8 @@ export async function getHomeProducts(
 ) {
   const currency = req.currency!
 
+  const priceField = `price_in_${currency}` as keyof typeof productSelect;
+  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));
@@ -463,7 +575,7 @@ export async function getHomeProducts(
         ? categories[Math.floor(Math.random() * categories.length)]?.name
         : null;
 
-    const promises: Promise<Product[]>[] = [
+    const promises: Promise<ProductWithSelectedFields[]>[] = [
       getNewProducts(currency),
       getTrendingProducts(currency),
       getSaleProducts(currency),
@@ -480,13 +592,51 @@ export async function getHomeProducts(
       categoryProducts = [],
     ] = results;
 
-    //format price for client
-
-    //calc avg rating
-
     console.log(
       chalk.green(`${getTimestamp()} Home products fetched successfully`)
     );
+
+    //format price and calc avg for client
+    if (newProducts && newProducts.length > 0) {
+      newProducts.forEach((product) =>
+        formatPricesForClientAndCalculateAverageRating(
+          product,
+          priceField,
+          salePriceField
+        )
+      )
+    }
+
+    if (trendingProducts && trendingProducts.length > 0) {
+      trendingProducts.forEach((product) =>
+        formatPricesForClientAndCalculateAverageRating(
+          product,
+          priceField,
+          salePriceField
+        )
+      );
+    }
+
+    if (productsOnSale && productsOnSale.length > 0) {
+      productsOnSale.forEach((product) =>
+        formatPricesForClientAndCalculateAverageRating(
+          product,
+          priceField,
+          salePriceField
+        )
+      );
+    }
+
+    if (categoryProducts && categoryProducts.length > 0) {
+      categoryProducts.forEach((product) =>
+        formatPricesForClientAndCalculateAverageRating(
+          product,
+          priceField,
+          salePriceField
+        )
+      );
+    }
+
     return res.status(200).json({
       newProducts,
       trendingProducts,
