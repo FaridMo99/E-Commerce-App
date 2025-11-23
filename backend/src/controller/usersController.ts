@@ -8,7 +8,7 @@ import type {
 } from "@monorepo/shared";
 import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
-import { formatPriceForClient, formatPricesForClientAndCalculateAverageRating } from "../lib/currencyHandlers.js";
+import { formatPriceForClient, formatPricesForClientAndCalculateAverageRating, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
@@ -17,7 +17,6 @@ import {
   cartSelect,
   orderSelect,
   productSelect,
-  productSelector,
   productWhere,
   userSelect,
 } from "../config/prismaHelpers.js";
@@ -301,9 +300,6 @@ export async function getUserCart(
 ) {
   const userId = req.user?.id!;
   const currency = req.currency!
-
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -326,7 +322,7 @@ export async function getUserCart(
                 id: true,
                 product: {
                     select: {
-                        ...productSelector(currency)
+                        ...productSelect
                     }
                 }
             }
@@ -347,9 +343,11 @@ export async function getUserCart(
       )
     );
 
-    cart.items.forEach(item => {
-      formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField)
-    })
+        await Promise.all(
+          cart.items.map((item) =>
+            transformAndFormatProductPrice(item.product, item.product.currency, currency)
+          )
+        );
 
     return res.status(200).json(cart);
   } catch (err) {
@@ -410,10 +408,6 @@ export async function addProductToUserCart(
   const userId = req.user?.id!;
   const { productId, quantity } = req.body;
   const currency = req.currency!
-
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField =
-    `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -442,7 +436,7 @@ export async function addProductToUserCart(
                   id: true,
                   product: {
                       select: {
-                          ...productSelector(currency)
+                          ...productSelect
                       }
                   }
               }
@@ -458,9 +452,15 @@ export async function addProductToUserCart(
       )
     );
 
-    newCartItem.cart.items.forEach(item => {
-      formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField)
-    })
+      await Promise.all(
+        newCartItem.cart.items.map((item) =>
+          transformAndFormatProductPrice(
+            item.product,
+            item.product.currency,
+            currency
+          )
+        )
+      );
 
     return res.status(200).json(newCartItem.cart);
   } catch (err) {
@@ -544,9 +544,6 @@ export async function updateItemQuantity(
   const { quantity } = req.body;
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField =
-    `sale_price_in_${currency}` as keyof typeof productSelect;
   
   if (!itemId) {
     console.log(chalk.red(`${getTimestamp()} No ProductId received`));
@@ -584,7 +581,7 @@ export async function updateItemQuantity(
                     id: true,
                     product: {
                         select: {
-                            ...productSelector(currency)
+                            ...productSelect
                         }
                     }
                 }
@@ -609,8 +606,16 @@ export async function updateItemQuantity(
       )
     );
 
-    cart.cart.items.forEach(item=> formatPricesForClientAndCalculateAverageRating(item.product,priceField,salePriceField))
-
+    await Promise.all(
+      cart.cart.items.map((item) =>
+        transformAndFormatProductPrice(
+          item.product,
+          item.product.currency,
+          currency
+        )
+      )
+    );
+    
     return res.status(200).json(cart.cart);
 
   } catch (err) {
@@ -633,9 +638,6 @@ export async function getFavoriteItems(
   const userId = req.user?.id!;
     const currency = req.currency!;
 
-    const priceField = `price_in_${currency}` as keyof typeof productSelect;
-    const salePriceField =
-      `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -655,7 +657,7 @@ export async function getFavoriteItems(
       select: {
         favorites: {
           select: {
-            ...productSelector(currency),
+            ...productSelect
           },
         },
       },
@@ -676,8 +678,16 @@ export async function getFavoriteItems(
       )
     );
 
-    favorites.favorites.forEach(favorite=> formatPricesForClientAndCalculateAverageRating(favorite,priceField,salePriceField))
-    
+    await Promise.all(
+      favorites.favorites.map((favorite) =>
+        transformAndFormatProductPrice(
+          favorite,
+          favorite.currency,
+          currency
+        )
+      )
+    );    
+
     return res.status(200).json(favorites.favorites);
   } catch (err) {
     console.log(
@@ -757,9 +767,6 @@ export async function addFavoriteItem(
   const productId = req.body.productId
   const currency = req.currency!;
 
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField =
-    `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(
@@ -799,12 +806,12 @@ export async function addFavoriteItem(
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: {
-        ...productSelector(currency),
+        ...productSelect
       },
     });
 
     if (product) {
-      formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField);
+     await transformAndFormatProductPrice(product,product.currency,currency)
     }
 
     return res.status(200).json(product);
@@ -828,9 +835,6 @@ export async function getRecentlyViewedProducts(
   const userId = req.user?.id!;
   const currency = req.currency!;
 
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField =
-    `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(
@@ -849,7 +853,7 @@ export async function getRecentlyViewedProducts(
           },
           select: {
             product: {
-              select: { ...productSelector(currency) },
+              select: { ...productSelect },
             },
           },
           orderBy: {
@@ -882,8 +886,15 @@ export async function getRecentlyViewedProducts(
     );
     console.log(recentlyViewedProducts)
 
-    recentlyViewedProducts.forEach(product=>formatPricesForClientAndCalculateAverageRating(product,priceField,salePriceField))
-
+    await Promise.all(
+      recentlyViewedProducts.map((product) =>
+        transformAndFormatProductPrice(
+          product,
+          product.currency,
+          currency
+        )
+      )
+    );
 
     return res.status(200).json(recentlyViewedProducts);
   } catch (err) {
@@ -905,10 +916,6 @@ export async function addProductToRecentlyViewedProductsByProductId(
   const userId = req.user?.id!;
   const productId = req.body.productId
   const currency = req.currency!
-
-    const priceField = `price_in_${currency}` as keyof typeof productSelect;
-    const salePriceField =
-      `sale_price_in_${currency}` as keyof typeof productSelect;
 
 
   if (!productId) return res.status(400).json({ message: "No Product provided" })
@@ -943,7 +950,7 @@ export async function addProductToRecentlyViewedProductsByProductId(
           },
           select: {
             product: {
-              select: { ...productSelector(currency) },
+              select: { ...productSelect },
             },
           },
         },
@@ -959,7 +966,7 @@ export async function addProductToRecentlyViewedProductsByProductId(
     const product = recentlyViewed.recentlyViewedProducts[0]?.product;
 
     if (product) {
-    formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField);  
+    await transformAndFormatProductPrice(product,product.currency, currency);  
     }
 
     return res.status(200).json(product);

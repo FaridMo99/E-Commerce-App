@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import { sortOrderSchema } from "@monorepo/shared";
-import { formatPriceForClient } from "../lib/currencyHandlers.js";
+import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
-import { productSelect, productSelector } from "../config/prismaHelpers.js";
+import { productSelect } from "../config/prismaHelpers.js";
 
 
 export async function getRevenue(
@@ -56,8 +56,6 @@ export async function getTopsellers(
   const { sortOrder = "desc", limit = 10 } = req.query;
   const currency = req.currency!
 
-    const priceField = `price_in_${currency}` as keyof typeof productSelect;
-    const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -97,27 +95,27 @@ export async function getTopsellers(
         id: { in: topSellers.map((s) => s.product_id) },
       },
       select: {
-        ...productSelector(currency),
+        ...productSelect,
         id:true
       },
     });
 
     
+    const baseCurrency = productsWithInfo[0]?.currency ?? "USD";
+    await Promise.all(
+      productsWithInfo.map((product) =>
+        transformAndFormatProductPrice(product, baseCurrency, currency)
+      )
+    );
+
     // Map products to include total sold and formatted prices
     const response = topSellers.map((s) => {
       const product = productsWithInfo.find((p) => p.id === s.product_id)!;
 
-    const priceValue = product[priceField as keyof typeof product];
-    const salePriceValue = product[salePriceField as keyof typeof product];
-
-    const price = typeof priceValue === "number" ? priceValue : null;
-    const salePrice = typeof salePriceValue === "number" ? salePriceValue : null;
 
     return {
       product,
       totalSold: s._sum.quantity ?? 0,
-      price: price !== null ? formatPriceForClient(price) : null,
-      sale_price: salePrice !== null ? formatPriceForClient(salePrice) : null,
     };
     });
 

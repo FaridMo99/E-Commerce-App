@@ -8,6 +8,7 @@ type ProductViewProps = {
 
 //tags for onsale, trending,favorited,new, recently viewed, probably have to save these infos in global state
 function ProductView({ product }: ProductViewProps) {
+
   return (
     <Link
       href={`/products/${product.id}`}

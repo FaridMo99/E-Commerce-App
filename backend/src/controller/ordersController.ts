@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import {
-  exchangeToCurrencyInCents,
+  turnPriceToPriceInCents,
   formatPriceForClient,
 } from "../lib/currencyHandlers.js";
 import stripe from "../services/stripe.js";

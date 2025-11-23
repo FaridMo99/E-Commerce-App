@@ -62,12 +62,8 @@ model Product {
   id             String       @id @default(uuid())
   name           String
   description    String
-  price_in_USD   Int
-  price_in_GBP   Int
-  price_in_EUR   Int
-  sale_price_in_USD     Int?
-  sale_price_in_GBP     Int?
-  sale_price_in_EUR     Int?
+  price          Int
+  sale_price     Int?
   currency       CurrencyISO
   stock_quantity Int
   is_public      Boolean      @default(false)

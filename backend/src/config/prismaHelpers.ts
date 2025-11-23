@@ -25,12 +25,8 @@ export const categorySelect: Prisma.CategorySelect = {
 
 export const productSelect: Prisma.ProductSelect = {
     id: true,
-    price_in_USD:true,
-    price_in_GBP:true,
-    price_in_EUR:true,
-    sale_price_in_USD:true,
-    sale_price_in_GBP:true,
-    sale_price_in_EUR:true,
+    price: true,
+    sale_price:true,
     name: true,
     description: true,
     stock_quantity: true,
@@ -62,44 +58,6 @@ export const productSelect: Prisma.ProductSelect = {
     },
 };
 
-export function productSelector(currency:CurrencyISO):Prisma.ProductSelect {
-  const priceField = `price_in_${currency}`
-  const salePriceField = `sale_price_in_${currency}`
-
-  return {
-    id: true,
-    name: true,
-    description: true,
-    stock_quantity: true,
-    published_at: true,
-    imageUrls: true,
-    currency: true,
-
-    // dynamic fields
-    [priceField]: true,
-    [salePriceField]: true,
-
-    category: {
-      select: {
-        ...categorySelect,
-      },
-    },
-      reviews: {
-          where: {
-            is_public:true
-          },
-          
-      select: {
-        rating: true,
-      },
-    },
-    _count: {
-      select: {
-        reviews: { where: { is_public: true } },
-      },
-    },
-  } satisfies Prisma.ProductSelect;
-}
 
 export const orderSelect: Prisma.OrderSelect = {
     id: true,

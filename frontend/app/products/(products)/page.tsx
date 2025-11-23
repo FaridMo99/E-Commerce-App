@@ -1,7 +1,7 @@
-import { getProducts } from "@/lib/queries/productQueries";
 import "server-only";
 import ProductView from "./components/ProductView";
 import { SeachParams } from "@/types/types";
+import { getProducts } from "@/lib/queries/server/productQueries";
 
 //page and limit should be default values
 //give good loading state that only overrides this page but not sidebar

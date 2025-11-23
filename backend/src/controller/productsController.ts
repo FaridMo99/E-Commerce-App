@@ -8,16 +8,15 @@ import {
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
-  exchangeAllPricesInCents,
-  formatPricesForClientAndCalculateAverageRating,
+  transformAndFormatProductPrice,
   turnPriceToPriceInCents,
 } from "../lib/currencyHandlers.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import {
   BASE_CURRENCY_KEY,
+  CATEGORIES_REDIS_KEY,
   NEW_PRODUCTS_REDIS_KEY,
   SALE_PRODUCTS_REDIS_KEY,
-  SUPPORTED_CURRENCIES,
 } from "../config/constants.js";
 import {
   getCategoryProducts,
@@ -26,12 +25,10 @@ import {
   getTrendingProducts,
 } from "../lib/productQueries.js";
 import redis from "../services/redis.js";
-import type { Product } from "../generated/prisma/client.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import {
   productSelect,
-  productSelector,
   productWhere,
   reviewSelect,
   reviewWhere,
@@ -57,8 +54,6 @@ export async function getAllProducts(
   } = req.query;
 
   const currency = req.currency!
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
   
   try {
     console.log(
@@ -73,12 +68,12 @@ export async function getAllProducts(
         deleted: false,
         ...(search && { name: { startsWith: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
-        ...(sale && { [salePriceField]:{not:null} }),
+        ...(sale && { sale_price: { not: null } }),
         ...(minPrice || maxPrice
           ? {
-              [priceField]: {
-                ...(minPrice && { gte: minPrice }),
-                ...(maxPrice && { lte: maxPrice }),
+              price: {
+                ...(minPrice !== undefined && { gte: minPrice }),
+                ...(maxPrice !== undefined && { lte: maxPrice }),
               },
             }
           : {}),
@@ -87,7 +82,7 @@ export async function getAllProducts(
       ...(limit && { take: limit }),
       ...(page && limit && { skip: (page - 1) * limit }),
       select: {
-        ...productSelector(currency)
+        ...productSelect,
       },
     });
 
@@ -96,9 +91,13 @@ export async function getAllProducts(
     );
 
     //format price from cent to .niceprice
-    products.forEach(product => {
-      formatPricesForClientAndCalculateAverageRating(product, priceField, salePriceField)
-    })
+    const baseCurrency = products[0]?.currency ?? "USD";
+
+    await Promise.all(
+      products.map((product) =>
+        transformAndFormatProductPrice(product, baseCurrency, currency)
+      )
+    );
 
     console.log(chalk.green(`${getTimestamp()} Products fetched successfully`));
     return res.status(200).json(products);
@@ -107,7 +106,6 @@ export async function getAllProducts(
     next(err);
   }
 }
-
 
 export async function createProduct(
   req: Request<{}, {}, ProductSchema>,
@@ -148,13 +146,6 @@ export async function createProduct(
         product.sale_price = turnPriceToPriceInCents(product.sale_price);
       }
 
-      //convert to all supported prices
-      const allPrices = await exchangeAllPricesInCents(
-        baseCurrency,
-        product.price,
-        product.sale_price
-      );
-
       //create product
       const createData = {
         name: product.name,
@@ -164,51 +155,39 @@ export async function createProduct(
         stock_quantity: product.stock_quantity,
         is_public: product.is_public,
         ...(product.is_public && { published_at: new Date() }),
-        category: { connect: { name: product.category } },
-        price_in_USD: allPrices.USD.priceInCents,
-        price_in_GBP: allPrices.GBP.priceInCents,
-        price_in_EUR: allPrices.EUR.priceInCents,
-        ...(allPrices.USD.salePriceInCents && {
-          sale_price_in_USD: allPrices.USD.salePriceInCents,
-        }),
-        ...(allPrices.GBP.salePriceInCents && {
-          sale_price_in_GBP: allPrices.GBP.salePriceInCents,
-        }),
-        ...(allPrices.EUR.salePriceInCents && {
-          sale_price_in_EUR: allPrices.EUR.salePriceInCents,
+        category: {
+          connectOrCreate: {
+            where: {
+              name: product.category
+            },
+            create: {
+              name: product.category
+            }
+          }
+        },
+        price: product.price,
+        ...(product.sale_price !== undefined && {
+          sale_price: product.sale_price,
         }),
       };
 
       return tx.product.create({
         data: createData,
         select: {
-          ...productSelector(baseCurrency),
+          ...productSelect,
         },
       });
     });
 
-    //build redis keys
-    const productsRedisKeys = SUPPORTED_CURRENCIES.map(
-      (currency) => `${NEW_PRODUCTS_REDIS_KEY}:${currency}`
-    );
-
-    const saleProductsRedisKeys = SUPPORTED_CURRENCIES.map(
-      (currency) => `${SALE_PRODUCTS_REDIS_KEY}:${currency}`
-    );
-
-    const categoryRedisKeys = SUPPORTED_CURRENCIES.map(
-      (currency) => `categoryProducts:${product.category}:currency:${currency}`
-    );
-
     //clear all relevant caches
+    if (newProduct.is_public) {
     await Promise.all([
-      ...productsRedisKeys.map((key) => redis.del(key)),
-      ...categoryRedisKeys.map((key) => redis.del(key)),
-      ...(product.sale_price
-        ? saleProductsRedisKeys.map((key) => redis.del(key))
-        : []),
-    ]);
-
+      redis.del(NEW_PRODUCTS_REDIS_KEY),
+      redis.del(SALE_PRODUCTS_REDIS_KEY),
+      redis.del(CATEGORIES_REDIS_KEY),
+    ]);  
+    }
+    
     console.log(
       chalk.green(
         `${getTimestamp()} Product ${product.name} created successfully`
@@ -235,8 +214,6 @@ export async function getProductByProductId(
   const id = req.params.productId!;
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
@@ -244,7 +221,7 @@ export async function getProductByProductId(
     const product = await prisma.product.findUnique({
       where: { ...productWhere, id },
       select: {
-        ...productSelector(currency),
+        ...productSelect,
       },
     });
 
@@ -257,8 +234,8 @@ export async function getProductByProductId(
       chalk.green(`${getTimestamp()} Product ${id} fetched successfully`)
     );
 
-    //format price to nice price
-    formatPricesForClientAndCalculateAverageRating(product,priceField, salePriceField)
+    //format price and calc avg
+    await transformAndFormatProductPrice(product, product.currency, currency);
 
     return res.status(200).json(product);
   } catch (err) {
@@ -333,8 +310,15 @@ export async function updateProductByProductId(
 ) {
   const id = req.params.productId;
 
+  if (req.body.price !== undefined) {
+    req.body.price = turnPriceToPriceInCents(req.body.price);
+  }
 
-  let {
+  if (req.body.sale_price !== undefined) {
+    req.body.sale_price = turnPriceToPriceInCents(req.body.sale_price);
+  }
+
+  const {
     name,
     description,
     price,
@@ -348,73 +332,34 @@ export async function updateProductByProductId(
     console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
 
     const updatedProduct = await prisma.$transaction(async (tx) => {
-      
-      //get base currency
-      const currencySetting = await tx.settings.findFirst({
-        where: { key: BASE_CURRENCY_KEY },
-      });
-      if (!currencySetting) throw new Error("Base currency not set");
-      const baseCurrency = currencySetting.value as CurrencyISO;
-
-      //prices to cent
-      let priceInCents: number | undefined;
-      let salePriceInCents: number | undefined;
-
-      if (typeof price === "number") {
-        priceInCents = turnPriceToPriceInCents(price);
-      }
-      if (typeof sale_price === "number") {
-        salePriceInCents = turnPriceToPriceInCents(sale_price);
-      }
-
-      //all supported prices cnvert
-      let allPrices:
-        | Awaited<ReturnType<typeof exchangeAllPricesInCents>>
-        | undefined;
-
-      if (priceInCents !== undefined) {
-        allPrices = await exchangeAllPricesInCents(
-          baseCurrency,
-          priceInCents,
-          salePriceInCents
-        );
-      }
-
-      const updateData: any = { updated_at: new Date() };
-
-      if (name) updateData.name = name;
-      if (description) updateData.description = description;
-      if (typeof stock_quantity === "number")
-        updateData.stock_quantity = stock_quantity;
-
-      if (typeof is_public === "boolean") {
-        updateData.is_public = is_public;
-        if (is_public) updateData.published_at = new Date();
-      }
-
-      if (category) updateData.category = { connect: { name: category } };
-
-      if (priceInCents !== undefined && allPrices) {
-        updateData.price_in_USD = allPrices.USD.priceInCents;
-        updateData.price_in_GBP = allPrices.GBP.priceInCents;
-        updateData.price_in_EUR = allPrices.EUR.priceInCents;
-
-        if (allPrices.USD.salePriceInCents)
-          updateData.sale_price_in_USD = allPrices.USD.salePriceInCents;
-
-        if (allPrices.GBP.salePriceInCents)
-          updateData.sale_price_in_GBP = allPrices.GBP.salePriceInCents;
-
-        if (allPrices.EUR.salePriceInCents)
-          updateData.sale_price_in_EUR = allPrices.EUR.salePriceInCents;
-      }
 
       //update
       const product = await tx.product.update({
         where: { id },
-        data: updateData,
+        data: {
+          updated_at: new Date(),
+          ...(name && { name }),
+          ...(description && { description }),
+          ...(category && {
+            category: {
+              connectOrCreate: {
+                where: {
+                  name: category,
+                },
+                create: {
+                  name: category,
+                },
+              },
+            },
+          }),
+          ...(price !== undefined && { price }),
+          ...(stock_quantity !== undefined && { stock_quantity }),
+          ...(sale_price !== undefined && { sale_price }),
+          ...(typeof is_public === "boolean" && { is_public }),
+          ...(is_public && { published_at: new Date() }),
+        },
         select: {
-          ...productSelector(baseCurrency),
+          ...productSelect,
         },
       });
 
@@ -440,21 +385,11 @@ export async function updateProductByProductId(
 
     //redis invalidation
     if (is_public) {
-      const newProductsKeys = SUPPORTED_CURRENCIES.map(
-        (currency) => `${NEW_PRODUCTS_REDIS_KEY}:${currency}`
-      );
-      const saleProductsKeys = SUPPORTED_CURRENCIES.map(
-        (currency) => `${SALE_PRODUCTS_REDIS_KEY}:${currency}`
-      );
-      const categoryKeys = SUPPORTED_CURRENCIES.map(
-        (currency) => `categoryProducts:${category}:currency:${currency}`
-      );
-
-      await Promise.all([
-        ...newProductsKeys.map((key) => redis.del(key)),
-        ...(sale_price ? saleProductsKeys.map((key) => redis.del(key)) : []),
-        ...categoryKeys.map((key) => redis.del(key)),
-      ]);
+        await Promise.all([
+          redis.del(NEW_PRODUCTS_REDIS_KEY),
+          redis.del(SALE_PRODUCTS_REDIS_KEY),
+          redis.del(CATEGORIES_REDIS_KEY),
+        ]);
     }
 
     console.log(
@@ -563,9 +498,6 @@ export async function getHomeProducts(
 ) {
   const currency = req.currency!
 
-  const priceField = `price_in_${currency}` as keyof typeof productSelect;
-  const salePriceField = `sale_price_in_${currency}` as keyof typeof productSelect;
-
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));
 
@@ -576,12 +508,12 @@ export async function getHomeProducts(
         : null;
 
     const promises: Promise<ProductWithSelectedFields[]>[] = [
-      getNewProducts(currency),
-      getTrendingProducts(currency),
-      getSaleProducts(currency),
+      getNewProducts(),
+      getTrendingProducts(),
+      getSaleProducts(),
     ];
 
-    if (randomCategory) promises.push(getCategoryProducts(randomCategory, currency));
+    if (randomCategory) promises.push(getCategoryProducts(randomCategory));
 
     const results = await Promise.all(promises);
 
@@ -597,45 +529,23 @@ export async function getHomeProducts(
     );
 
     //format price and calc avg for client
-    if (newProducts && newProducts.length > 0) {
-      newProducts.forEach((product) =>
-        formatPricesForClientAndCalculateAverageRating(
-          product,
-          priceField,
-          salePriceField
-        )
-      )
-    }
+    await Promise.all([
+      ...(newProducts?.map((product) =>
+        transformAndFormatProductPrice(product, currency, product.currency)
+      ) || []),
 
-    if (trendingProducts && trendingProducts.length > 0) {
-      trendingProducts.forEach((product) =>
-        formatPricesForClientAndCalculateAverageRating(
-          product,
-          priceField,
-          salePriceField
-        )
-      );
-    }
+      ...(trendingProducts?.map((product) =>
+        transformAndFormatProductPrice(product, currency, product.currency)
+      ) || []),
 
-    if (productsOnSale && productsOnSale.length > 0) {
-      productsOnSale.forEach((product) =>
-        formatPricesForClientAndCalculateAverageRating(
-          product,
-          priceField,
-          salePriceField
-        )
-      );
-    }
+      ...(productsOnSale?.map((product) =>
+        transformAndFormatProductPrice(product, currency, product.currency)
+      ) || []),
 
-    if (categoryProducts && categoryProducts.length > 0) {
-      categoryProducts.forEach((product) =>
-        formatPricesForClientAndCalculateAverageRating(
-          product,
-          priceField,
-          salePriceField
-        )
-      );
-    }
+      ...(categoryProducts?.map((product) =>
+        transformAndFormatProductPrice(product, currency, product.currency)
+      ) || []),
+    ]);
 
     return res.status(200).json({
       newProducts,
@@ -643,6 +553,7 @@ export async function getHomeProducts(
       productsOnSale,
       categoryProducts,
     });
+    
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch home products:`, err)

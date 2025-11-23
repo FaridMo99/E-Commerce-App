@@ -28,35 +28,23 @@ export type ProductCategory = {
     name:string
 }
 
-export type PriceTypes =
-    {
-      price_in_GBP: number;
-      sale_price_in_GBP: number | null;
-    }
-  | {
-      price_in_EUR: number;
-      sale_price_in_EUR: number | null;
-    }
-  | {
-      price_in_USD: number;
-      sale_price_in_USD: number | null;
-    }
 
 export type Product = {
   id: string;
   name: string;
   description: string;
   currency: CurrencyISO;
+  price: number; //float
+  sale_price: number; //float
   stock_quantity: number;
-  averageRating:number;
+  averageRating: number;
   published_at: Date | null; // can be only null when user is not admin, and admin also gets is_public field with boolean value
   imageUrls: string[];
   category: ProductCategory;
   _count: {
     reviews: number;
   };
-} & PriceTypes;
-
+};
 
 
 export type Order = {
