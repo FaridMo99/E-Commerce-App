@@ -52,12 +52,12 @@ export async function deleteReviewByReviewId(id: string, accessToken: AccessToke
 }
 
 export async function setReviewPrivateOrPublic(
-  id: string,
+  reviewId: string,
   newState: boolean,
   accessToken: AccessToken
 ): Promise<AuthProductReview> {
-
-  const res = await fetch(`${apiBaseUrl}/reviews/${id}`, {
+  console.log(newState)
+  const res = await fetch(`${apiBaseUrl}/reviews/${reviewId}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -65,7 +65,7 @@ export async function setReviewPrivateOrPublic(
       ...getCsrfHeaderClientSide(),
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({ is_public: newState }),
+    body: JSON.stringify({ isPublic: newState }),
   });
   return await handleResponse(res);
 }

@@ -43,7 +43,7 @@ export default function UserDropdown() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-foreground text-white">
-        <DropdownMenuLabel>Chosse a currency</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex justify-center items-center">User Infos</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {routes.map((route) => (
           <DropdownMenuItem key={route.link}>

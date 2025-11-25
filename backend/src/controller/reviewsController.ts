@@ -138,14 +138,21 @@ export async function setPublicByReviewId(
   const userId = req.user?.id!;
   const isPublic = req.body.isPublic;
 
-  if (!isPublic && typeof isPublic !== "boolean") {
-    console.log(
-      chalk.red(
-        `${getTimestamp()} Invalid isPublic value for review: ${reviewId}`
-      )
-    );
-    return res.status(400).json({ message: "Bad Request" });
-  }
+  console.log(isPublic)
+
+    let isPublicBoolean: boolean;
+
+    if (typeof isPublic === "string") {
+      if (isPublic.toLowerCase() === "true") isPublicBoolean = true;
+      else if (isPublic.toLowerCase() === "false") isPublicBoolean = false;
+      else {
+        return res.status(400).json({ message: "Invalid isPublic value" });
+      }
+    } else if (typeof isPublic === "boolean") {
+      isPublicBoolean = isPublic;
+    } else {
+      return res.status(400).json({ message: "Invalid isPublic value" });
+    }
 
   try {
     console.log(
@@ -170,9 +177,9 @@ export async function setPublicByReviewId(
     }
 
       await prisma.review.update({
-      where: { id: reviewId },
-      data: { is_public: isPublic },
-    });
+        where: { id: reviewId },
+        data: { is_public: isPublicBoolean },
+      });
 
     console.log(
       chalk.green(

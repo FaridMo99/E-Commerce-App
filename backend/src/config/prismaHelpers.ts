@@ -106,6 +106,11 @@ export const cartSelect: Prisma.CartSelect = {
 export const reviewSelect: Prisma.ReviewSelect = {
     id: true,
     product_id: true,
+    product: {
+        select: {
+          name:true
+      }  
+    },
     user: {
         select: {
             name:true

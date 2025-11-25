@@ -279,6 +279,7 @@ export async function getReviewsByUser(
         ...authenticatedReviewSelect,
       },
     });
+    
     console.log(
       chalk.green(
         `${getTimestamp()} Reviews fetched successfully for user ${userId}`
