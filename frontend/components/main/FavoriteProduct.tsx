@@ -3,6 +3,8 @@ import { addFavoriteItemByProductId, deleteFavoriteItemByProductId, getUserFavor
 import useAuth from "@/stores/authStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Bookmark } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { MouseEvent } from "react"
 import { toast } from "sonner"
 
 
@@ -13,6 +15,7 @@ type FavoriteProductProps = {
 function FavoriteProduct({ productId }: FavoriteProductProps) {
     const accessToken = useAuth((state) => state.accessToken);
     const queryClient = useQueryClient()
+    const router = useRouter()
 
     const { data: favoriteItems, isLoading, isError } = useQuery({
         queryKey: ["get favorite products"],
@@ -42,20 +45,27 @@ function FavoriteProduct({ productId }: FavoriteProductProps) {
         },
     });
 
+    function clickHandler(e: MouseEvent<HTMLButtonElement>) {
+      e.preventDefault();
+      if (accessToken) {
+        mutate();
+      } else {
+        toast.info("You have to be logged in to favorite Products");
+        router.push("/login");
+      }
+    }
+
     if (!accessToken || isLoading || isError) return null;
 
   return (
       <button
           type="button"
           disabled={isPending || isLoading}
-          onClick={(e) => {
-              e.preventDefault()
-              mutate()
-          }}
+          onClick={clickHandler}
           aria-label="Add product to favorites"
           className="z-50 self-end"
       >
-          <Bookmark className={`${isFavorite ?  "fill-current" : ""} text-foreground hover:scale-125 hover:cursor-pointer`} />
+          <Bookmark className={`${isFavorite ?  "fill-current" : ""} text-foreground hover:scale-105 hover:cursor-pointer`} />
     </button>
   )
 }

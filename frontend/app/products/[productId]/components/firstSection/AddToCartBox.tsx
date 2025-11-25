@@ -1,7 +1,7 @@
 "use client"
+import { useState } from 'react'
 import ItemQuantity from './ItemQuantity'
 import AddCart from './AddCart'
-import { useState } from 'react'
 
 type AddToCartBoxProps = {
     stockAmount: number

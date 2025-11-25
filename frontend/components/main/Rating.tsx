@@ -1,14 +1,15 @@
 import { Rating, RatingButton } from '../ui/shadcn-io/rating'
 
 type RatingPreviewProps = {
-    rating: number,
+  rating: number,
   reviewsAmount?: number
-  size?:number
+  size?: number
+  styles?:string
 }
 
-function RatingPreview({ rating, reviewsAmount, size }: RatingPreviewProps) {
+function RatingPreview({ rating, reviewsAmount, size, styles }: RatingPreviewProps) {
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className={`flex flex-col justify-center items-center ${styles}`}>
       <Rating value={rating} readOnly>
         {Array.from({ length: 5 }).map((_, index) => (
           <RatingButton

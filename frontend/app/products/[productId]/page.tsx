@@ -2,34 +2,31 @@ import { getProductByProductId } from "@/lib/queries/server/productQueries";
 import { Product } from "@/types/types";
 import { notFound } from "next/navigation";
 import "server-only";
-import FirstSection from "./components/FirstSection";
-import ImageSection from "./components/ImageSection";
-import SimilarProductsSection from "./components/SimilarProductsSection";
-import ReviewsSection from "./components/ReviewsSection";
+import FirstSection from "./components/firstSection/FirstSection";
+import ImageSection from "./components/secondSection/ImageSection";
+import SimilarProductsSection from "./components/fourthSection/SimilarProductsSection";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import ReviewsSection from "./components/thirdSection/ReviewsSection";
 
 
-//should have marker for available, sold out, sale
-async function page({ params }:{params:{productId:string}}) {
+async function page({ params }: { params: { productId: string } }) {
   const { productId } = await params;
-  let product:Product
-  
+  let product: Product;
+
   try {
-    const productReturn = await getProductByProductId(productId)
+    const productReturn = await getProductByProductId(productId);
     if (!productReturn) {
-      return notFound()
+      return notFound();
     }
-    product = productReturn
-
+    product = productReturn;
   } catch (err) {
-    console.log(err)
-    notFound()
-
+    console.log(err);
+    notFound();
   }
 
   return (
-    <main className="flex flex-col w-screen items-center justify-center">
+    <main className="flex flex-col w-screen justify-center px-4">
       <FirstSection product={product} />
       {product.imageUrls.length > 0 && (
         <ImageSection imageUrls={product.imageUrls} />

@@ -588,6 +588,15 @@ export async function createReviewByProductId(
       )
     );
 
+    const alreadyReviewed = await prisma.review.findFirst({
+      where: {
+        product_id: productId,
+        user_id:userId
+      }
+    })
+
+    if(alreadyReviewed)return res.status(400).json({message:"You already reviewed this product"})
+
     const review = await prisma.review.create({
       data: {
         title,
