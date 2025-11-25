@@ -24,7 +24,7 @@ function AddCart({ itemId, quantity }: AddCartProps) {
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["get user shopping cart", accessToken]})
+            queryClient.invalidateQueries({queryKey: ["get user shopping cart"]})
             toast.success("Product successfully added to shopping cart")
         },
         onError: (err) => {

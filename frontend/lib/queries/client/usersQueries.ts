@@ -109,7 +109,7 @@ export async function removeItemFromCart(
 
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
-    method: "POST",
+    method: "DELETE",
     headers: {
       ...getCsrfHeaderClientSide(),
       Authorization: `Bearer ${accessToken}`,

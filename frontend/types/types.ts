@@ -27,6 +27,11 @@ export type ProductCategory = {
     name:string
 }
 
+export type CartItem = {
+  quantity: number;
+  id: string;
+  product: Product;
+};
 
 export type Product = {
   id: string;
@@ -71,11 +76,7 @@ export type Cart = {
     _count: {
         items: number
     }
-    items: {
-            quantity: number,
-            id: string,
-            product:Product
-    }[]
+    items: CartItem[]
 };
     
 export type ProductReview = {

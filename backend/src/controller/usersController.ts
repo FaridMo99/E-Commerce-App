@@ -319,7 +319,7 @@ export async function getUserCart(
         _count: {
             select: {
                 items:true
-            }
+          }
         },
         items: {
             select: {
@@ -410,64 +410,84 @@ export async function addProductToUserCart(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id!;
+  const userId = req.user!.id;
   const { productId, quantity } = req.body;
-  const currency = req.currency!
-  
+  const currency = req.currency!;
+
   try {
     console.log(
       chalk.yellow(
         `${getTimestamp()} Adding product ${productId} to cart for user ${userId}`
       )
     );
-    const newCartItem = await prisma.cartItem.create({
-      data: {
-        cart: { connect: { userId } },
-        product: { connect: { id: productId } },
-        quantity,
+
+    //check if item already exists in cart
+    const existingItem = await prisma.cartItem.findFirst({
+      where: {
+        cart: { userId },
+        productId,
       },
+    });
+
+    let updatedCart;
+
+    if (existingItem) {
+      //update quantity
+      await prisma.cartItem.update({
+        where: { id: existingItem.id },
+        data: { quantity: existingItem.quantity + quantity },
+      });
+
+      console.log(
+        chalk.green(
+          `${getTimestamp()} Increased quantity for ${productId} in cart for user ${userId}`
+        )
+      );
+    } else {
+      //create new item
+      await prisma.cartItem.create({
+        data: {
+          cart: { connect: { userId } },
+          product: { connect: { id: productId } },
+          quantity,
+        },
+      });
+
+      console.log(
+        chalk.green(
+          `${getTimestamp()} Product ${productId} added to cart for user ${userId}`
+        )
+      );
+    }
+
+    //return full updated cart
+    updatedCart = await prisma.cart.findUnique({
+      where: { userId },
       select: {
-        cart: {
+        id: true,
+        _count: { select: { items: true } },
+        items: {
           select: {
-          id:true,
-          _count: {
-              select: {
-                  items:true
-              }
+            id: true,
+            quantity: true,
+            product: { select: { ...productSelect } },
           },
-          items: {
-              select: {
-                  quantity: true,
-                  id: true,
-                  product: {
-                      select: {
-                          ...productSelect
-                      }
-                  }
-              }
-          }
-      },
         },
       },
     });
 
-    console.log(
-      chalk.green(
-        `${getTimestamp()} Product ${productId} added to cart successfully for user ${userId}`
+    //convert and format prices
+    await Promise.all(
+      updatedCart!.items.map((item) =>
+        transformAndFormatProductPrice(
+          item.product,
+          item.product.currency,
+          currency
+        )
       )
     );
 
-      await Promise.all(
-        newCartItem.cart.items.map((item) =>
-          transformAndFormatProductPrice(
-            item.product,
-            item.product.currency,
-            currency
-          )
-        )
-      );
-
-    return res.status(200).json(newCartItem.cart);
+    return res.status(200).json(updatedCart);
   } catch (err) {
     console.log(
       chalk.red(

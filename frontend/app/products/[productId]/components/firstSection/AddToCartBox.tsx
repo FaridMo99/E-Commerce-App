@@ -8,7 +8,6 @@ type AddToCartBoxProps = {
     productId:string
 }
 
-//when amount 0 grey out and make non interactive
 function AddToCartBox({ stockAmount, productId }: AddToCartBoxProps) {
   const [quantity, setQuantity] = useState<number>(
     stockAmount === 0 ? stockAmount : 1

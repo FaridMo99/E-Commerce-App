@@ -1,4 +1,4 @@
-
+"use client"
 import ItemCountDot from "./ItemCountDot";
 import { ShoppingCart } from "lucide-react";
 import {
@@ -11,12 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useAuth from "@/stores/authStore";
 import { Cart } from "@/types/types";
+import Price from "./Price";
+import RatingPreview from "./Rating";
+import Link from "next/link";
+import ImageWithPlaceholder from "./ImageWithPlaceholder";
 
-//check logic if not authed to log in then
-//check how to fetch, maybe after layout just the count and on click here the real items for performance
+
 function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
   const itemsLength = cart?.items.length;
-  const accessToken = useAuth.getState().accessToken;
+  const accessToken = useAuth(state=>state.accessToken);
 
   return (
     <DropdownMenu>
@@ -31,15 +34,40 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-foreground text-white">
-        <DropdownMenuLabel>Items in Cart</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex justify-around items-center">Items in Cart <Link href="/user/cart" className="text-blue-500 underline">Go To Cart</Link></DropdownMenuLabel>
         <DropdownMenuSeparator />
         {itemsLength && itemsLength > 0 ? (
           cart?.items.map((item) => (
-            <DropdownMenuItem
-              className="justify-between"
-              key={item.id}
-            >
-              {item.product.name}
+            <DropdownMenuItem className="justify-between" key={item.id}>
+              <ImageWithPlaceholder
+                src={item.product.imageUrls[0]}
+                width="w-1/3"
+                height="h-full"
+              />
+              <div className="w-2/3 h-full flex justify-center">
+                <div className="h-full flex flex-col w-2/3 pl-2">
+                  <Link
+                    href={`/products/${item.product.id}`}
+                    className="text-lg font-bold mt-4 truncate"
+                  >
+                    {item.product.name}
+                  </Link>
+                  <RatingPreview
+                    size={10}
+                    rating={item.product.averageRating}
+                    styles="items-start"
+                  />
+                </div>
+                <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
+                  <p>Amount: {item.quantity}</p>
+                  <Price
+                    price={item.product.price}
+                    sale_price={item.product.sale_price}
+                    currency={item.product.currency}
+                    styles="items-end"
+                  />
+                </div>
+              </div>
             </DropdownMenuItem>
           ))
         ) : (

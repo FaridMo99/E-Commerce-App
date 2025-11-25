@@ -11,7 +11,6 @@ import {
   User,
   ShoppingCart,
   PackageSearch,
-  Settings,
   MessageSquare,
   Bookmark,
 } from "lucide-react";
@@ -23,7 +22,6 @@ const routes: UserRoute[] = [
   { link: "/user", text: "My Profile", icon: User },
   { link: "/user/cart", text: "Shopping Cart", icon: ShoppingCart },
   { link: "/user/orders", text: "Orders", icon: PackageSearch },
-  { link: "/user/settings", text: "Settings", icon: Settings },
   { link: "/user/favorites", text: "Favorites", icon: Bookmark },
   { link: "/user/reviews", text: "Product Reviews", icon: MessageSquare },
 ];

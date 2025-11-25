@@ -19,7 +19,7 @@ function Navigation() {
     isError,
     error,
   } = useQuery({
-    queryKey: ["get user shopping cart", accessToken],
+    queryKey: ["get user shopping cart"],
     queryFn: () => {
       if (!accessToken) return Promise.resolve(null);
       return getUserCart(accessToken);
