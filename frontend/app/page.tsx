@@ -12,6 +12,8 @@ export default async function Home() {
     categoryProducts,
   } = await getHomeProducts();
 
+  console.log(categoryProducts)
+
   return (
     <main>
       {newProducts.length > 0 && (
@@ -29,8 +31,8 @@ export default async function Home() {
       {categoryProducts.length > 0 && (
         <ProductsCarousel
           title={
-            categoryProducts[0].name.charAt(0).toUpperCase() +
-            categoryProducts[0].name.slice(1).toLowerCase()
+            categoryProducts[0].category.name.charAt(0).toUpperCase() +
+            categoryProducts[0].category.name.slice(1).toLowerCase()
           }
           products={categoryProducts}
         />

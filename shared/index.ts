@@ -16,10 +16,12 @@ import {
   settingsSchema,
   passwordSchema,
   emailSchema,
-  productIdSchema
+  productIdSchema,
+  productsMetaInfosQuerySchema
 } from "./schemas.ts";
 
 import type {
+  ProductsMetaInfosQuerySchema,
   LoginSchema,
   SignupSchema,
   OrdersQuerySchema,
@@ -61,6 +63,7 @@ export {
   settingsSchema,
   passwordSchema,
   emailSchema,
+  productsMetaInfosQuerySchema
 };
 export type {
   LoginSchema,
@@ -77,4 +80,5 @@ export type {
   AddCartItemSchema,
   ItemQuantitySchema,
   SettingsSchema,
+  ProductsMetaInfosQuerySchema
 };

@@ -2,7 +2,6 @@
 import { getUserCart } from "@/lib/queries/server/usersQueries";
 import { Loader2, LogIn, MenuIcon } from "lucide-react";
 import Link from "next/link";
-import CurrencyDropdown from "./CurrencyDropdown";
 import UserDropdown from "./UserDropdown";
 import ShoppingCartDropdown from "./ShoppingCartDropdown";
 import LogoutButton from "./LogoutButton";
@@ -59,7 +58,6 @@ function Navigation() {
           <LogIn />
         </Link>
       )}
-      <CurrencyDropdown />
     </nav>
   );
 }

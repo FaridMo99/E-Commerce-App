@@ -85,14 +85,12 @@ usersRouter.delete(
 //add route and controller for recently viewed products
 usersRouter.get(
   "/me/recently-viewed-products",
-  isAuthenticated,
   geoCurrencyMiddleware,
   getRecentlyViewedProducts,
 );
 
 usersRouter.post(
   "/me/recently-viewed-products",
-  isAuthenticated,
   geoCurrencyMiddleware,
   addProductToRecentlyViewedProductsByProductId
 );

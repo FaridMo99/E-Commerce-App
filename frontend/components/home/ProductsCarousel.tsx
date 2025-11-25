@@ -11,6 +11,7 @@ type ProductsCarouselProps = {
 };
 
 function ProductsCarousel({ title, products }: ProductsCarouselProps) {
+  
   const settings: Settings = {
     slidesToShow: 5,
     slidesToScroll: 1,

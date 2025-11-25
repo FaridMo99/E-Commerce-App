@@ -6,11 +6,11 @@ import { getTimestamp } from "../lib/utils.js";
 import { reviewSelect, reviewWhere } from "../config/prismaHelpers.js";
 
 export async function getAllReviews(
-  req: Request<{}, {}, {}, ReviewsQuerySchema>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const { rating, created_at, sortBy, sortOrder, page, limit } = req.query;
+  const { rating, created_at, sortBy, sortOrder, page, limit } = req.validatedQuery as ReviewsQuerySchema;
 
   try {
     console.log(
@@ -24,8 +24,8 @@ export async function getAllReviews(
         ...(created_at && { created_at: new Date(created_at) }),
       },
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
-      ...(limit && { take: parseInt(limit) }),
-      ...(page && limit && { skip: (parseInt(page) - 1) * parseInt(limit) }),
+      ...(limit && { take: limit }),
+      ...(page && limit && { skip: (page - 1) * limit }),
       select: {
         ...reviewSelect
       }

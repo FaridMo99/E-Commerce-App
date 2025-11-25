@@ -1,15 +1,13 @@
 import "server-only";
 import ProductView from "./components/ProductView";
-import { SeachParams } from "@/types/types";
 import { getProducts } from "@/lib/queries/server/productQueries";
+import { SearchParamsProps } from "@/types/types";
 
 //page and limit should be default values
-//give good loading state that only overrides this page but not sidebar
-//implement abort controller when user too fast using sidebar and searchbar
-//maybe sends wrong data types
-//give breadcrumbs for pagination
-async function page({ searchParams }: { searchParams: SeachParams }) {
+async function page({ searchParams }:SearchParamsProps) {
   const params = await searchParams;
+
+
   const products = await getProducts(params);
 
   return (

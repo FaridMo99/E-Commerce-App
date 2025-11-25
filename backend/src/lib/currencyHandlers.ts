@@ -2,6 +2,8 @@ import {
   EXCHANGE_RATE_REDIS_KEY,
   DEFAULT_NICE_PRICE,
   ONE_DAY_IN_SECONDS,
+  BASE_CURRENCY_KEY,
+  TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
@@ -10,6 +12,7 @@ import type { NicePrice, OpenExchangeRateApiReturn } from "../types/types.js";
 import chalk from "chalk";
 import { calcAvgRating, getTimestamp } from "./utils.js";
 import type { ProductWithSelectedFields } from "../config/prismaHelpers.js";
+import prisma from "../services/prisma.js";
 
 //cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
@@ -135,4 +138,66 @@ export async function transformAndFormatProductPrice(
       chalk.red(getTimestamp(), "transformAndFormatProductPrice error:", err)
     );
   }
+}
+
+//for meta
+export async function convertAndFormatPriceInCents(
+  amountInCents: number,
+  baseCurrency: CurrencyISO,
+  wantedCurrency: CurrencyISO
+): Promise<number> {
+  if (!amountInCents) return 0;
+
+  // 1. Exchange if needed
+  if (baseCurrency !== wantedCurrency) {
+    const { rates } = await getExchangeRates();
+
+    const baseRate = rates[baseCurrency];
+    const wantedRate = rates[wantedCurrency];
+
+    if (!baseRate || !wantedRate) {
+      throw new Error(
+        `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`
+      );
+    }
+
+    // USD → base → wanted
+    const usdToBase = 1 / baseRate;
+    const usdToWanted = wantedRate;
+    const exchangeFactor = usdToBase * usdToWanted;
+
+    amountInCents = Math.round(amountInCents * exchangeFactor);
+  }
+
+  // 2. Apply your nice price rounding
+  amountInCents = roundPriceUpInCents(amountInCents);
+
+  // 3. Format for client
+  return formatPriceForClient(amountInCents);
+}
+
+export async function getBaseCurrency():Promise<CurrencyISO> {
+  try {
+    const cached = await redis.get(BASE_CURRENCY_KEY) as CurrencyISO
+  if (cached) {
+    return cached
+  }
+
+  const currency = await prisma.settings.findFirst({
+    where: {
+      key:BASE_CURRENCY_KEY
+    }
+  })
+    
+    if (currency) {
+      redis.setEx(BASE_CURRENCY_KEY, TWELVE_HOURS_IN_SECONDS, currency.value)
+    }
+
+    return currency?.value as CurrencyISO
+
+  } catch (err) {
+    console.log(chalk.red("Base currency fetch error:", err))
+    throw err
+  }
+
 }

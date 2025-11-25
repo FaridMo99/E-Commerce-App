@@ -73,7 +73,8 @@ export async function getSaleProducts(): Promise<ProductWithSelectedFields[]> {
 }
 
 export async function getCategoryProducts(category: Category["name"]): Promise<ProductWithSelectedFields[]> {
-  const cached = await redis.get(CATEGORIES_REDIS_KEY);
+  const redisKey = `${CATEGORIES_REDIS_KEY}:${category}`;
+  const cached = await redis.get(redisKey);
   if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
 
   const products = await prisma.product.findMany({
@@ -92,7 +93,7 @@ export async function getCategoryProducts(category: Category["name"]): Promise<P
     },
   });
 
-  await redis.set(CATEGORIES_REDIS_KEY, JSON.stringify(products), { EX: 1800 });
+  await redis.set(redisKey, JSON.stringify(products), { EX: 1800 });
   return products;
 }
 

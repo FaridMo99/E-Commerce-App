@@ -14,7 +14,7 @@ const apiRouter = Router();
 apiRouter.use("/users", isAuthenticated, usersRouter);
 apiRouter.use("/products", productsRouter);
 apiRouter.use("/categories", categoriesRouter);
-apiRouter.use("/orders", ordersRouter);
+apiRouter.use("/orders",isAuthenticated, ordersRouter);
 apiRouter.use("/reviews", reviewsRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/admin", isAuthenticated, isAdmin, adminRouter);

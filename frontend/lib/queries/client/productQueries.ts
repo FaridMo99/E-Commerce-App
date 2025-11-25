@@ -1,7 +1,7 @@
-import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
+import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
+import { AccessToken, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
 
@@ -29,6 +29,35 @@ export async function getProducts(
   }
 
   const url = `${apiBaseUrl}/products?${params.toString()}`;
+
+  const res = await fetch(url, {
+    credentials: "include",
+  });
+  return await handleResponse(res);
+}
+
+export async function getProductsMetaInfos(
+  queryParams?: ProductsMetaInfosQuerySchema
+): Promise<ProductMetaInfos> {
+
+  const params = new URLSearchParams();
+
+  if (queryParams) {
+    if (queryParams.page !== undefined)
+      params.set("page", String(queryParams.page));
+    if (queryParams.limit !== undefined)
+      params.set("limit", String(queryParams.limit));
+    if (queryParams.search) params.set("search", queryParams.search);
+    if (queryParams.category) params.set("category", queryParams.category);
+    if (queryParams.minPrice !== undefined)
+      params.set("minPrice", String(queryParams.minPrice));
+    if (queryParams.maxPrice !== undefined)
+      params.set("maxPrice", String(queryParams.maxPrice));
+    if (queryParams.sale !== undefined)
+      params.set("sale", String(queryParams.sale));
+  }
+
+  const url = `${apiBaseUrl}/products/meta?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",

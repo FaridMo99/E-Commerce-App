@@ -16,7 +16,8 @@ declare global {
       refreshTokenPayload?: JWTRefreshTokenPayload;
       oAuthUser?: OAuthUserPayload;
       currency?: CurrencyISO;
-      countryCode?:string
+      countryCode?: string;
+      validatedQuery?:any
     }
   }
 }

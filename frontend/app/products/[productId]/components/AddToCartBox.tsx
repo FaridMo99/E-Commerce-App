@@ -1,0 +1,28 @@
+"use client"
+import ItemQuantity from './ItemQuantity'
+import AddCart from './AddCart'
+import { useState } from 'react'
+
+type AddToCartBoxProps = {
+    stockAmount: number
+    productId:string
+}
+
+//when amount 0 grey out and make non interactive
+function AddToCartBox({ stockAmount, productId }: AddToCartBoxProps) {
+  const [quantity, setQuantity] = useState<number>(
+    stockAmount === 0 ? stockAmount : 1
+  );
+  return (
+    <div className='flex flex-col justify-between items-center w-full'>
+      <ItemQuantity
+        quantity={quantity}
+        setQuantity={setQuantity}
+        maxQuantity={stockAmount}
+      />
+      <AddCart itemId={productId} quantity={quantity}/>
+    </div>
+  );
+}
+
+export default AddToCartBox

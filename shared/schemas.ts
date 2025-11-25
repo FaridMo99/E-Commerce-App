@@ -99,27 +99,33 @@ export const paginationSchema = z.object({
     .optional(),
 });
 
-/** --- Products Query Schema --- */
-export const productsQuerySchema = paginationSchema.extend({
+//products meta query schema
+export const productsMetaInfosQuerySchema = paginationSchema.extend({
   search: z
     .string()
     .max(255, "Search is too long, max 255 Characters")
     .optional(),
   category: z.string().optional(),
-  minPrice: z.preprocess(
-    (val) => Number(val),
-    z.number().nonnegative().optional()
-  ),
-  maxPrice: z.preprocess(
-    (val) => Number(val),
-    z.number().nonnegative().optional()
-  ),
+  minPrice: z.preprocess((val) => {
+    if (val === undefined || val === "") return undefined;
+    const n = Number(val);
+    return isNaN(n) ? undefined : n;
+  }, z.number().nonnegative().optional()),
+  maxPrice: z.preprocess((val) => {
+    if (val === undefined || val === "") return undefined;
+    const n = Number(val);
+    return isNaN(n) ? undefined : n;
+  }, z.number().nonnegative().optional()),
   sale: z
     .preprocess(
       (val) => (val === "true" ? true : val === "false" ? false : val),
       z.boolean()
     )
     .optional(),
+});
+
+/** --- Products Query Schema --- */
+export const productsQuerySchema = productsMetaInfosQuerySchema.extend({
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
 });

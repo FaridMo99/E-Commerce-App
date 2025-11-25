@@ -1,23 +1,41 @@
 "use client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
 import { ProductCategory } from "@/types/types";
+import { useQuery } from "@tanstack/react-query";
+import { getProductsMetaInfos } from "@/lib/queries/client/productQueries";
+import { Loader2 } from "lucide-react";
+import SidebarSelect, { SingleSelectItem } from "./SidebarSelect";
+import PriceSlider from "./PriceSlider";
 
-//costraint the slider somehow with min and max values from db
-//debounce the slider so only when he let go it fetches
+const sortObj: SingleSelectItem[] = [{
+    value: "name|asc",
+    title:"Name ↑"
+  },
+    {
+    value: "name|desc",
+    title:"Name ↓"
+  },
+    {
+    value: "price|asc",
+    title:"Price ↑"
+  },
+    {
+    value: "price|desc",
+    title:"Price ↓"
+  },
+    {
+    value: "created_at|asc",
+    title:"Date ↑"
+  },
+    {
+    value: "created_at|desc",
+    title:"Date ↓"
+  }] 
+  
+
+
 function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -28,10 +46,16 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const maxPrice = searchParams.get("maxPrice");
   const sale = searchParams.get("sale");
 
-  const [priceLimits, setPriceLimits] = useState<[number, number]>(() => [
-    minPrice ? parseInt(minPrice) : 0,
-    maxPrice ? parseInt(maxPrice) : 100,
-  ]);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["get metadata for product", searchParams.toString()],
+    queryFn: () =>
+      getProductsMetaInfos({
+        category: category || undefined,
+        minPrice: minPrice ? parseInt(minPrice) : undefined,
+        maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+        sale: sale === "true" ? true : undefined,
+      }),
+  });
 
   //sorting
   const sortBy = searchParams.get("sortBy");
@@ -67,63 +91,32 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
     params.set("minPrice", min.toString());
     params.set("maxPrice", max.toString());
     router.push(`?${params.toString()}`);
-    setPriceLimits([min, max]);
   }
 
   return (
     <aside className="w-1/5 h-[50vh] sticky top-[20vh] bg-backgroundBright rounded-xl p-6 flex flex-col justify-around font-bold text-white">
       {/*sorting select*/}
-      <Select
+      <SidebarSelect
+        valueChangeHandler={handleSorting}
         value={sortBy && sortOrder ? `${sortBy}|${sortOrder}` : ""}
-        onValueChange={handleSorting}
-      >
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Sort" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Sort Options</SelectLabel>
-            <SelectItem value="name|asc">Name ↑</SelectItem>
-            <SelectItem value="name|desc">Name ↓</SelectItem>
-            <SelectItem value="price|asc">Price ↑</SelectItem>
-            <SelectItem value="price|desc">Price ↓</SelectItem>
-            <SelectItem value="created_at|asc">Date ↑</SelectItem>
-            <SelectItem value="created_at|desc">Date ↓</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+        placeholder="Sort"
+        label="Sort Options"
+        selectItems={sortObj}
+      />
 
       {/*category select*/}
-      <Select value={category ?? ""} onValueChange={handleCategoryChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select a Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Categories</SelectLabel>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.name}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-
+      <SidebarSelect
+        valueChangeHandler={handleCategoryChange}
+        value={category ?? ""}
+        placeholder="Select a Category"
+        label="Categories"
+        selectItems={categories.map(category=>({title:category.name,value:category.name}))}
+      />
       {/* max and min price slider*/}
-      <div className="w-[60%] space-y-3">
-        <Slider
-          value={priceLimits}
-          onValueChange={handlePriceChange}
-          max={100}
-          step={1}
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Min: {priceLimits[0]}</span>
-          <span>Max: {priceLimits[1]}</span>
-        </div>
-      </div>
-
+      {isLoading && (
+        <Loader2 className="animate-spin self-center text-foreground" />
+      )}
+      {!isLoading && !isError && data && <PriceSlider currency={data?.currency} min={data?.minPrice} max={data?.maxPrice} valueChangeHandler={handlePriceChange} />}
       {/*sale box*/}
       <div className="flex w-full items-center ">
         <Label htmlFor="saleBox" className="mr-2 text-md">

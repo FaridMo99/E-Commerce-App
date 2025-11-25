@@ -5,7 +5,6 @@ import z from "zod";
 
 export type AccessToken = string;
 
-export type SeachParams = { [key: string]: string };
 export type OAuthProvider = "google" | "facebook";
 
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
@@ -46,6 +45,12 @@ export type Product = {
   };
 };
 
+export type ProductMetaInfos = {
+  minPrice: number;
+  maxPrice: number;
+  totalItems: number;
+  currency: CurrencyISO;
+};
 
 export type Order = {
     id: string,

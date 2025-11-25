@@ -2,12 +2,15 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import {
   type ProductSchema,
+  type ProductsMetaInfosQuerySchema,
   type ProductsQuerySchema,
   type ReviewSchema,
   type UpdateProductSchema,
 } from "@monorepo/shared";
 import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
+  convertAndFormatPriceInCents,
+  getBaseCurrency,
   transformAndFormatProductPrice,
   turnPriceToPriceInCents,
 } from "../lib/currencyHandlers.js";
@@ -36,10 +39,11 @@ import {
 } from "../config/prismaHelpers.js";
 
 export async function getAllProducts(
-  req: Request<{}, {}, {}, ProductsQuerySchema>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
+
   const role = req.user?.role;
   const {
     search,
@@ -51,10 +55,11 @@ export async function getAllProducts(
     page,
     limit,
     sale,
-  } = req.query;
+  } = req.validatedQuery as ProductsQuerySchema;
+
 
   const currency = req.currency!
-  
+
   try {
     console.log(
       chalk.yellow(
@@ -91,11 +96,9 @@ export async function getAllProducts(
     );
 
     //format price from cent to .niceprice
-    const baseCurrency = products[0]?.currency ?? "USD";
-
     await Promise.all(
       products.map((product) =>
-        transformAndFormatProductPrice(product, baseCurrency, currency)
+        transformAndFormatProductPrice(product, product.currency, currency)
       )
     );
 
@@ -103,6 +106,78 @@ export async function getAllProducts(
     return res.status(200).json(products);
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch products:`, err));
+    next(err);
+  }
+}
+
+export async function getProductsMetaInfos(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const currency = req.currency!;
+  const { category, search, minPrice, maxPrice, sale } =
+    req.validatedQuery as ProductsMetaInfosQuerySchema;
+
+  try {
+    console.log(
+      chalk.yellow(`${getTimestamp()} Fetching products meta info...`)
+    );
+
+    const filters: any = {};
+
+    if (category) {
+      filters.category = { name: category };
+    }
+
+    if (search) {
+      filters.name = {
+        contains: search,
+        mode: "insensitive",
+      };
+    }
+
+    if (minPrice || maxPrice) {
+      filters.price = {};
+      if (minPrice) filters.price.gte = minPrice;
+      if (maxPrice) filters.price.lte = maxPrice;
+    }
+
+        if (sale !== undefined) {
+          if (sale) filters.sale_price = { not: null };
+          else filters.sale_price = null;
+        }
+
+    const [meta, baseCurrency] = await Promise.all([prisma.product.aggregate({
+      where: filters,
+      _min: { price: true },
+      _max: { price: true },
+      _count: true,
+    }), getBaseCurrency()])
+    
+    // Convert meta prices
+    const minPriceConverted = await convertAndFormatPriceInCents(
+      meta._min.price ?? 0,
+      baseCurrency, 
+      currency
+    );
+
+    const maxPriceConverted = await convertAndFormatPriceInCents(
+      meta._max.price ?? 0,
+      baseCurrency,
+      currency
+    );
+
+    return res.status(200).json({
+      minPrice: minPriceConverted,
+      maxPrice: maxPriceConverted,
+      totalItems: meta._count,
+      currency
+    });
+  } catch (err) {
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to fetch meta infos:`, err)
+    );
     next(err);
   }
 }
@@ -179,12 +254,15 @@ export async function createProduct(
       });
     });
 
+
+    const redisKey = `CATEGORIES_REDIS_KEY:${newProduct.category}`;
     //clear all relevant caches
     if (newProduct.is_public) {
     await Promise.all([
       redis.del(NEW_PRODUCTS_REDIS_KEY),
       redis.del(SALE_PRODUCTS_REDIS_KEY),
       redis.del(CATEGORIES_REDIS_KEY),
+      redis.del(redisKey),
     ]);  
     }
     
@@ -384,11 +462,13 @@ export async function updateProductByProductId(
     }
 
     //redis invalidation
+    const redisKey = `CATEGORIES_REDIS_KEY:${updatedProduct.category}`;
     if (is_public) {
         await Promise.all([
           redis.del(NEW_PRODUCTS_REDIS_KEY),
           redis.del(SALE_PRODUCTS_REDIS_KEY),
           redis.del(CATEGORIES_REDIS_KEY),
+          redis.del(redisKey)
         ]);
     }
 

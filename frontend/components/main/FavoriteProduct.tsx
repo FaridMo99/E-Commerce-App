@@ -1,56 +1,61 @@
 "use client"
-import { addFavoriteItemByProductId, deleteFavoriteItemByProductId } from "@/lib/queries/client/usersQueries"
+import { addFavoriteItemByProductId, deleteFavoriteItemByProductId, getUserFavoriteItems } from "@/lib/queries/client/usersQueries"
 import useAuth from "@/stores/authStore"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Bookmark } from "lucide-react"
-import { useState } from "react"
 import { toast } from "sonner"
+
 
 type FavoriteProductProps = {
     productId: string
-    isFavorite: boolean
-    setIsFavorite:React.Dispatch<boolean>
 }
 
-function FavoriteProduct({ productId, isFavorite, setIsFavorite }: FavoriteProductProps) {
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+function FavoriteProduct({ productId }: FavoriteProductProps) {
     const accessToken = useAuth((state) => state.accessToken);
+    const queryClient = useQueryClient()
 
-    if (!accessToken) return null;
-
-    async function buttonHandler() {
-        if (!accessToken) return null;
-
-        try {
-            setIsLoading(true) 
-
-            if (!isFavorite) {
-             await addFavoriteItemByProductId(productId,accessToken); 
-            }
-            setIsFavorite(false)
+    const { data: favoriteItems, isLoading, isError } = useQuery({
+        queryKey: ["get favorite products"],
+        queryFn: () => {
+            if(accessToken) return getUserFavoriteItems(accessToken)
+        },
+        enabled:!!accessToken
+    })
+    
+    const isFavorite = favoriteItems?.some((item) => item.id === productId);
+    
+    const { mutate, isPending } = useMutation({
+      mutationKey: ["favorising product", productId],
+      mutationFn: async () => {
             if (isFavorite) {
-                await deleteFavoriteItemByProductId(productId, accessToken);
-                setIsFavorite(true)
+                await deleteFavoriteItemByProductId(productId, accessToken!);
+            } else {
+                await addFavoriteItemByProductId(productId, accessToken!);
             }
+        },
+      onSuccess: () => {
+        toast.success("Successful");
+        queryClient.invalidateQueries({ queryKey: ["get favorite products"] });
+      },
+      onError: () => {
+        toast.error("Something went wrong");
+        },
+    });
 
-        } catch (err:Error) {
-            toast.error(err.message)
-        }
-        finally {
-            setIsLoading(false)
-        }
-    }
+    if (!accessToken || isLoading || isError) return null;
+
   return (
       <button
           type="button"
-          disabled={isLoading}
+          disabled={isPending || isLoading}
           onClick={(e) => {
               e.preventDefault()
-              buttonHandler()
+              mutate()
           }}
           aria-label="Add product to favorites"
-          className="z-50"
+          className="z-50 self-end"
       >
-          <Bookmark className={`${isFavorite ?  "fill-current" : ""} text-backgroundBright hover:scale-125 hover:cursor-pointer`} />
+          <Bookmark className={`${isFavorite ?  "fill-current" : ""} text-foreground hover:scale-125 hover:cursor-pointer`} />
     </button>
   )
 }

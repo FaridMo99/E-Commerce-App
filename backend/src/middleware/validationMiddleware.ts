@@ -71,21 +71,24 @@ export function validateSearchQueries<T>(schema: ZodType<T>) {
     res: Response,
     next: NextFunction
   ) {
-    console.log(req.query)
+    console.log(1,req.query)
     const validated = schema.safeParse(req.query);
 
     if (!validated.success) {
       console.log(
-        chalk.red(`${getTimestamp()} Query validation failed:`, req.query)
+        chalk.red(
+          `${getTimestamp()} Query validation failed: ${JSON.stringify(req.query)}`
+        )
       );
-      return res.status(400).json({ message: validated.error.message });
+      return res.status(400).json({message:validated.error.message})
     }
 
     console.log(chalk.green(`${getTimestamp()} Query validation succeeded`));
 
-    // Express makes issues so unavoidable
-    req.query = validated.data as any;
 
+    // Express makes issues so unavoidable
+    req.validatedQuery = validated.data
+    
     next();
   };
 } 

@@ -1,37 +1,69 @@
-//this is the error handling for react query, maybe nextjs expects it differently
 "use server"
-import { ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
+import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthProductReview, HomeProducts, Product, ProductReview } from "@/types/types";
+import { AccessToken, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 
 export async function getProducts(
-  queryParam?: ProductsQuerySchema,
+  queryParams?: ProductsQuerySchema,
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders()
 
   const params = new URLSearchParams();
 
-  if (queryParam) {
-    if (queryParam.page !== undefined)
-      params.set("page", String(queryParam.page));
-    if (queryParam.limit !== undefined)
-      params.set("limit", String(queryParam.limit));
-    if (queryParam.search) params.set("search", queryParam.search);
-    if (queryParam.category) params.set("category", queryParam.category);
-    if (queryParam.minPrice !== undefined)
-      params.set("minPrice", String(queryParam.minPrice));
-    if (queryParam.maxPrice !== undefined)
-      params.set("maxPrice", String(queryParam.maxPrice));
-    if (queryParam.sale !== undefined)
-      params.set("sale", String(queryParam.sale));
-    if (queryParam.sortBy) params.set("sortBy", queryParam.sortBy);
-    if (queryParam.sortOrder) params.set("sortOrder", queryParam.sortOrder);
+  if (queryParams) {
+    if (queryParams.page !== undefined)
+      params.set("page", String(queryParams.page));
+    if (queryParams.limit !== undefined)
+      params.set("limit", String(queryParams.limit));
+    if (queryParams.search) params.set("search", queryParams.search);
+    if (queryParams.category) params.set("category", queryParams.category);
+    if (queryParams.minPrice !== undefined)
+      params.set("minPrice", String(queryParams.minPrice));
+    if (queryParams.maxPrice !== undefined)
+      params.set("maxPrice", String(queryParams.maxPrice));
+    if (queryParams.sale !== undefined)
+      params.set("sale", String(queryParams.sale));
+    if (queryParams.sortBy) params.set("sortBy", queryParams.sortBy);
+    if (queryParams.sortOrder) params.set("sortOrder", queryParams.sortOrder);
   }
 
   const url = `${apiBaseUrl}/products?${params.toString()}`;
+
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      ...additionalHeaders,
+    },
+  });
+  return await handleResponse(res);
+}
+
+export async function getProductsMetaInfos(
+  queryParams?: ProductsMetaInfosQuerySchema
+): Promise<ProductMetaInfos> {
+  const additionalHeaders = await getAllHeaders();
+
+  const params = new URLSearchParams();
+
+  if (queryParams) {
+    if (queryParams.page !== undefined)
+      params.set("page", String(queryParams.page));
+    if (queryParams.limit !== undefined)
+      params.set("limit", String(queryParams.limit));
+    if (queryParams.search) params.set("search", queryParams.search);
+    if (queryParams.category) params.set("category", queryParams.category);
+    if (queryParams.minPrice !== undefined)
+      params.set("minPrice", String(queryParams.minPrice));
+    if (queryParams.maxPrice !== undefined)
+      params.set("maxPrice", String(queryParams.maxPrice));
+    if (queryParams.sale !== undefined)
+      params.set("sale", String(queryParams.sale));
+  }
+
+  const url = `${apiBaseUrl}/products/meta?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",

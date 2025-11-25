@@ -15,15 +15,13 @@ const ordersRouter = Router();
 
 ordersRouter.get(
   "/",
-  isAuthenticated,
   isAdmin,
   validateTimeframeQuery,
   getOrders,
 );
-ordersRouter.post("/", isAuthenticated, hasCsrfToken, makeOrder);
+ordersRouter.post("/", hasCsrfToken, makeOrder);
 ordersRouter.post(
   "/:orderId/cancel",
-  isAuthenticated,
   hasCsrfToken,
   cancelOrder,
 );

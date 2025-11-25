@@ -13,6 +13,7 @@ import Link from "next/link";
 import { Product } from "@/types/types";
 import { CameraIcon } from "lucide-react";
 import ProductCardTags from "./ProductCardTags";
+import RatingPreview from "./Rating";
 
 type ProductCardProps = { product: Product };
 
@@ -44,14 +45,14 @@ function ProductCard({ product }: ProductCardProps) {
         </CardContent>
         <CardHeader className="h-10">
           <div className="flex items-center justify-between">
-            <CardTitle>{product.name}</CardTitle>
+            <CardTitle >{product.name}</CardTitle>
           </div>
           <CardDescription className="break-after-all wrap-break-word truncate">
             {product.description}
           </CardDescription>
         </CardHeader>
         <CardFooter className="h-10">
-          Price:{product.price}
+          Price:{product.sale_price ? product.sale_price : product.price}
           <CurrencySymbol currency={product.currency} />
         </CardFooter>
       </Card>

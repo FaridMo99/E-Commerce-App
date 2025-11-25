@@ -1,4 +1,5 @@
 import CurrencySymbol from "@/components/main/CurrencySymbol";
+import RatingPreview from "@/components/main/Rating";
 import { Product } from "@/types/types";
 import Link from "next/link";
 
@@ -18,6 +19,10 @@ function ProductView({ product }: ProductViewProps) {
       <div className="h-full w-2/3 flex px-2 py-4 justify-evenly">
         <h2 className="text-lg font-bold">{product.name}</h2>
         <p>{product.description}</p>
+        <RatingPreview
+          rating={product.averageRating}
+          reviewsAmount={product._count.reviews}
+        />
       </div>
       <p className="flex items-center">
         {product.sale_price ?? product.price}

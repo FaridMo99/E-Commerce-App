@@ -20,6 +20,7 @@ import {
   productWhere,
   userSelect,
 } from "../config/prismaHelpers.js";
+import redis from "../services/redis.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -95,6 +96,8 @@ export async function updateUserByUserId(
       ...(birthdate && { birthdate }),
       ...(address && { address }),
       ...(password && { password: await bcrypt.hash(password, 10) }),
+      ...(currency && { currency }),
+      ...(countryCode && { countryCode })
     };
 
     const user = await prisma.user.update({
@@ -108,6 +111,7 @@ export async function updateUserByUserId(
     console.log(
       chalk.green(`${getTimestamp()} User ${id} updated successfully`)
     );
+
     return res.status(200).json(user);
   } catch (err) {
     console.log(
@@ -147,12 +151,12 @@ export async function deleteUserByUserId(
 
 // Get all orders by user
 export async function getAllOrdersByUser(
-  req: Request<{}, {}, {}, OrdersQuerySchema>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
   const userId = req.user?.id!
-  const { sort, order, page, limit, status } = req.query;
+  const { sort, order, page, limit, status } = req.validatedQuery as OrdersQuerySchema;
 
   if (!userId) {
     console.log(chalk.red(`${getTimestamp()} User not authenticated`));

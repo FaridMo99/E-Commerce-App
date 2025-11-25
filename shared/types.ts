@@ -6,6 +6,7 @@ import {
   loginSchema,
   ordersQuerySchema,
   productSchema,
+  productsMetaInfosQuerySchema,
   productsQuerySchema,
   reviewSchema,
   reviewsQuerySchema,
@@ -21,6 +22,7 @@ export type SignupSchema = z.infer<typeof signupSchema>;
 export type UpdateUserSchema = z.infer<typeof updateUserSchema>;
 export type OrdersQuerySchema = z.infer<typeof ordersQuerySchema>;
 export type ProductsQuerySchema = z.infer<typeof productsQuerySchema>;
+export type ProductsMetaInfosQuerySchema = z.infer<typeof productsMetaInfosQuerySchema>
 export type ProductSchema = z.infer<typeof productSchema>;
 export type UpdateProductSchema = z.infer<typeof updateProductSchema>;
 export type TimeframeQuerySchema = z.infer<typeof timeframeQuerySchema>;
