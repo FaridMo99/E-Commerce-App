@@ -16,8 +16,6 @@ import {
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
-//expired accesstoken than call refresh-token route
-//need auto refresh so doesnt get logged out
 
 export async function getUser(accessToken: AccessToken): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
@@ -60,6 +58,7 @@ export async function deleteUser(accessToken: AccessToken): Promise<void> {
   return await handleResponse(res);
 }
 
+//get more info for order summary
 export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
 
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
@@ -118,6 +117,7 @@ export async function removeItemFromCart(
   return await handleResponse(res);
 }
 
+//unused yet
 export async function changeItemQuantitiy(
   itemQuantity: ItemQuantitySchema,
   itemId: string,

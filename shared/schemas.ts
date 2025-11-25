@@ -67,16 +67,14 @@ export const ordersQuerySchema = z.object({
     .refine((val) => val > 0 && val % 5 === 0, {
       message: "Limit must be a positive number divisible by 5",
     })
-    .optional()
-    .default(10),
+    .optional(),
   page: z
     .preprocess(
       (val) => (typeof val === "string" ? Number(val) : val),
       z.number()
     )
     .refine((val) => val > 0, { message: "Page must be a positive number" })
-    .optional()
-    .default(1),
+    .optional(),
   status: z
     .enum(["ORDERED", "DELIVERING", "DELIVERED", "PENDING", "CANCELLED"])
     .optional(),

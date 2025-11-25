@@ -178,8 +178,8 @@ export async function getAllOrdersByUser(
       orderBy: {
         [sort]: order,
       },
-      skip: (page - 1) * limit,
-      take: page,
+      ...(limit && page && { skip: (page - 1) * limit}),
+      ...(page && {take: page}),
     });
 
     orders.forEach(

@@ -24,7 +24,7 @@ async function ReviewsSection({ productId }: { productId: string }) {
         </h2>
         {reviews.length > 0 && <ReviewButton buttonText={<Plus size={40}/>} />}
       </div>
-      {reviews.length === 0 && <ReviewButton buttonText="Leave Review here" />}
+      {reviews.length === 0 && <ReviewButton emptyReviews buttonText="Leave Review here" />}
        <ReviewsCarousel reviews={reviews}/> 
     </section>
   );
