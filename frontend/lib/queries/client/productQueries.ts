@@ -12,10 +12,8 @@ export async function getProducts(
   const params = new URLSearchParams();
 
   if (queryParam) {
-    if (queryParam.page !== undefined)
-      params.set("page", String(queryParam.page));
-    if (queryParam.limit !== undefined)
-      params.set("limit", String(queryParam.limit));
+      params.set("page", String(queryParam.page ?? 1));
+      params.set("limit", String(queryParam.limit ?? 10));
     if (queryParam.search) params.set("search", queryParam.search);
     if (queryParam.category) params.set("category", queryParam.category);
     if (queryParam.minPrice !== undefined)

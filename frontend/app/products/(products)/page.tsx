@@ -11,7 +11,7 @@ async function page({ searchParams }:SearchParamsProps) {
   const products = await getProducts(params);
 
   return (
-    <main className="ml-[10vw]">
+    <main className="ml-[5vw]">
       {products.length > 0 ? (
         products.map((product) => (
           <ProductView key={product.id} product={product} />

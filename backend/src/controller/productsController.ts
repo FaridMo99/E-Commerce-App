@@ -11,6 +11,7 @@ import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
   convertAndFormatPriceInCents,
   getBaseCurrency,
+  getExchangeRates,
   transformAndFormatProductPrice,
   turnPriceToPriceInCents,
 } from "../lib/currencyHandlers.js";
@@ -43,7 +44,6 @@ export async function getAllProducts(
   res: Response,
   next: NextFunction
 ) {
-
   const role = req.user?.role;
   const {
     search,
@@ -57,8 +57,62 @@ export async function getAllProducts(
     sale,
   } = req.validatedQuery as ProductsQuerySchema;
 
+  const currency = req.currency!;
 
-  const currency = req.currency!
+  //convert currency to main currency
+    let convertedMinPrice: number | undefined = minPrice;
+    let convertedMaxPrice: number | undefined = maxPrice;
+
+  if ((minPrice !== undefined || maxPrice !== undefined) && currency !== undefined) {
+    const baseCurrency = await getBaseCurrency(); 
+
+    if (currency !== baseCurrency) {
+      if (minPrice !== undefined) {
+        convertedMinPrice = await convertAndFormatPriceInCents(
+          minPrice,
+          baseCurrency,
+          currency
+        );
+      }
+      if (maxPrice !== undefined) {
+        convertedMaxPrice = await convertAndFormatPriceInCents(
+          maxPrice,
+          baseCurrency,
+          currency
+        );
+      }
+    }
+  }
+
+    const priceFilter =
+      convertedMinPrice !== undefined || convertedMaxPrice !== undefined
+        ? {
+            OR: [
+              {
+                price: {
+                  ...(convertedMinPrice !== undefined && {
+                    gte: convertedMinPrice,
+                  }),
+                  ...(convertedMaxPrice !== undefined && {
+                    lte: convertedMaxPrice,
+                  }),
+                },
+              },
+              {
+                sale_price: {
+                  ...(convertedMinPrice !== undefined && {
+                    gte: convertedMinPrice,
+                  }),
+                  ...(convertedMaxPrice !== undefined && {
+                    lte: convertedMaxPrice,
+                  }),
+                },
+              },
+            ],
+          }
+        : {};
+
+
 
   try {
     console.log(
@@ -74,14 +128,7 @@ export async function getAllProducts(
         ...(search && { name: { startsWith: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
         ...(sale && { sale_price: { not: null } }),
-        ...(minPrice || maxPrice
-          ? {
-              price: {
-                ...(minPrice !== undefined && { gte: minPrice }),
-                ...(maxPrice !== undefined && { lte: maxPrice }),
-              },
-            }
-          : {}),
+        ...priceFilter
       },
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
       ...(limit && { take: limit }),
@@ -118,7 +165,7 @@ export async function getProductsMetaInfos(
   const currency = req.currency!;
   const { category, search, minPrice, maxPrice, sale } =
     req.validatedQuery as ProductsMetaInfosQuerySchema;
-
+    
   try {
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching products meta info...`)

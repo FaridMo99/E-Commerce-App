@@ -3,19 +3,24 @@ import { Rating, RatingButton } from '../ui/shadcn-io/rating'
 type RatingPreviewProps = {
     rating: number,
   reviewsAmount?: number
+  size?:number
 }
 
-function RatingPreview({ rating, reviewsAmount }: RatingPreviewProps) {
+function RatingPreview({ rating, reviewsAmount, size }: RatingPreviewProps) {
   return (
     <div className="flex flex-col justify-center items-center">
       <Rating value={rating} readOnly>
         {Array.from({ length: 5 }).map((_, index) => (
-          <RatingButton className="text-yellow-500" key={index} />
+          <RatingButton
+            {...(size ? { size } : {})}
+            className="text-yellow-500"
+            key={index}
+          />
         ))}
       </Rating>
       {reviewsAmount && (
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-white">
             Reviews:{reviewsAmount}
           </p>
         </div>

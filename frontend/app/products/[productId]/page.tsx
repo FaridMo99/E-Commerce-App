@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 
-//placeholder when theres no image, do that for all components that expect images
+//should have marker for available, sold out, sale
 async function page({ params }:{params:{productId:string}}) {
   const { productId } = await params;
   let product:Product

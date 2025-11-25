@@ -144,7 +144,8 @@ export async function transformAndFormatProductPrice(
 export async function convertAndFormatPriceInCents(
   amountInCents: number,
   baseCurrency: CurrencyISO,
-  wantedCurrency: CurrencyISO
+  wantedCurrency: CurrencyISO,
+  format = true
 ): Promise<number> {
   if (!amountInCents) return 0;
 
@@ -173,7 +174,11 @@ export async function convertAndFormatPriceInCents(
   amountInCents = roundPriceUpInCents(amountInCents);
 
   // 3. Format for client
-  return formatPriceForClient(amountInCents);
+  if (format) {
+   return formatPriceForClient(amountInCents); 
+  }
+
+  return amountInCents
 }
 
 export async function getBaseCurrency():Promise<CurrencyISO> {

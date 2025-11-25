@@ -8,6 +8,7 @@ import { getProductsMetaInfos } from "@/lib/queries/client/productQueries";
 import { Loader2 } from "lucide-react";
 import SidebarSelect, { SingleSelectItem } from "./SidebarSelect";
 import PriceSlider from "./PriceSlider";
+import { useEffect, useState } from "react";
 
 const sortObj: SingleSelectItem[] = [{
     value: "name|asc",
@@ -46,13 +47,12 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const maxPrice = searchParams.get("maxPrice");
   const sale = searchParams.get("sale");
 
+  //minprice and maxprice also needed for pagiantion but will break sidebar prefill for prices
   const { data, isLoading, isError } = useQuery({
     queryKey: ["get metadata for product", searchParams.toString()],
     queryFn: () =>
       getProductsMetaInfos({
         category: category || undefined,
-        minPrice: minPrice ? parseInt(minPrice) : undefined,
-        maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
         sale: sale === "true" ? true : undefined,
       }),
   });
@@ -61,6 +61,9 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const sortBy = searchParams.get("sortBy");
   const sortOrder = searchParams.get("sortOrder");
 
+  //price filter
+  const [priceLimits, setPriceLimits] = useState<[number, number]>([0,0])
+  
   function handleCategoryChange(selectedCategory: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", selectedCategory);
@@ -85,13 +88,25 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
     router.push(`?${params.toString()}`);
   }
 
-  function handlePriceChange(newValues: [number, number]) {
+  function handlePriceCommit(values: [number, number]) {
     const params = new URLSearchParams(searchParams.toString());
-    const [min, max] = newValues;
-    params.set("minPrice", min.toString());
-    params.set("maxPrice", max.toString());
+    params.set("minPrice", values[0].toString());
+    params.set("maxPrice", values[1].toString());
     router.push(`?${params.toString()}`);
   }
+
+  function handlePriceDrag(values: [number, number]) {
+    setPriceLimits(values);
+  }
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      const minFromUrl = minPrice ? Number(minPrice) : data.minPrice;
+      const maxFromUrl = maxPrice ? Number(maxPrice) : data.maxPrice;
+
+      setPriceLimits([minFromUrl, maxFromUrl]);
+    }
+  }, [isLoading, data, minPrice, maxPrice]);
 
   return (
     <aside className="w-1/5 h-[50vh] sticky top-[20vh] bg-backgroundBright rounded-xl p-6 flex flex-col justify-around font-bold text-white">
@@ -110,13 +125,25 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
         value={category ?? ""}
         placeholder="Select a Category"
         label="Categories"
-        selectItems={categories.map(category=>({title:category.name,value:category.name}))}
+        selectItems={categories.map((category) => ({
+          title: category.name,
+          value: category.name,
+        }))}
       />
       {/* max and min price slider*/}
       {isLoading && (
         <Loader2 className="animate-spin self-center text-foreground" />
       )}
-      {!isLoading && !isError && data && <PriceSlider currency={data?.currency} min={data?.minPrice} max={data?.maxPrice} valueChangeHandler={handlePriceChange} />}
+      {!isLoading && !isError && data && (
+        <PriceSlider
+          currency={data.currency}
+          min={data.minPrice}
+          max={data.maxPrice}
+          value={priceLimits}
+          onDrag={handlePriceDrag}
+          onCommit={handlePriceCommit}
+        />
+      )}
       {/*sale box*/}
       <div className="flex w-full items-center ">
         <Label htmlFor="saleBox" className="mr-2 text-md">

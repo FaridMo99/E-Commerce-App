@@ -14,16 +14,14 @@ export async function getProducts(
   const params = new URLSearchParams();
 
   if (queryParams) {
-    if (queryParams.page !== undefined)
-      params.set("page", String(queryParams.page));
-    if (queryParams.limit !== undefined)
-      params.set("limit", String(queryParams.limit));
+      params.set("page", String(queryParams.page ?? 1));
+      params.set("limit", String(queryParams.limit ?? 10));
     if (queryParams.search) params.set("search", queryParams.search);
     if (queryParams.category) params.set("category", queryParams.category);
     if (queryParams.minPrice !== undefined)
-      params.set("minPrice", String(queryParams.minPrice));
+      params.set("minPrice", String(queryParams.minPrice * 100));
     if (queryParams.maxPrice !== undefined)
-      params.set("maxPrice", String(queryParams.maxPrice));
+      params.set("maxPrice", String(queryParams.maxPrice * 100));
     if (queryParams.sale !== undefined)
       params.set("sale", String(queryParams.sale));
     if (queryParams.sortBy) params.set("sortBy", queryParams.sortBy);
@@ -56,9 +54,9 @@ export async function getProductsMetaInfos(
     if (queryParams.search) params.set("search", queryParams.search);
     if (queryParams.category) params.set("category", queryParams.category);
     if (queryParams.minPrice !== undefined)
-      params.set("minPrice", String(queryParams.minPrice));
+      params.set("minPrice", String(queryParams.minPrice * 100));
     if (queryParams.maxPrice !== undefined)
-      params.set("maxPrice", String(queryParams.maxPrice));
+      params.set("maxPrice", String(queryParams.maxPrice * 100));
     if (queryParams.sale !== undefined)
       params.set("sale", String(queryParams.sale));
   }

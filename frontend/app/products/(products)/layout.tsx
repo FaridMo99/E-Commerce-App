@@ -1,9 +1,10 @@
 import "server-only";
 import { getAllCategories } from "@/lib/queries/server/categoryQueries";
 import Sidebar from "./components/Sidebar";
+import { ChildrenProps } from "@/types/types";
 import ProductPagination from "./components/ProductPagination";
 
-async function layout({ children }: { children: React.ReactNode }) {
+async function layout({ children }: ChildrenProps) {
   const categories = await getAllCategories();
 
   return (
@@ -12,7 +13,7 @@ async function layout({ children }: { children: React.ReactNode }) {
         <Sidebar categories={categories} />
         {children}
       </section>
-      <ProductPagination />
+      <ProductPagination/>
     </main>
   );
 }
