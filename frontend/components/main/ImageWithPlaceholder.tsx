@@ -12,7 +12,7 @@ function ImageWithPlaceholder({src, width, height}:ImageWithPlaceholderProps) {
 
     return (
       <CardContent className={`${width} ${height} flex justify-center items-center bg-white text-black`}>
-        {src ? <img src={src} /> : <CameraIcon />}
+        {src ? <img src={src} alt="product image" /> : <CameraIcon />}
       </CardContent>
     );
 }

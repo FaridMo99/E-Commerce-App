@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import { sortOrderSchema } from "@monorepo/shared";
-import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
+import { transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import chalk from "chalk";
-import { getTimestamp } from "../lib/utils.js";
+import { getDailyRevenue, getTimestamp, getTotalRevenue } from "../lib/utils.js";
 import { productSelect } from "../config/prismaHelpers.js";
+import { BASE_CURRENCY_KEY } from "../config/constants.js";
 
 
 export async function getRevenue(
@@ -20,27 +21,35 @@ export async function getRevenue(
       )
     );
 
-    const revenue = await prisma.order.aggregate({
-      _sum: { total_amount: true },
-      where: {
-        ordered_at: {
-          ...(from && { gte: from }),
-          lte: to,
+    const [orders, currency] = await Promise.all([
+      prisma.order.findMany({
+        where: {
+          ordered_at: {
+            ...(from && { gte: from }),
+            lte: to,
+          },
+          payment: { status: "COMPLETED" },
         },
-        payment: { status: "COMPLETED" },
-      },
-    });
+        select: {
+          total_amount: true,
+          ordered_at: true,
+        },
+        orderBy: {
+          ordered_at: "asc",
+        },
+      }),
+      prisma.settings.findUnique({ where: { key: BASE_CURRENCY_KEY } }),
+    ]);
 
-    revenue._sum.total_amount = formatPriceForClient(
-      revenue._sum.total_amount ?? 0
-    );
+    console.log(chalk.green(`${getTimestamp()} Revenue fetched successfully`));
 
-    console.log(
-      chalk.green(
-        `${getTimestamp()} Revenue fetched successfully: ${revenue._sum.total_amount}`
-      )
-    );
-    return res.status(200).json({revenue:revenue._sum.total_amount});
+    const dailyRevenue = getDailyRevenue(orders);
+    const totalRevenue = getTotalRevenue(dailyRevenue);
+    const totalOrders = orders.length;
+
+    return res
+      .status(200)
+      .json({ dailyRevenue, totalRevenue, currency: currency?.value, totalOrders});
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch revenue:`, err));
     next(err);
@@ -54,7 +63,6 @@ export async function getTopsellers(
 ) {
   const { from, to } = req.timeframe!;
   const { sortOrder = "desc", limit = 10 } = req.query;
-  const currency = req.currency!
 
   
   try {
@@ -95,18 +103,11 @@ export async function getTopsellers(
         id: { in: topSellers.map((s) => s.product_id) },
       },
       select: {
-        ...productSelect,
+        name: true,
+        imageUrls: true, 
         id:true
       },
     });
-
-    
-    const baseCurrency = productsWithInfo[0]?.currency ?? "USD";
-    await Promise.all(
-      productsWithInfo.map((product) =>
-        transformAndFormatProductPrice(product, baseCurrency, currency)
-      )
-    );
 
     // Map products to include total sold and formatted prices
     const response = topSellers.map((s) => {

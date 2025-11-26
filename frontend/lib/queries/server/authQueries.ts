@@ -1,6 +1,3 @@
-//expired accesstoken than call refresh-token route
-//need auto refresh so doesnt get logged out
-
 "use server";
 import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
@@ -103,34 +100,6 @@ export async function sendNewVerificationLink(
     body: JSON.stringify(email),
   });
   await handleResponse<void>(res);
-}
-
-export async function changePasswordAfterLogin(
-  passwords: {
-    oldPassword: string;
-    newPassword: string;
-  },
-  accessToken: AccessToken
-): Promise<User> {
-  const [additionalHeaders, csrfHeader] = await Promise.all([
-    getAllHeaders(),
-    getCsrfHeader(),
-  ]);
-  const safeHeader = stripContentLengthHeader(additionalHeaders);
-
-  const { oldPassword, newPassword } = passwords;
-  const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...csrfHeader,
-      Authorization: `Bearer ${accessToken}`,
-      ...safeHeader,
-    },
-    body: JSON.stringify({ oldPassword, newPassword }),
-    credentials: "include",
-  });
-  return await handleResponse(res);
 }
 
 export async function forgotPasswordSendEmail(

@@ -1,5 +1,5 @@
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthResponse, User } from "@/types/types";
+import { AccessToken, AuthResponse } from "@/types/types";
 import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { getCsrfHeaderClientSide } from "../../helpers";
@@ -78,26 +78,6 @@ export async function sendNewVerificationLink(
     body: JSON.stringify(email),
   });
   await handleResponse<void>(res);
-}
-
-export async function changePasswordAfterLogin(
-  passwords: {
-    oldPassword: string;
-    newPassword: string;
-  },
-  accessToken: AccessToken
-): Promise<User> {
-  const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getCsrfHeaderClientSide(),
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(passwords),
-    credentials: "include",
-  });
-  return await handleResponse(res);
 }
 
 export async function getNewRefreshToken(): Promise<AuthResponse> {

@@ -21,6 +21,7 @@ import {
 } from "./schemas.ts";
 
 import type {
+  DailyRevenue,
   ProductsMetaInfosQuerySchema,
   LoginSchema,
   SignupSchema,
@@ -80,5 +81,6 @@ export type {
   AddCartItemSchema,
   ItemQuantitySchema,
   SettingsSchema,
-  ProductsMetaInfosQuerySchema
+  ProductsMetaInfosQuerySchema,
+  DailyRevenue
 };

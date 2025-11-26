@@ -1,3 +1,4 @@
+"use client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,19 +7,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { LucideIcon } from "lucide-react";
+import useAuth from "@/stores/authStore";
+import { Route } from "@/types/types";
 import {
   User,
   ShoppingCart,
   PackageSearch,
   MessageSquare,
   Bookmark,
+  UserStar,
 } from "lucide-react";
 import Link from "next/link";
 
-type UserRoute = { link: string; text: string; icon: LucideIcon };
 
-const routes: UserRoute[] = [
+const routes: Route[] = [
+  { link: "/user/dashboard", text: "Admin", icon: UserStar },
   { link: "/user", text: "My Profile", icon: User },
   { link: "/user/cart", text: "Shopping Cart", icon: ShoppingCart },
   { link: "/user/orders", text: "Orders", icon: PackageSearch },
@@ -26,9 +29,15 @@ const routes: UserRoute[] = [
   { link: "/user/reviews", text: "Product Reviews", icon: MessageSquare },
 ];
 
-//make the links marked when on the corresponding route
-//maybe add admin routes or give admin seperate sidebar
+
 export default function UserDropdown() {
+  const role = useAuth(state => state.user?.role)
+  
+
+    const filteredRoutes = routes.filter((route) =>
+      route.text === "Admin" ? role === "ADMIN" : true
+    );
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,9 +50,11 @@ export default function UserDropdown() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-foreground text-white">
-        <DropdownMenuLabel className="flex justify-center items-center">User Infos</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex justify-center items-center">
+          User Infos
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {routes.map((route) => (
+        {filteredRoutes.map((route) => (
           <DropdownMenuItem key={route.link}>
             <Link
               href={route.link}

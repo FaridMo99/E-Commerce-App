@@ -15,7 +15,6 @@ import {
   AdminSetting,
   AdminTopseller,
   Order,
-  Product,
   ProductCategory,
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
@@ -48,7 +47,7 @@ export async function getRevenue(
 export async function getTopsellers(
   accessToken: AccessToken,
   timeframe?: TimeframeQuerySchema
-): Promise<AdminTopseller> {
+): Promise<AdminTopseller[]> {
   const params = new URLSearchParams();
 
   if (timeframe) {

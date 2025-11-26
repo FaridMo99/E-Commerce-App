@@ -33,7 +33,7 @@ function Searchlist({ products, isLoading }: SearchlistProps) {
               className="w-full flex justify-around items-center"
             >
               {product.imageUrls[0] ? (
-                <img src={product.imageUrls[0]} />
+                <img alt="product image" src={product.imageUrls[0]} />
               ) : (
                 <Camera />
               )}

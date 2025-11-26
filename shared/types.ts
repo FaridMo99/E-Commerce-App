@@ -26,9 +26,14 @@ export type ProductsMetaInfosQuerySchema = z.infer<typeof productsMetaInfosQuery
 export type ProductSchema = z.infer<typeof productSchema>;
 export type UpdateProductSchema = z.infer<typeof updateProductSchema>;
 export type TimeframeQuerySchema = z.infer<typeof timeframeQuerySchema>;
-export type ReviewSchema = z.infer<typeof reviewSchema>;
+export type UpdateUserSchemaReviewSchema = z.infer<typeof reviewSchema>;
 export type ReviewsQuerySchema = z.infer<typeof reviewsQuerySchema>;
 export type AddCartItemSchema = z.infer<typeof addCartItemSchema>;
 export type ItemQuantitySchema = z.infer<typeof itemQuantitySchema>;
 export type SettingsSchema = z.infer<typeof settingsSchema>;
 export type EmailSchema = z.infer<typeof emailSchema>;
+
+export type DailyRevenue = {
+  day: string;
+  revenue: number;
+};

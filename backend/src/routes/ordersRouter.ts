@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   hasCsrfToken,
   isAdmin,
-  isAuthenticated,
 } from "../middleware/authMiddleware.js";
 import { validateTimeframeQuery } from "../middleware/validationMiddleware.js";
 import {

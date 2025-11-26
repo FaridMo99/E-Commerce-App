@@ -1,7 +1,10 @@
 import { changePasswordSchema } from "@/schemas/schemas";
+import { DailyRevenue } from "@monorepo/shared";
+import { LucideIcon } from "lucide-react";
 import { ReactNode } from "react";
 import z from "zod";
 
+export type Route = { link: string; text: string; icon: LucideIcon };
 
 export type AccessToken = string;
 
@@ -123,8 +126,10 @@ export type AdminSetting = {
   updatedAt: Date;
 };
 
-export type AdminRevenue = {
-    revenue: number
+export type AdminRevenue = DailyRevenue[] & {
+  totalRevenue: number;
+  currency?: CurrencyISO;
+  totalOrders: number;
 };
 
 export type AdminNewUser = {
@@ -133,15 +138,11 @@ export type AdminNewUser = {
 export type AdminTopseller = {
     product: {
         id: string;
-        currency: CurrencyISO;
         name: string;
-        price: number;
-        sale_price: number | null;
+        imageUrls:string[]
     };
     totalSold: number;
-    price: number;
-    sale_price: number | null;
-}[];
+}
 
 
 //move all types from other files here

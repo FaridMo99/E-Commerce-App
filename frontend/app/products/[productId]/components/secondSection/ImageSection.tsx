@@ -18,7 +18,7 @@ function ImageSection({imageUrls}:{imageUrls:string[]}) {
   };
   return (
       <Slider className='px-8' {...settings}>
-        {imageUrls?.map((url) => <img key={url} src={url}/>)}
+        {imageUrls?.map((url) => <img key={url} alt="product image" src={url}/>)}
       </Slider>
   );
 }

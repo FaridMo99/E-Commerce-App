@@ -3,6 +3,7 @@ import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
+import Navbar from "./components/Navbar";
 
 //check how not to send this to client
 //cache the getnewrefreshtoken so when reloading in nested routes it doesnt trigger all layouts requesting refresh tokens
@@ -29,7 +30,10 @@ async function layout({ children }: ChildrenProps) {
   return (
     <>
       <AuthZustandSetter accessToken={accessToken} user={user} />
-      {children}
+      <div className="">
+        <Navbar />
+        {children}
+      </div>
     </>
   );
 }
