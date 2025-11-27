@@ -1,7 +1,7 @@
 "use client";
 
 import { Route } from "@/types/types";
-import { BookOpen, ChartColumn } from "lucide-react";
+import { Box, ChartColumn, Tag } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,12 +9,17 @@ const routes: Route[] = [
   {
     icon: ChartColumn,
     text: "Dashboard",
-    link: "/user/dashboard",
+    link: "/user/admin/dashboard",
   },
   {
-    icon: BookOpen,
-    text: "Product Actions",
-    link: "/user/actions",
+    icon: Tag,
+    text: "Products",
+    link: "/user/admin/products",
+  },
+  {
+    icon: Box,
+    text: "Products",
+    link: "/user/admin/orders",
   },
 ];
 

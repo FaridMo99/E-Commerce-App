@@ -18,6 +18,7 @@ function Searchbar() {
     queryKey: ["search for products:", debouncedSearch],
     queryFn: () => getProducts({ search: debouncedSearch }),
     enabled: debouncedSearch.length > 0,
+    placeholderData:pre=>pre
   });
 
   return (

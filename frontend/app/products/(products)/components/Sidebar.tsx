@@ -55,6 +55,7 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
         category: category || undefined,
         sale: sale === "true" ? true : undefined,
       }),
+    placeholderData:pre=>pre
   });
 
   //sorting

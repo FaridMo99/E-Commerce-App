@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Dialog
 } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,6 @@ import { updateUser } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema, UpdateUserSchema } from "@monorepo/shared";
-import { Dialog } from "@radix-ui/react-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";

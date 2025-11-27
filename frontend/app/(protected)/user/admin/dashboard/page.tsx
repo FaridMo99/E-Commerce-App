@@ -7,6 +7,7 @@ import TopsellersCarousel from "./components/TopsellersCarousel";
 import ChangeTimeframeDropdown from "./components/ChangeTimeframeDropdown";
 import { useSearchParams } from "next/navigation";
 import StatisticCard from "./components/StatisticCard";
+import { AdminNewUser, AdminRevenue, AdminTopseller } from "@/types/types";
 
 
 function Page() {
@@ -24,21 +25,24 @@ function Page() {
       {
         queryKey: ["get revenue", from, to],
         queryFn: () => getRevenue(accessToken!, { from, to }),
+        placeholderData: (pre:AdminRevenue | undefined) => pre,
       },
       {
         queryKey: ["get topsellers", from, to],
         queryFn: () => getTopsellers(accessToken!, { from, to }),
+        placeholderData: (pre:AdminTopseller[] | undefined) => pre,
       },
       {
         queryKey: ["get new users count", from, to],
         queryFn: () => getNewUsers(accessToken!, { from, to }),
+        placeholderData: (pre:AdminNewUser | undefined) => pre,
       },
     ],
   });
 
 
   return (
-    <main className="w-full h-full pl-[20vw] pr-[10vw] flex flex-col items-center justify-evenly">
+    <>
       <ChangeTimeframeDropdown />
       <div className="flex justify-between items-center w-full">
         <StatisticCard
@@ -66,7 +70,7 @@ function Page() {
       </div>
       <RevenueChart fetchResult={revenueResults} />
       <TopsellersCarousel fetchResult={topsellersResults} />
-    </main>
+    </>
   );
 }
 

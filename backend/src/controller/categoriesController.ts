@@ -117,8 +117,18 @@ export async function deleteCategory(
       chalk.yellow(`${getTimestamp()} Deleting category with ID: ${id}`)
     );
 
-    await prisma.category.delete({ where: { id } });
-    await redis.del(CATEGORIES_REDIS_KEY);
+    const productCount = await prisma.product.count({
+      where: {
+        category_id:id
+      },
+    });
+
+    if(productCount > 0) return res.status(400).json({message:`You still have ${productCount} products in that category, please move them first`})
+
+    await Promise.all([
+      prisma.category.delete({ where: { id } }),
+      redis.del(CATEGORIES_REDIS_KEY),
+    ]);
 
     console.log(
       chalk.green(`${getTimestamp()} Category deleted with ID: ${id}`)

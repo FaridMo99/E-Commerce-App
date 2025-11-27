@@ -18,6 +18,7 @@ function Page() {
   const { data: reviews, isLoading, isError, error } = useQuery({
     queryKey: ["get user product reviews"],
     queryFn: () => getUserReviews(accessToken!),
+    placeholderData:pre=>pre
   })
 
   if(isLoading) return <LoadingPage />

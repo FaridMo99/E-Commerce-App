@@ -30,7 +30,8 @@ const {
   error,
 } = useQuery({
   queryKey: ["get user orders", filters],
-  queryFn: () => getUserOrders(accessToken!, filters ),
+  queryFn: () => getUserOrders(accessToken!, filters),
+  placeholderData:pre=>pre
 });
 
   if (isLoading) return <LoadingPage />;

@@ -32,7 +32,7 @@ function TopsellersCarousel({ fetchResult }: TopsellerCarouselProps) {
 
 
   return (
-    <section className="m-8 self-start">
+    <section className="my-8 self-start">
       <h2 className="text-3xl font-extrabold mb-2">Topseller</h2>
       {fetchResult.data.length === 0 && <p>No Orders yet...</p>}
       <Slider {...settings}>

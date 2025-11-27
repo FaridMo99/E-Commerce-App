@@ -13,6 +13,7 @@ import {
 const categoriesRouter = Router();
 
 categoriesRouter.get("/", getAllProductCategories);
+
 categoriesRouter.post(
   "/",
   isAuthenticated,
@@ -20,6 +21,7 @@ categoriesRouter.post(
   hasCsrfToken,
   createCategory,
 );
+
 categoriesRouter.delete(
   "/:categoryId",
   isAuthenticated,

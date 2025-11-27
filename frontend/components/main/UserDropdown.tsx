@@ -21,7 +21,7 @@ import Link from "next/link";
 
 
 const routes: Route[] = [
-  { link: "/user/dashboard", text: "Admin", icon: UserStar },
+  { link: "/user/admin/dashboard", text: "Admin", icon: UserStar },
   { link: "/user", text: "My Profile", icon: User },
   { link: "/user/cart", text: "Shopping Cart", icon: ShoppingCart },
   { link: "/user/orders", text: "Orders", icon: PackageSearch },

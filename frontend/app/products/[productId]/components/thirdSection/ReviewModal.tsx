@@ -2,7 +2,7 @@
 import InputValidationFailedText from "@/components/main/InputValidationFailedText";
 import InteractiveRating from "@/components/main/InteractiveRating";
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,Dialog } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,6 @@ import { createProductReviewByProductId } from "@/lib/queries/client/productQuer
 import useAuth from "@/stores/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reviewSchema, ReviewSchema } from "@monorepo/shared";
-import { Dialog } from "@radix-ui/react-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";

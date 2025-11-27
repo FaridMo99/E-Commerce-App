@@ -30,10 +30,10 @@ async function layout({ children }: ChildrenProps) {
   return (
     <>
       <AuthZustandSetter accessToken={accessToken} user={user} />
-      <div className="">
         <Navbar />
-        {children}
-      </div>
+            <main className="w-full h-full pl-[20vw] pr-[10vw] flex flex-col items-center justify-evenly">
+          {children}
+          </main>
     </>
   );
 }
