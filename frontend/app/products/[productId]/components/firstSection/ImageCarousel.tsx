@@ -1,34 +1,25 @@
 "use client";
-import Slider, { type Settings } from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { Product } from "@/types/types";
 
 type ImageCarouselProps = {
-    imageUrls:Product["imageUrls"]
+  imageUrls: Product["imageUrls"];
+  setImageToShow:React.Dispatch<string>
 };
 
 
-function ImageCarousel({ imageUrls }: ImageCarouselProps) {
-  const settings: Settings = {
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    swipe: true,
-    swipeToSlide: true,
-    arrows: true,
-    infinite: true,
-
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 4 } },
-      { breakpoint: 640, settings: { slidesToShow: 3 } },
-    ],
-  };
+function ImageCarousel({ imageUrls, setImageToShow }: ImageCarouselProps) {
   return (
-      <Slider {...settings}>
-        {imageUrls.map((url) => (
-            <img key={url} src={url} alt="Product Image" />
-        ))}
-      </Slider>
+    <section className="w-full flex items-center h-full">
+      {imageUrls.map((url) => (
+        <img
+          key={url}
+            onClick={() => setImageToShow(url)}
+            alt="product image"
+            className="h-30 w-20"
+            src={url}
+          />
+      ))}
+    </section>
   );
 }
 

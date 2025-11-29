@@ -28,9 +28,6 @@ async function page({ params }: { params: { productId: string } }) {
   return (
     <main className="flex flex-col w-screen justify-center px-4">
       <FirstSection product={product} />
-      {product.imageUrls.length > 0 && (
-        <ImageSection imageUrls={product.imageUrls} />
-      )}
       <Suspense fallback={<Loader2 className="animate-spin self-center" />}>
         <SimilarProductsSection category={product.category} />
       </Suspense>

@@ -1,63 +1,73 @@
 "use client";
-import { useState } from "react";
-import { Input } from "../ui/input";
+
+import { useRef, useState } from "react";
 import { Search } from "lucide-react";
-import useDebounce from "@/hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
-import Searchlist from "./Searchlist";
+import { useRouter } from "next/navigation";
+import useDebounce from "@/hooks/useDebounce";
 import { getProducts } from "@/lib/queries/client/productQueries";
+import { Input } from "../ui/input";
+import Searchlist from "./Searchlist";
 
 function Searchbar() {
-  const searchParam = useSearchParams();
+  const [search, setSearch] = useState<string>("")
+  const debouncedSearch = useDebounce(search, 600);
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  const [search, setSearch] = useState<string>(searchParam.get("search") ?? "");
-  const debouncedSearch: string = useDebounce(search, 600);
+
   const router = useRouter();
-  const { data: products, isLoading } = useQuery({
-    queryKey: ["search for products:", debouncedSearch],
-    queryFn: () => getProducts({ search: debouncedSearch }),
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const { data } = useQuery({
+    queryKey: ["search", debouncedSearch],
+    queryFn: () => getProducts({search:debouncedSearch}),
     enabled: debouncedSearch.length > 0,
-    placeholderData:pre=>pre
   });
 
+  function searchHandler(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+      setIsFocused(false);
+      inputRef.current?.blur();
+      router.push(`/products?search=${search}`);
+  }
+
   return (
-    <div
-      onFocusCapture={() => setIsFocused(true)}
-      onBlurCapture={() => setIsFocused(false)}
-      className="w-full absolute top-0 left-0 h-full flex flex-col justify-center items-center"
+    <form
+      onSubmit={searchHandler}
+      className="absolute w-1/3 left-1/3 top-[5vh] z-500"
     >
-      <Input
-        className={`md:w-1/3 w-1/2 bg-foreground focus-visible:ring-white/50  pr-10 ${search.length > 0 && isFocused ? "rounded-b-none" : ""}`}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && search.length > 0) {
-            router.push(`/products?search=${search}`);
-            if (isFocused) {
+      <div className="w-full relative">
+        <Input
+          ref={inputRef}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => {
+            setTimeout(() => {
               setIsFocused(false);
-            }
-          }
-        }}
-      />
-      {search.length > 0 && isFocused && (
-        <button
-          onClick={() => {
-            router.push(`/products?search=${search}`);
-            if (isFocused) {
-              setIsFocused(false);
-            }
+            }, 200);
           }}
-          aria-label="Search for Products"
-          className="absolute cursor-pointer md:right-[calc(33.333%+8px)] right-[calc(25%+8px)]"
+          name="search"
+          placeholder="Search..."
+          className={`border-2 w-full h-[5vh] focus-visible:ring-0 text-black pr-[4vh] bg-gray-50 rounded-l-lg
+          ${debouncedSearch.length > 0 && isFocused ? "rounded-b-none border-b-2" : ""}  z-4`}
+          type="text"
+          autoComplete="on"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button
+          tabIndex={0}
+          type="submit"
+          aria-label="search users"
+          className="flex justify-center items-center absolute top-[1vh] right-0 z-1 disabled:opacity-60"
+          disabled={!data || data.length === 0}
         >
-          <Search aria-label="Search" />
+          <Search className="text-foreground w-[4vh]" />
         </button>
-      )}
-      {search.length > 0 && isFocused && (
-        <Searchlist products={products ?? []} isLoading={isLoading} />
-      )}
-    </div>
+      </div>
+      {debouncedSearch.length > 0 &&
+        isFocused &&
+        <Searchlist products={data ?? []} />
+      }
+    </form>
   );
 }
 

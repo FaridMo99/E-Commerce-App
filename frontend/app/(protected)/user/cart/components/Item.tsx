@@ -9,7 +9,7 @@ function Item({item}:{item:CartItem}) {
   return (
     <div className="w-full relative flex justify-center border-y items-center h-30">
       <ImageWithPlaceholder
-        src={item.product.imageUrls[0]}
+        imageUrls={item.product.imageUrls}
         width="w-1/3"
         height="h-full"
       />
@@ -28,12 +28,15 @@ function Item({item}:{item:CartItem}) {
         </div>
         <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
           <p>Amount: {item.quantity}</p>
+                            <div className="flex ellipsis truncate">
+
           <Price
             price={item.product.price}
             sale_price={item.product.sale_price}
             currency={item.product.currency}
             styles="items-end w-full"
-          />
+            />
+            </div>
           <RemoveItemButton itemId={item.id} />
         </div>
       </div>

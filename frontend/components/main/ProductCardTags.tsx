@@ -26,13 +26,13 @@ function ProductCardTags({
       {stock_quantity === 0 && (
         <ProductTag
           type="Sold out"
-          styles={`absolute top-4 ${positionClass} ${roundedClass}`}
+          styles={`absolute top-4 z-2 ${positionClass} ${roundedClass}`}
         />
       )}
       {stock_quantity !== 0 && sale_price && (
         <ProductTag
           type="Sale"
-          styles={`absolute top-4 ${positionClass} w-10 ${roundedClass}`}
+          styles={`absolute top-4 z-2 ${positionClass} w-10 ${roundedClass}`}
         />
       )}
       {published_at &&
@@ -40,7 +40,7 @@ function ProductCardTags({
           new Date(new Date().setDate(new Date().getDate() - 7)) && (
           <ProductTag
             type="New"
-            styles={`absolute top-12 ${positionClass} w-10 ${roundedClass}`}
+            styles={`absolute top-12 z-2 ${positionClass} w-10 ${roundedClass}`}
           />
         )}
     </>

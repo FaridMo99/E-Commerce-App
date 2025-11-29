@@ -3,9 +3,10 @@ import RatingPreview from '@/components/main/Rating';
 import { Product } from '@/types/types'
 import Link from 'next/link';
 
-function DescriptionPart({product}:{product:Product}) {
+function DescriptionPart({ product }: { product: Product }) {
+  console.log(product.description)
   return (
-    <div className="flex flex-col ml-4">
+    <div className="flex flex-col ml-4 h-full w-full pt-12">
       <h1 className="text-4xl font-bold">
         <span className="mr-2">{product.name}</span>{" "}
         <FavoriteProduct productId={product.id} />

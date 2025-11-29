@@ -33,15 +33,23 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
           <ItemCountDot count={itemsLength ?? 0} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-foreground text-white">
-        <DropdownMenuLabel className="flex justify-around items-center">Items in Cart <Link href="/user/cart" className="text-blue-500 underline">Go To Cart</Link></DropdownMenuLabel>
+      <DropdownMenuContent className="bg-foreground text-white max-h-110">
+        <DropdownMenuLabel className="flex justify-around items-center">
+          Items in Cart{" "}
+          <Link href="/user/cart" className="text-blue-500 underline">
+            Go To Cart
+          </Link>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {itemsLength && itemsLength > 0 ? (
           cart?.items.map((item) => (
-            <DropdownMenuItem className="justify-between" key={item.id}>
+            <DropdownMenuItem
+              className="flex h-30 justify-between"
+              key={item.id}
+            >
               <ImageWithPlaceholder
-                src={item.product.imageUrls[0]}
-                width="w-1/3"
+                imageUrls={item.product.imageUrls}
+                width="w-1/3 min-w-1/3 max-w-1/3"
                 height="h-full"
               />
               <div className="w-2/3 h-full flex justify-center">
@@ -60,12 +68,14 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
                 </div>
                 <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
                   <p>Amount: {item.quantity}</p>
-                  <Price
-                    price={item.product.price}
-                    sale_price={item.product.sale_price}
-                    currency={item.product.currency}
-                    styles="items-end"
-                  />
+                  <div className="flex ellipsis truncate">
+                    <Price
+                      price={item.product.price}
+                      sale_price={item.product.sale_price}
+                      currency={item.product.currency}
+                      styles="items-end"
+                    />
+                  </div>
                 </div>
               </div>
             </DropdownMenuItem>

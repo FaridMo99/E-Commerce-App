@@ -1,50 +1,51 @@
+import { Search } from "lucide-react";
+import type { Product } from "../../types/types";
 import Link from "next/link";
-import { Camera, Loader2 } from "lucide-react";
-import { Product } from "@/types/types";
+import ImageWithPlaceholder from "./ImageWithPlaceholder";
+import RatingPreview from "./Rating";
+import Price from "./Price";
 
-type SearchlistProps = {
-  products: Product[];
-  isLoading: boolean;
-};
+function Searchlist({ products }: { products: Product[] }) {
 
-//add if available or sold out etc.
-function Searchlist({ products, isLoading }: SearchlistProps) {
   return (
-    <ul
-      tabIndex={1}
-      className="rounded-b-xl bg-foreground flex flex-col overflow-x-clip overflow-y-scroll max-h-60 z-10 absolute top-[calc(36px+5.2vh)] md:w-1/3 w-1/2 border-x border-b"
-    >
-      {isLoading && (
-        <Loader2 className="bg-foreground animate-spin text-center my-4" />
-      )}
-      {!isLoading && products.length === 0 && (
-        <p className="text-center my-4">No Products found</p>
-      )}
-      {!isLoading &&
-        products.length > 0 &&
-        products.map((product) => (
-          <Link
+    <div className="bg-white overflow-x-clip overflow-y-scroll w-full max-h-100 rounded-b-lg border border-foreground text-black">
+      {products?.map((product) => (
+        <Link
+          key={product.id}
+          className="w-full"
+          href={`/products/${product.id}`}
+        >
+          <li
             key={product.id}
-            className="hover:bg-muted/30 w-full h-20 md:h-30 px-4"
-            href={`/products/${product.id}`}
+            className="w-full flex h-30 justify-around items-center bg-foreground hover:bg-foreground/50"
           >
-            <li
-              key={product.id}
-              className="w-full flex justify-around items-center"
-            >
-              {product.imageUrls[0] ? (
-                <img alt="product image" src={product.imageUrls[0]} />
-              ) : (
-                <Camera />
-              )}
-              <div>
-                <p>{product.name}</p>
-                <p>{product.description}</p>
-              </div>
-            </li>
-          </Link>
-        ))}
-    </ul>
+            <ImageWithPlaceholder
+              imageUrls={product.imageUrls}
+              width="w-20"
+              height="h-full"
+            />
+            <div className="w-1/3 h-full flex flex-col justify-evenly items-start truncate">
+              <p>{product.name}</p>
+              <p className="text-black/50">{product.description}</p>
+            </div>
+            <div className="w-1/3 h-full flex truncate flex-col justify-evenly items-start">
+              <RatingPreview rating={product.averageRating} />
+              <Price
+                price={product.price}
+                sale_price={product.sale_price}
+                currency={product.currency}
+              />
+            </div>
+          </li>
+        </Link>
+      ))}
+      {products.length === 0 && (
+        <div className="w-full h-[10vh] flex justify-center items-center text-gray-500">
+          <p>No Products Found</p>
+          <Search className="ml-2 text-foreground" />
+        </div>
+      )}
+    </div>
   );
 }
 

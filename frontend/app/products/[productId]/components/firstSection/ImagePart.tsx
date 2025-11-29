@@ -1,22 +1,22 @@
-import ImageWithPlaceholder from '@/components/main/ImageWithPlaceholder';
+"use client"
+import { useState } from 'react';
 import ImageCarousel from './ImageCarousel';
+import MainImage from './MainImage';
 
 type ImagePartProps = {
     imageUrls:string[]
 }
 
 
-function ImagePart({imageUrls}:ImagePartProps) {
+function ImagePart({ imageUrls }: ImagePartProps) {
+  const [imageToShow, setImageToShow] = useState<string>(imageUrls[0])
+
   return (
-    <div className="flex flex-col justify-between items-center">
-      {/*should be popup when cliking on it */}
-      <ImageWithPlaceholder
-        src={imageUrls[0]}
-        width="w-100"
-        height="h-100"
-      />
-      <div className="w-full">
-        <ImageCarousel imageUrls={imageUrls} />
+    <div className="flex flex-col justify-between items-start">
+      <MainImage url={imageToShow} />
+
+      <div className="w-100 h-50">
+        <ImageCarousel setImageToShow={setImageToShow} imageUrls={imageUrls} />
       </div>
     </div>
   );

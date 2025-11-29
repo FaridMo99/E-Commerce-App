@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export async function Header() {
   return (
-    <header className="w-screen min-h-[15vh] bg-foreground text-primary-foreground flex relative items-center justify-between">
+    <header className="w-screen h-[15vh] bg-foreground text-primary-foreground flex relative items-center justify-between">
         <Searchbar />
         <Link
           href="/"

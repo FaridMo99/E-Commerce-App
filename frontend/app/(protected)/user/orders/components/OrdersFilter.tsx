@@ -46,12 +46,10 @@ export default function OrdersFilter() {
       {/* STATUS FILTER */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button>
-            Status
-          </Button>
+          <Button>Status</Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="rounded-xl p-2 w-40">
+        <DropdownMenuContent className="rounded-xl p-2 w-40  bg-foreground text-white">
           <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
@@ -68,12 +66,10 @@ export default function OrdersFilter() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button>
-            Sort
-          </Button>
+          <Button>Sort</Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="rounded-xl p-2 w-40">
+        <DropdownMenuContent className="rounded-xl p-2 w-40 bg-foreground text-white">
           <DropdownMenuLabel>Sort By</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
