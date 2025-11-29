@@ -26,8 +26,6 @@ const currencyElements: CurrencyElement[] = [
   },
 ];
 
-//somehow keep already chosen one like focused with a darker bg and the navigation icon should also be that one
-//make this also change language
 export default function CurrencyDropdown() {
   return (
     <DropdownMenu>

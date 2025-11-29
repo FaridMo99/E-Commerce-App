@@ -12,7 +12,6 @@ export default async function Home() {
     categoryProducts,
   } = await getHomeProducts();
 
-  console.log(categoryProducts)
 
   return (
     <main>

@@ -6,6 +6,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/stores/authStore";
+import CarouselLoadingSkeleton from "../main/CarouselLoadingSkeleton";
 
 //needed bc the accesstoken is client side
 function RecentlyViewedProductsCarousel() {

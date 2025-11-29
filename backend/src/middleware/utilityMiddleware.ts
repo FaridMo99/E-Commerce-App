@@ -10,7 +10,6 @@ import {
   FALLBACK_COUNTRY_CURRENCY_ISO,
   FALLBACK_COUNTRY_ISO_CODE,
   GBP_COUNTRIES,
-  TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
 import { lookup } from "../../app.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
@@ -57,7 +56,9 @@ export async function geoCurrencyMiddleware(
 ) {
   try {
     //authed user check
-    console.log(chalk.yellow(`${getTimestamp()} Geolocation Middleware running...`))
+    console.log(
+      chalk.yellow(`${getTimestamp()} Geolocation Middleware running...`)
+    );
     if (req.user?.countryCode && req.user?.currency) {
       console.log(
         chalk.green(
@@ -91,9 +92,7 @@ export async function geoCurrencyMiddleware(
     //maxmind lookup
     const geo = lookup.get(ip) as unknown as CountryResponse;
     const country = geo?.country?.iso_code ?? FALLBACK_COUNTRY_ISO_CODE;
-    console.log(
-      chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`)
-    );
+    console.log(chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`));
 
     //set currency
     let currency: CurrencyISO = FALLBACK_COUNTRY_CURRENCY_ISO;
@@ -104,9 +103,10 @@ export async function geoCurrencyMiddleware(
     //store in redis
     await redis.hSet(`geo:${ip}`, { country, currency });
     await redis.expire(`geo:${ip}`, 60 * 60 * 2);
-    
-    
-    console.log(chalk.green(`${getTimestamp()} Stored geo info in Redis for IP ${ip}`));
+
+    console.log(
+      chalk.green(`${getTimestamp()} Stored geo info in Redis for IP ${ip}`)
+    );
 
     //attach to req
     req.countryCode = country;
@@ -123,4 +123,21 @@ export async function geoCurrencyMiddleware(
 }
 
 
-//orders route dont need this, should show in bought price, orders probably have to add currencies field
+
+export function transformProductFormData(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const body = { ...req.body };
+
+  body.price = body.price ? parseFloat(body.price) : undefined;
+  body.sale_price = body.sale_price ? parseFloat(body.sale_price) : undefined;
+  body.stock_quantity = body.stock_quantity
+    ? parseInt(body.stock_quantity)
+    : undefined;
+  body.is_public = body.is_public === "true";
+
+  req.body = body;
+  next(); 
+}

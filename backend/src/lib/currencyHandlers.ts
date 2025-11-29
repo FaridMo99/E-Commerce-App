@@ -1,6 +1,5 @@
 import {
   EXCHANGE_RATE_REDIS_KEY,
-  DEFAULT_NICE_PRICE,
   ONE_DAY_IN_SECONDS,
   BASE_CURRENCY_KEY,
   TWELVE_HOURS_IN_SECONDS,
@@ -13,6 +12,7 @@ import chalk from "chalk";
 import { calcAvgRating, getTimestamp } from "./utils.js";
 import type { ProductWithSelectedFields } from "../config/prismaHelpers.js";
 import prisma from "../services/prisma.js";
+import { DEFAULT_NICE_PRICE } from "@monorepo/shared";
 
 //cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {

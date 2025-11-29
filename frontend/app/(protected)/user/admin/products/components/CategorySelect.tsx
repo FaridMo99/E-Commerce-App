@@ -9,16 +9,14 @@ import {
 } from "@/components/ui/select";
 import { getAllCategories } from "@/lib/queries/client/categoryQueries";
 import { useQuery } from "@tanstack/react-query";
-import { SetStateAction } from "jotai";
 import { Loader2 } from "lucide-react";
-import { Dispatch } from "react";
 
 function CategorySelect({
-    setCategoryId,
-    categoryId
+  setCategoryId,
+  categoryId,
 }: {
-        setCategoryId: Dispatch<SetStateAction<string>>;
-    categoryId:string
+  setCategoryId: (val: string) => void;
+  categoryId?: string;
 }) {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["get all categories"],
@@ -27,10 +25,7 @@ function CategorySelect({
   });
 
   return (
-    <Select
-      value={categoryId}
-      onValueChange={(value) => setCategoryId(value)}
-    >
+    <Select value={categoryId} onValueChange={(value) => setCategoryId(value)}>
       <SelectTrigger>
         <SelectValue placeholder="Category" />
       </SelectTrigger>

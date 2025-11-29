@@ -1,7 +1,7 @@
 import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
+import { AccessToken, AdminProduct, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
 
@@ -30,6 +30,38 @@ export async function getProducts(
 
   const res = await fetch(url, {
     credentials: "include",
+  });
+  return await handleResponse(res);
+}
+
+export async function getProductsAdmin(
+    accessToken:AccessToken,
+  queryParam?: ProductsQuerySchema,
+): Promise<AdminProduct[]> {
+  const params = new URLSearchParams();
+
+  if (queryParam) {
+    params.set("page", String(queryParam.page ?? 1));
+    params.set("limit", String(queryParam.limit ?? 10));
+    if (queryParam.search) params.set("search", queryParam.search);
+    if (queryParam.category) params.set("category", queryParam.category);
+    if (queryParam.minPrice !== undefined)
+      params.set("minPrice", String(queryParam.minPrice));
+    if (queryParam.maxPrice !== undefined)
+      params.set("maxPrice", String(queryParam.maxPrice));
+    if (queryParam.sale !== undefined)
+      params.set("sale", String(queryParam.sale));
+    if (queryParam.sortBy) params.set("sortBy", queryParam.sortBy);
+    if (queryParam.sortOrder) params.set("sortOrder", queryParam.sortOrder);
+  }
+
+  const url = `${apiBaseUrl}/products?${params.toString()}`;
+
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }

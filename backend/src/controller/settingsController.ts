@@ -96,6 +96,25 @@ export async function getSettingBySettingId(
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching setting by ID: ${settingId}...`)
     );
+
+    if (settingId === BASE_CURRENCY_KEY) {
+      const baseCurrency = await prisma.settings.findFirst({
+        where: {
+          key: settingId,
+        },
+        select: {
+          ...settingsSelect,
+        },
+      });
+      if (!baseCurrency) {
+        console.log(
+          chalk.red(`${getTimestamp()} Base Currency not set yet`)
+        );
+        return res.status(404).json({ message: "Base Currency not set yet" });
+      }
+
+      return res.status(200).json(baseCurrency);
+    }
     const setting = await prisma.settings.findUnique({
       where: {
         id: settingId
@@ -110,6 +129,7 @@ export async function getSettingBySettingId(
       );
       return res.status(404).json({ message: "Setting not found" });
     }
+
     console.log(chalk.green(`${getTimestamp()} Setting fetched: ${settingId}`));
     return res.status(200).json(setting);
   } catch (err) {

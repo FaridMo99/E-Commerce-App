@@ -11,9 +11,3 @@ function page() {
 }
 
 export default page
-
-
-//create product with images, nice price
-//images should support drag and drop, multi images, previews, delete image
-//update product
-//everything thats related to price show the basecurrency

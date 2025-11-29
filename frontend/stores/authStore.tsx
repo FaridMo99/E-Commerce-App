@@ -26,7 +26,6 @@ const useAuth = create<AuthStore>((set) => ({
     set({user})
   },
   setState: (accessToken, user) => {
-    console.log("running setstaet")
     set({accessToken,user})
   }
 }));

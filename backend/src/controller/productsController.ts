@@ -21,6 +21,7 @@ import {
   CATEGORIES_REDIS_KEY,
   NEW_PRODUCTS_REDIS_KEY,
   SALE_PRODUCTS_REDIS_KEY,
+  TRENDING_PRODUCTS_REDIS_KEY,
 } from "../config/constants.js";
 import {
   getCategoryProducts,
@@ -56,6 +57,7 @@ export async function getAllProducts(
     limit,
     sale,
   } = req.validatedQuery as ProductsQuerySchema;
+  console.log(role)
 
   const currency = req.currency!;
 
@@ -128,13 +130,14 @@ export async function getAllProducts(
         ...(search && { name: { startsWith: search, mode: "insensitive" } }),
         ...(category && { category: { name: category } }),
         ...(sale && { sale_price: { not: null } }),
-        ...priceFilter
+        ...priceFilter,
       },
       ...(sortBy && sortOrder && { orderBy: { [sortBy]: sortOrder } }),
       ...(limit && { take: limit }),
       ...(page && limit && { skip: (page - 1) * limit }),
       select: {
         ...productSelect,
+        ...(role === "ADMIN" && { is_public: true }),
       },
     });
 
@@ -278,13 +281,8 @@ export async function createProduct(
         is_public: product.is_public,
         ...(product.is_public && { published_at: new Date() }),
         category: {
-          connectOrCreate: {
-            where: {
-              name: product.category
-            },
-            create: {
-              name: product.category
-            }
+          connect: {
+            id:product.category
           }
         },
         price: product.price,
@@ -302,7 +300,7 @@ export async function createProduct(
     });
 
 
-    const redisKey = `CATEGORIES_REDIS_KEY:${newProduct.category}`;
+    const redisKey = `${CATEGORIES_REDIS_KEY}:${product.category}`;
     //clear all relevant caches
     if (newProduct.is_public) {
     await Promise.all([
@@ -310,6 +308,7 @@ export async function createProduct(
       redis.del(SALE_PRODUCTS_REDIS_KEY),
       redis.del(CATEGORIES_REDIS_KEY),
       redis.del(redisKey),
+      redis.del(TRENDING_PRODUCTS_REDIS_KEY),
     ]);  
     }
     
@@ -435,13 +434,14 @@ export async function updateProductByProductId(
 ) {
   const id = req.params.productId;
 
-  if (req.body.price !== undefined) {
+  if (req.body.price) {
     req.body.price = turnPriceToPriceInCents(req.body.price);
   }
 
-  if (req.body.sale_price !== undefined) {
+  if (req.body.sale_price) {
     req.body.sale_price = turnPriceToPriceInCents(req.body.sale_price);
   }
+
 
   const {
     name,
@@ -467,13 +467,8 @@ export async function updateProductByProductId(
           ...(description && { description }),
           ...(category && {
             category: {
-              connectOrCreate: {
-                where: {
-                  name: category,
-                },
-                create: {
-                  name: category,
-                },
+              connect: {
+                  id: category,
               },
             },
           }),
@@ -509,7 +504,8 @@ export async function updateProductByProductId(
     }
 
     //redis invalidation
-    const redisKey = `CATEGORIES_REDIS_KEY:${updatedProduct.category}`;
+    const redisKey = `${CATEGORIES_REDIS_KEY}:${updatedProduct.category.id}`;
+
     if (is_public) {
         await Promise.all([
           redis.del(NEW_PRODUCTS_REDIS_KEY),

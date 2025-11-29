@@ -23,7 +23,7 @@ import {
 } from "../middleware/validationMiddleware.js";
 import { upload } from "../services/cloud.js";
 import { productSchema, productsMetaInfosQuerySchema, productsQuerySchema, reviewSchema, updateProductSchema } from "@monorepo/shared";
-import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
+import { geoCurrencyMiddleware, transformProductFormData } from "../middleware/utilityMiddleware.js";
 
 const productsRouter = Router();
 
@@ -50,9 +50,10 @@ productsRouter.post(
   hasCsrfToken,
   upload.array("images"),
   validateImages,
+  transformProductFormData,
   validateBody(productSchema),
   geoCurrencyMiddleware,
-  createProduct,
+  createProduct
 );
 productsRouter.get("/:productId/reviews", getAllReviewsByProductId);
 productsRouter.post(

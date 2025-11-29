@@ -14,10 +14,13 @@ import {
   AdminRevenue,
   AdminSetting,
   AdminTopseller,
+  CurrencyISO,
   Order,
   ProductCategory,
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
+import { BASE_CURRENCY_KEY } from "@monorepo/shared/constants";
+import { ClientProductSchema } from "@/schemas/schemas";
 
 //analytics
 export async function getRevenue(
@@ -138,6 +141,28 @@ export async function getSettingBySettingId(
   return await handleResponse(res);
 }
 
+type Replace<T, K extends keyof T, U> = Omit<T, K> & U;
+
+
+export async function getBaseCurrency(accessToken: AccessToken): Promise<
+  Replace<
+    AdminSetting,
+    "key" | "value",
+    {
+      key: typeof BASE_CURRENCY_KEY;
+      value: CurrencyISO;
+    }
+  >
+> {
+  const res = await fetch(`${apiBaseUrl}/settings/${BASE_CURRENCY_KEY}`, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return await handleResponse(res);
+}
+
 export async function deleteAllSettings(
   accessToken: AccessToken
 ): Promise<void> {
@@ -190,23 +215,36 @@ export async function updateSettingBySettingId(
 }
 
 //products
-//check how to do with images
 export async function createProduct(
-  content: ProductSchema,
+  product: ClientProductSchema,
   accessToken: AccessToken
 ): Promise<void> {
+  const formData = new FormData();
+
+  formData.append("name", product.name);
+  formData.append("description", product.description);
+    formData.append("category", product.category);
+  formData.append("price", product.price.toString());
+  if (product.sale_price !== undefined)
+  formData.append("sale_price", product.sale_price.toString());
+  formData.append("stock_quantity", product.stock_quantity.toString());
+  formData.append("is_public", String(product.is_public));
+
+  product.images.forEach((file) => {
+    formData.append("images", file);
+  });
 
   const res = await fetch(`${apiBaseUrl}/products`, {
     credentials: "include",
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       ...getCsrfHeaderClientSide(),
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify(content),
+    body: formData,
   });
-   await handleResponse(res);
+
+  await handleResponse(res);
 }
 
 export async function deleteProductByProductId(
@@ -245,7 +283,6 @@ export async function updateProductByProductId(
 }
 
 //orders
-//order search queries type could be wrong since user also uses it
 export async function getOrders(
   accessToken: AccessToken,
   timeframe?: TimeframeQuerySchema,
@@ -257,7 +294,6 @@ export async function getOrders(
   if (queryParam) {
     if (queryParam.page) params.set("page", String(queryParam.page));
     if (queryParam.limit) params.set("limit", String(queryParam.limit));
-    if (queryParam.order) params.set("order", queryParam.order);
     if (queryParam.sort) params.set("sortBy", queryParam.sort);
     if (queryParam.order) params.set("sortOrder", String(queryParam.order));
   }

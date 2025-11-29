@@ -26,7 +26,8 @@ export function validateBody<T>(schema: ZodType<T>) {
 }
 
 export function validateImages(req:Request,res:Response,next:NextFunction) {
-    const images = req.files;
+  const images = req.files;
+  console.log(chalk.yellow(getTimestamp(),"validating images..."))
 
     if (images && Array.isArray(images)) {
       const validatedImages = z.array(imageSchema).safeParse(images);
@@ -37,7 +38,8 @@ export function validateImages(req:Request,res:Response,next:NextFunction) {
         return res.status(400).json({ message: validatedImages.error.message });
       }
     }
-  
+    console.log(chalk.green(getTimestamp(), "Image validation successful!"));
+
   next()
 }
 

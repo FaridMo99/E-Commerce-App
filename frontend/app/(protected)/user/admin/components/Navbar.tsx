@@ -27,7 +27,7 @@ function Navbar() {
   const pathname = usePathname();
 
   return (
-    <aside className="h-screen w-[10vw] bg-foreground fixed top-0 left-0 pt-[20vh] flex flex-col items-center">
+    <aside className="h-[65vh] w-[10vw] bg-foreground fixed top-[20vh] left-0 pt-[20vh] flex flex-col items-center rounded-r-lg">
       {routes.map((route) => {
         const isActive = pathname.startsWith(route.link);
 

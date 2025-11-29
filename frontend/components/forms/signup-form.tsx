@@ -25,7 +25,7 @@ import { z } from "zod";
 import OAuthButton from "./OAuthButton";
 import Facebook from "../icons/Facebook";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { SignupSchema } from "@monorepo/shared";
 
 //add rerequesting the email logic

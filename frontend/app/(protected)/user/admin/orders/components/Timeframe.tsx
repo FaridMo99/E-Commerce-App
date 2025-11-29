@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import {
-  formatISO,
-  subDays,
-  subMonths,
-  subYears,
-  differenceInDays,
-} from "date-fns";
+import { subDays, subMonths, subYears } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -18,34 +11,27 @@ import {
 } from "@/components/ui/select";
 
 const TIMEFRAMES = [
+  { label: "All Time", value: "all" },
   { label: "1 Day", value: "1d" },
   { label: "7 Days", value: "7d" },
   { label: "30 Days", value: "30d" },
   { label: "1 Year", value: "1y" },
 ];
 
-export default function ChangeTimeframeDropdown() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentFrom = searchParams.get("from");
-  const currentTo = searchParams.get("to");
-
-  const initialValue = React.useMemo(() => {
-    if (!currentFrom || !currentTo) return "7d";
-    const fromDate = new Date(currentFrom);
-    const toDate = new Date(currentTo);
-    const diff = differenceInDays(toDate, fromDate);
-
-    if (diff <= 1) return "1d";
-    if (diff <= 7) return "7d";
-    if (diff <= 30) return "30d";
-    return "1y";
-  }, [currentFrom, currentTo]);
-
-  const [selected, setSelected] = React.useState<string>(initialValue);
+export default function ChangeTimeframeDropdown({
+  onChangeTimeframe,
+}: {
+  onChangeTimeframe: (range: { from?: Date; to?: Date }) => void;
+}) {
+  const [selected, setSelected] = React.useState("7d");
 
   const handleChange = (value: string) => {
     setSelected(value);
+
+    if (value === "all") {
+      onChangeTimeframe({ from: undefined, to: undefined });
+      return;
+    }
 
     const to = new Date();
     let from: Date;
@@ -67,18 +53,15 @@ export default function ChangeTimeframeDropdown() {
         from = subDays(to, 7);
     }
 
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set("from", formatISO(from));
-    newSearchParams.set("to", formatISO(to));
-
-    router.push(`?${newSearchParams.toString()}`);
+    onChangeTimeframe({ from, to });
   };
 
   return (
     <Select value={selected} onValueChange={handleChange}>
-      <SelectTrigger className="w-[150px] self-end bg-backgroundBright">
+      <SelectTrigger className="border bg-backgroundBright self-end my-4">
         <SelectValue placeholder="Select timeframe" />
       </SelectTrigger>
+
       <SelectContent className="bg-backgroundBright">
         {TIMEFRAMES.map((tf) => (
           <SelectItem key={tf.value} value={tf.value}>

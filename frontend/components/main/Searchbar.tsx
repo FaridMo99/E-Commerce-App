@@ -28,7 +28,7 @@ function Searchbar() {
       className="w-full absolute top-0 left-0 h-full flex flex-col justify-center items-center"
     >
       <Input
-        className={`md:w-1/3 w-1/2 pr-10 ${search.length > 0 && isFocused ? "rounded-b-none" : ""}`}
+        className={`md:w-1/3 w-1/2 bg-foreground focus-visible:ring-white/50  pr-10 ${search.length > 0 && isFocused ? "rounded-b-none" : ""}`}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         onKeyDown={(e) => {

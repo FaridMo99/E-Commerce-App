@@ -1,4 +1,4 @@
-import type { CurrencyISO, Prisma } from "../generated/prisma/client.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 
 // SELECT CLAUSES
@@ -11,8 +11,7 @@ export const userSelect: Prisma.UserSelect = {
 };
 
 export const userAuthenticatedSelect: Prisma.UserSelect = {
-    name: true,
-    role: true,
+    ...userSelect,
     created_at: true,
     address: true,
     birthdate: true,
@@ -66,6 +65,11 @@ export const orderSelect: Prisma.OrderSelect = {
     total_amount: true,
     currency: true,
     shipping_address: true,
+    user: {
+        select: {
+            ...userAuthenticatedSelect
+        }
+    },
     items: {
         select: {
             product: {

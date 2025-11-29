@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createCategory } from "@/lib/queries/client/adminQueries";
 import useAuth from "@/stores/authStore";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
@@ -60,7 +59,7 @@ export function CreateCategoryButton() {
           </DialogHeader>
           <FieldGroup className="grid gap-4 mt-4">
             <Field className="grid gap-3">
-              <Label htmlFor="title">Category Name:</Label>
+              <Label htmlFor="category">Category Name:</Label>
               <Input
                 id="category"
                 type="text"

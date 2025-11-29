@@ -1,17 +1,27 @@
 import z from "zod";
+import { DEFAULT_NICE_PRICE } from "./constants.ts";
 
 /** --- Price Schema --- */
 //here as float, in controller turn to cents
 export const priceSchema = z
-  .preprocess((val) => {
-    // allow strings that can be converted to number
-    const n = typeof val === "string" ? Number(val) : val;
-    return n;
-  }, z.number().int().nonnegative("Price must be 0 or greater"))
-  .refine((val) => {
-    const cents = Math.round((val % 1) * 100);
-    return cents === 95 || cents === 99;
-  }, "Price must end with .95 or .99");
+  .preprocess(
+    (val) => {
+      if (typeof val === "string") val = val.replace(",", ".");
+      const number = typeof val === "number" ? val : parseFloat(val);
+      return number;
+    },
+    z.number("Price is required")
+  )
+  .refine(
+    (val) => {
+      if (isNaN(val)) return false;
+      const rounded = Math.round(val * 100) / 100;
+      const fraction = +rounded.toFixed(2) % 1;
+
+      return Math.abs(fraction - DEFAULT_NICE_PRICE / 100) < 0.001;
+    },
+    { message: `Price must end with .${DEFAULT_NICE_PRICE}` }
+  );
 
 /** --- Currency Schema --- */
 export const currencySchema = z.enum(["USD", "EUR", "GBP"],"Must be USD EUR or GBP");
@@ -148,13 +158,20 @@ export const reviewsQuerySchema = paginationSchema.extend({
 
 /** --- Product Schema --- */
 export const productSchema = z.object({
-  name: z.string(),
-  description: z.string(),
+  name: z.string().nonempty("Field is required"),
+  description: z.string().nonempty("Field is required"),
   price: priceSchema,
-  stock_quantity: z.preprocess((val) => Number(val), z.number().int()),
+  stock_quantity: z
+    .preprocess(
+      (val) =>
+        val === "" || val === null || val === undefined ? NaN : Number(val),
+      z.number().int()
+    )
+    .refine((val) => !isNaN(val), { message: "Quantity is required" })
+    .refine((val) => val >= 0, { message: "Quantity must be 0 or more" }),
   is_public: z.boolean().default(false),
-  category: z.string(),
-  sale_price: priceSchema.optional(),
+  category: z.string("Field is required").nonempty("Field is required"),
+  sale_price: priceSchema.optional().or(z.literal("")),
 });
 
 export const updateProductSchema = productSchema.partial();

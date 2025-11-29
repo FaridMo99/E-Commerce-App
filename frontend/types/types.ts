@@ -53,6 +53,8 @@ export type Product = {
   };
 };
 
+export type AdminProduct = Product & { is_public: boolean };
+
 export type ProductMetaInfos = {
   minPrice: number;
   maxPrice: number;
@@ -67,7 +69,8 @@ export type Order = {
     total_amount: number,
     currency: CurrencyISO,
     shipping_address: string | null,
-    items: {product: Product}[],
+    items: { product: Product }[],
+    user:AuthUser,
     payment: {
         method:PaymentMethod,
         status:PaymentStatus

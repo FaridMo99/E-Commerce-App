@@ -9,6 +9,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { DailyRevenue } from "@monorepo/shared"
+import { Skeleton } from "../../skeleton"
 
 export const description = "An area chart with gradient fill"
 
@@ -19,10 +20,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartAreaGradient({ dailyRevenue }: { dailyRevenue: DailyRevenue[] }) {
+export function ChartAreaGradient({ dailyRevenue, isLoading }: { dailyRevenue: DailyRevenue[],isLoading:boolean }) {
 
-    const chartData =
-      dailyRevenue.length > 0 ? dailyRevenue : [{ day: "N/A", revenue: 0 }];
+  
+  if(isLoading) return (
+    <Skeleton className="h-[300px] w-full rounded-lg" />
+  );
+
+      const chartData =
+        dailyRevenue.length > 0 ? dailyRevenue : [{ day: "N/A", revenue: 0 }];
 
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full bg-backgroundBright rounded-lg border">

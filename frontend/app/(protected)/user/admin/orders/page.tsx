@@ -1,9 +1,12 @@
-import React from 'react'
+import OrdersTable from './components/OrdersTable';
 
 function page() {
   return (
-    <div>page</div>
-  )
+    <>
+      <h1 className="self-start text-2xl text-white">Orders</h1>
+      <OrdersTable />
+    </>
+  );
 }
 
 export default page

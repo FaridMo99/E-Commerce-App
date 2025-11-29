@@ -39,10 +39,11 @@ import type {
   EmailSchema
 } from "./types.ts";
 
-import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES } from "./constants.ts";
+import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES, DEFAULT_NICE_PRICE } from "./constants.ts";
 export {
   IMAGE_ALLOWED_TYPES,
-  IMAGE_MAX_SIZE
+  IMAGE_MAX_SIZE,
+  DEFAULT_NICE_PRICE
 }
 
 export {

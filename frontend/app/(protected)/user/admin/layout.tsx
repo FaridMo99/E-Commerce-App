@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import "server-only";
 import Navbar from "./components/Navbar";
 
-//check how not to send this to client
+
 //cache the getnewrefreshtoken so when reloading in nested routes it doesnt trigger all layouts requesting refresh tokens
 //do this for all nested layouts that repeat the same fn
 
@@ -16,6 +16,8 @@ async function layout({ children }: ChildrenProps) {
 
   try {
     res = await getNewRefreshToken();
+    accessToken = res.accessToken;
+    user = res.user;
   } catch (err) {
     console.log("User not logged in: " + err);
   }

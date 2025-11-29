@@ -15,18 +15,20 @@ import {
   TableRow,
 } from "@/components/ui/shadcn-io/table";
 
-import { getProducts } from "@/lib/queries/client/productQueries";
+import { getProductsAdmin } from "@/lib/queries/client/productQueries";
 import { ProductsQuerySchema } from "@monorepo/shared";
-import { Product } from "@/types/types";
+import { AdminProduct } from "@/types/types";
 import LoadingPage from "@/components/main/LoadingPage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import HeadSection from "./HeadSection";
 import ButtonPagination from "./ButtonPagination";
 import DeleteProduct from "./DeleteProduct";
-import EditProduct from "./EditProduct";
+import { EditProduct } from "./EditProduct";
+import useAuth from "@/stores/authStore";
 
 
 export default function ProductsTable() {
+  const accessToken = useAuth(state => state.accessToken)
   const [queryParams, setQueryParams] = useState<ProductsQuerySchema>({
     page: 1,
     limit: 20,
@@ -37,12 +39,14 @@ export default function ProductsTable() {
 
 
   const { data:products, isLoading  } = useQuery({
-    queryKey: ["get products", queryParams],
-    queryFn: () => getProducts(queryParams),
-    placeholderData:pre=>pre
+    queryKey: ["get admin products", queryParams],
+    queryFn: () => getProductsAdmin(accessToken!, queryParams),
+    placeholderData: pre => pre,
+    enabled:!!accessToken
   });
 
-  const columns: ColumnDef<Product>[] = [
+  console.log(products)
+  const columns: ColumnDef<AdminProduct>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -108,6 +112,17 @@ export default function ProductsTable() {
       ),
     },
     {
+      accessorKey: "is_public",
+      header: ({ column }) => (
+        <TableColumnHeader column={column} title="Public" />
+      ),
+      cell: ({ row }) => (
+        <span className={row.original.is_public ? "text-green-600" : "text-red-600"}>
+          {row.original.is_public ? "Yes" : "No"}
+        </span>
+      ),
+    },
+    {
       id: "actions",
       header: () => <span className="pl-4">Actions</span>,
       cell: ({ row }) => {
@@ -115,7 +130,7 @@ export default function ProductsTable() {
 
         return (
           <section className="flex items-center gap-3 pl-4">
-            <EditProduct />
+            <EditProduct product={product} />
             <DeleteProduct product={product}/>
           </section>
         );

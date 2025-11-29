@@ -13,14 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { deleteProductByProductId } from "@/lib/queries/client/adminQueries";
 import useAuth from "@/stores/authStore";
-import { Product } from "@/types/types"
+import { AdminProduct } from "@/types/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import { toast } from "sonner";
 
 
 
-function DeleteProduct({ product }: { product: Product }) {
+function DeleteProduct({ product }: { product: AdminProduct }) {
   const accessToken = useAuth(state => state.accessToken)
   const queryClient = useQueryClient()
   
@@ -32,7 +32,7 @@ function DeleteProduct({ product }: { product: Product }) {
     },
     onSuccess: () => {
       toast.success("Deleted " + product.name + " successfully!")
-      queryClient.invalidateQueries({queryKey:["get products"]})
+      queryClient.invalidateQueries({queryKey:["get admin products"]})
     }
   })
 
