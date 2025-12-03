@@ -1,9 +1,9 @@
 import { CartItem } from '@/types/types'
 import RemoveItemButton from './RemoveItemButton'
-import RatingPreview from '@/components/main/Rating'
-import ImageWithPlaceholder from '@/components/main/ImageWithPlaceholder'
 import Link from 'next/link'
-import Price from '@/components/main/Price'
+import RatingPreview from '@/components/main/product/Rating';
+import ImageWithPlaceholder from '@/components/main/product/ImageWithPlaceholder';
+import Price from '@/components/main/product/Price';
 
 function Item({item}:{item:CartItem}) {
   return (

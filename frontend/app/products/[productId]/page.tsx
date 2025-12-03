@@ -3,7 +3,6 @@ import { Product } from "@/types/types";
 import { notFound } from "next/navigation";
 import "server-only";
 import FirstSection from "./components/firstSection/FirstSection";
-import ImageSection from "./components/secondSection/ImageSection";
 import SimilarProductsSection from "./components/fourthSection/SimilarProductsSection";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";

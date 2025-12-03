@@ -2,13 +2,13 @@
 import { getUserCart } from "@/lib/queries/server/usersQueries";
 import { Loader2, LogIn, MenuIcon } from "lucide-react";
 import Link from "next/link";
-import UserDropdown from "./UserDropdown";
-import ShoppingCartDropdown from "./ShoppingCartDropdown";
-import LogoutButton from "./LogoutButton";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import ShoppingCartDropdown from "./ShoppingCartDropdown";
+import UserDropdown from "../UserDropdown";
+import LogoutButton from "./LogoutButton";
 
 //dont forget the popup for mobile
 function Navigation() {

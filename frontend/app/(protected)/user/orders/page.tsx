@@ -8,6 +8,7 @@ import OrdersFilter from "./components/OrdersFilter";
 import { useSearchParams } from "next/navigation";
 import { ordersQuerySchema } from "@monorepo/shared";
 import OrderCard from "./components/OrderCard";
+import SectionWrapper from "@/components/main/SectionWrapper";
 
 //error page
 function Page() {
@@ -39,15 +40,17 @@ const {
 
   return (
     <main className="px-8">
-      <section className="flex justify-between items-center">
-        <h2 className="text-3xl font-extrabold mb-2">
-          Orders ({orders?.length})
-        </h2>
+      <SectionWrapper
+        header={`Orders (${orders?.length})`}
+        styles="flex justify-between items-center"
+      >
         <OrdersFilter />
-      </section>
+      </SectionWrapper>
       <section className="w-full flex flex-col items-center justify-evenly">
-        {orders?.map(order=><OrderCard key={order.id} order={order}/>)}
-    </section>
+        {orders?.map((order) => (
+          <OrderCard key={order.id} order={order} />
+        ))}
+      </section>
     </main>
   );
 }

@@ -1,5 +1,5 @@
-import FavoriteProduct from '@/components/main/FavoriteProduct';
-import RatingPreview from '@/components/main/Rating';
+import FavoriteProduct from '@/components/main/product/FavoriteProduct';
+import RatingPreview from '@/components/main/product/Rating';
 import { Product } from '@/types/types'
 import Link from 'next/link';
 

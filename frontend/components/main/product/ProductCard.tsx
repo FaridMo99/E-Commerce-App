@@ -8,16 +8,14 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Product } from "@/types/types";
-import ProductCardTags from "./ProductCardTags";
-import RatingPreview from "./Rating";
 import Price from "./Price";
 import ImageWithPlaceholder from "./ImageWithPlaceholder";
+import ProductCardTags from "./ProductCardTags";
+import RatingPreview from "./Rating";
 
 type ProductCardProps = { product: Product };
 
-
 function ProductCard({ product }: ProductCardProps) {
-  
   return (
     <Link href={`/products/${product.id}`}>
       <Card

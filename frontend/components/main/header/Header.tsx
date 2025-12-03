@@ -1,8 +1,8 @@
 import "server-only";
-import Navigation from "./Navigation";
-import Searchbar from "./Searchbar";
 import { AxeIcon } from "lucide-react";
 import Link from "next/link";
+import Searchbar from "./Searchbar";
+import Navigation from "./Navigation";
 
 export async function Header() {
   return (

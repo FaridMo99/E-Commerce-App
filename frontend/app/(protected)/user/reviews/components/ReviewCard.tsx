@@ -1,9 +1,9 @@
-import RatingPreview from "@/components/main/Rating";
 import { Card } from "@/components/ui/card";
 import { AuthProductReview } from "@/types/types";
 import Link from "next/link";
 import DeleteButton from "./DeleteButton";
 import TogglePublicButton from "./TogglePublicButton";
+import RatingPreview from "@/components/main/product/Rating";
 
 interface ReviewCardProps {
   review: AuthProductReview;

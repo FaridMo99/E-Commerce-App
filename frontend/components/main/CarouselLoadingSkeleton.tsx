@@ -1,14 +1,14 @@
-import Slider, { Settings } from "react-slick";
+import Slider from "react-slick";
 import { Skeleton } from "../ui/skeleton";
+import { settings } from "./BaseSlider";
 
 
 type CarouselLoadingSkeletonProps = {
-    settings: Settings
     cardHeight: string,
     cardWidth:string
 };
 
-function CarouselLoadingSkeleton({ settings, cardHeight, cardWidth }: CarouselLoadingSkeletonProps) {
+function CarouselLoadingSkeleton({ cardHeight, cardWidth }: CarouselLoadingSkeletonProps) {
     const length = settings.slidesToShow ?? 5
 
     const array: number[] = []

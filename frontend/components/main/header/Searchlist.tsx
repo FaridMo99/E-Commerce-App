@@ -1,9 +1,9 @@
 import { Search } from "lucide-react";
-import type { Product } from "../../types/types";
 import Link from "next/link";
-import ImageWithPlaceholder from "./ImageWithPlaceholder";
-import RatingPreview from "./Rating";
-import Price from "./Price";
+import { Product } from "@/types/types";
+import ImageWithPlaceholder from "../product/ImageWithPlaceholder";
+import Price from "../product/Price";
+import RatingPreview from "../product/Rating";
 
 function Searchlist({ products }: { products: Product[] }) {
 

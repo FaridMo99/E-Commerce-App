@@ -1,4 +1,4 @@
-import { Rating, RatingButton } from '../ui/shadcn-io/rating'
+import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
 
 type RatingPreviewProps = {
   rating: number,

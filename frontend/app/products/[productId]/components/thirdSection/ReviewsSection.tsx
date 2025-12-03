@@ -4,7 +4,6 @@ import ReviewButton from './ReviewButton'
 import { Plus } from 'lucide-react'
 import ReviewsCarousel from './ReviewCarousel'
 
-//add filtering based on rating
 async function ReviewsSection({ productId }: { productId: string }) {
     let reviews: ProductReview[]
     

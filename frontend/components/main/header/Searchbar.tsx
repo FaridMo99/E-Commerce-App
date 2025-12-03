@@ -1,13 +1,13 @@
 "use client";
-
 import { useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import useDebounce from "@/hooks/useDebounce";
 import { getProducts } from "@/lib/queries/client/productQueries";
-import { Input } from "../ui/input";
+import { Input } from "@/components/ui/input";
 import Searchlist from "./Searchlist";
+
 
 function Searchbar() {
   const [search, setSearch] = useState<string>("")

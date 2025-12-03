@@ -1,4 +1,4 @@
-import RatingPreview from "@/components/main/Rating";
+import RatingPreview from "@/components/main/product/Rating";
 import {
   Card,
   CardContent,

@@ -17,17 +17,11 @@ function FirstSection({ product }: FirstSectionProps) {
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationKey: ["add product to recently viewed", product, accessToken],
-    mutationFn: () => {
-      if (accessToken)
-        return addProductToRecentlyViewedProductsByProductId(
-          product.id,
-          accessToken
-        );
-    },
+    mutationKey: ["add product to recently viewed", product],
+    mutationFn: () => addProductToRecentlyViewedProductsByProductId(product.id, accessToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["get recently viewed products ", accessToken],
+        queryKey: ["get recently viewed products"],
       });
     },
     onError: (err) => {
@@ -36,7 +30,9 @@ function FirstSection({ product }: FirstSectionProps) {
   });
 
   useEffect(() => {
-    mutate();
+    if (accessToken) {
+      mutate();
+    }
   }, [mutate]);
 
   return (

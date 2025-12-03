@@ -1,5 +1,5 @@
+import { CardContent } from "@/components/ui/card";
 import { CameraIcon } from "lucide-react";
-import { CardContent } from "../ui/card";
 
 type ImageWithPlaceholderProps = {
   imageUrls?: string[];

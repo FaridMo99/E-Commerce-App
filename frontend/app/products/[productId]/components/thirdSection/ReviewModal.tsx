@@ -1,6 +1,6 @@
 "use client"
 import InputValidationFailedText from "@/components/main/InputValidationFailedText";
-import InteractiveRating from "@/components/main/InteractiveRating";
+import InteractiveRating from "@/components/main/product/InteractiveRating";
 import { Button } from "@/components/ui/button";
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,Dialog } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
@@ -39,10 +39,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
         }
       });
 
-    
-    
     const { errors } = formState
-    console.log(errors)
     
     const {mutate, isPending } = useMutation({
         mutationKey: ["create review for product", productId],
@@ -72,7 +69,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
 
   return (
     <Dialog>
-        <DialogTrigger asChild>
+      <DialogTrigger asChild>
                   <button
                       type="button"
             className="text-white cursor-pointer hover:text-white/80"
@@ -92,7 +89,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
           <FieldGroup className="grid gap-4">
             <Field className="grid gap-3">
               <Label htmlFor="rating">Rating</Label>
-                          <InteractiveRating
+                <InteractiveRating
                     styles="items-start"
                     value={Number(watch("rating")) || 0}
                     onChange={(v) =>

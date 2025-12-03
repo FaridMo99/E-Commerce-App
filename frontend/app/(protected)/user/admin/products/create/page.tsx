@@ -10,7 +10,3 @@ function page() {
 }
 
 export default page
-
-  //these are also for creating products
-//product with images, nice price
-//images should support drag and drop, multi images, previews, delete image

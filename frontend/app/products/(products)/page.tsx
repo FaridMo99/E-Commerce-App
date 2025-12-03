@@ -3,7 +3,7 @@ import ProductView from "./components/ProductView";
 import { getProducts } from "@/lib/queries/server/productQueries";
 import { SearchParamsProps } from "@/types/types";
 
-//page and limit should be default values
+
 async function page({ searchParams }:SearchParamsProps) {
   const params = await searchParams;
 

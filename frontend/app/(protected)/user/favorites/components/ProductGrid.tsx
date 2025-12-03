@@ -1,10 +1,9 @@
-import ProductCard from '@/components/main/ProductCard'
-import { Product } from '@/types/types'
+import ProductCard from "@/components/main/product/ProductCard";
+import { Product } from "@/types/types";
 
-function ProductGrid({products}:{products:Product[]}) {
+function ProductGrid({ products }: { products: Product[] }) {
   return (
-    <div
-      className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
@@ -12,4 +11,4 @@ function ProductGrid({products}:{products:Product[]}) {
   );
 }
 
-export default ProductGrid
+export default ProductGrid;

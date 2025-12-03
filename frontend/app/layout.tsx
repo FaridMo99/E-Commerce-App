@@ -1,4 +1,3 @@
-import Header from "@/components/main/Header";
 import "./globals.css";
 import "server-only";
 import Footer from "@/components/main/Footer";
@@ -7,6 +6,7 @@ import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
+import Header from "@/components/main/header/Header";
 
 export default async function RootLayout({ children }: ChildrenProps) {
   let user: User | undefined;

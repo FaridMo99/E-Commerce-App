@@ -5,8 +5,6 @@ import { getUser } from "@/lib/queries/server/usersQueries";
 import { toast } from "sonner";
 import { User } from "@/types/types";
 
-//access token in searchparam, but not user info
-//have to grab that seperately, auto redirect to home after that
 async function page({ searchParams }: { searchParams?: { token: string } }) {
   const param = await searchParams;
   if (!param?.token) redirect("/");

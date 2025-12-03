@@ -1,4 +1,4 @@
-import ImageWithPlaceholder from "@/components/main/ImageWithPlaceholder";
+import ImageWithPlaceholder from "@/components/main/product/ImageWithPlaceholder";
 import {
   Card,
   CardDescription,
@@ -20,7 +20,7 @@ function TopsellerCard({ topseller }: TopsellerCardProps) {
     <Link href={`/products/${product.id}`}>
       <Card className="bg-foreground relative pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer">
         <ImageWithPlaceholder
-          src={product.imageUrls[0]}
+          imageUrls={product.imageUrls}
           width="w-full"
           height="h-35"
         />

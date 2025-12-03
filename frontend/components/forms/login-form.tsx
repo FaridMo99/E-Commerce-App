@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -25,13 +24,11 @@ import useAuth from "@/stores/authStore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import { Loader2 } from "lucide-react";
 import InputValidationFailedText from "../main/InputValidationFailedText";
-import Facebook from "../icons/Facebook";
-import Google from "../icons/Google";
-import OAuthButton from "./OAuthButton";
 import { login } from "@/lib/queries/client/authQueries";
 import { useMutation } from "@tanstack/react-query";
+import OAuthButtonSection from "./OAuthButtonSection";
+import SubmitButton from "./SubmitButton";
 
 export function LoginForm({
   className,
@@ -142,29 +139,18 @@ export function LoginForm({
                 }}
               />
               <Field>
-                <Button disabled={buttonDisabledReasons} type="submit">
-                  {isPending ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    "Sign in"
-                  )}
-                </Button>
+                <SubmitButton
+                  text="Sign In"
+                  disabled={buttonDisabledReasons}
+                  isPending={isPending}
+                />
+
                 <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card my-2">
                   Or continue with
                 </FieldSeparator>
-                <OAuthButton
-                  bgColor="#DB4437"
-                  disabled={isSubmitting || isPending}
-                  logoSvg={<Google />}
-                  text="Sign in with Google"
-                  provider="google"
-                />
-                <OAuthButton
-                  bgColor="#1877F2"
-                  disabled={isSubmitting || isPending}
-                  logoSvg={<Facebook />}
-                  text="Sign in with Facebook"
-                  provider="facebook"
+                <OAuthButtonSection
+                  isPending={isPending}
+                  isSubmitting={isSubmitting}
                 />
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
@@ -174,7 +160,10 @@ export function LoginForm({
                   <Link href="/forgot-password"> Forgot Password?</Link>
                 </FieldDescription>
                 <FieldDescription className="text-center">
-                  <Link href="/new-verification-link"> Send New Verification Link</Link>
+                  <Link href="/new-verification-link">
+                    {" "}
+                    Send New Verification Link
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

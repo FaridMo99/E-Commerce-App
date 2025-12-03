@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
@@ -17,18 +16,17 @@ import { signup } from "@/lib/queries/client/authQueries";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import { Loader2 } from "lucide-react";
 import OptionalFieldMarker from "../main/OptionalFieldMarker";
 import InputValidationFailedText from "../main/InputValidationFailedText";
 import { clientSignupSchema } from "@/schemas/schemas";
 import { z } from "zod";
-import OAuthButton from "./OAuthButton";
-import Facebook from "../icons/Facebook";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { SignupSchema } from "@monorepo/shared";
+import OAuthButtonSection from "./OAuthButtonSection";
+import SubmitButton from "./SubmitButton";
 
-//add rerequesting the email logic
+
 export function SignupForm({
   className,
   ...props
@@ -172,33 +170,15 @@ export function SignupForm({
                 }}
               />
               <Field>
-                <Button disabled={buttonDisabledReasons} type="submit">
-                  {isPending ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    "Sign up"
-                  )}
-                </Button>
+                <SubmitButton text="Sign up" disabled={buttonDisabledReasons} isPending={isPending} />
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
-              <Field className="flex justify-center items-center">
-                <OAuthButton
-                  bgColor="#DB4437"
-                  disabled={isSubmitting || isPending}
-                  logoSvg={<Facebook />}
-                  text="Sign up with Google"
-                  provider="google"
-                />
-                <OAuthButton
-                  bgColor="#1877F2"
-                  disabled={isSubmitting || isPending}
-                  logoSvg={<Facebook />}
-                  text="Sign up with Facebook"
-                  provider="facebook"
-                />
-              </Field>
+              <OAuthButtonSection
+                isPending={isPending}
+                isSubmitting={isSubmitting}
+              />
               <FieldDescription className="text-center">
                 Fields marked with <OptionalFieldMarker /> are optional
               </FieldDescription>

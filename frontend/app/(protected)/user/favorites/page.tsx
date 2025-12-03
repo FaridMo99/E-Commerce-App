@@ -4,6 +4,7 @@ import { getUserFavoriteItems } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
 import ProductGrid from "./components/ProductGrid";
+import SectionWrapper from "@/components/main/SectionWrapper";
 
 //error page
 function Page() {
@@ -18,14 +19,11 @@ function Page() {
   if (isError) throw error
   
   return (
-    <main>
-      <h2 className="text-3xl font-extrabold mb-2 pl-8">
-        Favorites({favoriteProducts?.length})
-      </h2>
+    <SectionWrapper styles="" as="main" header={`Favorites(${favoriteProducts?.length})`}>
       <div className="w-full flex flex-col justify-between items-center">
         <ProductGrid products={favoriteProducts ?? []}/>
       </div>
-    </main>
+    </SectionWrapper>
   );
 }
 

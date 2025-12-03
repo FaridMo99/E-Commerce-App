@@ -1,4 +1,4 @@
-import CurrencySymbol from "@/components/main/CurrencySymbol";
+import CurrencySymbol from "@/components/main/product/CurrencySymbol";
 import { Slider } from "@/components/ui/slider";
 import { CurrencyISO } from "@/types/types";
 
@@ -11,8 +11,14 @@ type PriceSliderProps = {
   onCommit: (value: [number, number]) => void;
 };
 
-function PriceSlider({ currency, min, max, onDrag, onCommit, value }: PriceSliderProps) {
-    
+function PriceSlider({
+  currency,
+  min,
+  max,
+  onDrag,
+  onCommit,
+  value,
+}: PriceSliderProps) {
   return (
     <div className=" space-y-3">
       <Slider
@@ -37,4 +43,4 @@ function PriceSlider({ currency, min, max, onDrag, onCommit, value }: PriceSlide
   );
 }
 
-export default PriceSlider
+export default PriceSlider;

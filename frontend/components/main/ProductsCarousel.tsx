@@ -1,9 +1,10 @@
 "use client";
-import ProductCard from "../main/ProductCard";
+import ProductCard from "../main/product/ProductCard";
 import Slider, { type Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Product } from "@/types/types";
+import SectionWrapper from "../main/SectionWrapper";
 
 type ProductsCarouselProps = {
   title: string;
@@ -11,7 +12,6 @@ type ProductsCarouselProps = {
 };
 
 function ProductsCarousel({ title, products }: ProductsCarouselProps) {
-  
   const settings: Settings = {
     slidesToShow: 5,
     slidesToScroll: 1,
@@ -27,14 +27,13 @@ function ProductsCarousel({ title, products }: ProductsCarouselProps) {
     ],
   };
   return (
-    <section className="m-8">
-      <h2 className="text-3xl font-extrabold mb-2">{title}</h2>
+    <SectionWrapper styles="m-8" header={title}>
       <Slider {...settings}>
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </Slider>
-    </section>
+    </SectionWrapper>
   );
 }
 

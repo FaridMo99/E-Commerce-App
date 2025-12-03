@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import ItemCountDot from "./ItemCountDot";
 import { ShoppingCart } from "lucide-react";
 import {
@@ -11,15 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useAuth from "@/stores/authStore";
 import { Cart } from "@/types/types";
-import Price from "./Price";
-import RatingPreview from "./Rating";
 import Link from "next/link";
-import ImageWithPlaceholder from "./ImageWithPlaceholder";
-
+import ImageWithPlaceholder from "../product/ImageWithPlaceholder";
+import RatingPreview from "../product/Rating";
+import Price from "../product/Price";
 
 function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
   const itemsLength = cart?.items.length;
-  const accessToken = useAuth(state=>state.accessToken);
+  const accessToken = useAuth((state) => state.accessToken);
 
   return (
     <DropdownMenu>

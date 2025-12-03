@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -13,7 +12,6 @@ import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { changePasswordSchema } from "@/schemas/schemas";
 import InputValidationFailedText from "../main/InputValidationFailedText";
 import { useRouter } from "next/navigation";
@@ -21,8 +19,9 @@ import { ChangePasswordSchema } from "@/types/types";
 import useAuth from "@/stores/authStore";
 import { useMutation } from "@tanstack/react-query";
 import { changePasswordUnauthenticated } from "@/lib/queries/client/authQueries";
+import SubmitButton from "./SubmitButton";
 
-//redirect on success
+
 function ChangePasswordForm({ token }: { token: string }) {
 
   const setState = useAuth(state=>state.setState)
@@ -93,13 +92,11 @@ function ChangePasswordForm({ token }: { token: string }) {
                   text={errors.confirmPassword?.message}
                 />
               </Field>
-              <Button disabled={buttonDisabledReasons} type="submit">
-                {isPending ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  "Submit"
-                )}
-              </Button>
+              <SubmitButton
+                text="Submit"
+                disabled={buttonDisabledReasons}
+                isPending={isPending}
+              />
             </FieldGroup>
           </form>
         </CardContent>

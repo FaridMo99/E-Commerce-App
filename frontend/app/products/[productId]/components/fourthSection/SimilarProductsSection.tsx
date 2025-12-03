@@ -1,4 +1,4 @@
-import ProductsCarousel from "@/components/home/ProductsCarousel";
+import ProductsCarousel from "@/components/main/ProductsCarousel";
 import { getProducts } from "@/lib/queries/server/productQueries";
 import { Product, ProductCategory } from "@/types/types";
 

@@ -1,6 +1,6 @@
-import Price from '@/components/main/Price';
 import { Product } from '@/types/types'
 import AddToCartBox from './AddToCartBox';
+import Price from '@/components/main/product/Price';
 
 function AddingPart({product}:{product:Product}) {
   return (
