@@ -9,6 +9,7 @@ import {
   getOrders,
   makeOrder,
 } from "../controller/ordersController.js";
+import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
 
 const ordersRouter = Router();
 
@@ -18,7 +19,7 @@ ordersRouter.get(
   validateTimeframeQuery,
   getOrders,
 );
-ordersRouter.post("/", hasCsrfToken, makeOrder);
+ordersRouter.post("/", hasCsrfToken, geoCurrencyMiddleware, makeOrder);
 ordersRouter.post(
   "/:orderId/cancel",
   hasCsrfToken,

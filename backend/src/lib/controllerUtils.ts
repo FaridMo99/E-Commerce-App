@@ -1,4 +1,4 @@
-import type { Cart, CartItem, Product } from "../generated/prisma/client.js";
+import type { Cart, CartItem } from "../generated/prisma/client.js";
 import type { BatchPayload } from "../generated/prisma/internal/prismaNamespace.js";
 import prisma from "../services/prisma.js";
 

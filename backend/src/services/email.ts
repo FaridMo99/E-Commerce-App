@@ -7,20 +7,12 @@ import {
   MJ_APIKEY_PRIVATE,
   MJ_APIKEY_PUBLIC,
 } from "../config/env.js";
-import type { Prisma } from "../generated/prisma/client.js";
 import { formatPriceForClient } from "../lib/currencyHandlers.js";
 import { getTimestamp } from "../lib/utils.js";
 import chalk from "chalk";
 import type { RequestData } from "node-mailjet/declarations/request/Request.js";
 import prisma from "./prisma.js";
-
-type OrderWithItemsAndProduct = Prisma.OrderGetPayload<{
-  include: {
-    items: {
-      include: { product: true };
-    };
-  };
-}>;
+import type { OrderWithSelectedFields } from "../config/prismaHelpers.js";
 
 const mailjet = new Mailjet.Client({
   apiKey: MJ_APIKEY_PUBLIC,
@@ -113,7 +105,7 @@ export async function sendVerificationEmail(
 
 export async function sendOrderEmail(
   receiver: string,
-  order: OrderWithItemsAndProduct
+  order:OrderWithSelectedFields
 ): Promise<Mailjet.LibraryResponse<RequestData>> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 

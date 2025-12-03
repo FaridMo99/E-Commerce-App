@@ -22,7 +22,7 @@ function Searchlist({ products }: { products: Product[] }) {
             <ImageWithPlaceholder
               imageUrls={product.imageUrls}
               width="w-20"
-              height="h-full"
+              height="h-20"
             />
             <div className="w-1/3 h-full flex flex-col justify-evenly items-start truncate">
               <p>{product.name}</p>

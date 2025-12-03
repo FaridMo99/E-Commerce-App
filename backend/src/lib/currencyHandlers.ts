@@ -140,6 +140,58 @@ export async function transformAndFormatProductPrice(
   }
 }
 
+export async function transformAndFormatProductPriceInCents(
+  product: ProductWithSelectedFields,
+  baseCurrency: CurrencyISO,
+  wantedCurrency: CurrencyISO
+): Promise<void> {
+  try {
+    // 1. If currency is the same → nothing to exchange
+    if (baseCurrency !== wantedCurrency) {
+      const { rates } = await getExchangeRates();
+
+      const baseRate = rates[baseCurrency];
+      const wantedRate = rates[wantedCurrency];
+
+      if (!baseRate || !wantedRate) {
+        throw new Error(
+          `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`
+        );
+      }
+
+      // Exchange factor: USD → baseCurrency → wantedCurrency
+      // openexchangerates always returns: 1 USD = rates[X]
+      const usdToBase = 1 / baseRate;
+      const usdToWanted = wantedRate;
+
+      const exchangeFactor = usdToBase * usdToWanted;
+
+      // ---- Convert product.price (in cents) ----
+      product.price = Math.round(product.price * exchangeFactor);
+
+      // ---- Convert sale_price if exists ----
+      if (product.sale_price) {
+        product.sale_price = Math.round(product.sale_price * exchangeFactor);
+      }
+
+      // set currency
+      product.currency = wantedCurrency;
+    }
+
+    // 2. Apply nice price rounding
+    product.price = roundPriceUpInCents(product.price);
+
+    if (product.sale_price) {
+      product.sale_price = roundPriceUpInCents(product.sale_price);
+    }
+
+  } catch (err) {
+    console.log(
+      chalk.red(getTimestamp(), "transformAndFormatProductPriceInCents error:", err)
+    );
+  }
+}
+
 //for meta
 export async function convertAndFormatPriceInCents(
   amountInCents: number,

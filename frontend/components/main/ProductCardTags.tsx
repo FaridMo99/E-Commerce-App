@@ -1,4 +1,3 @@
-import { X } from "lucide-react";
 import ProductTag from "./ProductTag";
 
 type ProductCardTagsProps = {
@@ -12,7 +11,7 @@ function ProductCardTags({
   stock_quantity,
   sale_price,
   published_at,
-  position = "right",
+  position = "right"
 }: ProductCardTagsProps) {
 
   const positionClass = position === "left" ? "left-0" : "right-0";
@@ -20,9 +19,6 @@ function ProductCardTags({
 
   return (
     <>
-      {stock_quantity === 0 && (
-        <X className="absolute w-full h-full text-black" />
-      )}
       {stock_quantity === 0 && (
         <ProductTag
           type="Sold out"

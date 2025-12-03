@@ -4,22 +4,22 @@ import { AccessToken } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
 
-//returns sessionid from stripe to then route to stripe checkout
-export async function makeOrder(accessToken: AccessToken): Promise<> {
-
+export async function makeOrder(
+  accessToken: AccessToken
+): Promise<{ redirectUrl: string }> {
   const res = await fetch(`${apiBaseUrl}/orders`, {
     credentials: "include",
-      method: "POST",
-      headers: {
-        ...getCsrfHeaderClientSide(),
-          Authorization: `Bearer ${accessToken}`,
-    }
+    method: "POST",
+    headers: {
+      ...getCsrfHeaderClientSide(),
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }
 
-//will probably be run when on cancel route
-export async function cancelOrder(orderId: string, accessToken: AccessToken): Promise<> {
+
+export async function cancelOrder(orderId: string, accessToken: AccessToken): Promise<void> {
 
   const res = await fetch(`${apiBaseUrl}/orders/${orderId}/cancel`, {
     credentials: "include",

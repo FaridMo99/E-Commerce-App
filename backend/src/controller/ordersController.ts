@@ -2,12 +2,14 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import {
   formatPriceForClient,
+  transformAndFormatProductPriceInCents,
 } from "../lib/currencyHandlers.js";
 import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
 import chalk from "chalk";
-import { getTimestamp } from "../lib/utils.js";
-import { orderSelect } from "../config/prismaHelpers.js";
+import { calculateCartTotalsInCents, getTimestamp, releaseCartItems } from "../lib/utils.js";
+import { cartSelect, orderSelect, type CartWithSelectedFields } from "../config/prismaHelpers.js";
+import type Stripe from "stripe";
 
 // Get orders within a timeframe
 export async function getOrders(
@@ -70,29 +72,30 @@ export async function getOrders(
   }
 }
 
-// Make a new order
 export async function makeOrder(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const userId = req.user?.id!;
+  const currency = req.currency!
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Creating order for user ${userId}`)
+      chalk.yellow(
+        `${getTimestamp()} Starting order process for user ${userId}`
+      )
     );
 
-    const shoppingCart = await prisma.cart.findUnique({
+    //fetch cart
+    const shoppingCart:CartWithSelectedFields | null = await prisma.cart.findUnique({
       where: { userId },
-      include: { items: { include: { product: true } } },
+      select: cartSelect,
     });
 
     if (!shoppingCart) {
       console.log(
-        chalk.red(
-          `${getTimestamp()} Shopping cart not found for user ${userId}`
-        )
+        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`)
       );
       return res.status(404).json({ message: "Shopping Cart not found" });
     }
@@ -104,84 +107,172 @@ export async function makeOrder(
       return res.status(400).json({ message: "No Items in Cart" });
     }
 
-    const line_items = await Promise.all(
-      shoppingCart.items.map(async (item) => {
-        const exchange = await exchangeToCurrencyInCents(
-          item.product.currency,
-          item.product.price,
-          currency
+    //initial check of stock and cart
+    let cartUpdated = false;
+    const updatedItems = shoppingCart.items.map((item) => {
+      const product = item.product;
+
+      if (product.stock_quantity < item.quantity) {
+        cartUpdated = true;
+        console.log(
+          chalk.yellow(
+            `${getTimestamp()} Adjusting cart item for product ${product.id}. Requested: ${item.quantity}, Available: ${product.stock_quantity}`
+          )
         );
-        const priceInCents = exchange.exchangedPriceInCents;
-
         return {
-          price_data: {
-            currency: exchange.currency.toLowerCase(),
-            product_data: {
-              name: item.product.name,
-              description: item.product.description,
-            },
-            unit_amount: priceInCents,
-          },
-          quantity: item.quantity,
+          ...item,
+          quantity: product.stock_quantity,
         };
-      })
-    );
-
-    const totalAmount = line_items.reduce((sum, item) => {
-      const price = item.price_data.unit_amount!;
-      const quantity = item.quantity!;
-      return sum + price * quantity;
-    }, 0);
-
-    const order = await prisma.order.create({
-      data: {
-        user_id: userId,
-        status: "PENDING",
-        currency,
-        total_amount: totalAmount,
-        items: {
-          create: shoppingCart.items.map((item) => ({
-            product: { connect: { id: item.product.id } },
-            quantity: item.quantity,
-            price_at_purchase: item.product.sale_price ?? item.product.price,
-            currency,
-          })),
-        },
-        payment: {
-          create: {
-            method: "CARD",
-            details: "Stripe Checkout Session",
-            status: "PENDING",
-          },
-        },
-      },
+      }
+      return item;
     });
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      success_url: `${CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${CLIENT_ORIGIN}/cart?cancelOrderId=${order.id}`,
-      billing_address_collection: "required",
-      metadata: { orderId: order.id, userId },
-    });
 
-    await prisma.$transaction(
-      shoppingCart.items.map((item) =>
-        prisma.product.update({
-          where: { id: item.product.id },
-          data: { stock_quantity: { decrement: item.quantity } },
+    if (cartUpdated) {
+    
+    await Promise.all(
+      updatedItems.map((item) =>
+        prisma.cartItem.update({
+          where: { cartId_productId: { cartId: shoppingCart.id, productId: item.product.id } },
+          data: { quantity: item.quantity },
         })
       )
     );
 
-    console.log(
-      chalk.green(
-        `${getTimestamp()} Order created successfully for user ${userId}`
-      )
-    );
-    return res.status(200).json({ sessionId: session.id });
+    return res.status(400).json({ message: "Some items in your cart were updated due to insufficient stock. Please review and try again." });
+    
+  }
+
+
+    //transform prices to customers currency in cents, add totals for each product and whole cart in cents
+    await Promise.all(shoppingCart.items.map((item) => transformAndFormatProductPriceInCents(item.product,item.product.currency,currency)));
+
+    const cartWithTotals = calculateCartTotalsInCents(shoppingCart);
+
+    let order;
+    let finalItems = cartWithTotals.items;
+
+    //atomic order creation, stock decrement, and check
+    try {
+      order = await prisma.$transaction(async (tx) => {
+        //decrement stock for all items
+        await Promise.all(
+          finalItems.map(async (item) => {
+            //atomically decrement the stock quantity
+            const updatedProduct = await tx.product.update({
+              where: { id: item.product.id },
+              data: {
+                stock_quantity: {
+                  decrement: item.quantity,
+                },
+              },
+              select: { stock_quantity: true, name: true, id: true },
+            });
+
+            if (updatedProduct.stock_quantity < 0) {
+              throw new Error(
+                `Insufficient stock for product ${updatedProduct.name} (ID: ${updatedProduct.id})`
+              );
+            }
+          })
+        );
+
+        //create order
+        return tx.order.create({
+          data: {
+            user_id: userId,
+            status: "PENDING",
+            currency,
+            total_amount: cartWithTotals.total!,
+            items: {
+              create: finalItems.map((item) => ({
+                product: { connect: { id: item.product.id } },
+                quantity: item.quantity,
+                price_at_purchase:
+                  item.product.sale_price ?? item.product.price,
+                currency,
+              })),
+            },
+            payment: {
+              create: {
+                method: "CARD",
+                details: "Stripe Checkout Session",
+                status: "PENDING",
+              },
+            },
+          },
+        });
+      });
+    } catch (transactionError) {
+
+      if (
+        transactionError instanceof Error &&
+        transactionError.message.includes("Insufficient stock")
+      ) {
+        console.log(
+          chalk.red(
+            `${getTimestamp()} Transaction failed due to: ${transactionError.message}`
+          )
+        );
+        return res.status(400).json({
+          message: transactionError.message + ". Please try again.",
+        });
+      }
+      throw transactionError;
+    }
+
+    //create stripe line Items
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      finalItems.map((item) => {
+        const productPrice = item.product.sale_price ?? item.product.price;
+        return {
+          price_data: {
+            currency: currency.toLowerCase(),
+            product_data: {
+              name: item.product.name,
+              images:item.product.imageUrls
+            },
+            //stripe price in cents
+            unit_amount: productPrice,
+          },
+          quantity: item.quantity,
+        };
+      });
+
+    //create stripe checkout session
+      //pass locale
+    try {
+      console.log(lineItems)
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${CLIENT_ORIGIN}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${CLIENT_ORIGIN}/order/cancel?cancelOrderId=${order.id}`,
+        billing_address_collection: "required",
+        metadata: { orderId: order.id, userId },
+      });
+
+      //save session id
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { stripe_session_id: session.id },
+      });
+
+      console.log(
+        chalk.green(
+          `${getTimestamp()} Order ${order.id} created and Stripe session initiated for user ${userId}`
+        )
+      );
+      //session id for redirect
+      return res.status(200).json({ redirectUrl: session.url });
+
+    } catch (err) {
+      console.log(chalk.red(getTimestamp(),"stripe error", err.message))
+      await releaseCartItems(order.id)
+      next(err)
+    }
+
   } catch (err) {
     console.log(
       chalk.red(
@@ -215,20 +306,14 @@ export async function cancelOrder(
         `${getTimestamp()} Cancelling order ${orderId} for user ${userId}`
       )
     );
-    const orderItems = await prisma.order_Item.findMany({
-      where: { order_id: orderId },
+
+    const order = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
     });
 
-    await prisma.$transaction(
-      orderItems.map((item) =>
-        prisma.product.update({
-          where: { id: item.product_id },
-          data: { stock_quantity: { increment: item.quantity } },
-        })
-      )
-    );
-
-    if (orderItems.length === 0) {
+    if (!order) {
       console.log(
         chalk.red(
           `${getTimestamp()} Order ${orderId} not found for user ${userId}`
@@ -237,11 +322,18 @@ export async function cancelOrder(
       return res.status(404).json({ message: "Order not found" });
     }
 
+    if (order.status !== "PENDING") return res.status(400).json({message:`Cant cancel this order since its already ${order.status}`})
+    
+    
+    await releaseCartItems(orderId)
+
+
     console.log(
       chalk.green(
         `${getTimestamp()} Order ${orderId} cancelled successfully for user ${userId}`
       )
     );
+
     return res.status(200).json({ message: "Order cancelled" });
   } catch (err) {
     console.log(

@@ -11,7 +11,8 @@ export const BACKEND_URL = process.env.BACKEND_URL;
 export const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS!;
 
 //stripe
-export const STRIPE_API_KEY = process.env.STRIPE_SECRET_KEY!;
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY!;
+export const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY!;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
 //cloudinary

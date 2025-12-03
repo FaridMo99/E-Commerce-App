@@ -34,6 +34,7 @@ export type CartItem = {
   quantity: number;
   id: string;
   product: Product;
+  total:number
 };
 
 export type Product = {
@@ -79,10 +80,8 @@ export type Order = {
 
 export type Cart = {
     id: string,
-    _count: {
-        items: number
-    }
-    items: CartItem[]
+  items: CartItem[]
+    total:number
 };
     
 export type ProductReview = {

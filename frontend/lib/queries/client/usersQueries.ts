@@ -16,7 +16,6 @@ import {
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
-
 export async function getUser(accessToken: AccessToken): Promise<User> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
@@ -31,7 +30,6 @@ export async function updateUser(
   content: UpdateUserSchema,
   accessToken: AccessToken
 ): Promise<User> {
-
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "PATCH",
@@ -46,7 +44,6 @@ export async function updateUser(
 }
 
 export async function deleteUser(accessToken: AccessToken): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "DELETE",
@@ -60,7 +57,6 @@ export async function deleteUser(accessToken: AccessToken): Promise<void> {
 
 //get more info for order summary
 export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
     headers: {
@@ -71,7 +67,6 @@ export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
 }
 
 export async function deleteUserCart(accessToken: AccessToken): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
     method: "DELETE",
@@ -87,7 +82,6 @@ export async function addProductToUserCart(
   product: AddCartItemSchema,
   accessToken: AccessToken
 ): Promise<Cart> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items`, {
     credentials: "include",
     method: "POST",
@@ -105,7 +99,6 @@ export async function removeItemFromCart(
   itemId: string,
   accessToken: AccessToken
 ): Promise<Cart> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "DELETE",
@@ -123,7 +116,6 @@ export async function changeItemQuantitiy(
   itemId: string,
   accessToken: AccessToken
 ): Promise<Cart> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "PATCH",
@@ -140,7 +132,6 @@ export async function changeItemQuantitiy(
 export async function getUserReviews(
   accessToken: AccessToken
 ): Promise<AuthProductReview[]> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/reviews`, {
     credentials: "include",
     headers: {
@@ -154,7 +145,6 @@ export async function getUserOrders(
   accessToken: AccessToken,
   queryParam?: OrdersQuerySchema
 ): Promise<Order[]> {
-
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -184,7 +174,6 @@ export async function getUserOrderByOrderId(
   id: string,
   accessToken: AccessToken
 ): Promise<Order> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/orders/${id}`, {
     credentials: "include",
     headers: {
@@ -197,7 +186,6 @@ export async function getUserOrderByOrderId(
 export async function getUserFavoriteItems(
   accessToken: AccessToken
 ): Promise<Product[]> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
     credentials: "include",
     headers: {
@@ -211,7 +199,6 @@ export async function addFavoriteItemByProductId(
   productId: string,
   accessToken: AccessToken
 ): Promise<Product> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
     credentials: "include",
     method: "POST",
@@ -229,7 +216,6 @@ export async function deleteFavoriteItemByProductId(
   productId: string,
   accessToken: AccessToken
 ): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/favorites/${productId}`, {
     credentials: "include",
     method: "DELETE",
@@ -244,7 +230,6 @@ export async function deleteFavoriteItemByProductId(
 export async function getRecentlyViewedProducts(
   accessToken: AccessToken
 ): Promise<Product[]> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/recently-viewed-products`, {
     credentials: "include",
     headers: {
@@ -258,7 +243,6 @@ export async function addProductToRecentlyViewedProductsByProductId(
   productId: string,
   accessToken: AccessToken
 ): Promise<Product> {
-
   const res = await fetch(`${apiBaseUrl}/users/me/recently-viewed-products`, {
     credentials: "include",
     method: "POST",
@@ -268,6 +252,20 @@ export async function addProductToRecentlyViewedProductsByProductId(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ productId }),
+  });
+  return await handleResponse(res);
+}
+
+//have to create controller endpoint for that
+export async function getUserOrderByStripeSessionId(
+  id: string,
+  accessToken: AccessToken
+): Promise<Order> {
+  const res = await fetch(`${apiBaseUrl}/users/me/orders/stripe/${id}`, {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }

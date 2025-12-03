@@ -92,6 +92,7 @@ model Order {
   user               User         @relation(fields: [user_id], references: [id])
   user_id            String
   shipping_address   String?
+  stripe_session_id  String?       @unique
   ordered_at         DateTime     @default(now())
   status             OrderStatus
   total_amount       Int

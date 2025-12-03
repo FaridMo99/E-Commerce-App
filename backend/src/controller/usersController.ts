@@ -8,10 +8,10 @@ import type {
 } from "@monorepo/shared";
 import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
-import { formatPriceForClient, formatPricesForClientAndCalculateAverageRating, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
+import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
-import { getTimestamp } from "../lib/utils.js";
+import { calculateCartTotals, getTimestamp } from "../lib/utils.js";
 import {
   authenticatedReviewSelect,
   cartSelect,
@@ -20,7 +20,6 @@ import {
   productWhere,
   userSelect,
 } from "../config/prismaHelpers.js";
-import redis from "../services/redis.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -314,25 +313,7 @@ export async function getUserCart(
       where: {
         userId,
       },
-      select: {
-        id:true,
-        _count: {
-            select: {
-                items:true
-          }
-        },
-        items: {
-            select: {
-                quantity: true,
-                id: true,
-                product: {
-                    select: {
-                        ...productSelect
-                    }
-                }
-            }
-        }
-      },
+      select: cartSelect
     });
 
     if (!cart) {
@@ -353,6 +334,9 @@ export async function getUserCart(
             transformAndFormatProductPrice(item.product, item.product.currency, currency)
           )
         );
+    
+    
+    calculateCartTotals(cart)
 
     return res.status(200).json(cart);
   } catch (err) {
@@ -429,6 +413,18 @@ export async function addProductToUserCart(
       },
     });
 
+    //check if amount in cart is more than available
+    const product = await prisma.product.findUnique({ where: { id: productId } })
+
+    if (!product) return res.status(404).json({ message: "Product not found" })
+    if (quantity > product.stock_quantity)
+      return res.status(400).json({ message: "Not enough stock" });
+    if (
+      existingItem &&
+      existingItem.quantity + quantity > product.stock_quantity
+    )
+      return res.status(400).json({ message: "Total quantity exceeds stock" });
+
     let updatedCart;
 
     if (existingItem) {
@@ -463,17 +459,7 @@ export async function addProductToUserCart(
     //return full updated cart
     updatedCart = await prisma.cart.findUnique({
       where: { userId },
-      select: {
-        id: true,
-        _count: { select: { items: true } },
-        items: {
-          select: {
-            id: true,
-            quantity: true,
-            product: { select: { ...productSelect } },
-          },
-        },
-      },
+      select: cartSelect
     });
 
     //convert and format prices
@@ -486,6 +472,8 @@ export async function addProductToUserCart(
         )
       )
     );
+
+    calculateCartTotals(updatedCart!);
 
     return res.status(200).json(updatedCart);
   } catch (err) {
@@ -525,9 +513,7 @@ export async function removeProductFromUserCart(
       where: { cart: { userId }, id: itemId },
       select: {
         cart: {
-          select: {
-            ...cartSelect,
-          },
+          select: cartSelect
         },
       },
     });
@@ -546,6 +532,8 @@ export async function removeProductFromUserCart(
         `${getTimestamp()} Item ${itemId} removed successfully for user ${userId}`
       )
     );
+
+    calculateCartTotals(cart.cart)
     return res.status(200).json(cart.cart);
   } catch (err) {
     console.log(
@@ -581,6 +569,29 @@ export async function updateItemQuantity(
         `${getTimestamp()} Updating quantity for item ${itemId}, user ${userId}`
       )
     );
+
+    //check if item already exists in cart
+    const existingItem = await prisma.cartItem.findFirst({
+      where: {
+        cart: { userId },
+        productId: itemId,
+      },
+    });
+
+    //check if amount in cart is more than available
+    const product = await prisma.product.findUnique({
+      where: { id: itemId },
+    });
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (quantity > product.stock_quantity)
+      return res.status(400).json({ message: "Not enough stock" });
+    if (
+      existingItem &&
+      existingItem.quantity + quantity > product.stock_quantity
+    )
+      return res.status(400).json({ message: "Total quantity exceeds stock" });
+
     const cart = await prisma.cartItem.update({
       where: {
         cart: {
@@ -593,25 +604,7 @@ export async function updateItemQuantity(
       },
       select: {
         cart: {
-          select: {
-            id:true,
-            _count: {
-                select: {
-                    items:true
-                }
-            },
-            items: {
-                select: {
-                    quantity: true,
-                    id: true,
-                    product: {
-                        select: {
-                            ...productSelect
-                        }
-                    }
-                }
-            }
-        },
+          select: cartSelect,
         },
       },
     });
@@ -640,9 +633,10 @@ export async function updateItemQuantity(
         )
       )
     );
-    
-    return res.status(200).json(cart.cart);
 
+    calculateCartTotals(cart.cart);
+
+    return res.status(200).json(cart.cart);
   } catch (err) {
     console.log(
       chalk.red(
