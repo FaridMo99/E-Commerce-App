@@ -1,10 +1,10 @@
 "use client"
-
+import { AlertDialogFooter, AlertDialogHeader } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { deleteUser } from "@/lib/queries/client/usersQueries"
 import useAuth from "@/stores/authStore"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useMutation } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -25,10 +25,25 @@ function DeleteAccountButton() {
         }
     })
 
-
-
-  return (
-      <Button onClick={()=>mutate()} disabled={isPending}>{isPending ? <Loader2 className="animate-spin"/> : "Delete Account"}</Button>
+    return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive">Delete Account</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you wanna delete your Account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your
+                    Account and remove your data from our servers.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={isPending} onClick={()=>mutate()}>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

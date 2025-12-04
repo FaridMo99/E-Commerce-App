@@ -1,6 +1,5 @@
-import Slider from "react-slick";
 import { Skeleton } from "../ui/skeleton";
-import { settings } from "./BaseSlider";
+import BaseSlider, { settings } from "./BaseSlider";
 
 
 type CarouselLoadingSkeletonProps = {
@@ -18,14 +17,14 @@ function CarouselLoadingSkeleton({ cardHeight, cardWidth }: CarouselLoadingSkele
     }
     
     return (
-      <Slider {...settings}>
+      <BaseSlider>
         {array.map((item) => (
-            <Skeleton
-              className={`w-${cardWidth} h-${cardHeight} rounded-lg`}
-              key={item}
-            />
+          <Skeleton
+            className={`w-${cardWidth} h-${cardHeight} rounded-lg`}
+            key={item}
+          />
         ))}
-      </Slider>
+      </BaseSlider>
     );
 }
 

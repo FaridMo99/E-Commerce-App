@@ -25,10 +25,10 @@ function ProductCardTags({
           styles={`absolute top-4 z-2 ${positionClass} ${roundedClass}`}
         />
       )}
-      {stock_quantity !== 0 && sale_price && (
+      {sale_price && (
         <ProductTag
           type="Sale"
-          styles={`absolute top-4 z-2 ${positionClass} w-10 ${roundedClass}`}
+          styles={`absolute top-20 z-2 ${positionClass} w-10 ${roundedClass}`}
         />
       )}
       {published_at &&

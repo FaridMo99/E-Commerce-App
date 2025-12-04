@@ -33,7 +33,7 @@ async function layout({ children }: ChildrenProps) {
     <>
       <AuthZustandSetter accessToken={accessToken} user={user} />
         <Navbar />
-            <main className="w-full h-full pl-[20vw] pr-[10vw] flex flex-col items-center justify-evenly">
+            <main className="w-full pl-[20vw] pr-[10vw] flex flex-col items-center justify-evenly">
           {children}
           </main>
     </>

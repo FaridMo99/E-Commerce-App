@@ -19,7 +19,6 @@ import {
 } from "../controller/usersController.js";
 import {
   hasCsrfToken,
-  isAuthenticated
 } from "../middleware/authMiddleware.js";
 import {
   validateBody,
@@ -27,6 +26,7 @@ import {
 } from "../middleware/validationMiddleware.js";
 import { addCartItemSchema, itemQuantitySchema, ordersQuerySchema, productIdSchema, updateUserSchema } from "@monorepo/shared";
 import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
+import { changePasswordAuthenticated } from "../controller/authController.js";
 
 const usersRouter = Router();
 

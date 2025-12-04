@@ -32,51 +32,48 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
           <ItemCountDot count={itemsLength ?? 0} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-foreground text-white max-h-110">
-        <DropdownMenuLabel className="flex justify-around items-center">
-          Items in Cart{" "}
-          <Link href="/user/cart" className="text-blue-500 underline">
-            Go To Cart
-          </Link>
+      <DropdownMenuContent className="bg-foreground text-white max-h-110 z-500">
+        <DropdownMenuLabel className="flex justify-center items-center text-lg">
+          Shopping Cart
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {itemsLength && itemsLength > 0 ? (
           cart?.items.map((item) => (
             <DropdownMenuItem
+              asChild
               className="flex h-30 justify-between"
               key={item.id}
             >
-              <ImageWithPlaceholder
-                imageUrls={item.product.imageUrls}
-                width="w-1/3 min-w-1/3 max-w-1/3"
-                height="h-full"
-              />
-              <div className="w-2/3 h-full flex justify-center">
-                <div className="h-full flex flex-col w-2/3 pl-2">
-                  <Link
-                    href={`/products/${item.product.id}`}
-                    className="text-lg font-bold mt-4 truncate"
-                  >
-                    {item.product.name}
-                  </Link>
-                  <RatingPreview
-                    size={10}
-                    rating={item.product.averageRating}
-                    styles="items-start"
-                  />
-                </div>
-                <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
-                  <p>Amount: {item.quantity}</p>
-                  <div className="flex ellipsis truncate">
-                    <Price
-                      price={item.product.price}
-                      sale_price={item.product.sale_price}
-                      currency={item.product.currency}
-                      styles="items-end"
+              <Link href="/user/cart" className="cursor-pointer">
+                <ImageWithPlaceholder
+                  imageUrls={item.product.imageUrls}
+                  width="w-1/3 min-w-1/3 max-w-1/3"
+                  height="h-full"
+                />
+                <div className="w-2/3 h-full flex justify-center">
+                  <div className="h-full flex flex-col w-2/3 pl-2">
+                    <p className="text-lg font-bold mt-4 truncate">
+                      {item.product.name}
+                    </p>
+                    <RatingPreview
+                      size={10}
+                      rating={item.product.averageRating}
+                      styles="items-start"
                     />
                   </div>
+                  <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
+                    <p>Amount: {item.quantity}</p>
+                    <div className="flex ellipsis truncate">
+                      <Price
+                        price={item.product.price}
+                        sale_price={item.product.sale_price}
+                        currency={item.product.currency}
+                        styles="items-end"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </DropdownMenuItem>
           ))
         ) : (

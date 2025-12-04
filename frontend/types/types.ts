@@ -1,4 +1,4 @@
-import { changePasswordSchema } from "@/schemas/schemas";
+import { changePasswordAuthenticatedSchema, changePasswordSchema } from "@/schemas/schemas";
 import { DailyRevenue } from "@monorepo/shared";
 import { LucideIcon } from "lucide-react";
 import { ReactNode } from "react";
@@ -11,6 +11,8 @@ export type AccessToken = string;
 export type OAuthProvider = "google" | "facebook";
 
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
+export type ChangePasswordAuthenticatedSchema = z.infer<typeof changePasswordAuthenticatedSchema>;
+
 
 //prisma enums
 export type OrderStatus = "PENDING" | "CANCELLED" | "ORDERED" | "DELIVERING" | "DELIVERED"
@@ -54,6 +56,13 @@ export type Product = {
   };
 };
 
+export type OrderItem = {
+  price_at_purchase: true;
+  quantity:number;
+  currency: CurrencyISO;
+  product:Product
+};
+
 export type AdminProduct = Product & { is_public: boolean };
 
 export type ProductMetaInfos = {
@@ -70,7 +79,7 @@ export type Order = {
     total_amount: number,
     currency: CurrencyISO,
     shipping_address: string | null,
-    items: { product: Product }[],
+    items: OrderItem[],
     user:AuthUser,
     payment: {
         method:PaymentMethod,
@@ -110,9 +119,16 @@ export type HomeProducts = {
 
 //protected user data, move this to protected user route for settings
 export type AuthUser = User & {
-    birthdate: Date | null,
-    created_at: Date,
-    address:string | null
+  birthdate: Date | null;
+  created_at: Date;
+  email: string;
+  street: string | null;
+  houseNumber: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  createdBy: "SELF" | "GOOGLE" | "FACEBOOK"
+  hasPassword:boolean //can only be false if createdby is not self
 };
 
 export type AuthProductReview = ProductReview & {

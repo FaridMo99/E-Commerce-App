@@ -27,7 +27,7 @@ function ProductForm() {
       stock_quantity:1
     }
   })
-    const {errors} = formState
+    const {errors, isDirty} = formState
 
     const { data: currency, isLoading } = useQuery({
         queryKey: ["get base currency"],
@@ -179,7 +179,7 @@ function ProductForm() {
           text={errors.is_public?.message}
         />
       </Field>
-      <Button className="my-4 self-center" disabled={isPending} type="submit">
+      <Button className="my-4 self-center" disabled={isPending || !isDirty} type="submit">
         {isPending ? <Loader2 className="animate-spin" /> : "Create"}
       </Button>
     </form>

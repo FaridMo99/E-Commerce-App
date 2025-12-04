@@ -15,7 +15,6 @@ import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import { userSelect } from "../config/prismaHelpers.js";
 
-
 export async function login(
   req: Request<{}, {}, LoginSchema>,
   res: Response,
@@ -27,7 +26,7 @@ export async function login(
       chalk.yellow(`${getTimestamp()} Attempting login for email: ${email}`)
     );
 
-    const user = await prisma.user.findFirst({where: { email }});
+    const user = await prisma.user.findFirst({ where: { email } });
 
     if (!user) {
       console.log(
@@ -38,7 +37,7 @@ export async function login(
       return res.status(401).json({ message: "Email or Password is wrong" });
     }
     if (!user.verified) {
-      console.log(user)
+      console.log(user);
       console.log(
         chalk.yellow(
           `${getTimestamp()} Login attempt for unverified account: ${email}`
@@ -89,10 +88,10 @@ export async function login(
       name: user.name,
       role: user.role,
       countryCode: user.countryCode,
-      currency:user.currency
-    }
+      currency: user.currency,
+    };
 
-    return res.status(200).json({ accessToken, user:safeUser });
+    return res.status(200).json({ accessToken, user: safeUser });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Error during login for email: ${email}`),
@@ -108,8 +107,8 @@ export async function signup(
   next: NextFunction
 ) {
   const { email } = req.body;
-  const currency = req.currency!
-  const countryCode = req.countryCode!
+  const currency = req.currency!;
+  const countryCode = req.countryCode!;
 
   try {
     console.log(
@@ -239,8 +238,8 @@ export async function verifyUser(
       countryCode: user.countryCode,
       currency: user.currency,
     };
-    
-    return res.status(200).json({ accessToken, user:safeUser });
+
+    return res.status(200).json({ accessToken, user: safeUser });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       console.log(chalk.red(`${getTimestamp()} Verification token expired`));
@@ -426,9 +425,8 @@ export async function issueRefreshToken(
       `${getTimestamp()} issueRefreshToken called for userId: ${token?.userId}`
     )
   );
-  
-  try {
 
+  try {
     const dbToken = await prisma.refreshToken.findFirst({
       where: { deviceId: token.deviceId },
     });
@@ -443,8 +441,8 @@ export async function issueRefreshToken(
 
     const user = await prisma.user.findUnique({
       where: {
-        id: token.userId
-      }
+        id: token.userId,
+      },
     });
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -458,7 +456,7 @@ export async function issueRefreshToken(
     res.clearCookie("refreshToken");
     res.clearCookie("csrfToken");
 
-    const accessToken = await issueTokens(user, res,token.deviceId);
+    const accessToken = await issueTokens(user, res, token.deviceId);
 
     console.log(
       chalk.green(
@@ -472,8 +470,8 @@ export async function issueRefreshToken(
       countryCode: user.countryCode,
       currency: user.currency,
     };
-    
-    return res.status(200).json({ accessToken, user:safeUser });
+
+    return res.status(200).json({ accessToken, user: safeUser });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       console.log(
@@ -490,5 +488,100 @@ export async function issueRefreshToken(
       err
     );
     return res.status(401).json({ message: "Invalid refresh token" });
+  }
+}
+
+
+export async function changePasswordAuthenticated(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id!;
+  const { oldPassword, password } = req.body;
+
+  if (!oldPassword || !password)
+    return res.status(400).json({ message: "Password missing" });
+
+   const validatedPassword = loginSchema.shape.password.safeParse(password);
+  if (!validatedPassword.success) return res.status(400).json({ message: validatedPassword.error.message });
+  
+   const validatedOldPassword = loginSchema.shape.password.safeParse(oldPassword);
+   if (!validatedOldPassword.success)
+     return res
+       .status(400)
+       .json({ message: validatedOldPassword.error.message });
+  
+  try {
+    console.log(
+      chalk.yellow(
+        getTimestamp(),
+        "changing password for user with id:",
+        userId
+      )
+    );
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      console.log(
+        chalk.red(getTimestamp(), "User not found with user id:", userId)
+      );
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if(!user.password) return res.status(400).json({message:"You didnt set a Password yet"})
+
+    const compareSuccess = await bcrypt.compare(oldPassword, user.password);
+
+    if (!compareSuccess) return res.status(401).json({ message: "Passwords dont match" })
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userWithNewPassword = await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+      select: userSelect,
+    });
+
+    return res.status(200).json(userWithNewPassword)
+  } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to change password authenticated ${userId}:`,
+        err
+      )
+    );
+    next(err);
+  }
+}
+
+
+//move this passowrd validation to middleware since you repeat it often
+export async function setPassword(req: Request, res: Response, next: NextFunction) { 
+  const id = req.user?.id!
+  const password = req.body.password
+
+    if (!password) return res.status(400).json({ message: "Password missing" });
+
+    const validatedPassword = loginSchema.shape.password.safeParse(password);
+    if (!validatedPassword.success)
+      return res.status(400).json({ message: validatedPassword.error.message });
+  
+  try {
+    const user = await prisma.user.findUnique({ where: { id } })
+    if (!user) return res.status(404).json({ message: "User not found" })
+    if (user.password) return res.status(400).json({ message: "User already has a password" })
+    
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        password:await bcrypt.hash(password,10)
+      },
+      select:userSelect
+    })
+
+    return res.status(200).json(updatedUser)
+  } catch (err) {
+    console.log(chalk.red(getTimestamp(), "Set Password error", err))
+    next(err)
   }
 }

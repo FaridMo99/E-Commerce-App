@@ -25,17 +25,17 @@ function Page() {
       {
         queryKey: ["get revenue", from, to],
         queryFn: () => getRevenue(accessToken!, { from, to }),
-        placeholderData: (pre:AdminRevenue | undefined) => pre,
+        placeholderData: (pre: AdminRevenue | undefined) => pre,
       },
       {
         queryKey: ["get topsellers", from, to],
         queryFn: () => getTopsellers(accessToken!, { from, to }),
-        placeholderData: (pre:AdminTopseller[] | undefined) => pre,
+        placeholderData: (pre: AdminTopseller[] | undefined) => pre,
       },
       {
         queryKey: ["get new users count", from, to],
         queryFn: () => getNewUsers(accessToken!, { from, to }),
-        placeholderData: (pre:AdminNewUser | undefined) => pre,
+        placeholderData: (pre: AdminNewUser | undefined) => pre,
       },
     ],
   });

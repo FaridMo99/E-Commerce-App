@@ -6,7 +6,6 @@ import type {
   OrdersQuerySchema,
   UpdateUserSchema,
 } from "@monorepo/shared";
-import bcrypt from "bcrypt";
 import type { User } from "../generated/prisma/client.js";
 import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
@@ -18,7 +17,7 @@ import {
   orderSelect,
   productSelect,
   productWhere,
-  userSelect,
+  userAuthenticatedSelect,
 } from "../config/prismaHelpers.js";
 
 // Get user by ID
@@ -41,7 +40,8 @@ export async function getUserByUserId(
         id,
       },
       select: {
-        ...userSelect,
+        ...userAuthenticatedSelect,
+        password:true
       },
     });
 
@@ -53,7 +53,9 @@ export async function getUserByUserId(
     console.log(
       chalk.green(`${getTimestamp()} Fetched user ${id} successfully`)
     );
-    return res.status(200).json(user);
+    user.hasPassword = !!user.password
+    const {password, ...safeUser} = user
+    return res.status(200).json(safeUser);
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch user ${id}:`, err)
@@ -68,7 +70,7 @@ export async function updateUserByUserId(
   res: Response,
   next: NextFunction
 ) {
-  const { email, name, password, birthdate, address, countryCode, currency } = req.body;
+  const { name, birthdate, countryCode, currency, street, houseNumber, postalCode, city, state } = req.body;
   const id = req.user?.id;
 
   if (!id) {
@@ -79,39 +81,35 @@ export async function updateUserByUserId(
   try {
     console.log(chalk.yellow(`${getTimestamp()} Updating user ${id}`));
 
-    if (email) {
-      const emailInUse = await prisma.user.findFirst({ where: { email } });
-      if (emailInUse) {
-        console.log(
-          chalk.red(`${getTimestamp()} Email ${email} already in use`)
-        );
-        return res.status(400).json({ message: "Email already in use" });
-      }
-    }
 
     const data: Partial<User> = {
-      ...(email && { email }),
       ...(name && { name }),
       ...(birthdate && { birthdate }),
-      ...(address && { address }),
-      ...(password && { password: await bcrypt.hash(password, 10) }),
+      ...(street && { street }),
+      ...(houseNumber && { houseNumber }),
+      ...(postalCode && { postalCode }),
+      ...(city && { city }),
+      ...(state && { state }),
       ...(currency && { currency }),
-      ...(countryCode && { countryCode })
+      ...(countryCode && { countryCode }),
     };
 
     const user = await prisma.user.update({
       where: { id },
       data,
       select: {
-        ...userSelect,
-      },
+        ...userAuthenticatedSelect,
+        password:true
+      }
     });
 
     console.log(
       chalk.green(`${getTimestamp()} User ${id} updated successfully`)
     );
-
-    return res.status(200).json(user);
+    
+        user.hasPassword = !!user.password;
+        const { password, ...safeUser } = user;
+        return res.status(200).json(safeUser);
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update user ${id}:`, err)
@@ -903,7 +901,6 @@ export async function getRecentlyViewedProducts(
         `${getTimestamp()} Successfully fetched recently viewed products for user ${userId}`
       )
     );
-    console.log(recentlyViewedProducts)
 
     await Promise.all(
       recentlyViewedProducts.map((product) =>

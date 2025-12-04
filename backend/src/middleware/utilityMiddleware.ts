@@ -69,7 +69,6 @@ export async function geoCurrencyMiddleware(
       req.currency = req.user.currency;
       return next();
     }
-
     //set ip if not authed
     const ip = (req.headers["x-forwarded-for"]?.toString().split(",")[0] ??
       req.ip)!;

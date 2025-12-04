@@ -55,10 +55,10 @@ export default function UserDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {filteredRoutes.map((route) => (
-          <DropdownMenuItem key={route.link}>
+          <DropdownMenuItem asChild key={route.link}>
             <Link
               href={route.link}
-              className="flex justify-between w-full items-center gap-2"
+              className="flex cursor-pointer justify-between w-full items-center gap-2"
             >
               <route.icon />
               <span>{route.text}</span>

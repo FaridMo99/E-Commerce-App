@@ -1,5 +1,11 @@
 import { apiBaseUrl } from "@/config/constants";
-import { AccessToken, AuthResponse } from "@/types/types";
+import {
+  AccessToken,
+  AuthResponse,
+  ChangePasswordAuthenticatedSchema,
+  ChangePasswordSchema,
+  User,
+} from "@/types/types";
 import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { getCsrfHeaderClientSide } from "../../helpers";
@@ -22,9 +28,8 @@ export async function login(
 
 export async function signup(
   credentials: SignupSchema,
-  captchaToken: string,
+  captchaToken: string
 ): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/auth/signup`, {
     method: "POST",
     headers: {
@@ -104,7 +109,6 @@ export async function changePasswordUnauthenticated(
 }
 
 export async function logout(accessToken: AccessToken): Promise<void> {
-
   const res = await fetch(`${apiBaseUrl}/auth/logout`, {
     method: "POST",
     credentials: "include",
@@ -115,6 +119,41 @@ export async function logout(accessToken: AccessToken): Promise<void> {
   });
   await handleResponse<void>(res);
   cookieStore.delete("refreshToken");
-  cookieStore.delete("csrfToken")
+  cookieStore.delete("csrfToken");
+}
 
+export async function changePasswordAuthenticated(
+  passwords: ChangePasswordAuthenticatedSchema,
+  accessToken: AccessToken
+): Promise<User> {
+  const { oldPassword, password } = passwords;
+  const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
+    credentials: "include",
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeaderClientSide(),
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ password, oldPassword }),
+  });
+  return await handleResponse(res);
+}
+
+export async function setPassword(
+  passwords: ChangePasswordSchema,
+  accessToken: AccessToken
+): Promise<User> {
+  const { password } = passwords;
+  const res = await fetch(`${apiBaseUrl}/auth/set-password`, {
+    credentials: "include",
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...getCsrfHeaderClientSide(),
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+  return await handleResponse(res);
 }

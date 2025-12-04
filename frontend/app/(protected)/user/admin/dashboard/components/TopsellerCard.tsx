@@ -18,7 +18,7 @@ function TopsellerCard({ topseller }: TopsellerCardProps) {
 
   return (
     <Link href={`/products/${product.id}`}>
-      <Card className="bg-foreground relative pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer">
+      <Card className="bg-foreground relative pt-0 overflow-clip hover:border-black transition-all duration-200 hover:cursor-pointer">
         <ImageWithPlaceholder
           imageUrls={product.imageUrls}
           width="w-full"

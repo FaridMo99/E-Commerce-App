@@ -121,7 +121,7 @@ export async function createProductReviewByProductId(
 
 export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
   const additionalHeaders = await getAllHeaders();
-  
+  console.log(additionalHeaders);
   const res = await fetch(`${apiBaseUrl}/products/home`, {
     credentials: "include",
     headers: {

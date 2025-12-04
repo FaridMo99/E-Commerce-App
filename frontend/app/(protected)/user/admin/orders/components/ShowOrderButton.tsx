@@ -17,6 +17,7 @@ function ShowOrderButton({ order }: { order: Order }) {
       <Dialog>
         <DialogTrigger asChild>
           <Button
+            aria-label="show order details"
             type="button"
             className="text-white cursor-pointer hover:text-white/80"
           >
@@ -28,16 +29,20 @@ function ShowOrderButton({ order }: { order: Order }) {
         </DialogHeader>
         <DialogContent>
           <p>{order.currency}</p>
-          <p>{order.ordered_at.toISOString()}</p>
+          <p>{order.ordered_at}</p>
           <p>{order.total_amount}</p>
           <p>{order.status}</p>
           <p>{order.shipping_address}</p>
           <p>{order.payment?.method}</p>
           <p>{order.payment?.status}</p>
-          <p>{order.user.address}</p>
-          <p>{order.user.birthdate?.toISOString()}</p>
+          <p>{order.user.city}</p>
+          <p>{order.user.postalCode}</p>
+          <p>{order.user.state}</p>
+          <p>{order.user.street}</p>
+          <p>{order.user.houseNumber}</p>
+          <p>{order.user.birthdate && order.user.birthdate}</p>
           <p>{order.user.countryCode}</p>
-          <p>{order.user.created_at.toISOString()}</p>
+          <p>{order.user.created_at}</p>
           <p>{order.user.name}</p>
           <p>{order.user.role}</p>
           {order.items.map((item) => (
@@ -46,13 +51,12 @@ function ShowOrderButton({ order }: { order: Order }) {
               <p>{item.product.name}</p>
             </div>
           ))}
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button type="button">Close</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
-        <DialogFooter className="mt-4">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button type="button">Close</Button>
-        </DialogFooter>
       </Dialog>
     );
 }

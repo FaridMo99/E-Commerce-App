@@ -20,6 +20,10 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const changePasswordAuthenticatedSchema = changePasswordSchema.safeExtend({
+  oldPassword: passwordSchema,
+});
+
 
 export const clientImageSchema = z
   .instanceof(File, {

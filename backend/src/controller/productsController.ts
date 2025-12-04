@@ -11,7 +11,6 @@ import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
   convertAndFormatPriceInCents,
   getBaseCurrency,
-  getExchangeRates,
   transformAndFormatProductPrice,
   turnPriceToPriceInCents,
 } from "../lib/currencyHandlers.js";

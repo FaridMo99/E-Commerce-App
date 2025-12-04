@@ -12,8 +12,14 @@ export const userSelect: Prisma.UserSelect = {
 export const userAuthenticatedSelect: Prisma.UserSelect = {
   ...userSelect,
   created_at: true,
-  address: true,
   birthdate: true,
+  email: true,
+  street: true,
+  houseNumber: true,
+  city: true,
+  state: true,
+  postalCode: true,
+  createdBy:true,
 };
 
 export const categorySelect: Prisma.CategorySelect = {
@@ -74,6 +80,9 @@ export const orderSelect: Prisma.OrderSelect = {
           ...productSelect,
         },
       },
+      price_at_purchase: true,
+      quantity: true,
+      currency:true,
     },
   },
   payment: {

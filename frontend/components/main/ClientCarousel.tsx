@@ -5,16 +5,10 @@ import "slick-carousel/slick/slick-theme.css";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/stores/authStore";
 import SectionWrapper from "../main/SectionWrapper";
-import { Product } from "@/types/types";
 import BaseSlider from "./BaseSlider";
+import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 
-type ClientCarouselProps = {
-    title: string;
-    mutationKey: string;
-    mutation: (accessToken: string) => Promise<Product[]>
-};
-
-function ClientCarousel({title, mutation, mutationKey}:ClientCarouselProps) {
+function RecentlyViewedProducts() {
   const accessToken = useAuth((state) => state.accessToken);
 
   const {
@@ -22,8 +16,8 @@ function ClientCarousel({title, mutation, mutationKey}:ClientCarouselProps) {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: [mutationKey],
-    queryFn: () =>mutation(accessToken!),
+    queryKey: ["Recently Viewed"],
+    queryFn: () => getRecentlyViewedProducts(accessToken!),
     enabled: !!accessToken,
   });
 
@@ -31,7 +25,7 @@ function ClientCarousel({title, mutation, mutationKey}:ClientCarouselProps) {
   if (!products || products.length === 0 || isError || isLoading) return null;
 
   return (
-    <SectionWrapper styles="m-8" header={title}>
+    <SectionWrapper styles="m-8" header="Recently Viewed">
       <BaseSlider>
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
@@ -41,4 +35,4 @@ function ClientCarousel({title, mutation, mutationKey}:ClientCarouselProps) {
   );
 }
 
-export default ClientCarousel;
+export default RecentlyViewedProducts;

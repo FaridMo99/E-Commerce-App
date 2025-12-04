@@ -9,14 +9,14 @@ import { apiBaseUrl } from "@/config/constants";
 import {
   AccessToken,
   AuthProductReview,
+  AuthUser,
   Cart,
   Order,
   Product,
-  User,
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
-export async function getUser(accessToken: AccessToken): Promise<User> {
+export async function getUser(accessToken: AccessToken): Promise<AuthUser> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     headers: {
@@ -29,7 +29,7 @@ export async function getUser(accessToken: AccessToken): Promise<User> {
 export async function updateUser(
   content: UpdateUserSchema,
   accessToken: AccessToken
-): Promise<User> {
+): Promise<AuthUser> {
   const res = await fetch(`${apiBaseUrl}/users/me`, {
     credentials: "include",
     method: "PATCH",

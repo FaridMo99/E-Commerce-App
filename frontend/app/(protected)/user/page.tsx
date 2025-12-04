@@ -5,16 +5,8 @@ import { getUser } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import LoadingPage from "@/components/main/LoadingPage";
 import { UpdateAccountModal } from "./components/UpdateAccountModal";
-
-
-//if oauth user with out password, give info here he can set password here
-//make delete a modal
-//make birthdate and address cleaner
-//changing email should,
-  //require old password to do so
-  //send email to old account to ask if it was you, if not you can change password with link
-  //new email address has to verify with link
-  //same for backend
+import ChangePasswordModal from "./components/ChangePasswordModal";
+import SetPasswordModal from "./components/SetPasswordModal";
 
 function Page() {
   const accessToken = useAuth(state => state.accessToken)
@@ -26,7 +18,8 @@ function Page() {
 
   if (isLoading) return <LoadingPage />
 
-  if(isError) throw error
+  if (isError || !user) throw error
+  console.log(user)
 
   return (
     <main className="px-8">
@@ -34,8 +27,9 @@ function Page() {
         Welcome {user?.name}
       </h1>
       <p>Here you can Edit your Account</p>
-      <UpdateAccountModal/>
+      <UpdateAccountModal user={user}/>
       <DeleteAccountButton />
+      {user.hasPassword ? <ChangePasswordModal/> : <SetPasswordModal /> }
     </main>
   );
 }

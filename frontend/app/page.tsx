@@ -1,7 +1,6 @@
 
-import ClientCarousel from "@/components/main/ClientCarousel";
+import RecentlyViewedProducts from "@/components/main/ClientCarousel";
 import ProductsCarousel from "@/components/main/ProductsCarousel";
-import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";
 import "server-only";
 
@@ -38,11 +37,7 @@ export default async function Home() {
           products={categoryProducts}
         />
       )}
-      <ClientCarousel
-        title="Recently Viewed"
-        mutationKey="get recently viewed products"
-        mutation={getRecentlyViewedProducts}
-      />
+      <RecentlyViewedProducts/>
     </main>
   );
 }

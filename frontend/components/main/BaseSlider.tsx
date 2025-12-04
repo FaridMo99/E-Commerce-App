@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import Slider, { Settings } from 'react-slick';
+import Slider, { type Settings } from 'react-slick';
 
 export   const settings: Settings = {
   slidesToShow: 5,

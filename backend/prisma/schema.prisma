@@ -24,8 +24,12 @@ model User {
   role       UserRole  @default(USER)
   created_at DateTime  @default(now())
   createdBy  UserCreatedBy
-  providerId String?
-  address    String?
+  providerId    String?
+  street        String?
+  houseNumber   String?
+  city          String?
+  state         String?
+  postalCode    String?
   countryCode String     @default("US")
   currency   CurrencyISO @default(USD)
   orders     Order[]

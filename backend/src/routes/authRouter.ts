@@ -8,6 +8,8 @@ import {
   verifyUser,
   sendEmailToChangePassword,
   issueRefreshToken,
+  changePasswordAuthenticated,
+  setPassword,
 } from "../controller/authController.js";
 import {
   hasCsrfToken,
@@ -50,6 +52,11 @@ authRouter.post(
 );
 
 authRouter.patch("/change-password", authRateLimiter, changePassword);
+
+authRouter.patch("/change-password-authenticated", isAuthenticated, hasCsrfToken, changePasswordAuthenticated);
+
+authRouter.patch("/set-password", isAuthenticated, hasCsrfToken, setPassword);
+
 
 authRouter.post(
   "/forgot-password",

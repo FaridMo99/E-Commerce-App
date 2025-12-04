@@ -48,7 +48,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
     },
   });
 
-  const { errors } = formState;
+  const { errors,isDirty } = formState;
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["edit product", product.id],
@@ -184,7 +184,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button disabled={isPending} type="submit">
+            <Button disabled={isPending || isDirty} type="submit">
               {isPending ? (
                 <Loader2 className="animate-spin text-white" />
               ) : (

@@ -33,7 +33,7 @@ function Searchbar() {
   return (
     <form
       onSubmit={searchHandler}
-      className="absolute w-1/3 left-1/3 top-[5vh] z-500"
+      className="absolute w-1/3 left-1/3 top-[5vh] z-450"
     >
       <div className="w-full relative">
         <Input

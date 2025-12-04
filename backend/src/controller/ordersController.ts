@@ -247,8 +247,8 @@ export async function makeOrder(
         payment_method_types: ["card"],
         line_items: lineItems,
         mode: "payment",
-        success_url: `${CLIENT_ORIGIN}/order/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${CLIENT_ORIGIN}/order/cancel?cancelOrderId=${order.id}`,
+        success_url: `${CLIENT_ORIGIN}/user/orders/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${CLIENT_ORIGIN}/user/orders/cancel?cancelOrderId=${order.id}`,
         billing_address_collection: "required",
         metadata: { orderId: order.id, userId },
       });

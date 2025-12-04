@@ -58,12 +58,47 @@ export const signupSchema = loginSchema.extend({
 });
 
 /** --- Update User Schema --- */
-    //make this proper, this rn just momentarily
-export const updateUserSchema = signupSchema.partial().extend({
-  address: z.string().optional(),
-  countryCode: z.string(),
-  currency:currencySchema
-});
+export const updateUserSchema = signupSchema
+  .omit({ password: true,email:true })
+  .partial()
+  .extend({
+    street: z.string().optional(),
+    houseNumber: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    postalCode: z.string().optional(),
+    countryCode: z.string().optional(),
+    currency: currencySchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasAny =
+      data.street ||
+      data.houseNumber ||
+      data.city ||
+      data.state ||
+      data.postalCode ||
+      data.countryCode;
+
+    const requiredFields: Array<keyof typeof data> = [
+      "street",
+      "houseNumber",
+      "city",
+      "postalCode",
+      "countryCode",
+    ];
+
+    if (hasAny) {
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          ctx.addIssue({
+            code: "custom",
+            path: [field],
+            message: `${field} is required when providing an address`,
+          });
+        }
+      }
+    }
+  });
 
 /** --- Orders Query Schema --- */
 export const ordersQuerySchema = z.object({

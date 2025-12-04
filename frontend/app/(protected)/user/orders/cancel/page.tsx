@@ -6,9 +6,10 @@ async function page({ searchParams }: { searchParams?: { cancelOrderId: string }
   
   const params = await searchParams
   const cancelOrderId = params?.cancelOrderId;
-  
-  if (!cancelOrderId) return notFound()
+  console.log(cancelOrderId);
 
+  if (!cancelOrderId) return notFound()
+console.log(cancelOrderId)
   return <Screen cancelOrderId={ cancelOrderId } />
 }
 
