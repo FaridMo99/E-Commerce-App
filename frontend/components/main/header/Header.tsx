@@ -1,5 +1,4 @@
 import "server-only";
-import { AxeIcon } from "lucide-react";
 import Link from "next/link";
 import Searchbar from "./Searchbar";
 import Navigation from "./Navigation";
@@ -13,7 +12,7 @@ export async function Header() {
           aria-label="go to home"
           className="h-full w-1/8 flex justify-center items-center z-10"
         >
-          <AxeIcon size={100} />
+          <img src="/logoIcon.png"/>
         </Link>
         <Navigation />
     </header>

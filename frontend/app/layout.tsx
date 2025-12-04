@@ -7,6 +7,12 @@ import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
 import Header from "@/components/main/header/Header";
+import { Questrial } from "next/font/google";
+
+const questrial = Questrial({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export default async function RootLayout({ children }: ChildrenProps) {
   let user: User | undefined;
@@ -21,7 +27,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
   }
 
   return (
-    <html lang="de">
+    <html lang="de" className={questrial.className}>
       <body>
         <QueryContext>
           <AuthZustandSetter accessToken={accessToken} user={user} />
