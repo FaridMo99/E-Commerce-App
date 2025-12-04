@@ -2,13 +2,11 @@ import { verifyAfterEmailLink } from "@/lib/queries/server/authQueries";
 import "server-only";
 import SuccessCard from "./components/SuccessCard";
 
-async function page({ searchParams }: { searchParams?: { token: string } }) {
-  const param = await searchParams;
-  if (!param?.token) throw new Error();
+async function page(props:PageProps<"/verify-success">) {
+  const {token}  = await props.searchParams;
+  if (!token) throw new Error();
 
-  const token = param.token;
-
-  const res = await verifyAfterEmailLink(token);
+  const res = await verifyAfterEmailLink(token[0] ?? token);
 
   return (
     <SuccessCard

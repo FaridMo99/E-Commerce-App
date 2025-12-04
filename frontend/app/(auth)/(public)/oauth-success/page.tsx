@@ -2,24 +2,24 @@ import "server-only";
 import SuccessCard from "@/app/(auth)/(protected)/verify-success/components/SuccessCard";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/queries/server/usersQueries";
-import { toast } from "sonner";
 import { User } from "@/types/types";
 
-async function page({ searchParams }: { searchParams?: { token: string } }) {
-  const param = await searchParams;
-  if (!param?.token) redirect("/");
+async function page(props:PageProps<"/oauth-success">) {
+  const {token} = await props.searchParams
+  if (!token) redirect("/");
 
-  const token = param.token;
   let user: User;
 
   try {
-    user = await getUser(token);
+    user = await getUser(token[0] ?? token);
   } catch (err) {
-    toast.error("Something went wrong. Try again.");
-    redirect("/login");
+    console.log(err)
+    redirect("/login?error=oAuth");
   }
 
-  return <SuccessCard action="Login" user={user} accessToken={token} />;
+  return (
+    <SuccessCard action="Login" user={user} accessToken={token[0] ?? token} />
+  );
 }
 
 export default page;

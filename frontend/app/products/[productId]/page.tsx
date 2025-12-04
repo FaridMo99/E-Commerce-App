@@ -9,8 +9,8 @@ import { Loader2 } from "lucide-react";
 import ReviewsSection from "./components/thirdSection/ReviewsSection";
 
 
-async function page({ params }: { params: { productId: string } }) {
-  const { productId } = await params;
+async function page(props:PageProps<"/products/[productId]">) {
+  const { productId } = await props.params;
   let product: Product;
 
   try {

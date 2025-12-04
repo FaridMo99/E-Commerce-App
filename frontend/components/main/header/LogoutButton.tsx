@@ -9,9 +9,10 @@ import { toast } from "sonner";
 
 type LogoutButtonProps = {
   accessToken: AccessToken;
+  text?:boolean
 };
 
-function LogoutButton({ accessToken }: LogoutButtonProps) {
+function LogoutButton({ accessToken, text }: LogoutButtonProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
   const errorMessage = "Something went wrong. Try again later.";
@@ -39,10 +40,16 @@ function LogoutButton({ accessToken }: LogoutButtonProps) {
       disabled={isLoading}
       onClick={logoutHandler}
       title="logout"
-      className={`hidden md:block ${isLoading ? "cursor-wait" : "cursor-pointer"}`}
+      className={`${text ? "md:hidden flex items-center px-4" : "hidden md:block"} ${isLoading ? "cursor-wait" : "cursor-pointer"}`}
       aria-label="logout"
     >
-      {!isLoading ? <LogOut /> : <Loader2 className="animate-spin" />}
+      {isLoading ? (
+        <Loader2 className="animate-spin" />
+      ) : text ? (
+          "Logout"
+      ) : (
+        <LogOut />
+      )}
     </button>
   );
 }

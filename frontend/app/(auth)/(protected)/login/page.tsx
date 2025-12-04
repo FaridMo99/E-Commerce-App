@@ -1,7 +1,9 @@
 import { LoginForm } from "@/components/forms/login-form";
 
-function page() {
-  return <LoginForm />;
+async function page(props: PageProps<"/login">) {
+  const { error } = await props.searchParams
+  
+  return <LoginForm error={!!!error} />;
 }
 
 export default page;

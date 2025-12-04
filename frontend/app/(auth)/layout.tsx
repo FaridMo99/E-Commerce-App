@@ -1,10 +1,9 @@
-import { ChildrenProps } from '@/types/types';
+import "server-only"
 
-
-async function layout({children}:ChildrenProps) {
+async function layout(props: LayoutProps<"/">) {
   return (
     <div className="flex w-full h-full items-center justify-center">
-      <div className="w-full max-w-sm">{children}</div>
+      <div className="w-full max-w-sm">{props.children}</div>
     </div>
   );
 }

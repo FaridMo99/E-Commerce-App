@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 
 
-const routes: Route[] = [
+export const userRoutes: Route[] = [
   { link: "/user/admin/dashboard", text: "Admin", icon: UserStar },
   { link: "/user", text: "My Profile", icon: User },
   { link: "/user/cart", text: "Shopping Cart", icon: ShoppingCart },
@@ -34,7 +34,7 @@ export default function UserDropdown() {
   const role = useAuth(state => state.user?.role)
   
 
-    const filteredRoutes = routes.filter((route) =>
+    const filteredRoutes = userRoutes.filter((route) =>
       route.text === "Admin" ? role === "ADMIN" : true
     );
   

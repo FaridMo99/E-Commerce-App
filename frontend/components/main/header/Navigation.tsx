@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import ShoppingCartDropdown from "./ShoppingCartDropdown";
 import UserDropdown from "../UserDropdown";
 import LogoutButton from "./LogoutButton";
+import { MobileNavigation } from "./MobileNavigation";
 
 //dont forget the popup for mobile
 function Navigation() {
@@ -35,9 +36,7 @@ function Navigation() {
 
   return (
     <nav className="w-1/3 h-full flex justify-evenly items-center z-10">
-      <button className="block md:hidden">
-        <MenuIcon size={40} />
-      </button>
+      <MobileNavigation />
       {isLoading ? (
         <Loader2 className="animate-spin" />
       ) : (

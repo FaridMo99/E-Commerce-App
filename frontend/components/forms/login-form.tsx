@@ -19,7 +19,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { LoginSchema, loginSchema } from "@monorepo/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import useAuth from "@/stores/authStore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -31,9 +31,10 @@ import OAuthButtonSection from "./OAuthButtonSection";
 import SubmitButton from "./SubmitButton";
 
 export function LoginForm({
+  error= false,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {error?:boolean}) {
   //submission states
   const { mutate, isPending } = useMutation({
     mutationKey: ["login user"],
@@ -51,6 +52,12 @@ export function LoginForm({
         turnstileRef.current?.reset();
     }
   })
+
+    useEffect(() => {
+      if (error) {
+        toast.error("Something went wrong. Try again.");
+      }
+    }, [error]);
 
   //auth store
   const setState = useAuth((state) => state.setState);
@@ -79,7 +86,7 @@ export function LoginForm({
       mutate({credentials, captchaToken});
 
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
     } 
   }
 

@@ -1,10 +1,10 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
-import { AccessToken, ChildrenProps, User } from "@/types/types";
+import { AccessToken, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 
-async function layout({ children }: ChildrenProps) {
+async function layout(props:LayoutProps<"/user">) {
   let res;
   let user: User | undefined;
   let accessToken: AccessToken | undefined;
@@ -22,7 +22,7 @@ async function layout({ children }: ChildrenProps) {
   return (
     <>
       <AuthZustandSetter accessToken={accessToken} user={user} />
-      {children}
+      {props.children}
     </>
   );
 }

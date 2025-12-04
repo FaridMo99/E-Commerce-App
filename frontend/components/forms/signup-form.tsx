@@ -80,7 +80,7 @@ export function SignupForm({
         // Pass a single object to mutate
         mutate({ mutateCredentials: rest, captchaToken });
       } catch (err) {
-        toast.error(err.message || "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
     }
 

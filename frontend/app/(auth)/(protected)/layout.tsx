@@ -1,9 +1,8 @@
 import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
-import { ChildrenProps } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 
-async function layout({ children }: ChildrenProps) {
+async function layout(props:LayoutProps<"/">) {
   let res;
   try {
     res = await getNewRefreshToken();
@@ -15,7 +14,7 @@ async function layout({ children }: ChildrenProps) {
     redirect("/");
   }
 
-  return children;
+  return props.children;
 }
 
 export default layout;
