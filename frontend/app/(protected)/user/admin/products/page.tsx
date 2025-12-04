@@ -1,13 +1,13 @@
+import SectionWrapper from "@/components/main/SectionWrapper";
 import ProductsTable from "./components/ProductsTable"
 
 
 function page() {
   return (
-    <>
-      <h1 className="self-start text-2xl text-white">Products</h1>
-      <ProductsTable/>
-    </>
-  )
+    <SectionWrapper header="Products" styles="w-full">
+      <ProductsTable />
+    </SectionWrapper>
+  );
 }
 
 export default page

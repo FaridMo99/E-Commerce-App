@@ -119,7 +119,8 @@ export default function UserOrderTable() {
             </TableRow>
           )}
         </TableBody>
-          </TableProvider>
+      </TableProvider>
+      
     </main>
   );
 }

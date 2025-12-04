@@ -22,10 +22,11 @@ import { AdminProduct } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProductSchema, UpdateProductSchema } from "@monorepo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Pen } from "lucide-react";
+import { Pen } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import CategorySelect from "./CategorySelect";
+import SubmitButton from "@/components/forms/SubmitButton";
 
 
 
@@ -70,6 +71,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
+          aria-label="Edit product"
           type="button"
           className="text-white cursor-pointer hover:text-white/80"
         >
@@ -184,13 +186,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button disabled={isPending || isDirty} type="submit">
-              {isPending ? (
-                <Loader2 className="animate-spin text-white" />
-              ) : (
-                "Submit"
-              )}
-            </Button>
+            <SubmitButton text="Submit" isPending={isPending} disabled={isPending || !isDirty } />
           </DialogFooter>
         </form>
       </DialogContent>

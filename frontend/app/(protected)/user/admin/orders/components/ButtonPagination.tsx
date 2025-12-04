@@ -9,26 +9,37 @@ type ButtonPaginationProps = {
   >;
   length: number;
 };
-
 function ButtonPagination({
   queryParams,
   setQueryParams,
   length,
 }: ButtonPaginationProps) {
+  const currentPage = queryParams[0].page!;
+
   return (
     <section className="flex items-center justify-end gap-3 py-4">
       <Button
-        disabled={queryParams[0].page === 1}
+        disabled={currentPage === 1}
         className="px-3 py-1 text-sm border rounded"
-        onClick={() => setQueryParams((p) => ({ ...p, page: p[0].page! - 1 }))}
+        onClick={() =>
+          setQueryParams(([orderParams, timeframe]) => [
+            { ...orderParams, page: orderParams.page! - 1 },
+            timeframe,
+          ])
+        }
       >
         Prev
       </Button>
 
       <Button
-        disabled={length < 10}
+        disabled={length < queryParams[0].limit!}
         className="px-3 py-1 text-sm border rounded"
-        onClick={() => setQueryParams((p) => ({ ...p, page: p[0].page! + 1 }))}
+        onClick={() =>
+          setQueryParams(([orderParams, timeframe]) => [
+            { ...orderParams, page: orderParams.page! + 1 },
+            timeframe,
+          ])
+        }
       >
         Next
       </Button>
@@ -36,4 +47,4 @@ function ButtonPagination({
   );
 }
 
-export default ButtonPagination;
+export default ButtonPagination

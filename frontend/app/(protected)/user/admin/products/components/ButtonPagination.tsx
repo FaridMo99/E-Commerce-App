@@ -14,7 +14,7 @@ function ButtonPagination({
   length
 }: ButtonPaginationProps) {
   return (
-    <section className="flex items-center justify-end gap-3 py-4">
+    <section className="flex items-center  justify-center gap-3 py-4">
       <Button
         disabled={queryParams.page === 1}
         className="px-3 py-1 text-sm border rounded"

@@ -22,16 +22,19 @@ const TIMEFRAMES = [
   { label: "7 Days", value: "7d" },
   { label: "30 Days", value: "30d" },
   { label: "1 Year", value: "1y" },
+  { label: "All Time", value: "all" },
 ];
 
 export default function ChangeTimeframeDropdown() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const currentFrom = searchParams.get("from");
   const currentTo = searchParams.get("to");
 
   const initialValue = React.useMemo(() => {
-    if (!currentFrom || !currentTo) return "7d";
+    if (!currentFrom || !currentTo) return "all";
+
     const fromDate = new Date(currentFrom);
     const toDate = new Date(currentTo);
     const diff = differenceInDays(toDate, fromDate);
@@ -42,10 +45,15 @@ export default function ChangeTimeframeDropdown() {
     return "1y";
   }, [currentFrom, currentTo]);
 
-  const [selected, setSelected] = React.useState<string>(initialValue);
+  const [selected, setSelected] = React.useState(initialValue);
 
   const handleChange = (value: string) => {
     setSelected(value);
+
+    if (value === "all") {
+      router.push("?");
+      return;
+    }
 
     const to = new Date();
     let from: Date;
@@ -64,14 +72,14 @@ export default function ChangeTimeframeDropdown() {
         from = subYears(to, 1);
         break;
       default:
-        from = subDays(to, 7);
+        return;
     }
 
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set("from", formatISO(from));
-    newSearchParams.set("to", formatISO(to));
+    const params = new URLSearchParams();
+    params.set("from", formatISO(from));
+    params.set("to", formatISO(to));
 
-    router.push(`?${newSearchParams.toString()}`);
+    router.push(`?${params.toString()}`);
   };
 
   return (

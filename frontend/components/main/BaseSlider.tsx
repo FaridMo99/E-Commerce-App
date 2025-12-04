@@ -1,5 +1,8 @@
+"use client"
 import { ReactNode } from 'react'
 import Slider, { type Settings } from 'react-slick';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export   const settings: Settings = {
   slidesToShow: 5,

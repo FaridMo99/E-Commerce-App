@@ -18,7 +18,9 @@ function TopsellersCarousel({ fetchResult }: TopsellerCarouselProps) {
   return (
     <SectionWrapper as="section" styles="my-8 w-full" header="Topseller">
       {fetchResult?.data?.length === 0 && <p>No Orders yet...</p>}
-      {fetchResult.isLoading && <CarouselLoadingSkeleton cardWidth="40" cardHeight="40" />}
+      {fetchResult.isLoading && (
+        <CarouselLoadingSkeleton cardWidth="40" cardHeight="50" />
+      )}
       {!fetchResult.isLoading && fetchResult.data && (
         <BaseSlider>
           {fetchResult.data.map((product) => (

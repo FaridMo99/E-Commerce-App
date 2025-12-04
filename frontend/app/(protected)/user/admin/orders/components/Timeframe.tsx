@@ -23,7 +23,7 @@ export default function ChangeTimeframeDropdown({
 }: {
   onChangeTimeframe: (range: { from?: Date; to?: Date }) => void;
 }) {
-  const [selected, setSelected] = React.useState("7d");
+  const [selected, setSelected] = React.useState("all");
 
   const handleChange = (value: string) => {
     setSelected(value);

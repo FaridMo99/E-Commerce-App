@@ -28,7 +28,7 @@ function ShowOrderButton({ order }: { order: Order }) {
         <DialogHeader className="sr-only">
           <DialogTitle>Order from {order.user.name}</DialogTitle>
         </DialogHeader>
-        <DialogContent className="sm:max-w-xl p-6 overflow-y-scroll no-scrollbar">
+        <DialogContent className="sm:max-w-4xl p-6 overflow-y-scroll no-scrollbar">
           <OrderSummary order={order} />
           <DialogFooter className="mt-4">
             <DialogClose asChild>

@@ -24,7 +24,6 @@ import ShowOrderButton from "./ShowOrderButton";
 import ChangeTimeframeDropdown from "./Timeframe";
 
 
-//add pagination
 export default function OrdersTable() {
   const accessToken = useAuth((state) => state.accessToken);
   const [queryParams, setQueryParams] = useState<
@@ -32,14 +31,14 @@ export default function OrdersTable() {
   >([
     {
       page: 1,
-      limit: 20,
+      limit: 10,
       sort: "ordered_at",
       order: "asc",
       status: undefined,
     },
     {
-      from: new Date(),
-      to: new Date(),
+      from: undefined,
+      to: undefined,
     },
   ]);
 
@@ -151,7 +150,10 @@ export default function OrdersTable() {
       <ChangeTimeframeDropdown
         onChangeTimeframe={(range) => {
           setQueryParams(([orderParams, _]) => [
-            orderParams,
+            {
+              ...orderParams,
+              page: 1,
+            },
             {
               from: range.from,
               to: range.to,
@@ -180,12 +182,13 @@ export default function OrdersTable() {
           )}
         </TableBody>
       </TableProvider>
-
-      <ButtonPagination
-        queryParams={queryParams}
-        setQueryParams={setQueryParams}
-        length={orders.length}
-      />
+      <div className="w-full flex justify-center items-center">
+        <ButtonPagination
+          queryParams={queryParams}
+          setQueryParams={setQueryParams}
+          length={orders.length}
+        />
+      </div>
     </>
   );
 }

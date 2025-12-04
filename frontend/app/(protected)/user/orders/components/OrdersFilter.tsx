@@ -42,7 +42,7 @@ export default function OrdersFilter() {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 items-center justify-end my-4">
       {/* STATUS FILTER */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
