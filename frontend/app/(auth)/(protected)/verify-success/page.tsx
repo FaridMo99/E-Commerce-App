@@ -6,7 +6,7 @@ async function page(props:PageProps<"/verify-success">) {
   const {token}  = await props.searchParams;
   if (!token) throw new Error();
 
-  const res = await verifyAfterEmailLink(token[0] ?? token);
+  const res = await verifyAfterEmailLink(token as string);
 
   return (
     <SuccessCard

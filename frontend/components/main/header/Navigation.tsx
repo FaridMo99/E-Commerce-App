@@ -1,6 +1,6 @@
 "use client";
 import { getUserCart } from "@/lib/queries/server/usersQueries";
-import { Loader2, LogIn, MenuIcon } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import Link from "next/link";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
@@ -11,16 +11,16 @@ import UserDropdown from "../UserDropdown";
 import LogoutButton from "./LogoutButton";
 import { MobileNavigation } from "./MobileNavigation";
 
-//dont forget the popup for mobile
+
 function Navigation() {
-  const { accessToken } = useAuth((state) => state);
+  const { accessToken,user } = useAuth((state) => state);
   const {
     data: cart,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ["get user shopping cart"],
+    queryKey: ["get user shopping cart",user],
     queryFn: () => {
       if (!accessToken) return Promise.resolve(null);
       return getUserCart(accessToken);
@@ -45,7 +45,7 @@ function Navigation() {
       {accessToken && (
         <>
           <UserDropdown />
-          <LogoutButton accessToken={accessToken} />
+          <LogoutButton />
         </>
       )}
       {!accessToken && (

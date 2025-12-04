@@ -26,7 +26,7 @@ function Screen({ sessionId }: { sessionId: string }) {
         {!isLoading && order && (
           <div className="w-full h-2/3 flex flex-col justify-evenly items-start pl-8">
             <p className="self-center text-white text-lg font-semibold">
-              Total Items: { }
+              Total Items: {}
             </p>
             {order?.items.map((item) => (
               <p className="text-white/70" key={item.product.id}>

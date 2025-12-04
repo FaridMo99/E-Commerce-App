@@ -1,12 +1,10 @@
 "use client"
 import { useQuery } from "@tanstack/react-query";
-import DeleteAccountButton from "./components/DeleteAccountButton";
 import { getUser } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import LoadingPage from "@/components/main/LoadingPage";
-import { UpdateAccountModal } from "./components/UpdateAccountModal";
-import ChangePasswordModal from "./components/ChangePasswordModal";
-import SetPasswordModal from "./components/SetPasswordModal";
+import UserTabs from "./components/UserTabs";
+import SectionWrapper from "@/components/main/SectionWrapper";
 
 function Page() {
   const accessToken = useAuth(state => state.accessToken)
@@ -19,18 +17,12 @@ function Page() {
   if (isLoading) return <LoadingPage />
 
   if (isError || !user) throw error
-  console.log(user)
 
   return (
-    <main className="px-8">
-      <h1 className="text-3xl font-extrabold mb-2">
-        Welcome {user?.name}
-      </h1>
+    <SectionWrapper as="main" header={`Welcome ${user?.name}`} styles="px-8">
       <p>Here you can Edit your Account</p>
-      <UpdateAccountModal user={user}/>
-      <DeleteAccountButton />
-      {user.hasPassword ? <ChangePasswordModal/> : <SetPasswordModal /> }
-    </main>
+      <UserTabs user={user} />
+    </SectionWrapper>
   );
 }
 

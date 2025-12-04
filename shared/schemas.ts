@@ -1,6 +1,8 @@
 import z from "zod";
 import { DEFAULT_NICE_PRICE } from "./constants.ts";
 
+const allowedCountries = ["US", "GB", "DE"]
+const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of US, GB, or DE" );
 /** --- Price Schema --- */
 //here as float, in controller turn to cents
 export const priceSchema = z
@@ -59,7 +61,7 @@ export const signupSchema = loginSchema.extend({
 
 /** --- Update User Schema --- */
 export const updateUserSchema = signupSchema
-  .omit({ password: true,email:true })
+  .omit({ password: true, email: true })
   .partial()
   .extend({
     street: z.string().optional(),
@@ -67,7 +69,7 @@ export const updateUserSchema = signupSchema
     city: z.string().optional(),
     state: z.string().optional(),
     postalCode: z.string().optional(),
-    countryCode: z.string().optional(),
+    countryCode: countryCodeSchema.optional(),
     currency: currencySchema.optional(),
   })
   .superRefine((data, ctx) => {

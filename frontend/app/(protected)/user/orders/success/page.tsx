@@ -2,14 +2,14 @@ import { notFound } from "next/navigation";
 import "server-only"
 import Screen from "./Screen";
 
-async function page({ searchParams }: { searchParams: { session_id?: string } }) {
-  const params = await searchParams
-  const sessionId = params.session_id
-  if (!sessionId) return notFound();
+async function page(props:PageProps<"/user/orders/success">) {
+  const { session_id } = await props.searchParams;
+
+  if (!session_id) return notFound();
   
   
   
-  return <Screen sessionId={sessionId} />;
+  return <Screen sessionId={session_id as string} />;
 }
 
 export default page

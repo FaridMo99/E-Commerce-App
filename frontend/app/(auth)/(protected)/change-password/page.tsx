@@ -8,7 +8,7 @@ async function page(props: PageProps<"/change-password">) {
   if (!token) throw new Error();
 
 
-  return <ChangePasswordForm token={token[0] ?? token} />;
+  return <ChangePasswordForm token={token as string} />;
 }
 
 export default page;

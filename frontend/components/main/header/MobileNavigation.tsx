@@ -64,7 +64,7 @@ export function MobileNavigation() {
                 asChild
                 className="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
               >
-                <LogoutButton text accessToken={accessToken} />
+                <LogoutButton text />
               </SheetClose>
             </>
           ) : (

@@ -18,7 +18,7 @@ function DescriptionPart({ product }: { product: Product }) {
           rating={product.averageRating}
         />
       </Link>
-      <h2 className="font-medium text-lg text-white wrap-break-word overflow-y-scroll">
+      <h2 className="font-medium text-lg text-white wrap-break-word overflow-y-auto">
         {product.description}
       </h2>
     </div>

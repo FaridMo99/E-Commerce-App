@@ -32,7 +32,7 @@ function ShoppingCartDropdown({ cart }: { cart: Cart | null }) {
           <ItemCountDot count={itemsLength ?? 0} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-foreground text-white max-h-110 z-500">
+      <DropdownMenuContent className="bg-foreground text-white max-h-110 z-50">
         <DropdownMenuLabel className="flex justify-center items-center text-lg">
           Shopping Cart
         </DropdownMenuLabel>

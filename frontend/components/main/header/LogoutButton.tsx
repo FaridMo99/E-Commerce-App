@@ -1,52 +1,44 @@
 "use client";
-import { logout } from "@/lib/queries/server/authQueries";
+import { logout } from "@/lib/queries/client/authQueries";
 import useAuth from "@/stores/authStore";
-import { AccessToken } from "@/types/types";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 
 type LogoutButtonProps = {
-  accessToken: AccessToken;
   text?:boolean
 };
 
-function LogoutButton({ accessToken, text }: LogoutButtonProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+function LogoutButton({ text }: LogoutButtonProps) {
   const router = useRouter();
-  const errorMessage = "Something went wrong. Try again later.";
-  const clearState = useAuth((state) => state.clearState);
+  const {clearState, accessToken} = useAuth((state) => state);
 
-  async function logoutHandler() {
-    if (!accessToken) return toast.error(errorMessage);
-
-    try {
-      setIsLoading(true);
-      await logout(accessToken);
-      clearState();
-      router.refresh();
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["logging user out"],
+    mutationFn: () => logout(accessToken!),
+    onError: () => {
+      toast.error("Something went wrong.Try again")
+    },
+    onSuccess: () => {
+      clearState()
+      router.refresh()
       toast.success("Logout successful!");
-    } catch (err) {
-      toast.error(errorMessage);
-      console.log(err);
-    } finally {
-      setIsLoading(false);
     }
-  }
+  })
 
   return (
     <button
-      disabled={isLoading}
-      onClick={logoutHandler}
+      disabled={isPending}
+      onClick={() => mutate()}
       title="logout"
-      className={`${text ? "md:hidden flex items-center px-4" : "hidden md:block"} ${isLoading ? "cursor-wait" : "cursor-pointer"}`}
+      className={`${text ? "md:hidden flex items-center px-4" : "hidden md:block"} ${isPending ? "cursor-wait" : "cursor-pointer"}`}
       aria-label="logout"
     >
-      {isLoading ? (
+      {isPending ? (
         <Loader2 className="animate-spin" />
       ) : text ? (
-          "Logout"
+        "Logout"
       ) : (
         <LogOut />
       )}

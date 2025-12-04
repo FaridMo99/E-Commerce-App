@@ -11,14 +11,14 @@ async function page(props:PageProps<"/oauth-success">) {
   let user: User;
 
   try {
-    user = await getUser(token[0] ?? token);
+    user = await getUser(token as string);
   } catch (err) {
     console.log(err)
     redirect("/login?error=oAuth");
   }
 
   return (
-    <SuccessCard action="Login" user={user} accessToken={token[0] ?? token} />
+    <SuccessCard action="Login" user={user} accessToken={token as string} />
   );
 }
 

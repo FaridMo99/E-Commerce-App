@@ -23,7 +23,7 @@ import SubmitButton from "./SubmitButton";
 
 
 function ChangePasswordForm({ token }: { token: string }) {
-
+console.log(token)
   const setState = useAuth(state=>state.setState)
   const { mutate, isPending } = useMutation({
     mutationKey: ["change password for unauthenticated user"],

@@ -28,7 +28,7 @@ function DeleteAccountButton() {
     return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">Delete Account</Button>
+        <Button className="mt-4" variant="destructive">Delete Account</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
