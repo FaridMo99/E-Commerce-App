@@ -1,12 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
-import { CATEGORIES_REDIS_KEY } from "../config/constants.js";
+import { CATEGORIES_REDIS_KEY, CATEGORY_CACHE_TIME } from "../config/constants.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import { categorySelect } from "../config/prismaHelpers.js";
-
-const cacheTime = 1800; // 30min
+import { getCategories } from "../lib/productQueries.js";
 
 export async function getAllProductCategories(
   req: Request,
@@ -14,35 +13,9 @@ export async function getAllProductCategories(
   next: NextFunction
 ) {
   try {
-    console.log(
-      chalk.yellow(`${getTimestamp()} Fetching all product categories...`)
-    );
+    
+    const categories = await getCategories()
 
-    const cached = await redis.get(CATEGORIES_REDIS_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      console.log(
-        chalk.green(
-          `${getTimestamp()} Categories fetched from cache (${parsed.length})`
-        )
-      );
-      return res.status(200).json(parsed);
-    }
-
-    const categories = await prisma.category.findMany({
-      select: {
-        ...categorySelect
-      }
-    });
-    await redis.set(CATEGORIES_REDIS_KEY, JSON.stringify(categories), {
-      EX: cacheTime,
-    });
-
-    console.log(
-      chalk.green(
-        `${getTimestamp()} Categories fetched from DB and cached (${categories.length})`
-      )
-    );
     return res.status(200).json(categories);
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Error fetching categories:`), err);

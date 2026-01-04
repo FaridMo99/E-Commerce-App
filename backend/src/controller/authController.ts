@@ -428,7 +428,10 @@ export async function issueRefreshToken(
 
   try {
     const dbToken = await prisma.refreshToken.findFirst({
-      where: { deviceId: token.deviceId },
+      where: {
+        deviceId: token.deviceId,
+        userId:token.userId
+      },
     });
 
     if (!dbToken)

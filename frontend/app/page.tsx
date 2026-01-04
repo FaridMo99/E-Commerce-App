@@ -1,4 +1,3 @@
-
 import RecentlyViewedProducts from "@/components/main/ClientCarousel";
 import ProductsCarousel from "@/components/main/ProductsCarousel";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";

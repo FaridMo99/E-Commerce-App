@@ -1,4 +1,4 @@
-import { CATEGORIES_REDIS_KEY, TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS } from "../config/constants.js";
+import { CATEGORIES_REDIS_KEY, CATEGORY_CACHE_TIME, TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS } from "../config/constants.js";
 import type {
   Category,
 } from "../generated/prisma/client.js";
@@ -10,7 +10,9 @@ import {
   SALE_PRODUCTS_REDIS_KEY,
   TWELVE_HOURS_IN_SECONDS,
 } from "../config/constants.js";
-import { productSelect, productWhere, type ProductWithSelectedFields } from "../config/prismaHelpers.js";
+import { categorySelect, productSelect, productWhere, type ProductWithSelectedFields } from "../config/prismaHelpers.js";
+import { getTimestamp } from "./utils.js";
+import chalk from "chalk";
 
 const limit = 10;
 
@@ -155,4 +157,35 @@ export async function getTrendingProducts(): Promise<ProductWithSelectedFields[]
   });
 
   return returnProducts;
+}
+
+export async function getCategories(): Promise<Category[]> {
+  
+  const cached = await redis.get(CATEGORIES_REDIS_KEY);
+  
+      if (cached) {
+        const parsed:Category[] = JSON.parse(cached);
+        console.log(
+          chalk.green(
+            `${getTimestamp()} Categories fetched from cache (${parsed.length})`
+          )
+        );
+        return parsed;
+      }
+  
+      const categories = await prisma.category.findMany({
+        select: {
+          ...categorySelect,
+        },
+      });
+      await redis.set(CATEGORIES_REDIS_KEY, JSON.stringify(categories), {
+        EX: CATEGORY_CACHE_TIME,
+      });
+
+      console.log(
+        chalk.green(
+          `${getTimestamp()} Categories fetched from DB and cached (${categories.length})`
+        )
+      );
+      return categories;
 }

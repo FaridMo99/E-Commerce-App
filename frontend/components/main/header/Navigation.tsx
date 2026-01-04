@@ -1,6 +1,6 @@
 "use client";
 import { getUserCart } from "@/lib/queries/server/usersQueries";
-import { Loader2, LogIn } from "lucide-react";
+import { Loader2, LogIn, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
@@ -37,6 +37,9 @@ function Navigation() {
   return (
     <nav className="w-1/3 h-full flex justify-evenly items-center z-10">
       <MobileNavigation />
+      <Link href="/products">
+        <ShoppingBag aria-label="products page" className="hidden md:block" />
+      </Link>
       {isLoading ? (
         <Loader2 className="animate-spin" />
       ) : (

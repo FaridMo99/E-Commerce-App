@@ -42,7 +42,7 @@ productsRouter.get(
   getProductsMetaInfos
 );
 
-productsRouter.get("/home", attachUserIfExists,geoCurrencyMiddleware, getHomeProducts);
+productsRouter.get("/home", attachUserIfExists, geoCurrencyMiddleware, getHomeProducts);
 productsRouter.post(
   "/",
   isAuthenticated,

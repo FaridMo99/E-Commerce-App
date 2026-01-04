@@ -23,6 +23,7 @@ import {
   TRENDING_PRODUCTS_REDIS_KEY,
 } from "../config/constants.js";
 import {
+  getCategories,
   getCategoryProducts,
   getNewProducts,
   getSaleProducts,
@@ -36,7 +37,6 @@ import {
   productWhere,
   reviewSelect,
   reviewWhere,
-  type ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
 
 export async function getAllProducts(
@@ -56,16 +56,18 @@ export async function getAllProducts(
     limit,
     sale,
   } = req.validatedQuery as ProductsQuerySchema;
-  console.log(role)
 
   const currency = req.currency!;
 
   //convert currency to main currency
-    let convertedMinPrice: number | undefined = minPrice;
-    let convertedMaxPrice: number | undefined = maxPrice;
+  let convertedMinPrice: number | undefined = minPrice;
+  let convertedMaxPrice: number | undefined = maxPrice;
 
-  if ((minPrice !== undefined || maxPrice !== undefined) && currency !== undefined) {
-    const baseCurrency = await getBaseCurrency(); 
+  if (
+    (minPrice !== undefined || maxPrice !== undefined) &&
+    currency !== undefined
+  ) {
+    const baseCurrency = await getBaseCurrency();
 
     if (currency !== baseCurrency) {
       if (minPrice !== undefined) {
@@ -85,35 +87,33 @@ export async function getAllProducts(
     }
   }
 
-    const priceFilter =
-      convertedMinPrice !== undefined || convertedMaxPrice !== undefined
-        ? {
-            OR: [
-              {
-                price: {
-                  ...(convertedMinPrice !== undefined && {
-                    gte: convertedMinPrice,
-                  }),
-                  ...(convertedMaxPrice !== undefined && {
-                    lte: convertedMaxPrice,
-                  }),
-                },
+  const priceFilter =
+    convertedMinPrice !== undefined || convertedMaxPrice !== undefined
+      ? {
+          OR: [
+            {
+              price: {
+                ...(convertedMinPrice !== undefined && {
+                  gte: convertedMinPrice,
+                }),
+                ...(convertedMaxPrice !== undefined && {
+                  lte: convertedMaxPrice,
+                }),
               },
-              {
-                sale_price: {
-                  ...(convertedMinPrice !== undefined && {
-                    gte: convertedMinPrice,
-                  }),
-                  ...(convertedMaxPrice !== undefined && {
-                    lte: convertedMaxPrice,
-                  }),
-                },
+            },
+            {
+              sale_price: {
+                ...(convertedMinPrice !== undefined && {
+                  gte: convertedMinPrice,
+                }),
+                ...(convertedMaxPrice !== undefined && {
+                  lte: convertedMaxPrice,
+                }),
               },
-            ],
-          }
-        : {};
-
-
+            },
+          ],
+        }
+      : {};
 
   try {
     console.log(
@@ -167,7 +167,7 @@ export async function getProductsMetaInfos(
   const currency = req.currency!;
   const { category, search, minPrice, maxPrice, sale } =
     req.validatedQuery as ProductsMetaInfosQuerySchema;
-    
+
   try {
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching products meta info...`)
@@ -192,22 +192,25 @@ export async function getProductsMetaInfos(
       if (maxPrice) filters.price.lte = maxPrice;
     }
 
-        if (sale !== undefined) {
-          if (sale) filters.sale_price = { not: null };
-          else filters.sale_price = null;
-        }
+    if (sale !== undefined) {
+      if (sale) filters.sale_price = { not: null };
+      else filters.sale_price = null;
+    }
 
-    const [meta, baseCurrency] = await Promise.all([prisma.product.aggregate({
-      where: filters,
-      _min: { price: true },
-      _max: { price: true },
-      _count: true,
-    }), getBaseCurrency()])
-    
+    const [meta, baseCurrency] = await Promise.all([
+      prisma.product.aggregate({
+        where: filters,
+        _min: { price: true },
+        _max: { price: true },
+        _count: true,
+      }),
+      getBaseCurrency(),
+    ]);
+
     // Convert meta prices
     const minPriceConverted = await convertAndFormatPriceInCents(
       meta._min.price ?? 0,
-      baseCurrency, 
+      baseCurrency,
       currency
     );
 
@@ -221,7 +224,7 @@ export async function getProductsMetaInfos(
       minPrice: minPriceConverted,
       maxPrice: maxPriceConverted,
       totalItems: meta._count,
-      currency
+      currency,
     });
   } catch (err) {
     console.log(
@@ -281,8 +284,8 @@ export async function createProduct(
         ...(product.is_public && { published_at: new Date() }),
         category: {
           connect: {
-            id:product.category
-          }
+            id: product.category,
+          },
         },
         price: product.price,
         ...(product.sale_price !== undefined && {
@@ -298,19 +301,18 @@ export async function createProduct(
       });
     });
 
-
     const redisKey = `${CATEGORIES_REDIS_KEY}:${product.category}`;
     //clear all relevant caches
     if (newProduct.is_public) {
-    await Promise.all([
-      redis.del(NEW_PRODUCTS_REDIS_KEY),
-      redis.del(SALE_PRODUCTS_REDIS_KEY),
-      redis.del(CATEGORIES_REDIS_KEY),
-      redis.del(redisKey),
-      redis.del(TRENDING_PRODUCTS_REDIS_KEY),
-    ]);  
+      await Promise.all([
+        redis.del(NEW_PRODUCTS_REDIS_KEY),
+        redis.del(SALE_PRODUCTS_REDIS_KEY),
+        redis.del(CATEGORIES_REDIS_KEY),
+        redis.del(redisKey),
+        redis.del(TRENDING_PRODUCTS_REDIS_KEY),
+      ]);
     }
-    
+
     console.log(
       chalk.green(
         `${getTimestamp()} Product ${product.name} created successfully`
@@ -335,8 +337,7 @@ export async function getProductByProductId(
   next: NextFunction
 ) {
   const id = req.params.productId!;
-  const currency = req.currency!
-
+  const currency = req.currency!;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching product ${id}`));
@@ -441,7 +442,6 @@ export async function updateProductByProductId(
     req.body.sale_price = turnPriceToPriceInCents(req.body.sale_price);
   }
 
-
   const {
     name,
     description,
@@ -456,7 +456,6 @@ export async function updateProductByProductId(
     console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
 
     const updatedProduct = await prisma.$transaction(async (tx) => {
-
       //update
       const product = await tx.product.update({
         where: { id },
@@ -467,7 +466,7 @@ export async function updateProductByProductId(
           ...(category && {
             category: {
               connect: {
-                  id: category,
+                id: category,
               },
             },
           }),
@@ -506,19 +505,19 @@ export async function updateProductByProductId(
     const redisKey = `${CATEGORIES_REDIS_KEY}:${updatedProduct.category.id}`;
 
     if (is_public) {
-        await Promise.all([
-          redis.del(NEW_PRODUCTS_REDIS_KEY),
-          redis.del(SALE_PRODUCTS_REDIS_KEY),
-          redis.del(CATEGORIES_REDIS_KEY),
-          redis.del(redisKey)
-        ]);
+      await Promise.all([
+        redis.del(NEW_PRODUCTS_REDIS_KEY),
+        redis.del(SALE_PRODUCTS_REDIS_KEY),
+        redis.del(CATEGORIES_REDIS_KEY),
+        redis.del(redisKey),
+      ]);
     }
 
     console.log(
       chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
     );
 
-    return res.status(200).json({message:"Updated product successfully"});
+    return res.status(200).json({ message: "Updated product successfully" });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update product ${id}:`, err)
@@ -586,11 +585,14 @@ export async function createReviewByProductId(
     const alreadyReviewed = await prisma.review.findFirst({
       where: {
         product_id: productId,
-        user_id:userId
-      }
-    })
+        user_id: userId,
+      },
+    });
 
-    if(alreadyReviewed)return res.status(400).json({message:"You already reviewed this product"})
+    if (alreadyReviewed)
+      return res
+        .status(400)
+        .json({ message: "You already reviewed this product" });
 
     const review = await prisma.review.create({
       data: {
@@ -627,56 +629,47 @@ export async function getHomeProducts(
   res: Response,
   next: NextFunction
 ) {
-  const currency = req.currency!
+  const currency = req.currency!;
 
   try {
-    console.log(chalk.yellow(`${getTimestamp()} Fetching home products}`));
+    console.log(chalk.yellow(`${getTimestamp()} Fetching home products`));
 
-    const categories = await prisma.category.findMany();
+    //fetch data
+    const categories = await getCategories()
+    
     const randomCategory =
       categories.length > 0
         ? categories[Math.floor(Math.random() * categories.length)]?.name
         : null;
 
-    const promises: Promise<ProductWithSelectedFields[]>[] = [
-      getNewProducts(),
-      getTrendingProducts(),
-      getSaleProducts(),
+    const [newProducts, trendingProducts, productsOnSale, categoryProductsRaw] =
+      await Promise.all([
+        getNewProducts(),
+        getTrendingProducts(),
+        getSaleProducts(),
+        randomCategory
+          ? getCategoryProducts(randomCategory)
+          : Promise.resolve([]),
+      ]);
+
+    const categoryProducts = categoryProductsRaw || [];
+
+    const allProducts = [
+      ...newProducts,
+      ...trendingProducts,
+      ...productsOnSale,
+      ...categoryProducts,
     ];
 
-    if (randomCategory) promises.push(getCategoryProducts(randomCategory));
-
-    const results = await Promise.all(promises);
-
-    const [
-      newProducts,
-      trendingProducts,
-      productsOnSale,
-      categoryProducts = [],
-    ] = results;
-
-    console.log(
-      chalk.green(`${getTimestamp()} Home products fetched successfully`)
+    await Promise.all(
+      allProducts.map((product) =>
+        transformAndFormatProductPrice(product, product.currency, currency)
+      )
     );
 
-    //format price and calc avg for client
-    await Promise.all([
-      ...(newProducts?.map((product) =>
-        transformAndFormatProductPrice(product, currency, product.currency)
-      ) || []),
-
-      ...(trendingProducts?.map((product) =>
-        transformAndFormatProductPrice(product, currency, product.currency)
-      ) || []),
-
-      ...(productsOnSale?.map((product) =>
-        transformAndFormatProductPrice(product, currency, product.currency)
-      ) || []),
-
-      ...(categoryProducts?.map((product) =>
-        transformAndFormatProductPrice(product, currency, product.currency)
-      ) || []),
-    ]);
+    console.log(
+      chalk.green(`${getTimestamp()} Home products fetched`)
+    );
 
     return res.status(200).json({
       newProducts,
@@ -684,7 +677,7 @@ export async function getHomeProducts(
       productsOnSale,
       categoryProducts,
     });
-    
+
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch home products:`, err)

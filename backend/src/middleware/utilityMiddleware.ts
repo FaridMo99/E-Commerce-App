@@ -76,6 +76,7 @@ export async function geoCurrencyMiddleware(
 
     //redis lookup
     const cached = await redis.hGetAll(`geo:${ip}`);
+
     if (cached && cached.country && cached.currency) {
       console.log(
         chalk.green(
@@ -90,7 +91,7 @@ export async function geoCurrencyMiddleware(
 
     //maxmind lookup
     const geo = lookup.get(ip) as unknown as CountryResponse;
-    const country = geo?.country?.iso_code ?? FALLBACK_COUNTRY_ISO_CODE;
+    const country = geo?.country_code ?? FALLBACK_COUNTRY_ISO_CODE;
     console.log(chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`));
 
     //set currency

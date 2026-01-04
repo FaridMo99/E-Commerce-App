@@ -28,7 +28,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
 
   return (
     <html lang="de" className={questrial.className}>
-      <body>
+      <body className="overflow-x-hidden">
         <QueryContext>
           <AuthZustandSetter accessToken={accessToken} user={user} />
           <Header />

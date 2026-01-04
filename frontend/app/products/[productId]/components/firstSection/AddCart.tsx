@@ -5,6 +5,7 @@ import useAuth from '@/stores/authStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 
 type AddCartProps = {
@@ -15,6 +16,7 @@ type AddCartProps = {
 function AddCart({ itemId, quantity }: AddCartProps) {
     const accessToken = useAuth(state => state.accessToken)
     const queryClient = useQueryClient()
+    const router = useRouter()
     
     const { mutate, isPending } = useMutation({
         mutationKey: ["add item to cart", itemId, quantity],
@@ -34,7 +36,7 @@ function AddCart({ itemId, quantity }: AddCartProps) {
   return (
       <Button
           className='mt-6'
-          onClick={()=>mutate()}
+          onClick={() => accessToken ? mutate() : router.push("/login")}
           disabled={isPending || quantity === 0}>{isPending ? <Loader2 className='animate-spin' /> : "Add to Cart"}</Button>
   )
 }
