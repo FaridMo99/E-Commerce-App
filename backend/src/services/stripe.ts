@@ -11,7 +11,19 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 });
 
 //handle more cases
-export async function stripeEventHandler(stripeEvent: Stripe.Event) {
+export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void> {
+
+  const eventHappened = await prisma.stripeEvent.findUnique({
+    where: {
+      id:stripeEvent.id
+    }
+  })
+
+  if (eventHappened) {
+    console.log(chalk.green(getTimestamp(), "Already Processed Webhook"))
+    return
+  }
+
   switch (stripeEvent.type) {
     //only for card payment not for async payments like klarna etc.
     case "checkout.session.completed":
@@ -27,12 +39,9 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event) {
       const email = session.customer_details?.email!;
 
       console.log(chalk.yellow(`${getTimestamp()} Processing checkout.session.completed, orderId: ${orderId}, userId: ${userId}`));
-      //since stripe isnt idempotent and can fire multiple times gotta first check if it already fired
-      const existingOrder = await prisma.order.findUnique({ where: { id: orderId } })
-      if(existingOrder?.status === "ORDERED") return
 
       //update order status and empty user cart
-      const [_, order, payment] = await prisma.$transaction([
+      const [_, order, payment, stripeEventDb] = await prisma.$transaction([
         prisma.cartItem.deleteMany({
           where: { cart: { userId: userId } },
         }),
@@ -50,6 +59,12 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event) {
             status: "COMPLETED",
           },
         }),
+        prisma.stripeEvent.create({
+          data: {
+            id: stripeEvent.id,
+            type:stripeEvent.type
+          }
+        })
       ]);
 
       console.log(chalk.green(`${getTimestamp()} Cart cleared and order updated: orderId ${orderId}`));

@@ -10,6 +10,7 @@ import chalk from "chalk";
 import { calculateCartTotalsInCents, getTimestamp, releaseCartItems } from "../lib/utils.js";
 import { cartSelect, orderSelect, type CartWithSelectedFields } from "../config/prismaHelpers.js";
 import type Stripe from "stripe";
+import { ORDERS_EXPIRATION_TIME } from "../config/constants.js";
 
 // Get orders within a timeframe
 export async function getOrders(
@@ -183,6 +184,7 @@ export async function makeOrder(
             user_id: userId,
             status: "PENDING",
             currency,
+            expires_at: new Date(Date.now() + ORDERS_EXPIRATION_TIME),
             total_amount: cartWithTotals.total!,
             items: {
               create: finalItems.map((item) => ({
@@ -247,6 +249,7 @@ export async function makeOrder(
         payment_method_types: ["card"],
         line_items: lineItems,
         mode: "payment",
+        expires_at: Math.floor((Date.now() + ORDERS_EXPIRATION_TIME) / 1000),
         success_url: `${CLIENT_ORIGIN}/user/orders/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${CLIENT_ORIGIN}/user/orders/cancel?cancelOrderId=${order.id}`,
         billing_address_collection: "required",
@@ -324,9 +327,14 @@ export async function cancelOrder(
 
     if (order.status !== "PENDING") return res.status(400).json({message:`Cant cancel this order since its already ${order.status}`})
     
-    
-    await releaseCartItems(orderId)
-
+    await Promise.all([releaseCartItems(orderId), prisma.order.update({
+      where: {
+        id: order.id
+      },
+      data: {
+        status:"CANCELLED"
+      }
+    })])
 
     console.log(
       chalk.green(

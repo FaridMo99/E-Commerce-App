@@ -99,6 +99,7 @@ model Order {
   stripe_session_id  String?       @unique
   ordered_at         DateTime     @default(now())
   status             OrderStatus
+  expires_at         DateTime    
   total_amount       Int
   items              Order_Item[]
   payment            Payment?
@@ -166,7 +167,14 @@ model CartItem {
   quantity  Int
 }
 
+model StripeEvent {
+  id               String   @id
+  type             String   
+  processed_at     DateTime @default(now())
+}
+
 enum OrderStatus {
+  EXPIRED
   PENDING
   CANCELLED
   ORDERED
