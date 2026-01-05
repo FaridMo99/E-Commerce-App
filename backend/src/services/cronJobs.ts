@@ -30,7 +30,10 @@ cron.schedule("* * * * *", async () => {
     },
   });
 
-  if (expiredOrders.length === 0) return;
+  if (expiredOrders.length === 0) {
+    console.log(chalk.green(getTimestamp(), "Cleaned Orders Successfully"));
+    return
+  };
 
   await Promise.all(
     expiredOrders.map(async (order) => {

@@ -150,6 +150,8 @@ export async function makeOrder(
 
     const cartWithTotals = calculateCartTotalsInCents(shoppingCart);
 
+    if (cartWithTotals.total && cartWithTotals.total > 99999999) return res.status(400).json({message:"Your Order cant exceed 999999,99"})
+
     let order;
     let finalItems = cartWithTotals.items;
 
@@ -244,7 +246,6 @@ export async function makeOrder(
     //create stripe checkout session
       //pass locale
     try {
-      console.log(lineItems)
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: lineItems,
@@ -259,7 +260,17 @@ export async function makeOrder(
       //save session id
       await prisma.order.update({
         where: { id: order.id },
-        data: { stripe_session_id: session.id },
+        data: {
+          stripe_session_id: session.id,
+          payment: {
+            update: {
+              stripePaymentIntentId:
+                typeof session.payment_intent === "string"
+                  ? session.payment_intent
+                  : session.payment_intent?.id!
+            },
+          },
+        },
       });
 
       console.log(
@@ -271,7 +282,8 @@ export async function makeOrder(
       return res.status(200).json({ redirectUrl: session.url });
 
     } catch (err) {
-      console.log(chalk.red(getTimestamp(),"stripe error", err.message))
+      console.log(chalk.red(getTimestamp(), "stripe error", err.message))
+      //this maybe unnecessary when instead doing a transaction
       await releaseCartItems(order.id)
       next(err)
     }
@@ -332,7 +344,12 @@ export async function cancelOrder(
         id: order.id
       },
       data: {
-        status:"CANCELLED"
+        status: "CANCELLED",
+        payment: {
+          update: {
+            status:"CANCELLED"
+          }
+        }
       }
     })])
 

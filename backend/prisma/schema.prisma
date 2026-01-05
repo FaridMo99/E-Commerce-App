@@ -97,7 +97,7 @@ model Order {
   user_id            String
   shipping_address   String?
   stripe_session_id  String?       @unique
-  ordered_at         DateTime     @default(now())
+  ordered_at         DateTime      @default(now())
   status             OrderStatus
   expires_at         DateTime    
   total_amount       Int
@@ -131,13 +131,15 @@ model Review {
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  order      Order         @relation(fields: [order_id], references: [id])
-  order_id   String        @unique
-  method     PaymentMethod
-  details    String
-  status     PaymentStatus
-  created_at DateTime      @default(now())
+  id                String        @id @default(uuid())
+  order             Order         @relation(fields: [order_id], references: [id])
+  order_id          String        @unique
+  method            PaymentMethod
+  details           String
+  status            PaymentStatus
+  stripePaymentIntentId   String?
+  stripeRefundId          String?
+  created_at        DateTime      @default(now())
 }
 
 model RefreshToken {
@@ -180,6 +182,8 @@ enum OrderStatus {
   ORDERED
   DELIVERING
   DELIVERED
+  REFUND_PENDING
+  REFUNDED
 }
 
 enum PaymentStatus {
@@ -187,6 +191,8 @@ enum PaymentStatus {
   CANCELLED
   COMPLETED
   FAILED
+  REFUNDING
+  REFUNDED
 }
 
 enum PaymentMethod {

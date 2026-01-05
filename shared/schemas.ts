@@ -1,5 +1,5 @@
 import z from "zod";
-import { DEFAULT_NICE_PRICE } from "./constants.ts";
+import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants.ts";
 
 const allowedCountries = ["US", "GB", "DE"]
 const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of US, GB, or DE" );
@@ -12,7 +12,9 @@ export const priceSchema = z
       const number = typeof val === "number" ? val : parseFloat(val);
       return number;
     },
-    z.number("Price is required")
+    z
+      .number("Price is required")
+      .max(STRIPE_ORDER_PRICE_LIMIT, "Price cannot exceed 999,999.99")
   )
   .refine(
     (val) => {

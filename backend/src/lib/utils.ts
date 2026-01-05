@@ -1,8 +1,15 @@
 import type { DailyRevenue } from "@monorepo/shared";
-import type { CartWithSelectedFields, ProductWithSelectedFields } from "../config/prismaHelpers.js";
+import type {
+  CartWithSelectedFields,
+  ProductWithSelectedFields,
+} from "../config/prismaHelpers.js";
 import { formatPriceForClient } from "./currencyHandlers.js";
-import type { Cart, CartItem, Product } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
+import stripe from "../services/stripe.js";
+import type Stripe from "stripe";
+import chalk from "chalk";
+import type { CurrencyISO } from "../generated/prisma/enums.js";
+import { notifyAdmin } from "../services/email.js";
 
 export const getTimestamp = () =>
   `[${new Date().toISOString().replace("T", ", ").replace("Z", "")}]`;
@@ -66,7 +73,6 @@ export function getTotalRevenue(dailyRevenue: DailyRevenue[]): number {
   return dailyRevenue.reduce((sum, day) => sum + day.revenue, 0);
 }
 
-
 export type CartProduct = {
   id: string;
   name: string;
@@ -92,20 +98,22 @@ export type CartWithTotals = {
 export function calculateCartTotalsInCents(
   cart: CartWithSelectedFields
 ): CartWithTotals {
-    let cartTotal = 0;
+  let cartTotal = 0;
 
-    cart.items.forEach((item) => {
-      const price = item.product.sale_price ?? item.product.price;
-      const itemTotal = price * item.quantity;
-      cartTotal += itemTotal;
-      item.total = Number(itemTotal.toFixed(2)) * 100;
-    });
-    cart.total = Number(cartTotal.toFixed(2)) * 100;
+  cart.items.forEach((item) => {
+    const price = item.product.sale_price ?? item.product.price;
+    const itemTotal = price * item.quantity;
+    cartTotal += itemTotal;
+    item.total = Number(itemTotal.toFixed(2)) * 100;
+  });
+  cart.total = Number(cartTotal.toFixed(2)) * 100;
 
-    return cart;
+  return cart;
 }
 
-export function calculateCartTotals(cart: CartWithSelectedFields): CartWithTotals {
+export function calculateCartTotals(
+  cart: CartWithSelectedFields
+): CartWithTotals {
   let cartTotal = 0;
 
   cart.items.forEach((item) => {
@@ -119,17 +127,34 @@ export function calculateCartTotals(cart: CartWithSelectedFields): CartWithTotal
   return cart;
 }
 
-export async function releaseCartItems(orderId:string) {
-      const orderItems = await prisma.order_Item.findMany({
-        where: { order_id: orderId },
-      });
+export async function releaseCartItems(orderId: string) {
+  const orderItems = await prisma.order_Item.findMany({
+    where: { order_id: orderId },
+  });
 
-      await prisma.$transaction(
-        orderItems.map((item) =>
-          prisma.product.update({
-            where: { id: item.product_id },
-            data: { stock_quantity: { increment: item.quantity } },
-          })
-        )
-      );
+  await prisma.$transaction(
+    orderItems.map((item) =>
+      prisma.product.update({
+        where: { id: item.product_id },
+        data: { stock_quantity: { increment: item.quantity } },
+      })
+    )
+  );
+}
+
+export async function refundOrder(paymentIntentId:string, amount:number, currency:CurrencyISO):Promise<Stripe.Response<Stripe.Refund> | void> {
+  try {
+
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      amount: amount,
+      reason: "requested_by_customer",
+      currency
+    });
+
+    return refund;
+  } catch (error) {
+    console.log(chalk.red(getTimestamp(), "Refund failed:", error));
+    await notifyAdmin(`Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`);
+  }
 }

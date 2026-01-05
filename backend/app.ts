@@ -57,7 +57,7 @@ app.use(passport.initialize());
 app.use("/api", apiRouter);
 app.use("/webhooks", webhookRouter);
 
-//add another handler here for webapp serving
+
 export const server = app.listen(PORT, async () => {
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
 });
@@ -67,7 +67,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
   if (NODE_ENV === "dev") {
       console.log(chalk.magenta(err.stack));
-  } 
+  }
 
   console.log(chalk.red(`${getTimestamp()} Global error: ${err}`));
   return res.status(500).json({ error: "Something went wrong" });

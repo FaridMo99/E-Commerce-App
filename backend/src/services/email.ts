@@ -105,7 +105,7 @@ export async function sendVerificationEmail(
 
 export async function sendOrderEmail(
   receiver: string,
-  order:OrderWithSelectedFields
+  order: OrderWithSelectedFields
 ): Promise<Mailjet.LibraryResponse<RequestData>> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 
@@ -214,7 +214,6 @@ export async function notifyAdmin(
   const senderName = `The ${CLIENT_ORIGIN} Team`;
   const subject = `Admin Notification - ${CLIENT_ORIGIN}`;
 
-  
   let adminEmail: string | undefined;
   try {
     const admin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
@@ -284,4 +283,79 @@ Sent from ${CLIENT_ORIGIN}`;
     );
     throw err;
   }
+}
+
+export async function notifyUser(
+  userId: string,
+  subject:string,
+  content: string
+): Promise<Mailjet.LibraryResponse<any> | void> {
+  const senderName = `The ${CLIENT_ORIGIN} Team`;
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          id:userId
+        }
+       });
+      const email = user?.email;
+
+      if (!email) return console.log(chalk.red(`${getTimestamp()} No admin email configured, skipping notification.`))
+      
+        const htmlPart = `
+          <h2>Notification 👋</h2>
+          <p>${content}</p>
+          <p>Sent from ${CLIENT_ORIGIN}</p>`;
+
+        const textPart = `
+          Notification
+
+          ${content}
+
+          Sent from ${CLIENT_ORIGIN}`;
+
+        const data = {
+          Messages: [
+            {
+              From: { Email: EMAIL_ADDRESS, Name: senderName },
+              To: [{ Email: email }],
+              Subject: subject,
+              TextPart: textPart,
+              HTMLPart: htmlPart,
+            },
+          ],
+        };
+      
+          try {
+            console.log(
+              chalk.yellow(
+                `${getTimestamp()} Sending notification to: ${email}...`
+              )
+            );
+            const request = await mailjet
+              .post("send", { version: "v3.1" })
+              .request(data);
+            console.log(
+              chalk.green(
+                `${getTimestamp()} Notification sent successfully to: ${email}`
+              )
+            );
+            return request;
+          } catch (err) {
+            console.log(
+              chalk.red(
+                `${getTimestamp()} Failed to send Notification to: ${email}`
+              ),
+              err
+            );
+            throw err;
+          }
+
+    } catch (err) {
+      console.log(
+        chalk.red(`${getTimestamp()} Failed to fetch user from DB`),
+        err
+      );
+      throw err
+    }
+
 }
