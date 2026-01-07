@@ -10,7 +10,6 @@ import type Stripe from "stripe";
 import chalk from "chalk";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import { notifyAdmin } from "../services/email.js";
-import redis from "../services/redis.js";
 
 export const getTimestamp = () =>
   `[${new Date().toISOString().replace("T", ", ").replace("Z", "")}]`;

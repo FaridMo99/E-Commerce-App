@@ -1,4 +1,3 @@
-import React from "react";
 
 //not found page for products and productId
 function NotFound() {

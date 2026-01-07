@@ -1,7 +1,7 @@
 "use server";
 import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { AccessToken, AuthResponse, User } from "@/types/types";
+import { AccessToken, AuthResponse } from "@/types/types";
 import { apiBaseUrl } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../../serverHelpers";
 import { cookies } from "next/headers";

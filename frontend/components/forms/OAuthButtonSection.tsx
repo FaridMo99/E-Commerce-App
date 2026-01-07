@@ -1,4 +1,3 @@
-import React from 'react'
 import { Field } from '../ui/field';
 import OAuthButton from './OAuthButton';
 import Facebook from '../icons/Facebook';

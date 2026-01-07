@@ -1,3 +1,4 @@
+"use client"
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useState } from 'react'
 import { userRoutes } from '../UserDropdown';

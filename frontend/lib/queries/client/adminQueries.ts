@@ -1,7 +1,6 @@
 //this whole file shouldnt be send when the user is not a admin
 import {
   OrdersQuerySchema,
-  ProductSchema,
   TimeframeQuerySchema,
   UpdateProductSchema,
 } from "@monorepo/shared";

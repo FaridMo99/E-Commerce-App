@@ -11,13 +11,11 @@ import passport from "./src/services/passport.js";
 import { CLIENT_ORIGIN, NODE_ENV, PORT } from "./src/config/env.js";
 import "./src/services/cronJobs.js";
 import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
-import prisma from "./src/services/prisma.js";
 import cors from "cors";
 import { loggerMiddleware } from "./src/middleware/utilityMiddleware.js";
 import { getTimestamp } from "./src/lib/utils.js";
 import path from "path";
 import maxmind from "maxmind";
-import { BASE_CURRENCY_KEY } from "./src/config/constants.js";
 
 //ip to country reader
 const dbPath = path.join(import.meta.dirname, "src" ,"data", "ip-to-country.mmdb");

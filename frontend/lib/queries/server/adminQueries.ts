@@ -16,7 +16,6 @@ import {
   AdminSetting,
   AdminTopseller,
   Order,
-  Product,
   ProductCategory,
 } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
