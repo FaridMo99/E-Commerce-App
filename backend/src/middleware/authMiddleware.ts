@@ -7,7 +7,7 @@ import {
   JWT_REFRESH_TOKEN_SECRET,
 } from "../config/env.js";
 import { validateTurnstile } from "../lib/auth.js";
-import { getTimestamp } from "../lib/utils.js";
+import { getTimestamp, isValidUserPayload } from "../lib/utils.js";
 
 
 export async function isAdmin(req: Request, res: Response, next: NextFunction) {
@@ -54,12 +54,10 @@ export async function isAuthenticated(
   try {
     const payload = jwt.verify(
       accessToken,
-      JWT_ACCESS_TOKEN_SECRET,
-    ) as Partial<JWTUserPayload>;
+      JWT_ACCESS_TOKEN_SECRET)
+    
 
-    console.log(chalk.red(getTimestamp(), "User has invalid Access Token"));
-
-    if (!payload.id || !payload.role)
+    if (!isValidUserPayload(payload))
       return res.status(401).json({ message: "Invalid token" });
     req.user = payload as JWTUserPayload;
 
@@ -185,9 +183,9 @@ export async function attachUserIfExists(
     const payload = jwt.verify(
       accessToken,
       JWT_ACCESS_TOKEN_SECRET,
-    ) as Partial<JWTUserPayload>;
+    )
 
-    if (payload.id && payload.role) {
+    if (isValidUserPayload(payload)) {
       req.user = payload as JWTUserPayload;
     }
   } catch (err) {

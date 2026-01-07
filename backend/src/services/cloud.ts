@@ -43,12 +43,12 @@ export async function handleCloudUpload(
 
 export async function deleteCloudAsset(url: string): Promise<void> {
   try {
-    const publicId = url.split("/").slice(-1)[0]?.split(".")[0];
+    const publicId = url.split("/").slice(-1)[0]?.split(".")[0]!;
     console.log(
       chalk.yellow(`${getTimestamp()} Deleting cloud asset: ${publicId}...`)
     );
 
-    await cloudinary.uploader.destroy(publicId!, { resource_type: "image" });
+    await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
 
     console.log(chalk.green(`${getTimestamp()} Cloud asset deleted successfully: ${publicId}`));
   } catch (err) {

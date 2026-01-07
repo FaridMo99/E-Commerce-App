@@ -13,7 +13,6 @@ import {
 } from "../config/constants.js";
 import { lookup } from "../../app.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
-import type { CountryResponse } from "maxmind";
 
 export const authRateLimiter = rateLimit({
   store: new RedisStore({
@@ -90,7 +89,7 @@ export async function geoCurrencyMiddleware(
     console.log(chalk.yellow(`${getTimestamp()} Cache miss for IP ${ip}`));
 
     //maxmind lookup
-    const geo = lookup.get(ip) as unknown as CountryResponse;
+    const geo = lookup.get(ip);
     const country = geo?.country_code ?? FALLBACK_COUNTRY_ISO_CODE;
     console.log(chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`));
 

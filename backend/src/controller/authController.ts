@@ -199,7 +199,12 @@ export async function verifyUser(
   try {
     console.log(chalk.yellow(`${getTimestamp()} Verifying user token`));
 
-    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as { id: string };
+    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET);
+
+    if (typeof payload === "string" || !("id" in payload)) {
+      return res.status(400).json({message:"Invalid Token"})
+    }
+
     const userId = payload.id;
 
     const storedToken = await redis.get(`verifyToken:${userId}`);
@@ -263,7 +268,12 @@ export async function changePassword(
   if (!token) return res.status(400).json({ message: "Token missing" });
 
   try {
-    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as { id: string };
+    const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET);
+    
+    if (typeof payload === "string" || !("id" in payload)) {
+      return res.status(400).json({ message: "Invalid Token" });
+    }
+
     const redisTokenKey = `changePasswordUserId:${payload.id}`;
     const redisToken = await redis.get(redisTokenKey);
 
@@ -412,7 +422,9 @@ export async function issueRefreshToken(
   next: NextFunction
 ) {
   const token = req.refreshTokenPayload!;
-  const rawToken = req.cookies.refreshToken as string;
+  const rawToken:string = req.cookies.refreshToken;
+
+
   console.log(
     chalk.yellow(
       `${getTimestamp()} issueRefreshToken called for userId: ${token?.userId}`

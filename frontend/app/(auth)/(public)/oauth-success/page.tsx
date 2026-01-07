@@ -6,19 +6,19 @@ import { User } from "@/types/types";
 
 async function page(props:PageProps<"/oauth-success">) {
   const {token} = await props.searchParams
-  if (!token) redirect("/");
+  if (!token || typeof token !== "string") redirect("/");
 
   let user: User;
 
   try {
-    user = await getUser(token as string);
+    user = await getUser(token);
   } catch (err) {
     console.log(err)
     redirect("/login?error=oAuth");
   }
 
   return (
-    <SuccessCard action="Login" user={user} accessToken={token as string} />
+    <SuccessCard action="Login" user={user} accessToken={token} />
   );
 }
 

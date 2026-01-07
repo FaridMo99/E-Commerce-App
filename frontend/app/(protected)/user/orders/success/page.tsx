@@ -3,13 +3,16 @@ import "server-only"
 import Screen from "./Screen";
 
 async function page(props:PageProps<"/user/orders/success">) {
-  const { session_id } = await props.searchParams;
+  const searchParams = await props.searchParams;
+  const sessionId = searchParams.session_id;
 
-  if (!session_id) return notFound();
+  if (!sessionId || typeof sessionId !== "string") {
+    return notFound();
+  }
   
   
   
-  return <Screen sessionId={session_id as string} />;
+  return <Screen sessionId={sessionId} />;
 }
 
 export default page

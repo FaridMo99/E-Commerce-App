@@ -38,7 +38,7 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
       const orderId = session.metadata?.orderId!;
       const userId = session.metadata?.userId!;
       const email = session.customer_details?.email!;
-      const paymentIntentId = session.payment_intent as string;
+      const paymentIntentId = session.payment_intent;
 
       console.log(
         chalk.yellow(

@@ -34,6 +34,7 @@ import {
   reviewSelect,
   reviewWhere,
 } from "../config/prismaHelpers.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 export async function getAllProducts(
   req: Request,
@@ -169,7 +170,7 @@ export async function getProductsMetaInfos(
       chalk.yellow(`${getTimestamp()} Fetching products meta info...`)
     );
 
-    const filters: any = {};
+    const filters: Prisma.ProductWhereInput = {};
 
     if (category) {
       filters.category = { name: category };

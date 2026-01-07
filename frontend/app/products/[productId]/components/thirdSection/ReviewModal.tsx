@@ -26,7 +26,8 @@ type ReviewModalProps = {
 
 
 export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewModalProps) {
-    const { productId } = useParams()
+    const params = useParams()
+    const productId = typeof params.productId === "string" ? params.productId : "";
     const accessToken = useAuth(state => state.accessToken)
     const router = useRouter()
     
@@ -43,7 +44,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
     
     const {mutate, isPending } = useMutation({
         mutationKey: ["create review for product", productId],
-        mutationFn: (review: ReviewSchema) => createProductReviewByProductId(productId as string, review, accessToken!)
+        mutationFn: (review: ReviewSchema) => createProductReviewByProductId(productId, review, accessToken!)
         ,
         onSuccess: () => {
             toast.success("Review posted successfully!")

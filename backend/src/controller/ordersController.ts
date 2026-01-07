@@ -42,8 +42,8 @@ export async function getOrders(
     const skip = (currentPage - 1) * take;
 
     const allowedFields = ["ordered_at", "total_amount", "status"];
-    const field = allowedFields.includes(sortBy as string)
-      ? (sortBy as string)
+    const field = allowedFields.includes(sortBy)
+      ? (sortBy)
       : "ordered_at";
     const order: "asc" | "desc" = sortOrder === "desc" ? "desc" : "asc";
 

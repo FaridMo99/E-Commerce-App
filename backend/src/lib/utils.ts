@@ -10,23 +10,22 @@ import type Stripe from "stripe";
 import chalk from "chalk";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import { notifyAdmin } from "../services/email.js";
+import type { JWTUserPayload } from "../types/types.js";
 
 export const getTimestamp = () =>
   `[${new Date().toISOString().replace("T", ", ").replace("Z", "")}]`;
 
 type ProductWithAvgRating = ProductWithSelectedFields & {
-  averageRating: number;
+  averageRating?: number;
 };
 
-export function calcAvgRating(product: ProductWithSelectedFields) {
+export function calcAvgRating(product: ProductWithAvgRating) {
   const ratings = product.reviews?.map((r) => r.rating) ?? [];
 
-  (product as ProductWithAvgRating).averageRating =
+  product.averageRating =
     ratings.length === 0
       ? 0
       : ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length;
-
-  delete (product as { reviews?: any }).reviews;
 }
 
 type OrderSmall = {
@@ -142,19 +141,32 @@ export async function releaseCartItems(orderId: string) {
   );
 }
 
-export async function refundOrder(paymentIntentId:string, amount:number, currency:CurrencyISO):Promise<Stripe.Response<Stripe.Refund> | void> {
+export async function refundOrder(
+  paymentIntentId: string,
+  amount: number,
+  currency: CurrencyISO
+): Promise<Stripe.Response<Stripe.Refund> | void> {
   try {
-
     const refund = await stripe.refunds.create({
       payment_intent: paymentIntentId,
       amount: amount,
       reason: "requested_by_customer",
-      currency
+      currency,
     });
 
     return refund;
   } catch (error) {
     console.log(chalk.red(getTimestamp(), "Refund failed:", error));
-    await notifyAdmin(`Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`);
+    await notifyAdmin(
+      `Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`
+    );
   }
+}
+
+export function isValidUserPayload(payload:any): payload is JWTUserPayload {
+  return (
+    payload &&
+    typeof payload.id === "string" &&
+    typeof payload.role === "string"
+  );
 }

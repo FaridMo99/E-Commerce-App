@@ -5,10 +5,10 @@ import "server-only";
 //!!!! its not the route for when logged in changing the password
 async function page(props: PageProps<"/change-password">) {
   const {token} = await props.searchParams;
-  if (!token) throw new Error();
+  if (!token || typeof token !== "string") throw new Error();
 
 
-  return <ChangePasswordForm token={token as string} />;
+  return <ChangePasswordForm token={token} />;
 }
 
 export default page;

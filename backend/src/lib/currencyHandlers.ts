@@ -248,9 +248,11 @@ export async function getBaseCurrency():Promise<CurrencyISO> {
     
     if (currency) {
       redis.setEx(BASE_CURRENCY_KEY, TWELVE_HOURS_IN_SECONDS, currency.value)
+      return currency.value as CurrencyISO
     }
 
-    return currency?.value as CurrencyISO
+    throw new Error("Base Currency Not Found")
+
 
   } catch (err) {
     console.log(chalk.red("Base currency fetch error:", err))

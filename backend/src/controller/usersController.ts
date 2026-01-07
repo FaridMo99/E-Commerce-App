@@ -26,11 +26,7 @@ export async function getUserByUserId(
   res: Response,
   next: NextFunction
 ) {
-  const id = req.user?.id;
-  if (!id) {
-    console.log(chalk.red(`${getTimestamp()} User not logged in`));
-    return res.status(400).json({ message: "User not logged in" });
-  }
+  const id = req.user?.id!
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching user ${id}`));
@@ -155,11 +151,6 @@ export async function getAllOrdersByUser(
   const userId = req.user?.id!
   const { sort, order, page, limit, status } = req.validatedQuery as OrdersQuerySchema;
 
-  if (!userId) {
-    console.log(chalk.red(`${getTimestamp()} User not authenticated`));
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-
   try {
     console.log(
       chalk.yellow(`${getTimestamp()} Fetching orders for user ${userId}`)
@@ -206,12 +197,8 @@ export async function getSingleOrderByUser(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id;
+  const userId = req.user?.id!;
   const orderId = req.params.orderId!;
-  if (!userId) {
-    console.log(chalk.red(`${getTimestamp()} User not authenticated`));
-    return res.status(401).json({ message: "Not authenticated" });
-  }
 
   try {
     console.log(
@@ -261,13 +248,8 @@ export async function getSingleStripeOrderByUser(
   res: Response,
   next: NextFunction
 ) {
-  const userId = req.user?.id;
+  const userId = req.user?.id!;
   const sessionId = req.params.stripeSessionId!;
-
-  if (!userId) {
-    console.log(chalk.red(`${getTimestamp()} User not authenticated`));
-    return res.status(401).json({ message: "Not authenticated" });
-  }
 
   try {
     console.log(

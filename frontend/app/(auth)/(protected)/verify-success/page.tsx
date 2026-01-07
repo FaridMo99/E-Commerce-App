@@ -4,9 +4,9 @@ import SuccessCard from "./components/SuccessCard";
 
 async function page(props:PageProps<"/verify-success">) {
   const {token}  = await props.searchParams;
-  if (!token) throw new Error();
+  if (!token || typeof token !== "string") throw new Error();
 
-  const res = await verifyAfterEmailLink(token as string);
+  const res = await verifyAfterEmailLink(token);
 
   return (
     <SuccessCard

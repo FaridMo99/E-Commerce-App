@@ -173,7 +173,7 @@ export async function deleteReviewByReviewId(
 }
 
 export async function setPublicByReviewId(
-  req: Request<{ reviewId: string }, {}, { isPublic?: any }>,
+  req: Request<{ reviewId: string }, {}, { isPublic?:"true" | "false" }>,
   res: Response,
   next: NextFunction
 ) {

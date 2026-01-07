@@ -53,7 +53,7 @@ export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   birthdate: z
     .preprocess(
-      (val) => (val ? new Date(val as string) : undefined),
+      (val) => (typeof val === "string" ? new Date(val) : undefined),
       z.date().optional()
     )
     .refine((val) => !val || !isNaN(val.getTime()), {
@@ -185,7 +185,7 @@ export const reviewsQuerySchema = paginationSchema.extend({
   ),
   created_at: z
     .preprocess(
-      (val) => (val ? new Date(val as string) : undefined),
+      (val) => (typeof val === "string" ? new Date(val) : undefined),
       z.date().optional()
     )
     .refine((val) => !val || !isNaN(val.getTime()), {
@@ -219,7 +219,7 @@ export const updateProductSchema = productSchema.partial();
 export const timeframeQuerySchema = z.object({
   from: z
     .preprocess(
-      (val) => (val ? new Date(val as string) : undefined),
+      (val) => (typeof val === "string" ? new Date(val) : undefined),
       z.date().optional()
     )
     .refine((val) => !val || !isNaN(val.getTime()), {
@@ -227,7 +227,7 @@ export const timeframeQuerySchema = z.object({
     }),
   to: z
     .preprocess(
-      (val) => (val ? new Date(val as string) : undefined),
+      (val) => (typeof val === "string" ? new Date(val) : undefined),
       z.date().optional()
     )
     .refine((val) => !val || !isNaN(val.getTime()), {

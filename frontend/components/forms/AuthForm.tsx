@@ -123,7 +123,7 @@ export default function CaptchaForm<
 
                     <InputValidationFailedText
                       trigger={errors[fieldName]}
-                      text={errors[fieldName]?.message as string}
+                      text={errors[fieldName]?.message}
                     />
                   </Field>
                 );
