@@ -17,19 +17,15 @@ import {
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import {
   BASE_CURRENCY_KEY,
-  CATEGORIES_REDIS_KEY,
-  NEW_PRODUCTS_REDIS_KEY,
-  SALE_PRODUCTS_REDIS_KEY,
-  TRENDING_PRODUCTS_REDIS_KEY,
 } from "../config/constants.js";
 import {
+  clearAllProductCaches,
   getCategories,
   getCategoryProducts,
   getNewProducts,
   getSaleProducts,
   getTrendingProducts,
 } from "../lib/productQueries.js";
-import redis from "../services/redis.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 import {
@@ -301,16 +297,9 @@ export async function createProduct(
       });
     });
 
-    const redisKey = `${CATEGORIES_REDIS_KEY}:${product.category}`;
     //clear all relevant caches
-    if (newProduct.is_public) {
-      await Promise.all([
-        redis.del(NEW_PRODUCTS_REDIS_KEY),
-        redis.del(SALE_PRODUCTS_REDIS_KEY),
-        redis.del(CATEGORIES_REDIS_KEY),
-        redis.del(redisKey),
-        redis.del(TRENDING_PRODUCTS_REDIS_KEY),
-      ]);
+    if (product.is_public) {
+      await clearAllProductCaches(newProduct.category.name)
     }
 
     console.log(
@@ -502,15 +491,8 @@ export async function updateProductByProductId(
     }
 
     //redis invalidation
-    const redisKey = `${CATEGORIES_REDIS_KEY}:${updatedProduct.category.id}`;
-
-    if (is_public) {
-      await Promise.all([
-        redis.del(NEW_PRODUCTS_REDIS_KEY),
-        redis.del(SALE_PRODUCTS_REDIS_KEY),
-        redis.del(CATEGORIES_REDIS_KEY),
-        redis.del(redisKey),
-      ]);
+    if (is_public || is_public === false) {
+      await clearAllProductCaches(updatedProduct.category.name)
     }
 
     console.log(

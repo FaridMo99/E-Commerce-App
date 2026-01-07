@@ -112,6 +112,11 @@ export const reviewSelect: Prisma.ReviewSelect = {
   product: {
     select: {
       name: true,
+      category: {
+        select: {
+          name:true
+        }
+      }
     },
   },
   user: {

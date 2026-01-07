@@ -11,6 +11,7 @@ import { calculateCartTotalsInCents, getTimestamp, releaseCartItems } from "../l
 import { cartSelect, orderSelect, type CartWithSelectedFields } from "../config/prismaHelpers.js";
 import type Stripe from "stripe";
 import { ORDERS_EXPIRATION_TIME } from "../config/constants.js";
+import { clearAllProductCaches } from "../lib/productQueries.js";
 
 // Get orders within a timeframe
 export async function getOrders(
@@ -154,6 +155,7 @@ export async function makeOrder(
 
     let order;
     let finalItems = cartWithTotals.items;
+    const categoriesToInvalidate = new Set<string>(); //caches to invalidate for sold out products
 
     //atomic order creation, stock decrement, and check
     try {
@@ -169,7 +171,11 @@ export async function makeOrder(
                   decrement: item.quantity,
                 },
               },
-              select: { stock_quantity: true, name: true, id: true },
+              select: {
+                stock_quantity: true,
+                name: true,
+                id: true,
+              },
             });
 
             if (updatedProduct.stock_quantity < 0) {
@@ -177,8 +183,21 @@ export async function makeOrder(
                 `Insufficient stock for product ${updatedProduct.name} (ID: ${updatedProduct.id})`
               );
             }
+
+            if (updatedProduct.stock_quantity === 0) {
+              categoriesToInvalidate.add(updatedProduct.category.name);
+            }
           })
         );
+
+        //clear cache if products are sold out
+        if (categoriesToInvalidate.size > 0) {
+          await Promise.all(
+            Array.from(categoriesToInvalidate).map((cat) =>
+              clearAllProductCaches(cat)
+            )
+          );
+        }
 
         //create order
         return tx.order.create({

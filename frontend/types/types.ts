@@ -97,7 +97,10 @@ export type ProductReview = {
   id: string;
   product_id: string;
   product: {
-    name:string
+    name: string
+    category: {
+      name:string
+    }
   },
   user: {
       name: string;

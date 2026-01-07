@@ -42,7 +42,7 @@ export async function isAuthenticated(
   next: NextFunction,
 ) {
   console.log(
-    chalk.yellow(getTimestamp(), "Checking is user is authenticated")
+    chalk.yellow(getTimestamp(), "Checking if user is authenticated")
   );
   const accessToken = req.headers.authorization?.split(" ")[1];
 

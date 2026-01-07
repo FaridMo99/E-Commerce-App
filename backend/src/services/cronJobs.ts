@@ -12,7 +12,7 @@ cron.schedule("0 */6 * * *", async () => {
   try {
     console.log(chalk.yellow(getTimestamp(), "Refreshing exchange rates..."));
     const rates = await getExchangeRates();
-    console.log(chalk.green(getTimestamp(), " Rates refreshed:", rates));
+    console.log(chalk.green(getTimestamp(), "Rates refreshed:", rates));
   } catch (err) {
     console.log(chalk.red(getTimestamp(), "Failed to refresh exchange rates:", err));
   }

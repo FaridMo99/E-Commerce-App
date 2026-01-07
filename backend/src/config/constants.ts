@@ -3,7 +3,8 @@ import type { CurrencyISO } from "../generated/prisma/enums.js";
 //redis store exchange rates, key name
 export const EXCHANGE_RATE_REDIS_KEY = "exchangeRates";
 export const ONE_DAY_IN_SECONDS = 43200 * 2;
-export const TWELVE_HOURS_IN_SECONDS = 43200;
+export const TWELVE_HOURS_IN_SECONDS = 43200; // 12 hours
+export const HOME_PRODUCTS_CACHE_TIME = 1800; // 30 min
 export const BASE_CURRENCY_KEY = "baseCurrency";
 export const TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS = 14;
 export const CATEGORY_CACHE_TIME = 1800; // 30min
@@ -11,7 +12,7 @@ export const CATEGORY_CACHE_TIME = 1800; // 30min
 export const NEW_PRODUCTS_REDIS_KEY = "newProducts";
 export const SALE_PRODUCTS_REDIS_KEY = "saleProducts";
 export const TRENDING_PRODUCTS_REDIS_KEY = "trendingProducts";
-export const CATEGORIES_REDIS_KEY = "categories";
+export const CATEGORIES_REDIS_KEY = "categories" as const;
 
 export const EURO_COUNTRIES = [
   "AT",
