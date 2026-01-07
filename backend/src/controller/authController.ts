@@ -260,14 +260,7 @@ export async function changePassword(
     chalk.yellow(`${getTimestamp()} changePassword called for token: ${token}`)
   );
 
-  if (!password && !token)
-    return res.status(400).json({ message: "Token and Password missing" });
-  if (!password) return res.status(400).json({ message: "Password missing" });
   if (!token) return res.status(400).json({ message: "Token missing" });
-
-  const validatedPassword = loginSchema.shape.password.safeParse(password);
-  if (!validatedPassword.success)
-    return res.status(400).json({ message: validatedPassword.error.message });
 
   try {
     const payload = jwt.verify(token, JWT_EMAIL_TOKEN_SECRET) as { id: string };
@@ -291,7 +284,7 @@ export async function changePassword(
       return res.status(403).json({ message: "Invalid Link" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password!, 10);
     const user = await prisma.user.update({
       where: { id: payload.id },
       data: { password: hashedPassword },
@@ -503,11 +496,8 @@ export async function changePasswordAuthenticated(
   const userId = req.user?.id!;
   const { oldPassword, password } = req.body;
 
-  if (!oldPassword || !password)
+  if (!oldPassword)
     return res.status(400).json({ message: "Password missing" });
-
-   const validatedPassword = loginSchema.shape.password.safeParse(password);
-  if (!validatedPassword.success) return res.status(400).json({ message: validatedPassword.error.message });
   
    const validatedOldPassword = loginSchema.shape.password.safeParse(oldPassword);
    if (!validatedOldPassword.success)
@@ -558,16 +548,9 @@ export async function changePasswordAuthenticated(
 }
 
 
-//move this passowrd validation to middleware since you repeat it often
 export async function setPassword(req: Request, res: Response, next: NextFunction) { 
   const id = req.user?.id!
   const password = req.body.password
-
-    if (!password) return res.status(400).json({ message: "Password missing" });
-
-    const validatedPassword = loginSchema.shape.password.safeParse(password);
-    if (!validatedPassword.success)
-      return res.status(400).json({ message: validatedPassword.error.message });
   
   try {
     const user = await prisma.user.findUnique({ where: { id } })

@@ -5,8 +5,6 @@ import { getTimestamp } from "../lib/utils.js";
 import chalk from "chalk";
 import { imageSchema } from "../config/schemas.js";
 
-
-//error message wrong
 export function validateBody<T>(schema: ZodType<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     const parsed = schema.safeParse(req.body);

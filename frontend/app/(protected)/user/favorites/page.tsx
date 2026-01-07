@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import ProductGrid from "./components/ProductGrid";
 import SectionWrapper from "@/components/main/SectionWrapper";
 
-//error page
 function Page() {
   const accessToken = useAuth(state => state.accessToken)
   

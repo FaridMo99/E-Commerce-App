@@ -1,5 +1,5 @@
 "user server"
-//this whole file shouldnt be send when the user is not a admin
+
 import {
   OrdersQuerySchema,
   ProductSchema,

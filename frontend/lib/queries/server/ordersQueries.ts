@@ -26,7 +26,6 @@ export async function makeOrder(
   return await handleResponse(res);
 }
 
-//will probably be run when on cancel route
 export async function cancelOrder(orderId: string, accessToken: AccessToken): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),

@@ -55,7 +55,6 @@ export async function deleteUser(accessToken: AccessToken): Promise<void> {
   return await handleResponse(res);
 }
 
-//get more info for order summary
 export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
   const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
     credentials: "include",
@@ -110,7 +109,6 @@ export async function removeItemFromCart(
   return await handleResponse(res);
 }
 
-//unused yet
 export async function changeItemQuantitiy(
   itemQuantity: ItemQuantitySchema,
   itemId: string,
@@ -256,7 +254,6 @@ export async function addProductToRecentlyViewedProductsByProductId(
   return await handleResponse(res);
 }
 
-//have to create controller endpoint for that
 export async function getUserOrderByStripeSessionId(
   id: string,
   accessToken: AccessToken

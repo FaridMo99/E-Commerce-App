@@ -302,7 +302,6 @@ export async function makeOrder(
 
     } catch (err) {
       console.log(chalk.red(getTimestamp(), "stripe error", err.message))
-      //this maybe unnecessary when instead doing a transaction
       await releaseCartItems(order.id)
       next(err)
     }

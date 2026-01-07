@@ -120,7 +120,6 @@ export type HomeProducts = {
 
 
 
-//protected user data, move this to protected user route for settings
 export type AuthUser = User & {
   birthdate: Date | null;
   created_at: Date;
@@ -139,7 +138,6 @@ export type AuthProductReview = ProductReview & {
 }
 
 
-//admin types, move them to admin pages/layout so they wont get send with these normal user types
 export type AdminSetting = {
   key: string;
   value: string;
@@ -165,13 +163,7 @@ export type AdminTopseller = {
     totalSold: number;
 }
 
-
-//move all types from other files here
-
-//somehow select on backend returns way too much even though it should limit
-
 //utility nextjs type
-
 export type SearchParams = Record<string, string | string[] | undefined>;
 export type Params = Record<string, string | undefined>;
 export type ParamsProps = { params: Params };

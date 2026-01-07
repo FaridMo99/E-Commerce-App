@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import {
   Sheet,
@@ -15,7 +14,6 @@ import LogoutButton from "./LogoutButton";
 import MobileUserDopdown from "./MobileUserDopdown";
 
 
-//user routes missing
 export function MobileNavigation() {
   const accessToken = useAuth(state=>state.accessToken)
   const links = [

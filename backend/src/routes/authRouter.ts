@@ -51,11 +51,17 @@ authRouter.post(
   sendNewVerifyLink
 );
 
-authRouter.patch("/change-password", authRateLimiter, changePassword);
+authRouter.patch("/change-password", authRateLimiter, validateBody(loginSchema.shape.password), changePassword);
 
-authRouter.patch("/change-password-authenticated", isAuthenticated, hasCsrfToken, changePasswordAuthenticated);
+authRouter.patch(
+  "/change-password-authenticated",
+  validateBody(loginSchema.shape.password),
+  isAuthenticated,
+  hasCsrfToken,
+  changePasswordAuthenticated
+);
 
-authRouter.patch("/set-password", isAuthenticated, hasCsrfToken, setPassword);
+authRouter.patch("/set-password",validateBody(loginSchema.shape.password), isAuthenticated, hasCsrfToken, setPassword);
 
 
 authRouter.post(

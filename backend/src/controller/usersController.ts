@@ -256,6 +256,62 @@ export async function getSingleOrderByUser(
   }
 }
 
+export async function getSingleStripeOrderByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const userId = req.user?.id;
+  const sessionId = req.params.stripeSessionId!;
+
+  if (!userId) {
+    console.log(chalk.red(`${getTimestamp()} User not authenticated`));
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  try {
+    console.log(
+      chalk.yellow(
+        `${getTimestamp()} Fetching stripe order ${sessionId} for user ${userId}`
+      )
+    );
+    const order = await prisma.order.findFirst({
+      where: {
+        stripe_session_id: sessionId,
+        user_id: userId,
+      },
+      select: {
+        ...orderSelect,
+      },
+    });
+
+    if (!order) {
+      console.log(
+        chalk.red(
+          `${getTimestamp()} Stripe Order ${sessionId} not found for user ${userId}`
+        )
+      );
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.total_amount = formatPriceForClient(order.total_amount);
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Stripe Order ${sessionId} fetched successfully for user ${userId}`
+      )
+    );
+    return res.status(200).json(order);
+  } catch (err) {
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to fetch Stripe order ${sessionId} for user ${userId}:`,
+        err
+      )
+    );
+    next(err);
+  }
+}
+
 // Get reviews by user
 export async function getReviewsByUser(
   req: Request,
@@ -544,7 +600,6 @@ export async function removeProductFromUserCart(
   }
 }
 
-//later give support for variants
 export async function updateItemQuantity(
   req: Request<{ itemId: string }, {}, ItemQuantitySchema>,
   res: Response,

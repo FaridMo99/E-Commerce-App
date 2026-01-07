@@ -4,8 +4,6 @@ import { STRIPE_WEBHOOK_SECRET } from "../config/env.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
 
-//request that key later from stripe for prod
-
 //webhook that gets hit after order done
 export async function stripeHandler(
   req: Request,

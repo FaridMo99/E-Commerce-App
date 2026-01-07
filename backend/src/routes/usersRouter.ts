@@ -16,6 +16,7 @@ import {
   updateItemQuantity,
   getRecentlyViewedProducts,
   addProductToRecentlyViewedProductsByProductId,
+  getSingleStripeOrderByUser,
 } from "../controller/usersController.js";
 import {
   hasCsrfToken,
@@ -64,7 +65,9 @@ usersRouter.get("/me/reviews", getReviewsByUser);
 
 //orders related routes
 usersRouter.get("/me/orders", validateSearchQueries(ordersQuerySchema), getAllOrdersByUser);
-usersRouter.get("/me/orders/:orderId",getSingleOrderByUser);
+usersRouter.get("/me/orders/:orderId", getSingleOrderByUser);
+usersRouter.get("/me/orders/stripe/:stripeSessionId", getSingleStripeOrderByUser);
+
 
 //favorite articles routes
 usersRouter.get("/me/favorites",geoCurrencyMiddleware, getFavoriteItems);
