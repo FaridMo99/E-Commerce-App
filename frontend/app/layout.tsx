@@ -14,6 +14,7 @@ const questrial = Questrial({
   weight: "400",
 });
 
+
 export default async function RootLayout({ children }: ChildrenProps) {
   let user: User | undefined;
   let accessToken: AccessToken | undefined;
@@ -29,13 +30,13 @@ export default async function RootLayout({ children }: ChildrenProps) {
   return (
     <html lang="de" className={questrial.className}>
       <body className="overflow-x-hidden">
-        <QueryContext>
-          <AuthZustandSetter accessToken={accessToken} user={user} />
-          <Header />
-          <div className="w-screen min-h-[75vh] py-8">{children}</div>
-          <Footer />
-          <Toaster />
-        </QueryContext>
+      <QueryContext>
+        <AuthZustandSetter accessToken={accessToken} user={user} />
+        <Header />
+        <div className="w-screen min-h-[75vh] py-8">{children}</div>
+        <Footer />
+        <Toaster />
+      </QueryContext>
       </body>
     </html>
   );
