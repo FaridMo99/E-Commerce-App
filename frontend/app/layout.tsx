@@ -2,7 +2,7 @@ import "./globals.css";
 import "server-only";
 import Footer from "@/components/main/Footer";
 import { Toaster } from "@/components/ui/sonner";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
   let accessToken: AccessToken | undefined;
 
   try {
-    const res = await getNewRefreshToken();
+    const res = await getCachedRefreshToken();
     user = res.user;
     accessToken = res.accessToken;
   } catch (err) {

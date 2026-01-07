@@ -1,11 +1,11 @@
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
 import { redirect } from "next/navigation";
 import "server-only";
 
 async function layout(props:LayoutProps<"/">) {
   let res;
   try {
-    res = await getNewRefreshToken();
+    res = await getCachedRefreshToken();
   } catch (err) {
     console.log("User not logged in: " + err);
   }

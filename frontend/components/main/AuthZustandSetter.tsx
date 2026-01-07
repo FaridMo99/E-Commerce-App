@@ -2,7 +2,7 @@
 import useAuth from "@/stores/authStore";
 import { AccessToken, AuthUser, User } from "@/types/types";
 import { useEffect, useRef } from "react";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getNewRefreshToken } from "@/lib/queries/client/authQueries";
 import { useRouter } from "next/navigation";
 
 type AuthZustandSetterProps = {

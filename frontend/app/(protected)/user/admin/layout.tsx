@@ -1,13 +1,9 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
 import { AccessToken, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 import Navbar from "./components/Navbar";
-
-
-//cache the getnewrefreshtoken so when reloading in nested routes it doesnt trigger all layouts requesting refresh tokens
-//do this for all nested layouts that repeat the same fn
 
 async function layout(props: LayoutProps<"/user/admin">) {
   let res;
@@ -15,7 +11,7 @@ async function layout(props: LayoutProps<"/user/admin">) {
   let accessToken: AccessToken | undefined;
 
   try {
-    res = await getNewRefreshToken();
+    res = await getCachedRefreshToken();
     accessToken = res.accessToken;
     user = res.user;
   } catch (err) {
