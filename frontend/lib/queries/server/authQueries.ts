@@ -2,7 +2,7 @@
 import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { AccessToken, AuthResponse } from "@/types/types";
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../../serverHelpers";
 import { cookies } from "next/headers";
 import { stripContentLengthHeader } from "../../helpers";
@@ -13,7 +13,7 @@ export async function login(
   captchaToken: string
 ): Promise<AuthResponse> {
   const additionalHeaders = await getAllHeaders();
-  const res = await fetch(`${apiBaseUrl}/auth/login`, {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -33,7 +33,7 @@ export async function signup(
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
 
-  const res = await fetch(`${apiBaseUrl}/auth/signup`, {
+  const res = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export async function logout(accessToken: AccessToken): Promise<void> {
     cookies(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/auth/logout`, {
+  const res = await fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -72,7 +72,7 @@ export async function verifyAfterEmailLink(
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
 
-  const res = await fetch(`${apiBaseUrl}/auth/verify`, {
+  const res = await fetch(`${API_BASE_URL}/auth/verify`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -91,7 +91,7 @@ export async function sendNewVerificationLink(
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
 
-  const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
+  const res = await fetch(`${API_BASE_URL}/auth/new-verify-link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export async function forgotPasswordSendEmail(
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
   console.log(email);
-  const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -125,7 +125,7 @@ export async function forgotPasswordSendEmail(
 export async function getNewRefreshToken(): Promise<AuthResponse> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/auth/refresh-token`, {
+  const res = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -144,7 +144,7 @@ export async function changePasswordUnauthenticated(
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
 
-  const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
+  const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
     method: "PATCH",
     credentials: "include",
     headers: {

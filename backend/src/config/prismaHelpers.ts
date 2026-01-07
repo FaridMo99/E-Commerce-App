@@ -35,6 +35,7 @@ export const productSelect: Prisma.ProductSelect = {
   description: true,
   stock_quantity: true,
   published_at: true,
+  updated_at:true,
   imageUrls: true,
   currency: true,
   category: {

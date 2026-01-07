@@ -8,11 +8,51 @@ import { AccessToken, ChildrenProps, User } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
 import Header from "@/components/main/header/Header";
 import { Questrial } from "next/font/google";
+import { Metadata, Viewport } from "next";
+import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
 
 const questrial = Questrial({
   subsets: ["latin"],
   weight: "400",
 });
+
+export const viewport: Viewport = { themeColor: "#f46b61" };
+
+export const metadata: Metadata = {
+  title: DOMAIN_NAME,
+  metadataBase: new URL(DOMAIN!),
+  description: "Online Shop for various Products",
+  authors: [{ name: "Farid Mohseni" }],
+  openGraph: {
+    title: DOMAIN_NAME,
+    description: "Online Shop",
+    url: DOMAIN,
+    siteName: DOMAIN_NAME,
+    type: "website",
+    locale: "de_DE",
+    images: [
+      {
+        url: "/logoIcon.png",
+        width: 1200,
+        height: 630,
+        alt: "Shop Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DOMAIN_NAME,
+    description: "Online Shop",
+    images: [
+      {
+        url: "/logoIcon.png",
+        width: 1200,
+        height: 630,
+        alt: "Shop Logo",
+      },
+    ],
+  },
+};
 
 
 export default async function RootLayout({ children }: ChildrenProps) {

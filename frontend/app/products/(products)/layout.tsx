@@ -2,6 +2,16 @@ import "server-only";
 import { getAllCategories } from "@/lib/queries/server/categoryQueries";
 import Sidebar from "./components/Sidebar";
 import ProductPagination from "./components/ProductPagination";
+import { Metadata } from "next";
+import { DOMAIN_NAME } from "@/config/constants";
+
+export const metadata: Metadata = {
+  title: "Products",
+  description: `Discover various Products`,
+  openGraph: {
+    title: `${DOMAIN_NAME} | Products`,
+  },
+};
 
 async function layout(props: LayoutProps<"/products">) {
   const categories = await getAllCategories();

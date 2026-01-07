@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import {
   AccessToken,
   AuthResponse,
@@ -14,7 +14,7 @@ export async function login(
   credentials: LoginSchema,
   captchaToken: string
 ): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/login`, {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -30,7 +30,7 @@ export async function signup(
   credentials: SignupSchema,
   captchaToken: string
 ): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/auth/signup`, {
+  const res = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export async function forgotPasswordSendEmail(
   email: EmailSchema,
   captchaToken: string
 ): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/auth/forgot-password`, {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export async function forgotPasswordSendEmail(
 export async function verifyAfterEmailLink(
   token: string
 ): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/verify`, {
+  const res = await fetch(`${API_BASE_URL}/auth/verify`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -74,7 +74,7 @@ export async function sendNewVerificationLink(
   email: EmailSchema,
   captchaToken: string
 ): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/auth/new-verify-link`, {
+  const res = await fetch(`${API_BASE_URL}/auth/new-verify-link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,7 +86,7 @@ export async function sendNewVerificationLink(
 }
 
 export async function getNewRefreshToken(): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/refresh-token`, {
+  const res = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
     method: "POST",
     credentials: "include",
   });
@@ -97,7 +97,7 @@ export async function changePasswordUnauthenticated(
   token: string,
   password: string
 ): Promise<AuthResponse> {
-  const res = await fetch(`${apiBaseUrl}/auth/change-password`, {
+  const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
     method: "PATCH",
     credentials: "include",
     headers: {
@@ -109,7 +109,7 @@ export async function changePasswordUnauthenticated(
 }
 
 export async function logout(accessToken: AccessToken): Promise<void> {
-  const res = await fetch(`${apiBaseUrl}/auth/logout`, {
+  const res = await fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -127,7 +127,7 @@ export async function changePasswordAuthenticated(
   accessToken: AccessToken
 ): Promise<User> {
   const { oldPassword, password } = passwords;
-  const res = await fetch(`${apiBaseUrl}/auth/change-password-authenticated`, {
+  const res = await fetch(`${API_BASE_URL}/auth/change-password-authenticated`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -145,7 +145,7 @@ export async function setPassword(
   accessToken: AccessToken
 ): Promise<User> {
   const { password } = passwords;
-  const res = await fetch(`${apiBaseUrl}/auth/set-password`, {
+  const res = await fetch(`${API_BASE_URL}/auth/set-password`, {
     credentials: "include",
     method: "PATCH",
     headers: {

@@ -1,5 +1,5 @@
 "use server"
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import { handleResponse } from "../utils";
 import { AccessToken } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
@@ -14,7 +14,7 @@ export async function makeOrder(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/orders`, {
+  const res = await fetch(`${API_BASE_URL}/orders`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -33,7 +33,7 @@ export async function cancelOrder(orderId: string, accessToken: AccessToken): Pr
   ]);
 
 
-  const res = await fetch(`${apiBaseUrl}/orders/${orderId}/cancel`, {
+  const res = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
     credentials: "include",
     method: "POST",
     headers: {

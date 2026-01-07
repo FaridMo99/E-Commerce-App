@@ -1,6 +1,6 @@
 import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import { AccessToken, AdminProduct, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
@@ -26,7 +26,7 @@ export async function getProducts(
     if (queryParam.sortOrder) params.set("sortOrder", queryParam.sortOrder);
   }
 
-  const url = `${apiBaseUrl}/products?${params.toString()}`;
+  const url = `${API_BASE_URL}/products?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -55,7 +55,7 @@ export async function getProductsAdmin(
     if (queryParam.sortOrder) params.set("sortOrder", queryParam.sortOrder);
   }
 
-  const url = `${apiBaseUrl}/products?${params.toString()}`;
+  const url = `${API_BASE_URL}/products?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -87,7 +87,7 @@ export async function getProductsMetaInfos(
       params.set("sale", String(queryParams.sale));
   }
 
-  const url = `${apiBaseUrl}/products/meta?${params.toString()}`;
+  const url = `${API_BASE_URL}/products/meta?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -97,7 +97,7 @@ export async function getProductsMetaInfos(
 
 export async function getProductByProductId(id: string): Promise<Product> {
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
   });
   return await handleResponse(res);
@@ -105,7 +105,7 @@ export async function getProductByProductId(id: string): Promise<Product> {
 
 export async function getAllProductReviewsByProductId(id: string): Promise<ProductReview[]> {
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`);
+  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`);
   return await handleResponse(res);
 }
 
@@ -115,7 +115,7 @@ export async function createProductReviewByProductId(
   accessToken:AccessToken
 ): Promise<AuthProductReview[]> {
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
+  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -130,7 +130,7 @@ export async function createProductReviewByProductId(
 
 export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
   
-  const res = await fetch(`${apiBaseUrl}/products/home`, {
+  const res = await fetch(`${API_BASE_URL}/products/home`, {
     credentials: "include",
     headers: {
       ...(accessToken && { Authorization: `Bearer ${accessToken}` }),

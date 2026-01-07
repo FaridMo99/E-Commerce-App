@@ -7,7 +7,7 @@ import {
   UpdateUserSchema,
 } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import {
   AccessToken,
   AuthProductReview,
@@ -20,7 +20,7 @@ import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 export async function getUser(accessToken: AccessToken): Promise<User> {
   const additionalHeaders = await getAllHeaders();
-  const res = await fetch(`${apiBaseUrl}/users/me`, {
+  const res = await fetch(`${API_BASE_URL}/users/me`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -39,7 +39,7 @@ export async function updateUser(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me`, {
+  const res = await fetch(`${API_BASE_URL}/users/me`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -59,7 +59,7 @@ export async function deleteUser(accessToken: AccessToken): Promise<void> {
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me`, {
+  const res = await fetch(`${API_BASE_URL}/users/me`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -74,7 +74,7 @@ export async function deleteUser(accessToken: AccessToken): Promise<void> {
 export async function getUserCart(accessToken: AccessToken): Promise<Cart> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/cart`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -90,7 +90,7 @@ export async function deleteUserCart(accessToken: AccessToken): Promise<void> {
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/cart`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/cart`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -111,7 +111,7 @@ export async function addProductToUserCart(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/cart/items`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/cart/items`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -134,7 +134,7 @@ export async function removeItemFromCart(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -156,7 +156,7 @@ export async function changeItemQuantitiy(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/cart/items/${itemId}`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/cart/items/${itemId}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -175,7 +175,7 @@ export async function getUserReviews(
 ): Promise<AuthProductReview[]> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/users/me/reviews`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/reviews`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -204,7 +204,7 @@ export async function getUserOrders(
       params.set("status", String(queryParam.status));
   }
 
-  const url = `${apiBaseUrl}/users/me/orders?${params.toString()}`;
+  const url = `${API_BASE_URL}/users/me/orders?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -223,7 +223,7 @@ export async function getUserOrderByOrderId(
 ): Promise<Order> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/users/me/orders/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/orders/${id}`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -238,7 +238,7 @@ export async function getUserFavoriteItems(
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/favorites`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -257,7 +257,7 @@ export async function addFavoriteItemByProductId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/favorites`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/favorites`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -280,7 +280,7 @@ export async function deleteFavoriteItemByProductId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/favorites/${productId}`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/favorites/${productId}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -297,7 +297,7 @@ export async function getRecentlyViewedProducts(
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/users/me/recently-viewed-products`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/recently-viewed-products`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -316,7 +316,7 @@ export async function addProductToRecentlyViewedProductsByProductId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/users/me/recently-viewed-products`, {
+  const res = await fetch(`${API_BASE_URL}/users/me/recently-viewed-products`, {
     credentials: "include",
     method: "POST",
     headers: {

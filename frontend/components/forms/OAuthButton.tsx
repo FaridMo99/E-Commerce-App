@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { ReactNode } from "react";
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import { OAuthProvider } from "@/types/types";
 
 type OAuthButtonProps = {
@@ -27,7 +27,7 @@ function OAuthButton({
       style={{ backgroundColor: bgColor, color: "white" }}
       type="button"
       onClick={() => {
-        router.push(`${apiBaseUrl}/auth/oauth/${provider}`);
+        router.push(`${API_BASE_URL}/auth/oauth/${provider}`);
       }}
     >
       {logoSvg}

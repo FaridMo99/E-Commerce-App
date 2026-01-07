@@ -1,7 +1,7 @@
 "use server"
 import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { apiBaseUrl } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
 import { AccessToken, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
@@ -28,7 +28,7 @@ export async function getProducts(
     if (queryParams.sortOrder) params.set("sortOrder", queryParams.sortOrder);
   }
 
-  const url = `${apiBaseUrl}/products?${params.toString()}`;
+  const url = `${API_BASE_URL}/products?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -61,7 +61,7 @@ export async function getProductsMetaInfos(
       params.set("sale", String(queryParams.sale));
   }
 
-  const url = `${apiBaseUrl}/products/meta?${params.toString()}`;
+  const url = `${API_BASE_URL}/products/meta?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -75,7 +75,7 @@ export async function getProductsMetaInfos(
 export async function getProductByProductId(id: string): Promise<Product> {
     const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
     headers: {
       ...additionalHeaders,
@@ -87,7 +87,7 @@ export async function getProductByProductId(id: string): Promise<Product> {
 export async function getAllProductReviewsByProductId(id: string): Promise<ProductReview[]> {
     const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
+  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
     headers: {
       ...additionalHeaders,
     },
@@ -105,7 +105,7 @@ export async function createProductReviewByProductId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
+  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -122,7 +122,7 @@ export async function createProductReviewByProductId(
 export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
   const additionalHeaders = await getAllHeaders();
   console.log(additionalHeaders);
-  const res = await fetch(`${apiBaseUrl}/products/home`, {
+  const res = await fetch(`${API_BASE_URL}/products/home`, {
     credentials: "include",
     headers: {
       ...additionalHeaders,

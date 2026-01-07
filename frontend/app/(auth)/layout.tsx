@@ -1,4 +1,10 @@
+import { Metadata } from "next";
 import "server-only"
+
+export const metadata: Metadata = {
+  title: "Authentication",
+  description: "Log in or create an account.",
+};
 
 async function layout(props: LayoutProps<"/">) {
   return (

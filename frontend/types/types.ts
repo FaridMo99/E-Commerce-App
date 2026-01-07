@@ -41,6 +41,7 @@ export type CartItem = {
 
 export type Product = {
   id: string;
+  updated_at: Date;
   name: string;
   description: string;
   currency: CurrencyISO;

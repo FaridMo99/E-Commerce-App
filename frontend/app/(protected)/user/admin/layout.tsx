@@ -4,6 +4,12 @@ import { AccessToken, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 import Navbar from "./components/Navbar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin",
+  description: "Manage your Shop, Orders and Products.",
+};
 
 async function layout(props: LayoutProps<"/user/admin">) {
   let res;
