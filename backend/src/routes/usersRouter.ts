@@ -81,7 +81,7 @@ usersRouter.delete(
   deleteFavoriteItem,
 );
 
-//add route and controller for recently viewed products
+//recently viewed products
 usersRouter.get(
   "/me/recently-viewed-products",
   geoCurrencyMiddleware,

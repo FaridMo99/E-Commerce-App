@@ -3,7 +3,6 @@ type ProductTagProps = {
     styles?:string
 }
 
-//give this to all elemnts that are products
 function ProductTag({ type, styles }: ProductTagProps) {
     let bgColor = "";
     if (type === "Sale") bgColor = "bg-red-500";
