@@ -1,4 +1,5 @@
 "use client"
+import SubmitButton from "@/components/forms/SubmitButton";
 import InputValidationFailedText from "@/components/main/InputValidationFailedText";
 import InteractiveRating from "@/components/main/product/InteractiveRating";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import useAuth from "@/stores/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reviewSchema, ReviewSchema } from "@monorepo/shared";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { JSX, MouseEventHandler } from "react";
 import { useForm } from "react-hook-form";
@@ -129,13 +129,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button disabled={isPending} type="submit">
-              {isPending ? (
-                <Loader2 className="animate-spin text-white" />
-              ) : (
-                "Submit"
-              )}
-            </Button>
+            <SubmitButton disabled={isPending} text="Submit" isPending={isPending} />
             </DialogFooter>
             </form>
         </DialogContent>

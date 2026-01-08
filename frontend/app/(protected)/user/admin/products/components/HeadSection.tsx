@@ -1,16 +1,13 @@
 "use client"
 import { Input } from '@/components/ui/input';
 import React from 'react'
-import AddProductButton from './AddProductButton';
 import { ProductsQuerySchema } from '@monorepo/shared';
 import { SetStateAction } from 'react';
-import CategoryFilter from './CategoryFilter';
-import { CreateCategoryButton } from './CreateCategoryButton';
-import { DeleteCategoryButton } from './DeleteCategoryButton';
+import HeadSectionButtons from './HeadSectionButtons';
 
 
 
-type HeadSectionProps = {
+export type HeadSectionProps = {
   queryParams: ProductsQuerySchema;
   setQueryParams:React.Dispatch<SetStateAction<ProductsQuerySchema>>
 };
@@ -27,15 +24,7 @@ function HeadSection({queryParams,setQueryParams}:HeadSectionProps) {
           setQueryParams((p) => ({ ...p, search: e.target.value }))
         }
       />
-      <div className='flex justify-between items-center gap-2 flex-wrap lg:flex-nowrap'>
-        <CategoryFilter
-          queryParams={queryParams}
-          setQueryParams={setQueryParams}
-        />
-        <CreateCategoryButton />
-        <DeleteCategoryButton />
-        <AddProductButton />
-      </div>
+    <HeadSectionButtons queryParams={queryParams} setQueryParams={setQueryParams}/>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import type { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
 
-type InputValidationProps = {
+export type InputValidationProps = {
   trigger?:
     | FieldError
   | boolean

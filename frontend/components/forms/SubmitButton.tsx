@@ -1,10 +1,17 @@
 import { Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 
-function SubmitButton({isPending, text, disabled}:{isPending:boolean, text:string, disabled:boolean}) {
+type SubmitButtonProps = {
+  isPending: boolean;
+  text: string;
+  disabled: boolean;
+  styles?: string;
+}
+
+function SubmitButton({isPending, text, disabled, styles = ""}:SubmitButtonProps) {
   return (
-    <Button disabled={disabled} type="submit">
-      {isPending ? <Loader2 className="animate-spin" /> : text}
+    <Button className={styles} disabled={disabled} type="submit">
+      {isPending ? <Loader2 className="animate-spin text-white" /> : text}
     </Button>
   );
 }

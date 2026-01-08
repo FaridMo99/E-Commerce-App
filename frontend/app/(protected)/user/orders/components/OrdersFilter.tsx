@@ -1,15 +1,10 @@
 "use client";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { OrderStatus } from "@/types/types";
+import OrdersFilterDropdownWrapper from "./OrdersFilterDropdownWrapper";
 
 const statusFilters: OrderStatus[] = [
   "CANCELLED",
@@ -43,48 +38,26 @@ export default function OrdersFilter() {
 
   return (
     <div className="flex gap-4 items-center justify-end my-4">
-      {/* STATUS FILTER */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button>Status</Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="rounded-xl p-2 w-40  bg-foreground text-white">
-          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          {statusFilters.map((status) => (
-            <DropdownMenuItem
-              key={status}
-              onClick={() => updateParams({ status })}
-            >
-              {status}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button>Sort</Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent className="rounded-xl p-2 w-40 bg-foreground text-white">
-          <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          {sortFilters.map((item) => (
-            <DropdownMenuItem
-              key={item.label}
-              onClick={() =>
-                updateParams({ sort: item.sort, order: item.order })
-              }
-            >
-              {item.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <OrdersFilterDropdownWrapper label="Filter By Status" buttonText="Status">
+        {statusFilters.map((status) => (
+          <DropdownMenuItem
+            key={status}
+            onClick={() => updateParams({ status })}
+          >
+            {status}
+          </DropdownMenuItem>
+        ))}
+      </OrdersFilterDropdownWrapper>
+      <OrdersFilterDropdownWrapper label="Sort By" buttonText="Sort">
+        {sortFilters.map((item) => (
+          <DropdownMenuItem
+            key={item.label}
+            onClick={() => updateParams({ sort: item.sort, order: item.order })}
+          >
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </OrdersFilterDropdownWrapper>
     </div>
   );
 }

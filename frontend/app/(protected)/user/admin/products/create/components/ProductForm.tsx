@@ -1,5 +1,4 @@
 "use client"
-
 import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +17,7 @@ import ImageUpload from "./ImageUpload"
 import InputValidationFailedText from "@/components/main/InputValidationFailedText"
 import { ClientProductSchema, fullClientProductSchema } from "@/schemas/schemas"
 import { DEFAULT_NICE_PRICE } from "@monorepo/shared"
+import SubmitButton from "@/components/forms/SubmitButton"
 
 function ProductForm() {
     const accessToken = useAuth(state => state.accessToken)
@@ -186,6 +186,12 @@ function ProductForm() {
       >
         {isPending ? <Loader2 className="animate-spin" /> : "Create"}
       </Button>
+      <SubmitButton
+        disabled={isPending || !isDirty}
+        text="Create"
+        isPending={isPending}
+        styles="my-4 self-center"
+      />
     </form>
   );
 }
