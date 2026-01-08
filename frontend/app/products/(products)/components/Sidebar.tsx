@@ -47,7 +47,7 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   const maxPrice = searchParams.get("maxPrice");
   const sale = searchParams.get("sale");
 
-  //minprice and maxprice also needed for pagiantion but will break sidebar prefill for prices
+  //minprice and maxprice also needed for pagination but will break sidebar prefill for prices
   const { data, isLoading, isError } = useQuery({
     queryKey: ["get metadata for product", searchParams.toString()],
     queryFn: () =>

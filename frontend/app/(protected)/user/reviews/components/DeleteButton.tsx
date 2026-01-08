@@ -26,7 +26,7 @@ function DeleteButton({ reviewId }: { reviewId: string }) {
 
 
   return (
-      <Button disabled={isPending} className="bg-red-500" onClick={() => mutate()}>{isPending ? <Loader2 className="animate-spin"/> : "Delete"}</Button>
+      <Button disabled={isPending} className="bg-red-500 w-20" onClick={() => mutate()}>{isPending ? <Loader2 className="animate-spin"/> : "Delete"}</Button>
   )
 }
 

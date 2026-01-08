@@ -31,7 +31,7 @@ function TogglePublicButton({reviewId, oldState}:TogglePublicButtonProps) {
     return (
       <Button
         disabled={isPending}
-        className="bg-blue-500"
+        className="bg-blue-500 w-20"
         onClick={() => mutate()}
       >
         {!isPending && oldState && "Set Private"}

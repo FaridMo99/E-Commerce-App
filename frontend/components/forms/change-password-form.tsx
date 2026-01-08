@@ -55,8 +55,8 @@ console.log(token)
   }
 
   return (
-    <div className={cn("flex flex-col gap-6")}>
-      <Card className="bg-backgroundBright text-white ">
+    <div className={cn("flex justify-center items-center")}>
+      <Card className="bg-backgroundBright text-white w-8/10">
         <CardHeader>
           <CardTitle>Change Password:</CardTitle>
           <CardDescription>Enter your new Password</CardDescription>

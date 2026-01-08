@@ -35,7 +35,7 @@ function AddCart({ itemId, quantity }: AddCartProps) {
     })
   return (
       <Button
-          className='mt-6'
+          className='mt-6 w-22'
           onClick={() => accessToken ? mutate() : router.push("/login")}
           disabled={isPending || quantity === 0}>{isPending ? <Loader2 className='animate-spin' /> : "Add to Cart"}</Button>
   )

@@ -20,7 +20,7 @@ function Page() {
 
   return (
     <SectionWrapper as="main" header={`Welcome ${user?.name}`} styles="px-8">
-      <p>Here you can Edit your Account</p>
+      <p className="mb-4">Here you can Edit your Account</p>
       <UserTabs user={user} />
     </SectionWrapper>
   );

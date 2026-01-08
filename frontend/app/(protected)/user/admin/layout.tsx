@@ -1,10 +1,10 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
 import { AccessToken, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 import Navbar from "./components/Navbar";
 import { Metadata } from "next";
+import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -17,7 +17,7 @@ async function layout(props: LayoutProps<"/user/admin">) {
   let accessToken: AccessToken | undefined;
 
   try {
-    res = await getCachedRefreshToken();
+    res = await getNewRefreshToken();
     accessToken = res.accessToken;
     user = res.user;
   } catch (err) {

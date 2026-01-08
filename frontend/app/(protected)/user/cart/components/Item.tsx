@@ -27,7 +27,7 @@ function Item({item}:{item:CartItem}) {
           </p>
         </div>
         <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
-          <p>Amount: {item.quantity}</p>
+          <p>{item.quantity}x</p>
                             <div className="flex ellipsis truncate">
 
           <Price

@@ -18,7 +18,7 @@ async function layout(props: LayoutProps<"/products">) {
 
   return (
     <main className="w-full h-full">
-      <section className="py-20 px-30 flex w-full">
+      <section className="py-20 flex justify-evenly w-full">
         <Sidebar categories={categories} />
         {props.children}
       </section>

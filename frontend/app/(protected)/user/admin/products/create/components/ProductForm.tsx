@@ -99,8 +99,8 @@ function ProductForm() {
         />
       </Field>
 
-      <div className="flex justify-between items-center my-4">
-        <Field className="w-4/10 relative">
+      <div className="flex justify-between items-center my-4 gap-2">
+        <Field className="flex flex-col justify-between h-full">
           <Label htmlFor="price">Price</Label>
           <div className="relative">
             {!isLoading && currency && (
@@ -122,7 +122,7 @@ function ProductForm() {
             text={errors.price?.message}
           />
         </Field>
-        <Field className="w-4/10 relative">
+        <Field className="flex flex-col justify-between h-full">
           <Label htmlFor="sale">Sale Price (Optional)</Label>
           <div className="relative">
             {!isLoading && currency && (
@@ -156,7 +156,7 @@ function ProductForm() {
       <Label className="mb-2" htmlFor="public">
         Public
       </Label>
-      <Field className="bg-background/60 border border-white/30 rounded-2xl flex flex-row justify-around">
+      <Field className="bg-background/60 border border-white/30 rounded-2xl flex flex-col md:flex-row justify-around">
         <div className="ml-4 p-6">
           <p className="text-white">
             Toggle to show or hide this product in your store
@@ -179,7 +179,11 @@ function ProductForm() {
           text={errors.is_public?.message}
         />
       </Field>
-      <Button className="my-4 self-center" disabled={isPending || !isDirty} type="submit">
+      <Button
+        className="my-4 self-center"
+        disabled={isPending || !isDirty}
+        type="submit"
+      >
         {isPending ? <Loader2 className="animate-spin" /> : "Create"}
       </Button>
     </form>

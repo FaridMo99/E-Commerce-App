@@ -2,7 +2,6 @@ import "./globals.css";
 import "server-only";
 import Footer from "@/components/main/Footer";
 import { Toaster } from "@/components/ui/sonner";
-import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { AccessToken, ChildrenProps, User } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
@@ -10,6 +9,7 @@ import Header from "@/components/main/header/Header";
 import { Questrial } from "next/font/google";
 import { Metadata, Viewport } from "next";
 import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
+import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 
 const questrial = Questrial({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: ChildrenProps) {
   let accessToken: AccessToken | undefined;
 
   try {
-    const res = await getCachedRefreshToken();
+    const res = await getNewRefreshToken();
     user = res.user;
     accessToken = res.accessToken;
   } catch (err) {

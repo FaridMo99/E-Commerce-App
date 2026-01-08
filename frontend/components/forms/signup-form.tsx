@@ -85,8 +85,11 @@ export function SignupForm({
     }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className=" bg-backgroundBright text-white">
+    <div
+      className={cn("flex justify-center items-center", className)}
+      {...props}
+    >
+      <Card className=" bg-backgroundBright text-white w-8/10">
         <CardContent>
           <form onSubmit={handleSubmit(submitHandler)}>
             <FieldGroup>
@@ -170,7 +173,11 @@ export function SignupForm({
                 }}
               />
               <Field>
-                <SubmitButton text="Sign up" disabled={buttonDisabledReasons} isPending={isPending} />
+                <SubmitButton
+                  text="Sign up"
+                  disabled={buttonDisabledReasons}
+                  isPending={isPending}
+                />
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with

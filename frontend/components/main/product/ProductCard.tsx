@@ -19,6 +19,7 @@ function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
       <Card
+        title={product.name}
         className={`bg-foreground relative pt-0 overflow-clip mr-4 hover:border-black transition-all duration-200 hover:cursor-pointer ${product.stock_quantity === 0 ? "bg-muted opacity-35 " : ""}`}
       >
         <ProductCardTags
@@ -35,12 +36,12 @@ function ProductCard({ product }: ProductCardProps) {
           />
         </div>
 
-        <CardHeader className="h-10">
-          <div className="flex items-center justify-between">
-            <CardTitle>{product.name}</CardTitle>
+        <CardHeader className="h-10 w-full px-2">
+          <div className="flex w-full justify-between items-center">
+            <CardTitle className="truncate w-34">{product.name}</CardTitle>
             <RatingPreview rating={product.averageRating} size={10} />
           </div>
-          <CardDescription className="break-after-all wrap-break-word truncate">
+          <CardDescription className="break-after-all wrap-break-word truncate text-ellipsis">
             {product.description}
           </CardDescription>
         </CardHeader>

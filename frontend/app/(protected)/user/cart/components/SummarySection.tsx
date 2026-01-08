@@ -9,9 +9,9 @@ function SummarySection({ cart }: { cart: Cart }) {
 
     
   return (
-    <section className="w-1/3 h-full overflow-scroll border-l flex flex-col items-center justify-evenly">
+    <section className="w-1/3 min-h-full overflow-scroll text-wrap wrap-break-word border-l flex flex-col items-center justify-evenly p-2">
       <div className="w-full h-2/3 flex flex-col justify-evenly items-start pl-8">
-        <p className="self-center text-white text-lg font-semibold">
+        <p className="self-center text-center text-white md:text-lg font-semibold">
           Total Items: {totalItems}
         </p>
         {cart?.items.map((item) => (
@@ -20,12 +20,12 @@ function SummarySection({ cart }: { cart: Cart }) {
             {item.product.currency}
           </p>
         ))}
-        <p className="self-center text-white text-lg font-semibold">
-          Total Price:{cart?.total}
+        <p className="self-center text-center text-white md:text-lg font-semibold">
+          Total Price: {cart?.total}
           {cart?.items[0]?.product.currency}
         </p>
+        <StripeCheckoutButton disabled={totalItems === 0} />
       </div>
-      <StripeCheckoutButton disabled={totalItems === 0} />
     </section>
   );
 }

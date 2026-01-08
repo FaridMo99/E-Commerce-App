@@ -17,16 +17,16 @@ type HeadSectionProps = {
 
 function HeadSection({queryParams,setQueryParams}:HeadSectionProps) {
   return (
-    <section className="flex justify-between items-center w-full ">
+    <section className="flex justify-between gap-2 items-center w-full my-4 ">
       <Input
         type="text"
-        className="focus-visible:ring-foreground my-4 w-1/2"
+        placeholder='Search Products...'
+        className="focus-visible:ring-foreground w-1/2"
         value={queryParams.search}
         onChange={(e) =>
           setQueryParams((p) => ({ ...p, search: e.target.value }))
         }
       />
-      <div className='flex justify-between items-center'>
         <CategoryFilter
           queryParams={queryParams}
           setQueryParams={setQueryParams}
@@ -34,7 +34,6 @@ function HeadSection({queryParams,setQueryParams}:HeadSectionProps) {
         <CreateCategoryButton />
         <DeleteCategoryButton/>
         <AddProductButton />
-      </div>
     </section>
   );
 }

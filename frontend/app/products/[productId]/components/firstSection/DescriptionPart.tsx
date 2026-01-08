@@ -6,8 +6,8 @@ import Link from 'next/link';
 function DescriptionPart({ product }: { product: Product }) {
   console.log(product.description)
   return (
-    <div className="flex flex-col ml-4 h-full w-full pt-12">
-      <h1 className="text-4xl font-bold">
+    <div className="flex flex-col pl-4 h-full w-[30vw]">
+      <h1 className="md:text-4xl text-2xl font-bold">
         <span className="mr-2">{product.name}</span>{" "}
         <FavoriteProduct productId={product.id} />
       </h1>

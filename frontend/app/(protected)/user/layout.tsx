@@ -1,5 +1,5 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { getCachedRefreshToken } from "@/lib/queries/server/authQueries";
+import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import { AccessToken, User } from "@/types/types";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -16,7 +16,7 @@ async function layout(props:LayoutProps<"/user">) {
   let accessToken: AccessToken | undefined;
 
   try {
-    res = await getCachedRefreshToken();
+    res = await getNewRefreshToken();
   } catch (err) {
     console.log("User not logged in: " + err);
   }

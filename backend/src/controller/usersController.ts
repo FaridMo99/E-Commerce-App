@@ -699,32 +699,18 @@ export async function getFavoriteItems(
         `${getTimestamp()} Fetching favorite items for user ${userId}`
       )
     );
-    const favorites = await prisma.user.findUnique({
+
+    const favorites = await prisma.product.findMany({
       where: {
-        id: userId,
-        favorites: {
-          some: {
-            ...productWhere,
-          },
+        favoredBy: {
+          some: { id: userId },
         },
+        ...productWhere,
       },
       select: {
-        favorites: {
-          select: {
-            ...productSelect
-          },
-        },
+        ...productSelect,
       },
     });
-
-    if (!favorites) {
-      console.log(
-        chalk.red(
-          `${getTimestamp()} No favorite products found for user ${userId}`
-        )
-      );
-      return res.status(404).json({ message: "Favorite products not found" });
-    }
 
     console.log(
       chalk.green(
@@ -733,7 +719,7 @@ export async function getFavoriteItems(
     );
 
     await Promise.all(
-      favorites.favorites.map((favorite) =>
+      favorites.map((favorite) =>
         transformAndFormatProductPrice(
           favorite,
           favorite.currency,
@@ -742,7 +728,7 @@ export async function getFavoriteItems(
       )
     );    
 
-    return res.status(200).json(favorites.favorites);
+    return res.status(200).json(favorites);
   } catch (err) {
     console.log(
       chalk.red(

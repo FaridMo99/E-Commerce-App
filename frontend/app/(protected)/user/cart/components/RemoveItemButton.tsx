@@ -24,7 +24,10 @@ function RemoveItemButton({ itemId }: { itemId: string }) {
   })
 
   return (
-    <Button onClick={()=>mutate()} disabled={isPending} className='bg-red-500 py-4 h-3'>{isPending ? <Loader2/> : "Remove Item"}</Button>
+    <Button onClick={() => mutate()} disabled={isPending} className='bg-red-500 py-4 h-3'>
+      {isPending && <Loader2 />}
+      {!isPending && "Remove Item"}
+    </Button>
   )
 }
 

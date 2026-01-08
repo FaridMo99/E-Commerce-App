@@ -55,6 +55,9 @@ function FavoriteProduct({ productId }: FavoriteProductProps) {
       }
     }
 
+  console.log("1", accessToken)
+  console.log("2", isLoading);
+  console.log("3", isError);
     if (!accessToken || isLoading || isError) return null;
 
   return (

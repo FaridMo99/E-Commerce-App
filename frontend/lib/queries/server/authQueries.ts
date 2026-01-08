@@ -6,7 +6,6 @@ import { API_BASE_URL } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../../serverHelpers";
 import { cookies } from "next/headers";
 import { stripContentLengthHeader } from "../../helpers";
-import { cache } from "react";
 
 export async function login(
   credentials: LoginSchema,
@@ -134,8 +133,6 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
   });
   return await handleResponse<AuthResponse>(res);
 }
-
-export const getCachedRefreshToken = cache(getNewRefreshToken)
 
 export async function changePasswordUnauthenticated(
   token: string,

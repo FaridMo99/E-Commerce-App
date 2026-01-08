@@ -37,8 +37,6 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
 
   const { errors, isDirty } = formState;
 
-  console.log(errors)
-
   const { mutate, isPending } = useMutation({
     mutationKey: ["update Account"],
     mutationFn: (user: UpdateUserSchema) => updateUser(user, accessToken!),
@@ -80,7 +78,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
           </Field>
 
           <div className="flex justify-between items-center">
-            <Field className="grid gap-3 mr-4">
+            <Field className="flex flex-col justify-between items-center h-full mr-4">
               <Label htmlFor="street">Street</Label>
               <Input id="street" type="text" {...register("street")} />
               <InputValidationFailedText
@@ -88,7 +86,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
                 text={errors.street?.message}
               />
             </Field>
-            <Field className="grid gap-3 w-1/3">
+            <Field className="flex flex-col justify-between items-center h-full">
               <Label
                 htmlFor="houseNumber"
                 className="whitespace-nowrap text-ellipsis"
@@ -108,7 +106,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
           </div>
 
           <div className="flex justify-between items-center">
-            <Field className="grid gap-3">
+            <Field className="flex flex-col justify-between items-center h-full">
               <Label htmlFor="cc">Country Code</Label>
               <Input id="cc" type="text" {...register("countryCode")} />
               <InputValidationFailedText
@@ -116,7 +114,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
                 text={errors.countryCode?.message}
               />
             </Field>
-            <Field className="grid gap-3 mr-4 ml-4">
+            <Field className="flex flex-col justify-between items-center h-full mr-4 ml-4">
               <Label htmlFor="state">State</Label>
               <Input id="state" type="text" {...register("state")} />
               <InputValidationFailedText
@@ -124,7 +122,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
                 text={errors.state?.message}
               />
             </Field>
-            <Field className="grid gap-3">
+            <Field className="flex flex-col justify-between items-center h-full">
               <Label htmlFor="postalCode">Postal Code</Label>
               <Input id="postalCode" type="text" {...register("postalCode")} />
               <InputValidationFailedText

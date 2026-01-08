@@ -44,7 +44,7 @@ function Page() {
   return (
     <>
       <ChangeTimeframeDropdown />
-      <div className="flex justify-between items-center w-full">
+      <div className="flex justify-between items-center w-full flex-wrap">
         <StatisticCard
           title="New User:"
           isLoading={usersResults.isLoading}

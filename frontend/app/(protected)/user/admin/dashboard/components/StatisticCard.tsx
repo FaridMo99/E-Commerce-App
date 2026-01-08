@@ -15,15 +15,17 @@ function StatisticCard({
   statistic,
 }: StatisticCardProps) {
 
-  const sharedSizes = "w-[20%] h-40 my-10"
+  const sharedSizes = "md:w-[20%] w-[30%] min-w-30 h-40 my-10"
 
   if (isLoading) return <Skeleton className={sharedSizes} />;
   
   return (
     <Card className={`bg-backgroundBright border ${sharedSizes}`}>
-      <CardHeader className="font-semibold text-lg">{title}</CardHeader>
-      <CardContent className="w-full flex justify-center items-center font-extrabold text-2xl text-white">
-        {!isLoading && statistic}
+      <CardHeader className="font-extrabold text-lg text-center">
+        {title}
+      </CardHeader>
+      <CardContent className="w-full flex justify-center items-center font-extrabold text-2xl text-white text-center">
+        {!isLoading && <p className="text-center">{statistic}</p>}
         {isError && !isLoading && <p>Something went wrong...</p>}
       </CardContent>
     </Card>

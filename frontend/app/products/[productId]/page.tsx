@@ -74,7 +74,7 @@ async function page(props:PageProps<"/products/[productId]">) {
     };
 
   return (
-    <main className="flex flex-col w-screen justify-center px-4">
+    <main className="flex flex-col w-full justify-center px-4">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

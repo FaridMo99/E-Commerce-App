@@ -109,8 +109,8 @@ export default function CaptchaForm<
   const buttonDisabled = isSubmitting || (!isValid && isSubmitted) || isPending;
 
   return (
-    <div className={cn("flex flex-col gap-6")}>
-      <Card className="bg-backgroundBright text-white">
+    <div className={cn("flex justify-center items-center")}>
+      <Card className="bg-backgroundBright text-white w-8/10">
         <CardHeader>
           <CardTitle>{headerText}</CardTitle>
           <CardDescription>{description}</CardDescription>

@@ -25,7 +25,7 @@ function StripeCheckoutButton({ disabled }: { disabled: boolean }) {
   })
 
 
-  return <Button onClick={()=>mutate()} disabled={disabled || isPending}>{isPending ? <Loader2 className="animate-spin text-white"/> : "Checkout"}</Button>;
+  return <Button className="self-center md:w-auto w-18 md:my-0 my-4" onClick={()=>mutate()} disabled={disabled || isPending}>{isPending ? <Loader2 className="animate-spin text-white"/> : "Checkout"}</Button>;
 }
 
 export default StripeCheckoutButton;

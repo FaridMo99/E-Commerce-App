@@ -35,14 +35,16 @@ function SuccessCard({ action, accessToken, user }:SuccessCardProps) {
   }, [counter, router]);
 
   return (
-    <Card className="h-100 bg-backgroundBright justify-center items-center text-center text-white text-lg font-bold">
-      <CardTitle>
-        {action} successful! You&apos;ll be redirected shortly...{counter}
-      </CardTitle>
-      <CardContent>
-        <CheckCircle2 className="text-foreground" size={50} />
-      </CardContent>
-    </Card>
+    <div className="w-full flex px-2 h-full justify-center items-center">
+      <Card className="h-100 w-8/10 bg-backgroundBright justify-center items-center text-center text-white text-lg font-bold">
+        <CardTitle>
+          {action} successful! You&apos;ll be redirected shortly...{counter}
+        </CardTitle>
+        <CardContent>
+          <CheckCircle2 className="text-foreground" size={50} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

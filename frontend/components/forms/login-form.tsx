@@ -91,8 +91,8 @@ export function LoginForm({
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="bg-backgroundBright text-white">
+    <div className={cn("flex justify-center items-center", className)} {...props}>
+      <Card className="bg-backgroundBright text-white w-8/10">
         <CardHeader>
           <CardTitle>Sign in to your account</CardTitle>
           <CardDescription>

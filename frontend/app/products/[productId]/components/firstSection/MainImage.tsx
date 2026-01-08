@@ -7,7 +7,7 @@ function MainImage({ url }: { url: string }) {
       if (!url) {
         return (
           <CardContent
-            className={`flex justify-center w-100 h-100 items-center bg-white text-black`}
+            className={`flex justify-center w-[33vw] h-100 items-center bg-white text-black`}
           >
             <CameraIcon />
           </CardContent>
@@ -19,7 +19,7 @@ function MainImage({ url }: { url: string }) {
         <img
           src={url}
           alt="product image"
-          className="bg-white w-100 h-full object-cover"
+          className="bg-white w-[33vw] h-full object-cover"
         />
       </ImageZoom>
   );

@@ -36,8 +36,8 @@ function FirstSection({ product }: FirstSectionProps) {
   }, [mutate]);
 
   return (
-    <section className="flex justify-between w-full h-[85vh] px-8">
-      <div className="flex items-center">
+    <section className="flex justify-between w-full h-[85vh] pt-12">
+      <div className="flex">
       <ImagePart imageUrls={product.imageUrls}/>
       <DescriptionPart product={product}/>
       </div>

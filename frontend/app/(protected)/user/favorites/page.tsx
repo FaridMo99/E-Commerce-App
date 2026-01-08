@@ -3,8 +3,9 @@ import LoadingPage from "@/components/main/LoadingPage";
 import { getUserFavoriteItems } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
-import ProductGrid from "./components/ProductGrid";
 import SectionWrapper from "@/components/main/SectionWrapper";
+import BaseSlider from "@/components/main/BaseSlider";
+import ProductCard from "@/components/main/product/ProductCard";
 
 function Page() {
   const accessToken = useAuth(state => state.accessToken)
@@ -18,10 +19,16 @@ function Page() {
   if (isError) throw error
   
   return (
-    <SectionWrapper styles="" as="main" header={`Favorites(${favoriteProducts?.length})`}>
-      <div className="w-full flex flex-col justify-between items-center">
-        <ProductGrid products={favoriteProducts ?? []}/>
-      </div>
+    <SectionWrapper
+      styles="px-8"
+      as="main"
+      header={`Favorites(${favoriteProducts?.length})`}
+    >
+      <BaseSlider>
+        {favoriteProducts?.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </BaseSlider>
     </SectionWrapper>
   );
 }

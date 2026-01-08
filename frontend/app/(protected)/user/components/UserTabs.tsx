@@ -7,7 +7,7 @@ import ChangePasswordForm from './ChangePasswordForm';
 
 function UserTabs({user}:{user:AuthUser}) {
   return (
-    <div className="mx-auto w-1/2">
+    <div className="mx-auto w-full md:w-1/2">
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="grid bg-backgroundBright w-full grid-cols-2 mb-8 border border-black">
           <TabsTrigger value="profile">Profile</TabsTrigger>

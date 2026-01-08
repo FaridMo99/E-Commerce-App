@@ -12,7 +12,7 @@ export async function Header() {
           aria-label="go to home"
           className="h-full w-1/8 flex justify-center items-center z-10"
         >
-          <img src="/logoIcon.png"/>
+          <img src="/logoIcon.png" className="object-stretch w-full" alt="logo"/>
         </Link>
         <Navigation />
     </header>

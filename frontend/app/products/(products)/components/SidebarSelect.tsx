@@ -29,7 +29,7 @@ function SidebarSelect({valueChangeHandler,placeholder,label,selectItems, value}
       value={value}
       onValueChange={valueChangeHandler}
     >
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

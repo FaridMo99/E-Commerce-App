@@ -35,7 +35,7 @@ function Navigation() {
   }, [isError, error]);
 
   return (
-    <nav className="w-1/3 h-full flex justify-evenly items-center z-10">
+    <nav className="w-1/3 h-full flex md:justify-evenly justify-end md:pr-0 pr-10 items-center z-10">
       <MobileNavigation />
       <Link href="/products">
         <ShoppingBag aria-label="products page" className="hidden md:block" />

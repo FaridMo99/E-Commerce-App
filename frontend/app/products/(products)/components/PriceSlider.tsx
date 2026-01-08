@@ -30,11 +30,11 @@ function PriceSlider({
         step={1}
       />
       <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <p>
+        <p className="truncate text-ellipsis" title={value[0].toString()}>
           Min: {value[0]}
           <CurrencySymbol currency={currency} />
         </p>
-        <p>
+        <p className="truncate text-ellipsis" title={value[1].toString()}>
           Max: {value[1]}
           <CurrencySymbol currency={currency} />
         </p>
