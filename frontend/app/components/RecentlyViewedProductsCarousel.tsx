@@ -1,12 +1,12 @@
 "use client";
-import ProductCard from "../main/product/ProductCard";
 import Slider, { type Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/stores/authStore";
-import SectionWrapper from "../main/SectionWrapper";
+import ProductCard from "@/components/main/product/ProductCard";
+import SectionWrapper from "@/components/main/SectionWrapper";
 
 
 function RecentlyViewedProductsCarousel() {
@@ -42,7 +42,7 @@ function RecentlyViewedProductsCarousel() {
   if (!products || products.length === 0 || isError || isLoading) return null;
 
   return (
-    <SectionWrapper header="Recently Viewed">
+    <SectionWrapper styles="" header="Recently Viewed">
       <Slider {...settings}>
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />

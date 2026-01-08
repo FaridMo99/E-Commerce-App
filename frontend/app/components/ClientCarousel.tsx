@@ -1,11 +1,11 @@
 "use client";
-import ProductCard from "../main/product/ProductCard";
+import ProductCard from "../../components/main/product/ProductCard";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/stores/authStore";
-import SectionWrapper from "../main/SectionWrapper";
-import BaseSlider from "./BaseSlider";
+import SectionWrapper from "../../components/main/SectionWrapper";
+import BaseSlider from "../../components/main/BaseSlider";
 import { getRecentlyViewedProducts } from "@/lib/queries/client/usersQueries";
 
 function RecentlyViewedProducts() {
@@ -20,7 +20,6 @@ function RecentlyViewedProducts() {
     queryFn: () => getRecentlyViewedProducts(accessToken!),
     enabled: !!accessToken,
   });
-
 
   if (!products || products.length === 0 || isError || isLoading) return null;
 

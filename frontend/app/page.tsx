@@ -1,4 +1,4 @@
-import RecentlyViewedProducts from "@/components/main/ClientCarousel";
+import RecentlyViewedProducts from "@/app/components/ClientCarousel";
 import ProductsCarousel from "@/components/main/ProductsCarousel";
 import { DOMAIN_NAME } from "@/config/constants";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";
@@ -7,22 +7,15 @@ import "server-only";
 
 export const metadata: Metadata = {
   title: "Home",
-  description:`Welcome to ${DOMAIN_NAME} - Discover various Products`,
+  description: `Welcome to ${DOMAIN_NAME} - Discover various Products`,
   openGraph: {
     title: `${DOMAIN_NAME} | Homepage`,
   },
 };
 
-
 export default async function Home() {
-
-  const {
-    newProducts,
-    trendingProducts,
-    productsOnSale,
-    categoryProducts,
-  } = await getHomeProducts();
-
+  const { newProducts, trendingProducts, productsOnSale, categoryProducts } =
+    await getHomeProducts();
 
   return (
     <main>
@@ -47,7 +40,7 @@ export default async function Home() {
           products={categoryProducts}
         />
       )}
-      <RecentlyViewedProducts/>
+      <RecentlyViewedProducts />
     </main>
   );
 }

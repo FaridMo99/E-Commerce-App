@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import useAuth from "@/stores/authStore";
 import { deleteCategoryByCategoryId } from "@/lib/queries/client/adminQueries";
