@@ -175,6 +175,11 @@ export async function makeOrder(
                 stock_quantity: true,
                 name: true,
                 id: true,
+                category: {
+                  select: {
+                    name:true
+                  }
+                }
               },
             });
 

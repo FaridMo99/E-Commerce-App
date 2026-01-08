@@ -33,7 +33,7 @@ function Searchbar() {
   return (
     <form
       onSubmit={searchHandler}
-      className="absolute w-1/3 left-1/3 top-[5vh] z-49"
+      className="w-1/3 md:flex-1 flex-3 z-49 relative"
     >
       <div className="w-full relative">
         <Input
@@ -57,10 +57,10 @@ function Searchbar() {
           tabIndex={0}
           type="submit"
           aria-label="search users"
-          className="flex justify-center items-center absolute top-[1vh] right-0 z-1 disabled:opacity-60"
+          className="flex justify-center items-center absolute top-[1vh] right-1 z-1 disabled:opacity-60"
           disabled={!data || data.length === 0}
         >
-          <Search className="text-foreground w-[4vh]" />
+          <Search className="text-foreground h-[3vh]" />
         </button>
       </div>
       {debouncedSearch.length > 0 &&

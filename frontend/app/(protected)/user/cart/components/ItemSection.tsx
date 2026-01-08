@@ -8,7 +8,7 @@ function ItemSection({items}:{items:CartItem[]}) {
         <Item key={item.id} item={item} />
       ))}
       {items?.length === 0 && (
-        <p className=" self-center mt-40 text-white text-2xl">
+        <p className=" self-center text-center mt-40 text-white text-2xl">
           Pretty empty in here...
         </p>
       )}

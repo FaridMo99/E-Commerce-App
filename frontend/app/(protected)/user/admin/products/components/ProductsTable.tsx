@@ -45,7 +45,6 @@ export default function ProductsTable() {
     enabled:!!accessToken
   });
 
-  console.log(products)
   const columns: ColumnDef<AdminProduct>[] = [
     {
       accessorKey: "name",

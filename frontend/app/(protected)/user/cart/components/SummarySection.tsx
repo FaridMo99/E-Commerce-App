@@ -9,8 +9,8 @@ function SummarySection({ cart }: { cart: Cart }) {
 
     
   return (
-    <section className="w-1/3 min-h-full overflow-scroll text-wrap wrap-break-word border-l flex flex-col items-center justify-evenly p-2">
-      <div className="w-full h-2/3 flex flex-col justify-evenly items-start pl-8">
+    <section className="w-1/3 min-h-full overflow-scroll text-wrap wrap-break-word border-l flex flex-col items-center justify-evenly p-2 px-4">
+      <div className="w-full h-2/3 flex flex-col justify-evenly items-start ">
         <p className="self-center text-center text-white md:text-lg font-semibold">
           Total Items: {totalItems}
         </p>
@@ -24,8 +24,8 @@ function SummarySection({ cart }: { cart: Cart }) {
           Total Price: {cart?.total}
           {cart?.items[0]?.product.currency}
         </p>
-        <StripeCheckoutButton disabled={totalItems === 0} />
       </div>
+      <StripeCheckoutButton disabled={totalItems === 0} />
     </section>
   );
 }

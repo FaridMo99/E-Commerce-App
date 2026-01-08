@@ -17,23 +17,25 @@ type HeadSectionProps = {
 
 function HeadSection({queryParams,setQueryParams}:HeadSectionProps) {
   return (
-    <section className="flex justify-between gap-2 items-center w-full my-4 ">
+    <section className="flex flex-col lg:flex-row justify-between gap-2 lg:items-center items-start w-full my-4 ">
       <Input
         type="text"
-        placeholder='Search Products...'
-        className="focus-visible:ring-foreground w-1/2"
+        placeholder="Search Products..."
+        className="focus-visible:ring-foreground lg:w-1/2 w-full"
         value={queryParams.search}
         onChange={(e) =>
           setQueryParams((p) => ({ ...p, search: e.target.value }))
         }
       />
+      <div className='flex justify-between items-center gap-2 flex-wrap lg:flex-nowrap'>
         <CategoryFilter
           queryParams={queryParams}
           setQueryParams={setQueryParams}
         />
         <CreateCategoryButton />
-        <DeleteCategoryButton/>
+        <DeleteCategoryButton />
         <AddProductButton />
+      </div>
     </section>
   );
 }
