@@ -50,7 +50,7 @@ function SetPasswordForm() {
           <CardTitle>Set a Password</CardTitle>
           <CardDescription>
             Since you didnt set a Password yet, you can set one here to login
-            without Google/Facebook
+            without Google
           </CardDescription>
         </CardHeader>
         <FieldGroup className="grid gap-4 mt-2">

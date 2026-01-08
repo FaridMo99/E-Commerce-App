@@ -210,7 +210,6 @@ enum UserRole {
 enum UserCreatedBy {
   SELF
   GOOGLE
-  FACEBOOK
 }
 
 enum CurrencyISO {

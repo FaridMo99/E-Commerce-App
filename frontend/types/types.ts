@@ -8,7 +8,7 @@ export type Route = { link: string; text: string; icon: LucideIcon };
 
 export type AccessToken = string;
 
-export type OAuthProvider = "google" | "facebook";
+export type OAuthProvider = "google";
 
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
 export type ChangePasswordAuthenticatedSchema = z.infer<typeof changePasswordAuthenticatedSchema>;
@@ -130,7 +130,7 @@ export type AuthUser = User & {
   city: string | null;
   state: string | null;
   postalCode: string | null;
-  createdBy: "SELF" | "GOOGLE" | "FACEBOOK"
+  createdBy: "SELF" | "GOOGLE"
   hasPassword:boolean //can only be false if createdby is not self
 };
 

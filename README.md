@@ -22,7 +22,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 #### General
 
-* **Signup:** User signup through Google/Facebook or Email based
+* **Signup:** User signup through Google or Email based
 * **Products:** User is able to search and filter for Products
 * **SEO:** Good SEO and SSR through NextJs Server Side rendering, Static Site Generation and Incremental Site Regeneration
 
@@ -45,7 +45,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 * **JWT Logic:** Implements a secure authentication flow using rotating **Refresh Tokens** stored in the database and short-lived **Access Tokens** handled in-memory as well as authorization for admin.
 * **Multi Device Support** suppports multiple Devices Signed in Status through storing the DeviceId in the Database.
-* **Social OAuth 2.0:** Integrated **Google** and **Facebook** authentication using **Passport.js** strategies.
+* **Social OAuth 2.0:** Integrated **Google** authentication using **Passport.js** strategies.
 * **CSRF Protection:** extended Security via **HTTP-Only Cookies** and CSRF token validation to prevent cross-site request forgery.
 * **Rate Limiting:** Protects API endpoints from Brute Force attempts and DDoS attacks using `express-rate-limit` with a **Redis-backed** store for persistence.
 * **Secure Hashing:** All user passwords are encrypted using **Bcrypt**.

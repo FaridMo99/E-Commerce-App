@@ -87,30 +87,13 @@ authRouter.get(
     session: false,
   }),
 );
-authRouter.get(
-  "/oauth/facebook",
-  authRateLimiter,
-  passport.authenticate("facebook", {
-    scope: ["public_profile", "email"],
-    session: false,
-  }),
-);
+
 
 authRouter.get(
   "/oauth/google/callback",
   authRateLimiter,
   geoCurrencyMiddleware,
   passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${CLIENT_ORIGIN}/login`,
-  }),
-  OauthLogin
-);
-authRouter.get(
-  "/oauth/facebook/callback",
-  authRateLimiter,
-  geoCurrencyMiddleware,
-  passport.authenticate("facebook", {
     session: false,
     failureRedirect: `${CLIENT_ORIGIN}/login`,
   }),

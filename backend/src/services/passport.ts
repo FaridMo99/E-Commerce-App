@@ -4,17 +4,11 @@ import {
   type StrategyOptionsWithRequest as GoogleStrategyOptions,
   type VerifyCallback,
 } from "passport-google-oauth20";
-import {
-  Strategy as FacebookStrategy,
-  type StrategyOptionsWithRequest as FacebookStrategyOptions,
-} from "passport-facebook";
 import prisma from "./prisma.js";
 import type { Request } from "express";
 import type { UserCreatedBy } from "../generated/prisma/enums.js";
 import {
   BACKEND_URL,
-  OAUTH_FACEBOOK_CLIENT_ID,
-  OAUTH_FACEBOOK_CLIENT_SECRET,
   OAUTH_GOOGLE_CLIENT_ID,
   OAUTH_GOOGLE_CLIENT_SECRET,
 } from "../config/env.js";
@@ -31,13 +25,6 @@ const googleConfig: GoogleStrategyOptions = {
   passReqToCallback: true,
 };
 
-const facebookConfig: FacebookStrategyOptions = {
-  clientID: OAUTH_FACEBOOK_CLIENT_ID,
-  clientSecret: OAUTH_FACEBOOK_CLIENT_SECRET,
-  callbackURL: `${BACKEND_URL}/api/auth/oauth/facebook/callback`,
-  scope: ["public_profile", "email"],
-  passReqToCallback: true,
-};
 
 function makeVerifyCb(provider: UserCreatedBy) {
   return async function (
@@ -105,6 +92,5 @@ function makeVerifyCb(provider: UserCreatedBy) {
 }
 
 passport.use(new GoogleStrategy(googleConfig, makeVerifyCb("GOOGLE")));
-//passport.use(new FacebookStrategy(facebookConfig, makeVerifyCb("FACEBOOK")));
 
 export default passport;

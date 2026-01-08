@@ -39,12 +39,6 @@ export const OAUTH_GOOGLE_CLIENT_ID = process.env.OAUTH_GOOGLE_CLIENT_ID!;
 export const OAUTH_GOOGLE_CLIENT_SECRET =
   process.env.OAUTH_GOOGLE_CLIENT_SECRET!;
 
-//oauth facebook
-export const OAUTH_FACEBOOK_CLIENT_ID =
-  process.env.OAUTH_FACEBOOK_CLIENT_ID ?? "";
-export const OAUTH_FACEBOOK_CLIENT_SECRET =
-  process.env.OAUTH_FACEBOOK_CLIENT_SECRET ?? "";
-
 //cloudflare captcha
 export const CLOUDFLARE_SECRET_KEY = process.env.CLOUDFLARE_SECRET_KEY!;
 
