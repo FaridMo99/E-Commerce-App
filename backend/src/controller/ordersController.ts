@@ -42,7 +42,7 @@ export async function getOrders(
     const skip = (currentPage - 1) * take;
 
     const allowedFields = ["ordered_at", "total_amount", "status"];
-    const field = allowedFields.includes(sortBy)
+    const field = allowedFields.includes(String(sortBy))
       ? (sortBy)
       : "ordered_at";
     const order: "asc" | "desc" = sortOrder === "desc" ? "desc" : "asc";
@@ -56,7 +56,7 @@ export async function getOrders(
       },
       skip,
       take,
-      orderBy: { [field]: order },
+      orderBy: { [String(field)]: order },
       select: {
         ...orderSelect
       }
@@ -90,7 +90,7 @@ export async function makeOrder(
     );
 
     //fetch cart
-    const shoppingCart:CartWithSelectedFields | null = await prisma.cart.findUnique({
+    const shoppingCart = await prisma.cart.findUnique({
       where: { userId },
       select: cartSelect,
     });
@@ -306,7 +306,7 @@ export async function makeOrder(
       return res.status(200).json({ redirectUrl: session.url });
 
     } catch (err) {
-      console.log(chalk.red(getTimestamp(), "stripe error", err.message))
+      console.log(chalk.red(getTimestamp(), "stripe error", err))
       await releaseCartItems(order.id)
       next(err)
     }

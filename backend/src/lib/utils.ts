@@ -1,5 +1,6 @@
 import type { DailyRevenue } from "@monorepo/shared";
 import type {
+  CartItemWithSelectedFields,
   CartWithSelectedFields,
   ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
@@ -10,7 +11,7 @@ import type Stripe from "stripe";
 import chalk from "chalk";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 import { notifyAdmin } from "../services/email.js";
-import type { JWTUserPayload } from "../types/types.js";
+import type { CartWithTotals, JWTUserPayload } from "../types/types.js";
 
 export const getTimestamp = () =>
   `[${new Date().toISOString().replace("T", ", ").replace("Z", "")}]`;
@@ -72,42 +73,26 @@ export function getTotalRevenue(dailyRevenue: DailyRevenue[]): number {
   return dailyRevenue.reduce((sum, day) => sum + day.revenue, 0);
 }
 
-export type CartProduct = {
-  id: string;
-  name: string;
-  price: number;
-  sale_price?: number | null;
-  currency: "USD" | "GBP" | "EUR";
-  stock_quantity: number;
-};
 
-export type CartItemWithTotal = {
-  id: string;
-  quantity: number;
-  product: CartProduct;
-  total?: number;
-};
-
-export type CartWithTotals = {
-  id: string;
-  items: CartItemWithTotal[];
-  total?: number;
-};
-
-export function calculateCartTotalsInCents(
-  cart: CartWithSelectedFields
-): CartWithTotals {
+export function calculateCartTotalsInCents(cart: CartWithSelectedFields): CartWithTotals {
   let cartTotal = 0;
 
-  cart.items.forEach((item) => {
+  const itemsWithTotals = cart.items.map((item) => {
     const price = item.product.sale_price ?? item.product.price;
     const itemTotal = price * item.quantity;
     cartTotal += itemTotal;
-    item.total = Number(itemTotal.toFixed(2)) * 100;
-  });
-  cart.total = Number(cartTotal.toFixed(2)) * 100;
 
-  return cart;
+    return {
+      ...item,
+      total: Number(itemTotal.toFixed(2)) * 100,
+    };
+  });
+
+    return {
+      ...cart,
+      items: itemsWithTotals,
+      total: Number(cartTotal.toFixed(2)) * 100,
+    };
 }
 
 export function calculateCartTotals(
@@ -115,16 +100,24 @@ export function calculateCartTotals(
 ): CartWithTotals {
   let cartTotal = 0;
 
-  cart.items.forEach((item) => {
+  const itemsWithTotals = cart.items.map((item) => {
     const price = item.product.sale_price ?? item.product.price;
     const itemTotal = price * item.quantity;
     cartTotal += itemTotal;
-    item.total = Number(itemTotal.toFixed(2));
-  });
-  cart.total = Number(cartTotal.toFixed(2));
 
-  return cart;
+    return {
+      ...item,
+      total: Number(itemTotal.toFixed(2)),
+    };
+  });
+
+  return {
+    ...cart,
+    items: itemsWithTotals,
+    total: Number(cartTotal.toFixed(2)),
+  };
 }
+
 
 export async function releaseCartItems(orderId: string) {
   const orderItems = await prisma.order_Item.findMany({

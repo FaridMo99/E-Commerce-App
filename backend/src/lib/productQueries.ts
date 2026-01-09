@@ -159,8 +159,10 @@ export async function getTrendingProducts(): Promise<ProductWithSelectedFields[]
     const { _count, score, ...productRest } = product;
     const { favoredBy, order_items, recentlyViewed, ...countRest } = _count;
 
-    productRest._count = { ...countRest };
-    return productRest as ProductWithSelectedFields;
+  return {
+    ...productRest,
+    _count: countRest,
+  } as ProductWithSelectedFields;
   });
 
   await redis.set(TRENDING_PRODUCTS_REDIS_KEY, JSON.stringify(returnProducts), {

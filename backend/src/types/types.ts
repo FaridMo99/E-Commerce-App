@@ -1,3 +1,4 @@
+import type { CartItemWithSelectedFields, CartWithSelectedFields } from "../config/prismaHelpers.js";
 import type { User } from "../generated/prisma/client.js";
 import type { CurrencyISO, UserRole } from "../generated/prisma/enums.js";
 
@@ -51,3 +52,12 @@ export type ExchangePrice = {
 };
 
 export type NicePrice = 95 | 99;
+
+export type CartItemWithTotal = CartItemWithSelectedFields & {
+  total: number;
+};
+
+export type CartWithTotals = Omit<CartWithSelectedFields, "items"> & {
+  items: CartItemWithTotal[];
+  total: number;
+};

@@ -33,8 +33,10 @@ import {
   productWhere,
   reviewSelect,
   reviewWhere,
+  type ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
 import type { Prisma } from "../generated/prisma/client.js";
+import type { ProductCreateInput } from "../generated/prisma/models.js";
 
 export async function getAllProducts(
   req: Request,
@@ -467,8 +469,8 @@ export async function updateProductByProductId(
           ...(is_public && { published_at: new Date() }),
         },
         select: {
-          ...productSelect,
-        },
+          ...productSelect
+        }
       });
 
       //if made not public, clean favorites and carts

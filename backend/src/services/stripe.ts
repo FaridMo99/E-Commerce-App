@@ -130,7 +130,7 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
                     status: "REFUNDING",
                     stripeRefundId: typeof refund?.payment_intent === "string"
                   ? refund.payment_intent
-                  : refund.payment_intent_id!
+                  : refund.payment_intent_id
                   },
                 },
               },

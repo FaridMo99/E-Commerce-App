@@ -6,7 +6,6 @@ import type {
   OrdersQuerySchema,
   UpdateUserSchema,
 } from "@monorepo/shared";
-import type { User } from "../generated/prisma/client.js";
 import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
@@ -19,6 +18,7 @@ import {
   productWhere,
   userAuthenticatedSelect,
 } from "../config/prismaHelpers.js";
+import type { User } from "../generated/prisma/client.js";
 
 // Get user by ID
 export async function getUserByUserId(
@@ -49,8 +49,13 @@ export async function getUserByUserId(
     console.log(
       chalk.green(`${getTimestamp()} Fetched user ${id} successfully`)
     );
-    user.hasPassword = !!user.password
-    const {password, ...safeUser} = user
+
+    const { password, ...userData } = user;
+    const safeUser = {
+      ...userData,
+      hasPassword: !!password,
+    };
+    
     return res.status(200).json(safeUser);
   } catch (err) {
     console.log(
@@ -103,9 +108,14 @@ export async function updateUserByUserId(
       chalk.green(`${getTimestamp()} User ${id} updated successfully`)
     );
     
-        user.hasPassword = !!user.password;
-        const { password, ...safeUser } = user;
-        return res.status(200).json(safeUser);
+    const { password, ...userData } = user;
+    const safeUser = {
+      ...userData,
+      hasPassword: !!password,
+    };
+
+    return res.status(200).json(safeUser);
+    
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update user ${id}:`, err)
