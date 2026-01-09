@@ -26,7 +26,6 @@ function ProductPagination() {
   const totalProducts = cachedData?.totalItems || 0;
 
   const totalPages = Math.ceil(totalProducts / 10);
-  if (totalPages <= 1) return null;
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -55,6 +54,8 @@ function ProductPagination() {
 
     return items;
   }, [currentPage, totalPages]);
+
+  if (totalPages <= 1) return null;
 
   return (
     <Pagination>

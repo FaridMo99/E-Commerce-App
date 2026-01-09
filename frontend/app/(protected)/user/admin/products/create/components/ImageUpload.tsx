@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { IMAGE_MAX_SIZE } from "@monorepo/shared";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ImageUploadProps = {
   value?: File[];
@@ -15,7 +15,16 @@ type ImageUploadProps = {
 
 export default function ImageUpload({value = [], onChange  }: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>(value);
-  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+
+  const filePreviews = useMemo(() => {
+    return files.map((file) => URL.createObjectURL(file));
+  }, [files]);
+
+  useEffect(() => {
+    return () => {
+      filePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [filePreviews]);
 
   const handleDrop = (newFiles: File[]) => {
     const combinedFiles = [...files, ...newFiles].slice(0, 5);
@@ -23,18 +32,11 @@ export default function ImageUpload({value = [], onChange  }: ImageUploadProps) 
     onChange?.(combinedFiles);
   };
 
-  useEffect(() => {
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setFilePreviews(previews);
-
-    return () => previews.forEach((url) => URL.revokeObjectURL(url));
-  }, [files]);
-
   const removeAll = () => {
     setFiles([]);
     onChange?.([]);
   };
-
+  
   return (
     <Dropzone
       className="relative"

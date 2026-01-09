@@ -7,12 +7,10 @@ import { createProduct, getBaseCurrency } from "@/lib/queries/client/adminQuerie
 import useAuth from "@/stores/authStore"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import CategorySelect from "../../components/CategorySelect"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
 import ImageUpload from "./ImageUpload"
 import InputValidationFailedText from "@/components/main/InputValidationFailedText"
 import { ClientProductSchema, fullClientProductSchema } from "@/schemas/schemas"
@@ -21,12 +19,23 @@ import SubmitButton from "@/components/forms/SubmitButton"
 
 function ProductForm() {
     const accessToken = useAuth(state => state.accessToken)
-  const { register, formState, reset, handleSubmit, watch, setValue, control } = useForm({
-    resolver: zodResolver(fullClientProductSchema),
-    defaultValues: {
-      stock_quantity:1
-    }
-  })
+    const { register, formState, reset, handleSubmit, setValue, control } = useForm({
+      resolver: zodResolver(fullClientProductSchema),
+      defaultValues: {
+        stock_quantity:1
+      }
+    })
+
+    const categoryValue = useWatch({
+      control,
+      name: "category",
+    });
+  
+      const imagesValue = useWatch({
+        control,
+        name: "images",
+      });
+  
     const {errors, isDirty} = formState
 
     const { data: currency, isLoading } = useQuery({
@@ -77,7 +86,7 @@ function ProductForm() {
           <Label>Category</Label>
         </div>
         <CategorySelect
-          categoryId={watch("category")}
+          categoryId={categoryValue}
           setCategoryId={(val) => setValue("category", val)}
         />
         <InputValidationFailedText
@@ -88,7 +97,7 @@ function ProductForm() {
       <Field>
         <Label>Product Images</Label>
         <ImageUpload
-          value={watch("images")}
+          value={imagesValue}
           onChange={(files) =>
             setValue("images", files, { shouldValidate: true })
           }
@@ -179,13 +188,6 @@ function ProductForm() {
           text={errors.is_public?.message}
         />
       </Field>
-      <Button
-        className="my-4 self-center"
-        disabled={isPending || !isDirty}
-        type="submit"
-      >
-        {isPending ? <Loader2 className="animate-spin" /> : "Create"}
-      </Button>
       <SubmitButton
         disabled={isPending || !isDirty}
         text="Create"

@@ -1,5 +1,5 @@
 import z from "zod";
-import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants.ts";
+import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants.js";
 
 const allowedCountries = ["US", "GB", "DE"]
 const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of US, GB, or DE" );
@@ -7,7 +7,7 @@ const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of 
 //here as float, in controller turn to cents
 export const priceSchema = z
   .preprocess(
-    (val) => {
+    (val:string | number) => {
       if (typeof val === "string") val = val.replace(",", ".");
       const number = typeof val === "number" ? val : parseFloat(val);
       return number;

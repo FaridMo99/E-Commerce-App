@@ -20,11 +20,7 @@ function AddCart({ itemId, quantity }: AddCartProps) {
     
     const { mutate, isPending } = useMutation({
         mutationKey: ["add item to cart", itemId, quantity],
-        mutationFn: () => {
-            if (accessToken) {
-            return addProductToUserCart({ productId: itemId, quantity }, accessToken);    
-            }
-        },
+        mutationFn: () => addProductToUserCart({ productId: itemId, quantity }, accessToken!),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ["get user shopping cart"]})
             toast.success("Product successfully added to shopping cart")

@@ -76,7 +76,7 @@ export function SignupForm({
 
         if (!captchaToken) throw new Error("Failed Captcha");
 
-        const {confirmPassword, ...rest} = credentials
+        const {confirmPassword:_ , ...rest} = credentials
         // Pass a single object to mutate
         mutate({ mutateCredentials: rest, captchaToken });
       } catch (err) {

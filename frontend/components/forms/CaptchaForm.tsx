@@ -67,7 +67,8 @@ export default function CaptchaForm<
     handleSubmit,
     formState: { errors, isSubmitting, isValid, isSubmitted },
   } = useForm({
-    resolver: zodResolver(schema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema as any),
     mode: "onSubmit",
     reValidateMode: "onChange",
   });

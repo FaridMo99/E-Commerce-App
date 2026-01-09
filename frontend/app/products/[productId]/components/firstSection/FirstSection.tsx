@@ -30,10 +30,12 @@ function FirstSection({ product }: FirstSectionProps) {
   });
 
   useEffect(() => {
-    if (accessToken) {
+    
+    if (accessToken && product.id) {
       mutate();
     }
-  }, [mutate]);
+
+  }, [mutate, accessToken, product.id]);
 
   return (
     <section className="flex justify-between w-full h-[85vh] pt-12">

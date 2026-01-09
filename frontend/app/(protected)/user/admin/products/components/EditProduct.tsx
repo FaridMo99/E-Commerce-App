@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProductSchema, UpdateProductSchema } from "@monorepo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pen } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import CategorySelect from "./CategorySelect";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -34,7 +34,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
   const accessToken = useAuth((state) => state.accessToken);
   const queryClient = useQueryClient()
 
-  const { register, handleSubmit, formState,watch, setValue ,control} = useForm({
+  const { register, handleSubmit, formState, setValue ,control} = useForm({
     resolver: zodResolver(updateProductSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -47,6 +47,11 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
       is_public: product.is_public,
       category: product.category.id,
     },
+  });
+
+  const categoryValue = useWatch({
+    control,
+    name: "category",
   });
 
   const { errors,isDirty } = formState;
@@ -155,7 +160,7 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
             <Field className="w-1/3">
               <Label htmlFor="category">Category</Label>
               <CategorySelect
-                categoryId={watch("category")}
+                categoryId={categoryValue}
                 setCategoryId={(val) => setValue("category", val)}
               />
               <InputValidationFailedText
@@ -186,7 +191,11 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <SubmitButton text="Submit" isPending={isPending} disabled={isPending || !isDirty } />
+            <SubmitButton
+              text="Submit"
+              isPending={isPending}
+              disabled={isPending || !isDirty}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

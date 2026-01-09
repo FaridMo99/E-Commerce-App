@@ -15,7 +15,7 @@ import { reviewSchema, ReviewSchema } from "@monorepo/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { JSX, MouseEventHandler } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 type ReviewModalProps = {
@@ -31,7 +31,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
     const accessToken = useAuth(state => state.accessToken)
     const router = useRouter()
     
-      const { register, handleSubmit, formState, watch, setValue } = useForm({
+      const { register, handleSubmit, formState, control, setValue } = useForm({
         resolver: zodResolver(reviewSchema),
         mode: "onSubmit",
           reValidateMode: "onChange",
@@ -39,6 +39,11 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
             rating:0
         }
       });
+  
+    const ratingValue = useWatch({
+      control,
+      name: "rating",
+    });
 
     const { errors } = formState
     
@@ -92,7 +97,7 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
               <Label htmlFor="rating">Rating</Label>
                 <InteractiveRating
                     styles="items-start"
-                    value={Number(watch("rating")) || 0}
+                    value={Number(ratingValue) || 0}
                     onChange={(v) =>
                     setValue("rating", v, {
                         shouldValidate: true,
