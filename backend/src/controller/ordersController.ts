@@ -132,10 +132,15 @@ export async function makeOrder(
 
     if (cartUpdated) {
     
-    await Promise.all(
+    await prisma.$transaction(
       updatedItems.map((item) =>
         prisma.cartItem.update({
-          where: { cartId_productId: { cartId: shoppingCart.id, productId: item.product.id } },
+          where: {
+            cartId_productId: {
+              cartId: shoppingCart.id,
+              productId: item.product.id,
+            },
+          },
           data: { quantity: item.quantity },
         })
       )

@@ -88,11 +88,12 @@ export function calculateCartTotalsInCents(cart: CartWithSelectedFields): CartWi
     };
   });
 
-    return {
-      ...cart,
-      items: itemsWithTotals,
-      total: Number(cartTotal.toFixed(2)) * 100,
-    };
+
+  return {
+    ...cart,
+    items: itemsWithTotals,
+    total: Number(cartTotal.toFixed(2)) * 100,
+  };
 }
 
 export function calculateCartTotals(
