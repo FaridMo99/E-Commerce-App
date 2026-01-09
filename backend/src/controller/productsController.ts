@@ -33,10 +33,8 @@ import {
   productWhere,
   reviewSelect,
   reviewWhere,
-  type ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
 import type { Prisma } from "../generated/prisma/client.js";
-import type { ProductCreateInput } from "../generated/prisma/models.js";
 
 export async function getAllProducts(
   req: Request,
@@ -266,41 +264,34 @@ export async function createProduct(
 
       const baseCurrency = currencySetting.value as CurrencyISO;
 
-      //prices come as float gotta transform to cents
-      product.price = turnPriceToPriceInCents(product.price);
-      if (product.sale_price) {
-        product.sale_price = turnPriceToPriceInCents(product.sale_price);
-      }
+      const priceInCents = turnPriceToPriceInCents(product.price);
 
-      //create product
-      const createData = {
+      const salePriceInCents =
+        product.sale_price !== "" && product.sale_price !== undefined
+          ? turnPriceToPriceInCents(product.sale_price)
+          : undefined;
+
+      const createData: Prisma.ProductCreateInput = {
         name: product.name,
-        ...(imageUrls && { imageUrls }),
         currency: baseCurrency,
         description: product.description,
         stock_quantity: product.stock_quantity,
         is_public: product.is_public,
-        ...(product.is_public && { published_at: new Date() }),
+        price: priceInCents,
         category: {
-          connect: {
-            id: product.category,
-          },
+          connect: { id: product.category },
         },
-        price: product.price,
-        ...(product.sale_price !== undefined && {
-          sale_price: product.sale_price,
-        }),
+        ...(imageUrls && { imageUrls }),
+        ...(product.is_public && { published_at: new Date() }),
+        ...(salePriceInCents !== undefined && { sale_price: salePriceInCents }),
       };
 
       return tx.product.create({
         data: createData,
-        select: {
-          ...productSelect,
-        },
+        select: { ...productSelect },
       });
     });
 
-    //clear all relevant caches
     if (product.is_public) {
       await clearAllProductCaches(newProduct.category.name)
     }
@@ -424,91 +415,87 @@ export async function updateProductByProductId(
   res: Response,
   next: NextFunction
 ) {
-  const id = req.params.productId;
+    const id = req.params.productId;
+    const body = req.body;
 
-  if (req.body.price) {
-    req.body.price = turnPriceToPriceInCents(req.body.price);
-  }
+    try {
+      console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
 
-  if (req.body.sale_price) {
-    req.body.sale_price = turnPriceToPriceInCents(req.body.sale_price);
-  }
+      const priceInCents =
+        body.price !== undefined
+          ? turnPriceToPriceInCents(body.price)
+          : undefined;
 
-  const {
-    name,
-    description,
-    price,
-    stock_quantity,
-    is_public,
-    category,
-    sale_price,
-  } = req.body;
+      const salePriceInCents =
+        body.sale_price !== undefined && body.sale_price !== ""
+          ? turnPriceToPriceInCents(body.sale_price)
+          : body.sale_price === ""
+            ? null 
+            : undefined;
 
-  try {
-    console.log(chalk.yellow(`${getTimestamp()} Updating product ${id}`));
+      const updatedProduct = await prisma.$transaction(async (tx) => {
 
-    const updatedProduct = await prisma.$transaction(async (tx) => {
-      //update
-      const product = await tx.product.update({
-        where: { id },
-        data: {
+        const updateData: Prisma.ProductUpdateInput = {
           updated_at: new Date(),
-          ...(name && { name }),
-          ...(description && { description }),
-          ...(category && {
-            category: {
-              connect: {
-                id: category,
-              },
-            },
+          ...(body.name && { name: body.name }),
+          ...(body.description && { description: body.description }),
+          ...(body.category && {
+            category: { connect: { id: body.category } },
           }),
-          ...(price !== undefined && { price }),
-          ...(stock_quantity !== undefined && { stock_quantity }),
-          ...(sale_price !== undefined && { sale_price }),
-          ...(typeof is_public === "boolean" && { is_public }),
-          ...(is_public && { published_at: new Date() }),
-        },
-        select: {
-          ...productSelect
-        }
-      });
+          ...(priceInCents !== undefined && { price: priceInCents }),
+          ...(body.stock_quantity !== undefined && {
+            stock_quantity: body.stock_quantity,
+          }),
+          ...(typeof body.is_public === "boolean" && {
+            is_public: body.is_public,
+          }),
+          ...(body.is_public && { published_at: new Date() }),
+        };
 
-      //if made not public, clean favorites and carts
-      if (is_public === false) {
-        await tx.product.update({
+        if (salePriceInCents !== undefined) {
+          updateData.sale_price = salePriceInCents;
+        }
+
+        const product = await tx.product.update({
           where: { id },
-          data: { favoredBy: { set: [] } },
+          data: updateData,
+          select: { ...productSelect },
         });
 
-        await tx.cartItem.deleteMany({ where: { productId: id } });
+        if (body.is_public === false) {
+          await tx.product.update({
+            where: { id },
+            data: { favoredBy: { set: [] } },
+          });
+          await tx.cartItem.deleteMany({ where: { productId: id } });
+        }
+
+        await tx.recentlyViewed.deleteMany({ where: { productId: id } });
+
+        return product;
+      });
+
+      if (!updatedProduct) {
+        console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
+        return res.status(404).json({ message: "Product not found" });
       }
 
-      await tx.recentlyViewed.deleteMany({ where: { productId: id } });
+      //redis invalidation
+      if (body.is_public || body.is_public === false) {
+        await clearAllProductCaches(updatedProduct.category.name);
+      }
 
-      return product;
-    });
+      console.log(
+        chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
+      );
 
-    if (!updatedProduct) {
-      console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(200).json({ message: "Updated product successfully" });
+    } catch (err) {
+      console.log(
+        chalk.red(`${getTimestamp()} Failed to update product ${id}:`, err)
+      );
+      next(err);
     }
-
-    //redis invalidation
-    if (is_public || is_public === false) {
-      await clearAllProductCaches(updatedProduct.category.name)
-    }
-
-    console.log(
-      chalk.green(`${getTimestamp()} Product ${id} updated successfully`)
-    );
-
-    return res.status(200).json({ message: "Updated product successfully" });
-  } catch (err) {
-    console.log(
-      chalk.red(`${getTimestamp()} Failed to update product ${id}:`, err)
-    );
-    next(err);
-  }
 }
 
 // Get all reviews for a product

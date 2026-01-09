@@ -14,6 +14,12 @@ import {
 import { lookup } from "../../app.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 
+type MaxMindResponse = {
+  continent_code: string;
+  country_code: string;
+  country_name: string;
+} | null
+
 export const authRateLimiter = rateLimit({
   store: new RedisStore({
     sendCommand: (...args: string[]) => redis.sendCommand(args),
@@ -72,6 +78,7 @@ export async function geoCurrencyMiddleware(
     const ip = (req.headers["x-forwarded-for"]?.toString().split(",")[0] ??
       req.ip)!;
     console.log(chalk.green(`${getTimestamp()} Client IP found: ${ip}`));
+    console.log(lookup.get("2.160.0.0"), "oipi");
 
     //redis lookup
     const cached = await redis.hGetAll(`geo:${ip}`);
@@ -89,7 +96,7 @@ export async function geoCurrencyMiddleware(
     console.log(chalk.yellow(`${getTimestamp()} Cache miss for IP ${ip}`));
 
     //maxmind lookup
-    const geo = lookup.get(ip);
+    const geo = lookup.get(ip) as MaxMindResponse;//doesnt work differently
     const country = geo?.country_code ?? FALLBACK_COUNTRY_ISO_CODE;
     console.log(chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`));
 

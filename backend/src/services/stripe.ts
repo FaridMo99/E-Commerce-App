@@ -38,13 +38,23 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
       const orderId = session.metadata?.orderId!;
       const userId = session.metadata?.userId!;
       const email = session.customer_details?.email!;
-      const paymentIntentId = session.payment_intent;
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
 
       console.log(
         chalk.yellow(
           `${getTimestamp()} Processing checkout.session.completed, orderId: ${orderId}, userId: ${userId}`
         )
       );
+
+      if (!paymentIntentId) {
+        const errorMessage = `Fatal Error: Checkout completed, but no payment_intent ID was found. Order ID: ${orderId}. Requires manual review on Stripe Dashboard.`;
+        console.error(chalk.red(getTimestamp(), errorMessage));
+        await notifyAdmin(errorMessage);
+        return;
+      }
 
       //checking if order already expired
       const expiredOrder = await prisma.order.findUnique({
@@ -119,6 +129,10 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
             )
           ]);
 
+          if (!refund) {
+            return;
+          }
+
           await prisma.order.update({
               where: {
                 id: expiredOrder.id,
@@ -130,7 +144,7 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
                     status: "REFUNDING",
                     stripeRefundId: typeof refund?.payment_intent === "string"
                   ? refund.payment_intent
-                  : refund.payment_intent_id
+                  : refund.id
                   },
                 },
               },
