@@ -6,7 +6,7 @@ import {
 } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import type { NicePrice, OpenExchangeRateApiReturn } from "../types/types.js";
 import chalk from "chalk";
 import { getTimestamp } from "./utils.js";

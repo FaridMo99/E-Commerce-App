@@ -1,5 +1,5 @@
 import RedisStore from "rate-limit-redis";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { NODE_ENV } from "../config/env.js";
 import type { NextFunction, Request, Response } from "express";

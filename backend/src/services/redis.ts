@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import { REDIS_URL } from "../config/env.js";
 import { getTimestamp } from "../lib/utils.js";
 
-const redis = createClient({ url: REDIS_URL });
+export const redis = createClient({ url: REDIS_URL });
 
 (async () => {
   try {
@@ -28,5 +28,3 @@ redis.on("ready", () => {
 redis.on("end", () => {
   console.log(chalk.blue(getTimestamp(), "Redis disconnected"));
 });
-
-export default redis;

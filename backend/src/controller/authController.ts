@@ -7,7 +7,7 @@ import {
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../services/prisma.js";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import { sendVerificationEmail } from "../services/email.js";
 import { issueTokens } from "../lib/auth.js";
 import { JWT_EMAIL_TOKEN_SECRET } from "../config/env.js";

@@ -1,5 +1,5 @@
 import { it, expect, describe, vi, beforeEach } from "vitest";
-import redis from "../../src/services/redis.js";
+import { redis } from "../../src/services/redis.js";
 import {
   turnPriceToPriceInCents,
   formatPriceForClient,
@@ -14,28 +14,26 @@ import {
 
 global.fetch = vi.fn();
 
-
 describe("Currency Transformation Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   const mockProduct = (): ProductWithAvgRating => ({
-        id: "prod_123",
-        stock_quantity: 2,
-        description: "non",
-        published_at: new Date(),
-        updated_at: new Date(),
-        category: { id: "kon", name: "0i" },
-        imageUrls:[""],
-        price: 1000,
-        sale_price: 800,
-        name: "Test Item",
-        currency: "EUR",
-        reviews: [{ rating: 5 }, { rating: 3 }],
-        _count: { reviews: 2 },
+    id: "prod_123",
+    stock_quantity: 2,
+    description: "non",
+    published_at: new Date(),
+    updated_at: new Date(),
+    category: { id: "kon", name: "0i" },
+    imageUrls: [""],
+    price: 1000,
+    sale_price: 800,
+    name: "Test Item",
+    currency: "EUR",
+    reviews: [{ rating: 5 }, { rating: 3 }],
+    _count: { reviews: 2 },
   });
-
 
   describe("Basic Formatters", () => {
     it("should turn 10.99 to 1099", () => {
@@ -50,24 +48,22 @@ describe("Currency Transformation Tests", () => {
       expect(roundPriceUpInCents(100)).toBe(199);
       expect(roundPriceUpInCents(200, 95)).toBe(295);
     });
-      
-      it("should format price and add average rating", () => {
-          const product = mockProduct()
-          formatPricesForClientAndCalculateAverageRating(product);
-          expect(product.price).toBe(10)
-          expect(product.sale_price).toBe(8);
-          expect(product.averageRating).toBeDefined();
 
+    it("should format price and add average rating", () => {
+      const product = mockProduct();
+      formatPricesForClientAndCalculateAverageRating(product);
+      expect(product.price).toBe(10);
+      expect(product.sale_price).toBe(8);
+      expect(product.averageRating).toBeDefined();
     });
 
     it("", () => {
-        const product = mockProduct();
-        transformAndFormatProductPriceInCents(product, "EUR", "USD");
-        expect(product.price).toBe(1000);
-        expect(product.sale_price).toBe(800);
+      const product = mockProduct();
+      transformAndFormatProductPriceInCents(product, "EUR", "USD");
+      expect(product.price).toBe(1000);
+      expect(product.sale_price).toBe(800);
     });
   });
-
 
   describe("getExchangeRates", () => {
     it("should return cached data from Redis if available", async () => {
@@ -111,7 +107,7 @@ describe("Currency Transformation Tests", () => {
     });
 
     it("should only round and format if currencies are the same", async () => {
-      const product = mockProduct(); 
+      const product = mockProduct();
 
       await transformAndFormatProductPrice(product, "EUR", "EUR");
 

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import { CATEGORIES_REDIS_KEY } from "../config/constants.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";

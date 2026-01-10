@@ -5,7 +5,7 @@ import {
 } from "../config/constants.js";
 import type { Category, Product } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import {
   NEW_PRODUCTS_REDIS_KEY,
   TRENDING_PRODUCTS_REDIS_KEY,

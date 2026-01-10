@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import prisma from "../services/prisma.js";
-import redis from "../services/redis.js";
+import {redis} from "../services/redis.js";
 import { getTimestamp } from "./utils.js";
 import { notifyAdmin } from "../services/email.js";
 import { NODE_ENV } from "../config/env.js";
