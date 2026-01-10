@@ -1,21 +1,21 @@
-"use client"
-import InputValidationFailedText from '@/components/main/InputValidationFailedText';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { changePasswordAuthenticatedSchema } from '@/schemas/schemas';
-import useAuth from '@/stores/authStore';
-import { ChangePasswordAuthenticatedSchema } from '@/types/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
-import { changePasswordAuthenticated } from '@/lib/queries/client/authQueries';
-import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import SubmitButton from '@/components/forms/SubmitButton';
+"use client";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { changePasswordAuthenticatedSchema } from "@/schemas/schemas";
+import useAuth from "@/stores/authStore";
+import { ChangePasswordAuthenticatedSchema } from "@/types/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { changePasswordAuthenticated } from "@/lib/queries/client/authQueries";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import SubmitButton from "@/components/forms/SubmitButton";
 
 function ChangePasswordForm() {
-    const {accessToken, setUser} = useAuth((state) => state);
+  const { accessToken, setUser } = useAuth((state) => state);
 
   const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(changePasswordAuthenticatedSchema),
@@ -23,14 +23,15 @@ function ChangePasswordForm() {
     reValidateMode: "onChange",
   });
 
-  const { errors,isDirty } = formState;
+  const { errors, isDirty } = formState;
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["change password"],
-    mutationFn: (passwords: ChangePasswordAuthenticatedSchema) => changePasswordAuthenticated(passwords, accessToken!),
-      onSuccess: (data) => {
-        setUser(data)
-        toast.success("Changed Password successfully!");
+    mutationFn: (passwords: ChangePasswordAuthenticatedSchema) =>
+      changePasswordAuthenticated(passwords, accessToken!),
+    onSuccess: (data) => {
+      setUser(data);
+      toast.success("Changed Password successfully!");
     },
     onError: (err) => {
       toast.error(err.message);
@@ -44,7 +45,7 @@ function ChangePasswordForm() {
   return (
     <Card className="sm:max-w-[425px] mx-auto p-6 bg-backgroundBright text-white">
       <form onSubmit={handleSubmit(submitHandler)}>
-        <CardHeader className='p-0'>
+        <CardHeader className="p-0">
           <CardTitle>Change Password</CardTitle>
         </CardHeader>
         <FieldGroup className="grid gap-4 mt-2">
@@ -93,4 +94,4 @@ function ChangePasswordForm() {
   );
 }
 
-export default ChangePasswordForm
+export default ChangePasswordForm;

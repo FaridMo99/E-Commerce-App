@@ -1,8 +1,8 @@
 import type { AccessToken, AuthUser, User } from "@/types/types";
 import { create } from "zustand";
 
-type ZustandUser = null | User | AuthUser
-type ZustandToken = null | AccessToken
+export type ZustandUser = null | User | AuthUser
+export type ZustandToken = null | AccessToken
 
 type AuthStore = {
   user: ZustandUser;

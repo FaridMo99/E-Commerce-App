@@ -1,5 +1,5 @@
 "use client";
-import InputValidationFailedText from "@/components/main/InputValidationFailedText";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -28,13 +28,11 @@ import { toast } from "sonner";
 import CategorySelect from "./CategorySelect";
 import SubmitButton from "@/components/forms/SubmitButton";
 
-
-
-export function EditProduct( { product } : { product:AdminProduct } ) {
+export function EditProduct({ product }: { product: AdminProduct }) {
   const accessToken = useAuth((state) => state.accessToken);
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const { register, handleSubmit, formState, setValue ,control} = useForm({
+  const { register, handleSubmit, formState, setValue, control } = useForm({
     resolver: zodResolver(updateProductSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -54,14 +52,15 @@ export function EditProduct( { product } : { product:AdminProduct } ) {
     name: "category",
   });
 
-  const { errors,isDirty } = formState;
+  const { errors, isDirty } = formState;
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["edit product", product.id],
-    mutationFn: (newProduct:UpdateProductSchema) =>updateProductByProductId(product.id, newProduct, accessToken!),
+    mutationFn: (newProduct: UpdateProductSchema) =>
+      updateProductByProductId(product.id, newProduct, accessToken!),
     onSuccess: () => {
       toast.success("Edited Product successfully!");
-      queryClient.invalidateQueries({queryKey:["get admin products"]})
+      queryClient.invalidateQueries({ queryKey: ["get admin products"] });
     },
     onError: (err) => {
       toast.error(err.message);

@@ -1,10 +1,10 @@
 "use client";
-import ProductCard from "../main/product/ProductCard";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Product } from "@/types/types";
-import SectionWrapper from "../main/SectionWrapper";
-import BaseSlider from "./BaseSlider";
+import SectionWrapper from "../SectionWrapper";
+import BaseSlider from "../BaseSlider";
+import ProductCard from "./ProductCard";
 
 type ProductsCarouselProps = {
   title: string;

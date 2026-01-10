@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { changePasswordSchema } from "@/schemas/schemas";
-import InputValidationFailedText from "../main/InputValidationFailedText";
+import InputValidationFailedText from "./InputValidationFailedText";
 import { useRouter } from "next/navigation";
 import { ChangePasswordSchema } from "@/types/types";
 import useAuth from "@/stores/authStore";
@@ -21,10 +21,9 @@ import { useMutation } from "@tanstack/react-query";
 import { changePasswordUnauthenticated } from "@/lib/queries/client/authQueries";
 import SubmitButton from "./SubmitButton";
 
-
 function ChangePasswordForm({ token }: { token: string }) {
-console.log(token)
-  const setState = useAuth(state=>state.setState)
+  console.log(token);
+  const setState = useAuth((state) => state.setState);
   const { mutate, isPending } = useMutation({
     mutationKey: ["change password for unauthenticated user"],
     mutationFn: ({ token, password }: { token: string; password: string }) =>
@@ -51,7 +50,7 @@ console.log(token)
   const router = useRouter();
 
   function submitHandler(passwords: ChangePasswordSchema) {
-    mutate({token,password:passwords.password})
+    mutate({ token, password: passwords.password });
   }
 
   return (

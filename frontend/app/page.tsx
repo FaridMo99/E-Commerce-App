@@ -1,5 +1,5 @@
 import RecentlyViewedProducts from "@/app/components/ClientCarousel";
-import ProductsCarousel from "@/components/main/ProductsCarousel";
+import ProductsCarousel from "@/components/main/product/ProductsCarousel";
 import { DOMAIN_NAME } from "@/config/constants";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";
 import { Metadata } from "next";

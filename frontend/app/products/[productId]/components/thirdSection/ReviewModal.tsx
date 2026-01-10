@@ -1,9 +1,18 @@
-"use client"
+"use client";
 import SubmitButton from "@/components/forms/SubmitButton";
-import InputValidationFailedText from "@/components/main/InputValidationFailedText";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
 import InteractiveRating from "@/components/main/product/InteractiveRating";
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,Dialog } from "@/components/ui/dialog";
+import {
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Dialog,
+} from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,72 +28,75 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 type ReviewModalProps = {
-  buttonText: string | JSX.Element
-    clickHandler: MouseEventHandler<HTMLButtonElement>;
-  defaultPublic?:boolean
+  buttonText: string | JSX.Element;
+  clickHandler: MouseEventHandler<HTMLButtonElement>;
+  defaultPublic?: boolean;
 };
 
+export function ReviewModal({
+  buttonText,
+  clickHandler,
+  defaultPublic,
+}: ReviewModalProps) {
+  const params = useParams();
+  const productId =
+    typeof params.productId === "string" ? params.productId : "";
+  const accessToken = useAuth((state) => state.accessToken);
+  const router = useRouter();
 
-export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewModalProps) {
-    const params = useParams()
-    const productId = typeof params.productId === "string" ? params.productId : "";
-    const accessToken = useAuth(state => state.accessToken)
-    const router = useRouter()
-    
-      const { register, handleSubmit, formState, control, setValue } = useForm({
-        resolver: zodResolver(reviewSchema),
-        mode: "onSubmit",
-          reValidateMode: "onChange",
-          defaultValues: {
-            rating:0
-        }
-      });
-  
-    const ratingValue = useWatch({
-      control,
-      name: "rating",
-    });
+  const { register, handleSubmit, formState, control, setValue } = useForm({
+    resolver: zodResolver(reviewSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      rating: 0,
+    },
+  });
 
-    const { errors } = formState
-    
-    const {mutate, isPending } = useMutation({
-        mutationKey: ["create review for product", productId],
-        mutationFn: (review: ReviewSchema) => createProductReviewByProductId(productId, review, accessToken!)
-        ,
-        onSuccess: () => {
-            toast.success("Review posted successfully!")
-            router.refresh()
-        },
-        onError: (err) => {
-            toast.error(err.message)
-        }
-    })
+  const ratingValue = useWatch({
+    control,
+    name: "rating",
+  });
 
-    function submitHandler(review: ReviewSchema) {
-        console.log("submit runs")
-        if (defaultPublic) {
-            review.isPublic = true;
-        }
-        if (accessToken) {
-           mutate(review);
-        }
-        else {
-            toast.error("You have to be logged in to create a Review")
-        }
+  const { errors } = formState;
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["create review for product", productId],
+    mutationFn: (review: ReviewSchema) =>
+      createProductReviewByProductId(productId, review, accessToken!),
+    onSuccess: () => {
+      toast.success("Review posted successfully!");
+      router.refresh();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  function submitHandler(review: ReviewSchema) {
+    console.log("submit runs");
+    if (defaultPublic) {
+      review.isPublic = true;
     }
+    if (accessToken) {
+      mutate(review);
+    } else {
+      toast.error("You have to be logged in to create a Review");
+    }
+  }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-                  <button
-                      type="button"
-            className="text-white cursor-pointer hover:text-white/80"
-            onClick={clickHandler}
-          >
-            {buttonText}
-          </button>
-        </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-backgroundBright text-white">
+        <button
+          type="button"
+          className="text-white cursor-pointer hover:text-white/80"
+          onClick={clickHandler}
+        >
+          {buttonText}
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] bg-backgroundBright text-white">
         <form onSubmit={handleSubmit(submitHandler)}>
           <DialogHeader>
             <DialogTitle>Create a Review</DialogTitle>
@@ -95,16 +107,16 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
           <FieldGroup className="grid gap-4">
             <Field className="grid gap-3">
               <Label htmlFor="rating">Rating</Label>
-                <InteractiveRating
-                    styles="items-start"
-                    value={Number(ratingValue) || 0}
-                    onChange={(v) =>
-                    setValue("rating", v, {
-                        shouldValidate: true,
-                        shouldTouch: true,
-                    })
-                    }
-                />
+              <InteractiveRating
+                styles="items-start"
+                value={Number(ratingValue) || 0}
+                onChange={(v) =>
+                  setValue("rating", v, {
+                    shouldValidate: true,
+                    shouldTouch: true,
+                  })
+                }
+              />
               <InputValidationFailedText
                 trigger={errors.rating}
                 text={errors.rating?.message}
@@ -134,10 +146,14 @@ export function ReviewModal({ buttonText, clickHandler, defaultPublic }: ReviewM
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <SubmitButton disabled={isPending} text="Submit" isPending={isPending} />
-            </DialogFooter>
-            </form>
-        </DialogContent>
+            <SubmitButton
+              disabled={isPending}
+              text="Submit"
+              isPending={isPending}
+            />
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

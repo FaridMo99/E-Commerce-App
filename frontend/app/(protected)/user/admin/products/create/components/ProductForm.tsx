@@ -1,64 +1,70 @@
-"use client"
-import { Field } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { createProduct, getBaseCurrency } from "@/lib/queries/client/adminQueries"
-import useAuth from "@/stores/authStore"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { toast } from "sonner"
-import CategorySelect from "../../components/CategorySelect"
-import { Switch } from "@/components/ui/switch"
-import ImageUpload from "./ImageUpload"
-import InputValidationFailedText from "@/components/main/InputValidationFailedText"
-import { ClientProductSchema, fullClientProductSchema } from "@/schemas/schemas"
-import { DEFAULT_NICE_PRICE } from "@monorepo/shared"
-import SubmitButton from "@/components/forms/SubmitButton"
+"use client";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  createProduct,
+  getBaseCurrency,
+} from "@/lib/queries/client/adminQueries";
+import useAuth from "@/stores/authStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
+import CategorySelect from "../../components/CategorySelect";
+import { Switch } from "@/components/ui/switch";
+import ImageUpload from "./ImageUpload";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
+import {
+  ClientProductSchema,
+  fullClientProductSchema,
+} from "@/schemas/schemas";
+import { DEFAULT_NICE_PRICE } from "@monorepo/shared";
+import SubmitButton from "@/components/forms/SubmitButton";
 
 function ProductForm() {
-    const accessToken = useAuth(state => state.accessToken)
-    const { register, formState, reset, handleSubmit, setValue, control } = useForm({
+  const accessToken = useAuth((state) => state.accessToken);
+  const { register, formState, reset, handleSubmit, setValue, control } =
+    useForm({
       resolver: zodResolver(fullClientProductSchema),
       defaultValues: {
-        stock_quantity:1
-      }
-    })
-
-    const categoryValue = useWatch({
-      control,
-      name: "category",
-    });
-  
-      const imagesValue = useWatch({
-        control,
-        name: "images",
-      });
-  
-    const {errors, isDirty} = formState
-
-    const { data: currency, isLoading } = useQuery({
-        queryKey: ["get base currency"],
-        queryFn:()=>getBaseCurrency(accessToken!)
-    })
-    const { mutate, isPending } = useMutation({
-      mutationKey: ["create product"],
-      mutationFn: (product: ClientProductSchema) =>
-        createProduct(product, accessToken!),
-      onError: (err) => {
-        toast.error(err.message);
-      },
-      onSuccess: () => {
-        toast.success("Successfully created Product");
-        reset();
+        stock_quantity: 1,
       },
     });
 
-    function submitHandler(product:ClientProductSchema) {
-        mutate(product)
-    }
+  const categoryValue = useWatch({
+    control,
+    name: "category",
+  });
 
+  const imagesValue = useWatch({
+    control,
+    name: "images",
+  });
+
+  const { errors, isDirty } = formState;
+
+  const { data: currency, isLoading } = useQuery({
+    queryKey: ["get base currency"],
+    queryFn: () => getBaseCurrency(accessToken!),
+  });
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["create product"],
+    mutationFn: (product: ClientProductSchema) =>
+      createProduct(product, accessToken!),
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      toast.success("Successfully created Product");
+      reset();
+    },
+  });
+
+  function submitHandler(product: ClientProductSchema) {
+    mutate(product);
+  }
 
   return (
     <form
@@ -198,4 +204,4 @@ function ProductForm() {
   );
 }
 
-export default ProductForm
+export default ProductForm;

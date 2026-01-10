@@ -1,7 +1,12 @@
 "use client";
 import SubmitButton from "@/components/forms/SubmitButton";
-import InputValidationFailedText from "@/components/main/InputValidationFailedText";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +20,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import DeleteAccountButton from "./DeleteAccountButton";
 
-
-export function UpdateAccountForm({user}:{user:AuthUser}) {
+export function UpdateAccountForm({ user }: { user: AuthUser }) {
   const accessToken = useAuth((state) => state.accessToken);
 
   const { register, handleSubmit, formState } = useForm({
@@ -31,7 +35,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
       postalCode: user.postalCode ?? undefined,
       city: user.city ?? undefined,
       houseNumber: user.houseNumber ?? undefined,
-      countryCode:user.countryCode ?? undefined
+      countryCode: user.countryCode ?? undefined,
     },
   });
 
@@ -49,7 +53,7 @@ export function UpdateAccountForm({user}:{user:AuthUser}) {
   });
 
   function submitHandler(user: UpdateUserSchema) {
-      mutate(user)
+    mutate(user);
   }
 
   return (

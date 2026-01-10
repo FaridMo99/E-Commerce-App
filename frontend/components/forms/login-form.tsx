@@ -24,21 +24,27 @@ import useAuth from "@/stores/authStore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import InputValidationFailedText from "../main/InputValidationFailedText";
+import InputValidationFailedText from "./InputValidationFailedText";
 import { login } from "@/lib/queries/client/authQueries";
 import { useMutation } from "@tanstack/react-query";
 import OAuthButtonSection from "./OAuthButtonSection";
 import SubmitButton from "./SubmitButton";
 
 export function LoginForm({
-  error= false,
+  error = false,
   className,
   ...props
-}: React.ComponentProps<"div"> & {error?:boolean}) {
+}: React.ComponentProps<"div"> & { error?: boolean }) {
   //submission states
   const { mutate, isPending } = useMutation({
     mutationKey: ["login user"],
-    mutationFn: ({ credentials, captchaToken }: { credentials: LoginSchema, captchaToken: string }) => login(credentials, captchaToken),
+    mutationFn: ({
+      credentials,
+      captchaToken,
+    }: {
+      credentials: LoginSchema;
+      captchaToken: string;
+    }) => login(credentials, captchaToken),
     onSuccess: (result) => {
       setState(result.accessToken, result.user);
 
@@ -46,18 +52,18 @@ export function LoginForm({
       toast.success("Login successful");
     },
     onError: (err) => {
-      toast.error(err.message)
+      toast.error(err.message);
     },
     onSettled: () => {
-        turnstileRef.current?.reset();
-    }
-  })
+      turnstileRef.current?.reset();
+    },
+  });
 
-    useEffect(() => {
-      if (error) {
-        toast.error("Something went wrong. Try again.");
-      }
-    }, [error]);
+  useEffect(() => {
+    if (error) {
+      toast.error("Something went wrong. Try again.");
+    }
+  }, [error]);
 
   //auth store
   const setState = useAuth((state) => state.setState);
@@ -74,24 +80,23 @@ export function LoginForm({
   const router = useRouter();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
-
-
   async function submitHandler(credentials: LoginSchema) {
     try {
-
       turnstileRef.current?.execute();
       const captchaToken = await turnstileRef.current?.getResponsePromise();
       if (!captchaToken) throw new Error("Failed Captcha");
 
-      mutate({credentials, captchaToken});
-
+      mutate({ credentials, captchaToken });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } 
+    }
   }
 
   return (
-    <div className={cn("flex justify-center items-center", className)} {...props}>
+    <div
+      className={cn("flex justify-center items-center", className)}
+      {...props}
+    >
       <Card className="bg-backgroundBright text-white w-8/10">
         <CardHeader>
           <CardTitle>Sign in to your account</CardTitle>

@@ -16,7 +16,7 @@ import {
 } from "../ui/card";
 import { Field, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
-import InputValidationFailedText from "../main/InputValidationFailedText";
+import InputValidationFailedText from "./InputValidationFailedText";
 import { cn } from "@/lib/utils";
 import SubmitButton from "./SubmitButton";
 
@@ -43,7 +43,6 @@ export type CaptchaFormProps<
   fields: InputField<TSchema>[];
   children?: ReactNode;
 };
-
 
 export default function CaptchaForm<
   TFieldValues extends FieldValues,

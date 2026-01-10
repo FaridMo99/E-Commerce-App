@@ -1,5 +1,5 @@
 "use client";
-import InputValidationFailedText from "@/components/main/InputValidationFailedText";
+import InputValidationFailedText from "@/components/forms/InputValidationFailedText";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { changePasswordSchema } from "@/schemas/schemas";
@@ -10,10 +10,15 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
-import {  setPassword } from "@/lib/queries/client/authQueries";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { setPassword } from "@/lib/queries/client/authQueries";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import SubmitButton from "@/components/forms/SubmitButton";
-
 
 function SetPasswordForm() {
   const { accessToken, setUser } = useAuth((state) => state);

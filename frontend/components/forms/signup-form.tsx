@@ -16,8 +16,8 @@ import { signup } from "@/lib/queries/client/authQueries";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import OptionalFieldMarker from "../main/OptionalFieldMarker";
-import InputValidationFailedText from "../main/InputValidationFailedText";
+import OptionalFieldMarker from "./OptionalFieldMarker";
+import InputValidationFailedText from "./InputValidationFailedText";
 import { clientSignupSchema } from "@/schemas/schemas";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -26,19 +26,18 @@ import { SignupSchema } from "@monorepo/shared";
 import OAuthButtonSection from "./OAuthButtonSection";
 import SubmitButton from "./SubmitButton";
 
-
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter()
+  const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationKey: ["signing up user"],
     mutationFn: ({
       mutateCredentials,
       captchaToken,
     }: {
-      mutateCredentials:SignupSchema;
+      mutateCredentials: SignupSchema;
       captchaToken: string;
     }) => signup(mutateCredentials, captchaToken),
     onSettled: () => {
@@ -66,23 +65,23 @@ export function SignupForm({
     isSubmitting || (!isValid && isSubmitted) || isPending;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
+  async function submitHandler(
+    credentials: z.infer<typeof clientSignupSchema>
+  ) {
+    try {
+      // Execute Turnstile captcha
+      turnstileRef.current?.execute();
+      const captchaToken = await turnstileRef.current?.getResponsePromise();
 
-  
-    async function submitHandler(credentials:z.infer<typeof clientSignupSchema>) {
-      try {
-        // Execute Turnstile captcha
-        turnstileRef.current?.execute();
-        const captchaToken = await turnstileRef.current?.getResponsePromise();
+      if (!captchaToken) throw new Error("Failed Captcha");
 
-        if (!captchaToken) throw new Error("Failed Captcha");
-
-        const {confirmPassword:_ , ...rest} = credentials
-        // Pass a single object to mutate
-        mutate({ mutateCredentials: rest, captchaToken });
-      } catch (err) {
+      const { confirmPassword: _, ...rest } = credentials;
+      // Pass a single object to mutate
+      mutate({ mutateCredentials: rest, captchaToken });
+    } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
-      }
     }
+  }
 
   return (
     <div
