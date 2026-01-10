@@ -89,6 +89,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 * **Architecture:** This Project was build as a Monorepo using npm workspaces
 * **Shared Packages:** The Projects share end-to-end TypeScript types, Zod Schemas and constants
+* **CI/CD** Automated Tests, Linting, Package Vulnerability Auditing aswell as Build Step through Github Actions for both, the Front- and Backend
 
 ---
 

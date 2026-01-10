@@ -7,11 +7,12 @@ import {
 import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
 import chalk from "chalk";
-import { calculateCartTotalsInCents, getTimestamp, releaseCartItems } from "../lib/utils.js";
-import { cartSelect, orderSelect, type CartWithSelectedFields } from "../config/prismaHelpers.js";
+import { calculateCartTotalsInCents, getTimestamp } from "../lib/utils.js";
+import { cartSelect, orderSelect } from "../config/prismaHelpers.js";
 import type Stripe from "stripe";
 import { ORDERS_EXPIRATION_TIME } from "../config/constants.js";
 import { clearAllProductCaches } from "../lib/productQueries.js";
+import { releaseCartItems } from "../lib/controllerUtils.js";
 
 // Get orders within a timeframe
 export async function getOrders(

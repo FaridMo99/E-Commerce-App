@@ -1,0 +1,42 @@
+name: Frontend Continous Integration Workflow
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Audit Dependencies
+        run: npm audit -w frontend
+      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Linting check
+        run: npm run lint -w frontend
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run Tests
+        run: npm run test -w frontend
+
+      - name: Production Build
+        run: npm run build -w frontend
+        env:
+          NEXT_PUBLIC_BACKEND_BASE_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_BASE_URL }}
+          ENV: ${{secrets.ENV}}
+          CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS: ${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS}}
+          CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK: ${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK}}
+          NEXT_PUBLIC_CLOUDFLARE_SITE_KEY: ${{secrets.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY}}
+          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{secrets.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}}
+          NEXT_PUBLIC_DOMAIN_NAME: ${{secrets.NEXT_PUBLIC_DOMAIN_NAME}}
+          NEXT_PUBLIC_DOMAIN: ${{secrets.NEXT_PUBLIC_DOMAIN}}

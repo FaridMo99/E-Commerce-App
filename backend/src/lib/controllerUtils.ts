@@ -5,7 +5,7 @@ import prisma from "../services/prisma.js";
 type CartReturn = (Cart & { items: CartItem[] }) | null;
 
 export async function deleteUserCart(
-  userId: string,
+  userId: string
 ): Promise<[BatchPayload, CartReturn]> {
   const [_, cart] = await prisma.$transaction([
     prisma.cartItem.deleteMany({
@@ -18,4 +18,19 @@ export async function deleteUserCart(
   ]);
 
   return [_, cart];
+}
+
+export async function releaseCartItems(orderId: string) {
+  const orderItems = await prisma.order_Item.findMany({
+    where: { order_id: orderId },
+  });
+
+  await prisma.$transaction(
+    orderItems.map((item) =>
+      prisma.product.update({
+        where: { id: item.product_id },
+        data: { stock_quantity: { increment: item.quantity } },
+      })
+    )
+  );
 }

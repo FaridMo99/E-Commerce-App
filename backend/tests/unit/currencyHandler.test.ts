@@ -9,8 +9,8 @@ import {
   transformAndFormatProductPrice,
   transformAndFormatProductPriceInCents,
   convertAndFormatPriceInCents,
+  ProductWithAvgRating,
 } from "../../src/lib/currencyHandlers.js";
-import { ProductWithSelectedFields } from "../../src/config/prismaHelpers.js";
 
 global.fetch = vi.fn();
 
@@ -20,7 +20,7 @@ describe("Currency Transformation Tests", () => {
     vi.clearAllMocks();
   });
 
-  const mockProduct = (): ProductWithSelectedFields => ({
+  const mockProduct = (): ProductWithAvgRating => ({
         id: "prod_123",
         stock_quantity: 2,
         description: "non",

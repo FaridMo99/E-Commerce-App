@@ -2,8 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
 import { sortOrderSchema } from "@monorepo/shared";
 import chalk from "chalk";
-import { getDailyRevenue, getTimestamp, getTotalRevenue } from "../lib/utils.js";
+import { getTimestamp, getTotalRevenue } from "../lib/utils.js";
 import { BASE_CURRENCY_KEY } from "../config/constants.js";
+import { getDailyRevenue } from "../lib/currencyHandlers.js";
 
 
 export async function getRevenue(

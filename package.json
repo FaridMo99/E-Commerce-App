@@ -17,6 +17,8 @@
     "shared"
   ],
   "devDependencies": {
-    "prettier": "^3.6.2"
+    "@vitest/coverage-v8": "^4.0.16",
+    "prettier": "^3.6.2",
+    "vitest": "^4.0.16"
   }
 }

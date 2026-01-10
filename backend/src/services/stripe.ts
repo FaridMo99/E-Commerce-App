@@ -3,12 +3,36 @@ import { STRIPE_SECRET_KEY } from "../config/env.js";
 import prisma from "./prisma.js";
 import { notifyAdmin, notifyUser, sendOrderEmail } from "./email.js";
 import chalk from "chalk";
-import { getTimestamp, refundOrder, releaseCartItems } from "../lib/utils.js";
+import { getTimestamp } from "../lib/utils.js";
 import { orderSelect } from "../config/prismaHelpers.js";
+import { releaseCartItems } from "../lib/controllerUtils.js";
+import type { CurrencyISO } from "../generated/prisma/enums.js";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   typescript: true,
 });
+
+export async function refundOrder(
+  paymentIntentId: string,
+  amount: number,
+  currency: CurrencyISO
+): Promise<Stripe.Response<Stripe.Refund> | void> {
+  try {
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      amount: amount,
+      reason: "requested_by_customer",
+      currency,
+    });
+
+    return refund;
+  } catch (error) {
+    console.log(chalk.red(getTimestamp(), "Refund failed:", error));
+    await notifyAdmin(
+      `Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`
+    );
+  }
+}
 
 
 export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void> {
@@ -269,5 +293,6 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
       },
         })
 }
+
 
 export default stripe;

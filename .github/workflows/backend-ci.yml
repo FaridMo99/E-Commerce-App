@@ -1,0 +1,96 @@
+name: Backend Continuous Integration
+
+on:
+  push:
+    branches: [main]
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  REDIS_URL: ${{ secrets.REDIS_URL }}
+  DEV_EMAIL_FALLBACK_IF_NO_ADMIN: ${{secrets.DEV_EMAIL_FALLBACK_IF_NO_ADMIN}}
+  BACKEND_URL: ${{secrets.BACKEND_URL}}
+  CLIENT_ORIGIN: ${{secrets.CLIENT_ORIGIN}}
+  PORT: ${{secrets.PORT}}
+  NODE_ENV: ${{secrets.NODE_ENV}}
+
+jobs:
+
+  audit-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Audit Dependencies
+        run: npm audit -w backend
+
+  build:
+    needs: audit-packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Build App
+        run: npm run build -w backend
+      
+  create-admin:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Create Admin
+        run: node ./backend/scripts/seed.js
+        env:
+          ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          ADMIN_COUNTRYCODE: ${{ secrets.ADMIN_COUNTRYCODE }}
+          ADMIN_CURRENCY: ${{ secrets.ADMIN_CURRENCY }}
+          BASE_CURRENCY: ${{ secrets.BASE_CURRENCY }}
+
+  tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run Tests
+        run: npm run test -w backend
+
+      - name: Run Lint
+        run: npm run lint -w backend 
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+  linting:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run linter
+        run: npm run lint

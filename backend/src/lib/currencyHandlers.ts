@@ -9,10 +9,19 @@ import { CurrencyISO } from "../generated/prisma/enums.js";
 import redis from "../services/redis.js";
 import type { NicePrice, OpenExchangeRateApiReturn } from "../types/types.js";
 import chalk from "chalk";
-import { calcAvgRating, getTimestamp } from "./utils.js";
+import { getTimestamp } from "./utils.js";
 import type { ProductWithSelectedFields } from "../config/prismaHelpers.js";
 import prisma from "../services/prisma.js";
-import { DEFAULT_NICE_PRICE } from "@monorepo/shared";
+import { DEFAULT_NICE_PRICE, type DailyRevenue } from "@monorepo/shared";
+
+export type ProductWithAvgRating = ProductWithSelectedFields & {
+  averageRating?: number;
+};
+
+type OrderSmall = {
+  total_amount: number;
+  ordered_at: Date;
+};
 
 //cronjob refreshes every 6 hours, exchange rate stored for 5 days, in case of exchange rate api issues
 export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
@@ -259,4 +268,48 @@ export async function getBaseCurrency():Promise<CurrencyISO> {
     throw err
   }
 
+}
+
+export function calcAvgRating(product: ProductWithAvgRating) {
+  const ratings = product.reviews?.map((r) => r.rating) ?? [];
+
+  product.averageRating =
+    ratings.length === 0
+      ? 0
+      : ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length;
+}
+
+export function getDailyRevenue(orders: OrderSmall[]): DailyRevenue[] {
+  if (orders.length === 0) return [];
+
+  const revenueMap: Record<string, number> = {};
+
+  // Aggregate revenue per day
+  for (const order of orders) {
+    const day = order.ordered_at.toISOString().slice(0, 10);
+    revenueMap[day] = (revenueMap[day] || 0) + order.total_amount;
+  }
+
+  // Find the date range
+  const dates = orders.map((o) => o.ordered_at.getTime());
+  const minDate = new Date(Math.min(...dates));
+  const maxDate = new Date(Math.max(...dates));
+
+  // Fill every day in the range
+  const dailyRevenue: DailyRevenue[] = [];
+  const current = new Date(minDate);
+
+  while (current <= maxDate) {
+    const dayStr = current.toISOString().slice(0, 10);
+    const amount = revenueMap[dayStr] || 0;
+
+    dailyRevenue.push({
+      day: dayStr,
+      revenue: formatPriceForClient(amount),
+    });
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dailyRevenue;
 }
