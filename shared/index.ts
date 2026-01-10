@@ -18,7 +18,7 @@ import {
   emailSchema,
   productIdSchema,
   productsMetaInfosQuerySchema
-} from "./schemas.js";
+} from "./schemas";
 
 import type {
   DailyRevenue,
@@ -39,7 +39,7 @@ import type {
   EmailSchema
 } from "./types.ts";
 
-import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES, DEFAULT_NICE_PRICE,STRIPE_ORDER_PRICE_LIMIT } from "./constants.js";
+import { IMAGE_MAX_SIZE, IMAGE_ALLOWED_TYPES, DEFAULT_NICE_PRICE,STRIPE_ORDER_PRICE_LIMIT } from "./constants";
 export {
   IMAGE_ALLOWED_TYPES,
   IMAGE_MAX_SIZE,

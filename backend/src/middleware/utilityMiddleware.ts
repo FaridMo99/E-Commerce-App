@@ -11,8 +11,9 @@ import {
   FALLBACK_COUNTRY_ISO_CODE,
   GBP_COUNTRIES,
 } from "../config/constants.js";
-import { lookup } from "../../app.js";
+import { lookup } from "../services/geo.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
+
 
 type MaxMindResponse = {
   continent_code: string;
@@ -78,7 +79,6 @@ export async function geoCurrencyMiddleware(
     const ip = (req.headers["x-forwarded-for"]?.toString().split(",")[0] ??
       req.ip)!;
     console.log(chalk.green(`${getTimestamp()} Client IP found: ${ip}`));
-    console.log(lookup.get("2.160.0.0"), "oipi");
 
     //redis lookup
     const cached = await redis.hGetAll(`geo:${ip}`);
@@ -127,7 +127,6 @@ export async function geoCurrencyMiddleware(
     next();
   }
 }
-
 
 
 export function transformProductFormData(

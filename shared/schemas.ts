@@ -1,5 +1,5 @@
 import z from "zod";
-import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants.js";
+import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants";
 
 const allowedCountries = ["US", "GB", "DE"]
 const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of US, GB, or DE" );

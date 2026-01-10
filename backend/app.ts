@@ -14,13 +14,6 @@ import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
 import cors from "cors";
 import { loggerMiddleware } from "./src/middleware/utilityMiddleware.js";
 import { getTimestamp } from "./src/lib/utils.js";
-import path from "path";
-import maxmind from "maxmind";
-
-//ip to country reader
-const dbPath = path.join(import.meta.dirname, "src" ,"data", "ip-to-country.mmdb");
-export const lookup = await maxmind.open(dbPath);
-
 
 export const app = express(); 
 
@@ -73,14 +66,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 //process crash handler
 process.on("uncaughtException", async (err: Error) => {
-  await disconnectAllServices("Uncaught Exception:", err);
+  await disconnectAllServices("Uncaught Exception:", server, err);
 });
 process.on("unhandledRejection", async (err: Error) => {
-  await disconnectAllServices("Unhandled Rejection:", err);
+  await disconnectAllServices("Unhandled Rejection:",server, err);
 });
 process.on("SIGINT", async () => {
-  await disconnectAllServices("SIGINT");
+  await disconnectAllServices("SIGINT", server);
 });
 process.on("SIGTERM", async () => {
-  await disconnectAllServices("SIGTERM");
+  await disconnectAllServices("SIGTERM", server);
 });

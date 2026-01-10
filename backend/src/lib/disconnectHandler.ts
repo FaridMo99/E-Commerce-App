@@ -1,13 +1,18 @@
 import chalk from "chalk";
-import { server } from "../../app.js";
 import prisma from "../services/prisma.js";
 import redis from "../services/redis.js";
 import { getTimestamp } from "./utils.js";
 import { notifyAdmin } from "../services/email.js";
 import { NODE_ENV } from "../config/env.js";
+import type {Server} from "http"
 
+//so it wont run multiple times
+let isShuttingDown:boolean
 
-export async function disconnectAllServices(reason: string, error?: Error) {
+export async function disconnectAllServices(reason: string, server: Server, error?: Error) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
   console.log(chalk.blue(`${getTimestamp()} Disconnecting all Services, Reason:${reason}, Error Message: ${error?.message}`));
 
   try {
