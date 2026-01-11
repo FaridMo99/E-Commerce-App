@@ -85,10 +85,3 @@ describe("ProductCard Component", () => {
     });
 
 });
-
-
-//test cases:
-//when new then new tag
-//when sold out sold out tag
-//when sale than sale tag
-//when image url than url if not than placeholder

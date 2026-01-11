@@ -10,7 +10,7 @@ type SubmitButtonProps = {
 
 function SubmitButton({isPending, text, disabled, styles = ""}:SubmitButtonProps) {
   return (
-    <Button className={styles} disabled={disabled} type="submit">
+    <Button data-testid="submitButton" className={styles} disabled={disabled} type="submit">
       {isPending ? <Loader2 className="animate-spin text-white" /> : text}
     </Button>
   );
