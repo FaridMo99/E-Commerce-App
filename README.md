@@ -36,8 +36,10 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **Lucide Icons**
 * **React Hook Form**
 * **TypeScript**
-* **server only**
 * **Zod**
+* **Vitest**
+* **Supertest**
+* * **Docker**
 
 ### Backend
 
@@ -81,13 +83,16 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **Redis**
 * **Prisma**
 * **Stripe**
-* **node-cron**
-* **multer**
-* **passport**
+* **Node-Cron**
+* **Multer**
+* **Passport**
+* **Vitest**
+* **Docker**
 
 ### General
 
 * **Architecture:** This Project was build as a Monorepo using npm workspaces
+* **Dpcker** Containerized Application through Docker
 * **Shared Packages:** The Projects share end-to-end TypeScript types, Zod Schemas and constants
 * **CI/CD** Automated Tests, Linting, Package Vulnerability Auditing aswell as Build Step through Github Actions for both, the Front- and Backend
 

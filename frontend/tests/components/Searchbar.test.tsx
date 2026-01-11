@@ -1,15 +1,13 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import Searchbar from "../../components/main/header/Searchbar";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-// 1. Mock Next.js Router
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-// 2. Mock TanStack Query
 vi.mock("@tanstack/react-query", () => ({
   useQuery: vi.fn(),
 }));
@@ -20,13 +18,11 @@ describe("Searchbar Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
   });
 
     it("updates the input value on change", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (useQuery as any).mockReturnValue({ data: [] });
+      (useQuery as Mock).mockReturnValue({ data: [] });
       render(<Searchbar />);
 
       const input = screen.getByPlaceholderText("Search...");
@@ -36,8 +32,7 @@ describe("Searchbar Component", () => {
     });
 
     it("shows the Searchlist only when focused and input value", async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (useQuery as any).mockReturnValue({
+      (useQuery as Mock).mockReturnValue({
         data: [{ id: "1", name: "iPhone" }],
       });
 
@@ -55,8 +50,7 @@ describe("Searchbar Component", () => {
     });
 
     it("navigates to the products page on submit", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (useQuery as any).mockReturnValue({ data: [{ id: "1" }] });
+      (useQuery as Mock).mockReturnValue({ data: [{ id: "1" }] });
       render(<Searchbar />);
 
       const input = screen.getByPlaceholderText("Search...");
@@ -70,8 +64,7 @@ describe("Searchbar Component", () => {
     });
 
     it("disables the search button when no result", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (useQuery as any).mockReturnValue({ data: [] });
+      (useQuery as Mock).mockReturnValue({ data: [] });
       render(<Searchbar />);
 
       const button = screen.getByRole("button", { name: /search users/i });

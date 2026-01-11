@@ -52,11 +52,14 @@ export const loginSchema = emailSchema.extend({
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   birthdate: z
-    .preprocess(
-      (val) => (typeof val === "string" ? new Date(val) : undefined),
-      z.date().optional()
-    )
-    .refine((val) => !val || !isNaN(val.getTime()), {
+    .preprocess((val) => {
+      if (!val || val === "") return undefined;
+      return typeof val === "string" ? new Date(val) : val;
+    }, z.date().optional()) 
+    .refine((val) => {
+      if (val === undefined) return true;
+      return !isNaN(val.getTime());
+    }, {
       message: "Birthdate must be a valid date",
     }),
 });

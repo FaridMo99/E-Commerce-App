@@ -7,7 +7,7 @@
     "dev": "tsx watch app.ts",
     "build": "npx prisma generate --schema ./src/prisma/schema.prisma && tsc",
     "start": "node dist/app.js",
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage"
   },

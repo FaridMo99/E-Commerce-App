@@ -20,6 +20,7 @@ import { LoginForm } from "@/components/forms/login-form";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
 import { SignupForm } from "@/components/forms/signup-form";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,12 +60,20 @@ vi.mock("@marsidev/react-turnstile", () => ({
   }),
 }));
 
+const mockRouter: AppRouterInstance = {
+  push: mockPush,
+  replace: vi.fn(),
+  refresh: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  prefetch: vi.fn(),
+};
+
 describe("Login Integration Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter);
     useAuth.getState().clearState();
     queryClient.clear();
   });
@@ -111,8 +120,7 @@ describe("Signup Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter);
     useAuth.getState().clearState();
     queryClient.clear();
   });
@@ -127,8 +135,7 @@ describe("Signup Tests", () => {
 
   it("should successfully sign up a new user and redirect", async () => {
     const user = userEvent.setup();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter);
 
     renderSignup();
 
