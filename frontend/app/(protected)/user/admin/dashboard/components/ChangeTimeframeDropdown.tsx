@@ -83,7 +83,7 @@ export default function ChangeTimeframeDropdown() {
 
   return (
     <Select value={selected} onValueChange={handleChange}>
-      <SelectTrigger className="w-[150px] self-end bg-backgroundBright">
+      <SelectTrigger className="w-37.5 self-end bg-backgroundBright">
         <SelectValue placeholder="Select timeframe" />
       </SelectTrigger>
       <SelectContent className="bg-backgroundBright">

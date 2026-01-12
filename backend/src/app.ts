@@ -1,21 +1,25 @@
+import "../src/config/constants.js";
+import "../src/config/env.js";
+import "../src/services/redis.js";
+import "../src/services/prisma.js";
 import express, {
   type NextFunction,
   type Request,
   type Response,
 } from "express";
 import chalk from "chalk";
-import { disconnectAllServices } from "./src/lib/disconnectHandler.js";
+import { disconnectAllServices } from "./lib/disconnectHandler.js";
 import cookieParser from "cookie-parser";
-import apiRouter from "./src/routes/apiRouter.js";
-import passport from "./src/services/passport.js";
-import { CLIENT_ORIGIN, NODE_ENV, PORT } from "./src/config/env.js";
-import "./src/services/cronJobs.js";
-import webhookRouter from "./src/routes/webhooks/webhookRouter.js";
+import apiRouter from "./routes/apiRouter.js";
+import passport from "./services/passport.js";
+import { CLIENT_ORIGIN, NODE_ENV, PORT } from "./config/env.js";
+import "./services/cronJobs.js";
+import webhookRouter from "./routes/webhooks/webhookRouter.js";
 import cors from "cors";
-import { loggerMiddleware } from "./src/middleware/utilityMiddleware.js";
-import { getTimestamp } from "./src/lib/utils.js";
+import { loggerMiddleware } from "./middleware/utilityMiddleware.js";
+import { getTimestamp } from "./lib/utils.js";
 
-export const app = express(); 
+export const app = express();
 
 //proxy support middleware to access ip
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
@@ -48,16 +52,14 @@ app.use(passport.initialize());
 app.use("/api", apiRouter);
 app.use("/webhooks", webhookRouter);
 
-
 export const server = app.listen(PORT, async () => {
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
 });
 
 //global error middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-
   if (NODE_ENV === "dev") {
-      console.log(chalk.magenta(err.stack));
+    console.log(chalk.magenta(err.stack));
   }
 
   console.log(chalk.red(`${getTimestamp()} Global error: ${err}`));
@@ -69,11 +71,15 @@ process.on("uncaughtException", async (err: Error) => {
   await disconnectAllServices("Uncaught Exception:", server, err);
 });
 process.on("unhandledRejection", async (err: Error) => {
-  await disconnectAllServices("Unhandled Rejection:",server, err);
+  await disconnectAllServices("Unhandled Rejection:", server, err);
 });
 process.on("SIGINT", async () => {
   await disconnectAllServices("SIGINT", server);
 });
 process.on("SIGTERM", async () => {
   await disconnectAllServices("SIGTERM", server);
+});
+
+process.on("exit", (code) => {
+  console.log(chalk.red(getTimestamp(), `Process exited with code: ${code}`));
 });

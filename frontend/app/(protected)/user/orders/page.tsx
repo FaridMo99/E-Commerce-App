@@ -1,9 +1,7 @@
 import UserOrderTable from "./components/UserOrderTable";
 
 function Page() {
-  return (
-      <UserOrderTable />
-  );
+  return <UserOrderTable />;
 }
 
 export default Page;

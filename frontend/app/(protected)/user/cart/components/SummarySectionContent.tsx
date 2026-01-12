@@ -1,6 +1,12 @@
-import { Cart } from '@/types/types';
+import { Cart } from "@/types/types";
 
-function SummarySectionContent({totalItems, cart}:{totalItems:number,cart:Cart}) {
+function SummarySectionContent({
+  totalItems,
+  cart,
+}: {
+  totalItems: number;
+  cart: Cart;
+}) {
   return (
     <div className="w-full h-2/3 flex flex-col justify-evenly items-start ">
       <p className="self-center text-center text-white md:text-lg font-semibold">
@@ -20,4 +26,4 @@ function SummarySectionContent({totalItems, cart}:{totalItems:number,cart:Cart})
   );
 }
 
-export default SummarySectionContent
+export default SummarySectionContent;

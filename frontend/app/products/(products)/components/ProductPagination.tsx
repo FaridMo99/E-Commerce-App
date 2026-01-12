@@ -20,9 +20,11 @@ function ProductPagination() {
 
   const currentPage = Number(searchParams.get("page")) || 1;
 
+  const cachedData = queryClient.getQueryData<ProductMetaInfos>([
+    "get metadata for product",
+    searchParams.toString(),
+  ]);
 
-  const cachedData = queryClient.getQueryData<ProductMetaInfos>(["get metadata for product", searchParams.toString()]);
-  
   const totalProducts = cachedData?.totalItems || 0;
 
   const totalPages = Math.ceil(totalProducts / 10);
@@ -86,7 +88,7 @@ function ProductPagination() {
                 {page}
               </PaginationLink>
             </PaginationItem>
-          )
+          ),
         )}
 
         <PaginationItem>

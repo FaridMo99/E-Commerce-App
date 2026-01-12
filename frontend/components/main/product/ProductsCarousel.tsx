@@ -12,7 +12,6 @@ type ProductsCarouselProps = {
 };
 
 function ProductsCarousel({ title, products }: ProductsCarouselProps) {
-
   return (
     <SectionWrapper styles="m-8" header={title}>
       <BaseSlider>

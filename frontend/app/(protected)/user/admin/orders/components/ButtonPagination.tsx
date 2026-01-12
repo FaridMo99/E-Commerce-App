@@ -1,6 +1,9 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
-import { OrdersQuerySchema, TimeframeQuerySchema } from "@monorepo/shared";
+import {
+  OrdersQuerySchema,
+  TimeframeQuerySchema,
+} from "@monorepo/shared";
 import { SetStateAction } from "react";
 
 type ButtonPaginationProps = {
@@ -48,4 +51,4 @@ function ButtonPagination({
   );
 }
 
-export default ButtonPagination
+export default ButtonPagination;

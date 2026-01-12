@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { cancelOrder } from "@/lib/queries/client/ordersQueries";
@@ -18,7 +18,6 @@ function Screen({ cancelOrderId }: { cancelOrderId: string }) {
   useEffect(() => {
     mutate();
   }, [mutate]);
-
 
   return (
     <div className="w-full h-full flex justify-center items-center">

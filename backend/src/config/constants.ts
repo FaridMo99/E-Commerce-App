@@ -43,6 +43,6 @@ export const GBP_COUNTRIES = ["GB"];
 export const FALLBACK_COUNTRY_ISO_CODE = "US";
 export const FALLBACK_COUNTRY_CURRENCY_ISO = "USD";
 
-export const SUPPORTED_CURRENCIES: CurrencyISO[] = ["USD", "GBP", "EUR"]
+export const SUPPORTED_CURRENCIES: CurrencyISO[] = ["USD", "GBP", "EUR"];
 
 export const ORDERS_EXPIRATION_TIME = 30 * 60 * 1000; // 30 minutes

@@ -13,12 +13,11 @@ type AuthZustandSetterProps = {
 function AuthZustandSetter({ accessToken, user }: AuthZustandSetterProps) {
   const setState = useAuth((s) => s.setState);
   const intervalSet = useRef(false);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     if (accessToken && user) setState(accessToken, user);
   }, [accessToken, user, setState]);
-
 
   useEffect(() => {
     if (!accessToken || intervalSet.current) return;
@@ -31,7 +30,7 @@ function AuthZustandSetter({ accessToken, user }: AuthZustandSetterProps) {
         if (res?.accessToken && res.user) {
           setState(res.accessToken, res.user);
         } else {
-          router.push("/")
+          router.push("/");
         }
       } catch (err) {
         console.error("Token refresh failed", err);
@@ -41,7 +40,7 @@ function AuthZustandSetter({ accessToken, user }: AuthZustandSetterProps) {
 
     const interval = setInterval(refreshToken, 14 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [accessToken, setState,router]);
+  }, [accessToken, setState, router]);
 
   return null;
 }

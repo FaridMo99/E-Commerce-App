@@ -1,9 +1,8 @@
-import Price from '@/components/main/product/Price';
-import RatingPreview from '@/components/main/product/Rating';
-import { ProductViewProps } from './ProductView';
+import Price from "@/components/main/product/Price";
+import RatingPreview from "@/components/main/product/Rating";
+import { ProductViewProps } from "./ProductView";
 
-
-function ProductViewInfo({product}:ProductViewProps) {
+function ProductViewInfo({ product }: ProductViewProps) {
   return (
     <div className="h-full flex flex-col justify-around items-end w-1/3">
       <RatingPreview
@@ -21,4 +20,4 @@ function ProductViewInfo({product}:ProductViewProps) {
   );
 }
 
-export default ProductViewInfo
+export default ProductViewInfo;

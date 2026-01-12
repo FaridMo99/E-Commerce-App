@@ -20,7 +20,10 @@ import { updateProductByProductId } from "@/lib/queries/client/adminQueries";
 import useAuth from "@/stores/authStore";
 import { AdminProduct } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateProductSchema, UpdateProductSchema } from "@monorepo/shared";
+import {
+  updateProductSchema,
+  type UpdateProductSchema,
+} from "@monorepo/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pen } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -82,7 +85,7 @@ export function EditProduct({ product }: { product: AdminProduct }) {
           <Pen />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-backgroundBright text-white">
+      <DialogContent className="sm:max-w-106.25 bg-backgroundBright text-white">
         <form onSubmit={handleSubmit(submitHandler)}>
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>

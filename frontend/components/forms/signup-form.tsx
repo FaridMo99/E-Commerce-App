@@ -22,7 +22,7 @@ import { clientSignupSchema } from "@/schemas/schemas";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { SignupSchema } from "@monorepo/shared";
+import type { SignupSchema } from "@monorepo/shared";
 import OAuthButtonSection from "./OAuthButtonSection";
 import SubmitButton from "./SubmitButton";
 
@@ -48,7 +48,7 @@ export function SignupForm({
     },
     onSuccess: () => {
       toast.success(
-        "Signup successful. Check your E-Mails and follow the link"
+        "Signup successful. Check your E-Mails and follow the link",
       );
       router.push("/");
     },
@@ -66,7 +66,7 @@ export function SignupForm({
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   async function submitHandler(
-    credentials: z.infer<typeof clientSignupSchema>
+    credentials: z.infer<typeof clientSignupSchema>,
   ) {
     try {
       // Execute Turnstile captcha

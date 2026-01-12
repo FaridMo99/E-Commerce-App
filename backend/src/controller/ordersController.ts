@@ -18,14 +18,14 @@ import { releaseCartItems } from "../lib/controllerUtils.js";
 export async function getOrders(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { from, to } = req.timeframe!;
   const { limit, sortBy, page, sortOrder } = req.query;
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching orders from ${from} to ${to}`)
+      chalk.yellow(`${getTimestamp()} Fetching orders from ${from} to ${to}`),
     );
 
     const take = limit ? Number(limit) : 10;
@@ -44,7 +44,7 @@ export async function getOrders(
 
     const allowedFields = ["ordered_at", "total_amount", "status"];
     const field = allowedFields.includes(String(sortBy))
-      ? (sortBy)
+      ? sortBy
       : "ordered_at";
     const order: "asc" | "desc" = sortOrder === "desc" ? "desc" : "asc";
 
@@ -59,12 +59,13 @@ export async function getOrders(
       take,
       orderBy: { [String(field)]: order },
       select: {
-        ...orderSelect
-      }
+        ...orderSelect,
+      },
     });
 
     orders.forEach(
-      (order) => (order.total_amount = formatPriceForClient(order.total_amount))
+      (order) =>
+        (order.total_amount = formatPriceForClient(order.total_amount)),
     );
 
     console.log(chalk.green(`${getTimestamp()} Orders fetched successfully`));
@@ -78,16 +79,16 @@ export async function getOrders(
 export async function makeOrder(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const currency = req.currency!
+  const currency = req.currency!;
 
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Starting order process for user ${userId}`
-      )
+        `${getTimestamp()} Starting order process for user ${userId}`,
+      ),
     );
 
     //fetch cart
@@ -98,14 +99,14 @@ export async function makeOrder(
 
     if (!shoppingCart) {
       console.log(
-        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`)
+        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`),
       );
       return res.status(404).json({ message: "Shopping Cart not found" });
     }
 
     if (shoppingCart.items.length === 0) {
       console.log(
-        chalk.red(`${getTimestamp()} Shopping cart empty for user ${userId}`)
+        chalk.red(`${getTimestamp()} Shopping cart empty for user ${userId}`),
       );
       return res.status(400).json({ message: "No Items in Cart" });
     }
@@ -119,8 +120,8 @@ export async function makeOrder(
         cartUpdated = true;
         console.log(
           chalk.yellow(
-            `${getTimestamp()} Adjusting cart item for product ${product.id}. Requested: ${item.quantity}, Available: ${product.stock_quantity}`
-          )
+            `${getTimestamp()} Adjusting cart item for product ${product.id}. Requested: ${item.quantity}, Available: ${product.stock_quantity}`,
+          ),
         );
         return {
           ...item,
@@ -130,34 +131,46 @@ export async function makeOrder(
       return item;
     });
 
-
     if (cartUpdated) {
-    
-    await prisma.$transaction(
-      updatedItems.map((item) =>
-        prisma.cartItem.update({
-          where: {
-            cartId_productId: {
-              cartId: shoppingCart.id,
-              productId: item.product.id,
+      await prisma.$transaction(
+        updatedItems.map((item) =>
+          prisma.cartItem.update({
+            where: {
+              cartId_productId: {
+                cartId: shoppingCart.id,
+                productId: item.product.id,
+              },
             },
-          },
-          data: { quantity: item.quantity },
-        })
-      )
-    );
+            data: { quantity: item.quantity },
+          }),
+        ),
+      );
 
-    return res.status(400).json({ message: "Some items in your cart were updated due to insufficient stock. Please review and try again." });
-    
-  }
-
+      return res
+        .status(400)
+        .json({
+          message:
+            "Some items in your cart were updated due to insufficient stock. Please review and try again.",
+        });
+    }
 
     //transform prices to customers currency in cents, add totals for each product and whole cart in cents
-    await Promise.all(shoppingCart.items.map((item) => transformAndFormatProductPriceInCents(item.product,item.product.currency,currency)));
+    await Promise.all(
+      shoppingCart.items.map((item) =>
+        transformAndFormatProductPriceInCents(
+          item.product,
+          item.product.currency,
+          currency,
+        ),
+      ),
+    );
 
     const cartWithTotals = calculateCartTotalsInCents(shoppingCart);
 
-    if (cartWithTotals.total && cartWithTotals.total > 99999999) return res.status(400).json({message:"Your Order cant exceed 999999,99"})
+    if (cartWithTotals.total && cartWithTotals.total > 99999999)
+      return res
+        .status(400)
+        .json({ message: "Your Order cant exceed 999999,99" });
 
     let order;
     let finalItems = cartWithTotals.items;
@@ -183,30 +196,30 @@ export async function makeOrder(
                 id: true,
                 category: {
                   select: {
-                    name:true
-                  }
-                }
+                    name: true,
+                  },
+                },
               },
             });
 
             if (updatedProduct.stock_quantity < 0) {
               throw new Error(
-                `Insufficient stock for product ${updatedProduct.name} (ID: ${updatedProduct.id})`
+                `Insufficient stock for product ${updatedProduct.name} (ID: ${updatedProduct.id})`,
               );
             }
 
             if (updatedProduct.stock_quantity === 0) {
               categoriesToInvalidate.add(updatedProduct.category.name);
             }
-          })
+          }),
         );
 
         //clear cache if products are sold out
         if (categoriesToInvalidate.size > 0) {
           await Promise.all(
             Array.from(categoriesToInvalidate).map((cat) =>
-              clearAllProductCaches(cat)
-            )
+              clearAllProductCaches(cat),
+            ),
           );
         }
 
@@ -238,15 +251,14 @@ export async function makeOrder(
         });
       });
     } catch (transactionError) {
-
       if (
         transactionError instanceof Error &&
         transactionError.message.includes("Insufficient stock")
       ) {
         console.log(
           chalk.red(
-            `${getTimestamp()} Transaction failed due to: ${transactionError.message}`
-          )
+            `${getTimestamp()} Transaction failed due to: ${transactionError.message}`,
+          ),
         );
         return res.status(400).json({
           message: transactionError.message + ". Please try again.",
@@ -264,7 +276,7 @@ export async function makeOrder(
             currency: currency.toLowerCase(),
             product_data: {
               name: item.product.name,
-              images:item.product.imageUrls
+              images: item.product.imageUrls,
             },
             //stripe price in cents
             unit_amount: productPrice,
@@ -274,7 +286,7 @@ export async function makeOrder(
       });
 
     //create stripe checkout session
-      //pass locale
+    //pass locale
     try {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -297,7 +309,7 @@ export async function makeOrder(
               stripePaymentIntentId:
                 typeof session.payment_intent === "string"
                   ? session.payment_intent
-                  : session.payment_intent?.id!
+                  : session.payment_intent?.id!,
             },
           },
         },
@@ -305,24 +317,22 @@ export async function makeOrder(
 
       console.log(
         chalk.green(
-          `${getTimestamp()} Order ${order.id} created and Stripe session initiated for user ${userId}`
-        )
+          `${getTimestamp()} Order ${order.id} created and Stripe session initiated for user ${userId}`,
+        ),
       );
       //session id for redirect
       return res.status(200).json({ redirectUrl: session.url });
-
     } catch (err) {
-      console.log(chalk.red(getTimestamp(), "stripe error", err))
-      await releaseCartItems(order.id)
-      next(err)
+      console.log(chalk.red(getTimestamp(), "stripe error", err));
+      await releaseCartItems(order.id);
+      next(err);
     }
-
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to create order for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -330,16 +340,16 @@ export async function makeOrder(
 
 // Cancel order
 export async function cancelOrder(
-  req: Request,
+  req: Request<{ orderId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const orderId = req.params.orderId;
 
   if (!orderId) {
     console.log(
-      chalk.red(`${getTimestamp()} No orderId provided by user ${userId}`)
+      chalk.red(`${getTimestamp()} No orderId provided by user ${userId}`),
     );
     return res.status(400).json({ message: "No order id provided" });
   }
@@ -347,8 +357,8 @@ export async function cancelOrder(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Cancelling order ${orderId} for user ${userId}`
-      )
+        `${getTimestamp()} Cancelling order ${orderId} for user ${userId}`,
+      ),
     );
 
     const order = await prisma.order.findUnique({
@@ -360,32 +370,40 @@ export async function cancelOrder(
     if (!order) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Order ${orderId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Order ${orderId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.status !== "PENDING") return res.status(400).json({message:`Cant cancel this order since its already ${order.status}`})
-    
-    await Promise.all([releaseCartItems(orderId), prisma.order.update({
-      where: {
-        id: order.id
-      },
-      data: {
-        status: "CANCELLED",
-        payment: {
-          update: {
-            status:"CANCELLED"
-          }
-        }
-      }
-    })])
+    if (order.status !== "PENDING")
+      return res
+        .status(400)
+        .json({
+          message: `Cant cancel this order since its already ${order.status}`,
+        });
+
+    await Promise.all([
+      releaseCartItems(orderId),
+      prisma.order.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          status: "CANCELLED",
+          payment: {
+            update: {
+              status: "CANCELLED",
+            },
+          },
+        },
+      }),
+    ]);
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Order ${orderId} cancelled successfully for user ${userId}`
-      )
+        `${getTimestamp()} Order ${orderId} cancelled successfully for user ${userId}`,
+      ),
     );
 
     return res.status(200).json({ message: "Order cancelled" });
@@ -393,8 +411,8 @@ export async function cancelOrder(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to cancel order ${orderId} for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }

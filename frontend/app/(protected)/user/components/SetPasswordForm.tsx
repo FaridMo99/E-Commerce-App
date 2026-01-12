@@ -49,7 +49,7 @@ function SetPasswordForm() {
   }
 
   return (
-    <Card className="sm:max-w-[425px] mx-auto p-6 bg-backgroundBright text-white">
+    <Card className="sm:max-w-106.25 mx-auto p-6 bg-backgroundBright text-white">
       <form onSubmit={handleSubmit(submitHandler)}>
         <CardHeader className="p-0">
           <CardTitle>Set a Password</CardTitle>

@@ -1,5 +1,11 @@
-import { IMAGE_ALLOWED_TYPES, IMAGE_MAX_SIZE, passwordSchema, productSchema, signupSchema } from "@monorepo/shared";
-import z from "zod";
+import {
+  IMAGE_ALLOWED_TYPES,
+  IMAGE_MAX_SIZE,
+  passwordSchema,
+  productSchema,
+  signupSchema,
+} from "@monorepo/shared";
+import z from "zod"
 
 export const clientSignupSchema = signupSchema
   .extend({
@@ -20,10 +26,10 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export const changePasswordAuthenticatedSchema = changePasswordSchema.safeExtend({
-  oldPassword: passwordSchema,
-});
-
+export const changePasswordAuthenticatedSchema =
+  changePasswordSchema.safeExtend({
+    oldPassword: passwordSchema,
+  });
 
 export const clientImageSchema = z
   .instanceof(File, {
@@ -39,15 +45,16 @@ export const clientImageSchema = z
     message: "File name is too long",
   });
 
-  export const clientImagesObjectSchema = z.object({
-    images: z
-      .array(clientImageSchema, "Atleast 1, max. 5 Images")
-      .min(1, "At least one image is required")
-      .max(5, "Maximum 5 images allowed"),
-  });
+export const clientImagesObjectSchema = z.object({
+  images: z
+    .array(clientImageSchema, "Atleast 1, max. 5 Images")
+    .min(1, "At least one image is required")
+    .max(5, "Maximum 5 images allowed"),
+});
 
-export type ClientProductSchema = z.infer<typeof fullClientProductSchema>
 
-  export const fullClientProductSchema = productSchema.extend({
-    ...clientImagesObjectSchema.shape,
-  });
+export const fullClientProductSchema = productSchema.extend({
+  ...clientImagesObjectSchema.shape,
+});
+
+export type ClientProductSchema = z.infer<typeof fullClientProductSchema>;

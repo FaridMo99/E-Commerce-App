@@ -1,21 +1,20 @@
-"use client"
-import { ArrowDown, ArrowUp } from 'lucide-react';
-import { useState } from 'react'
-import { userRoutes } from '../UserDropdown';
-import useAuth from '@/stores/authStore';
-import Link from 'next/link';
-import { SheetClose } from '@/components/ui/sheet';
+"use client";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useState } from "react";
+import { userRoutes } from "../UserDropdown";
+import useAuth from "@/stores/authStore";
+import Link from "next/link";
+import { SheetClose } from "@/components/ui/sheet";
 
 function MobileUserDopdown() {
-    const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false)
+  const [dropdownIsOpen, setDropdownIsOpen] = useState<boolean>(false);
 
-      const role = useAuth((state) => state.user?.role);
+  const role = useAuth((state) => state.user?.role);
 
-      const filteredRoutes = userRoutes.filter((route) =>
-        route.text === "Admin" ? role === "ADMIN" : true
-      );
-    
-    
+  const filteredRoutes = userRoutes.filter((route) =>
+    route.text === "Admin" ? role === "ADMIN" : true,
+  );
+
   return (
     <div className="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-800">
       <div
@@ -40,4 +39,4 @@ function MobileUserDopdown() {
   );
 }
 
-export default MobileUserDopdown
+export default MobileUserDopdown;

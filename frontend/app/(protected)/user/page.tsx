@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import { getUser } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
@@ -7,16 +7,21 @@ import UserTabs from "./components/UserTabs";
 import SectionWrapper from "@/components/main/SectionWrapper";
 
 function Page() {
-  const accessToken = useAuth(state => state.accessToken)
-  
-  const { data: user, isLoading, isError, error } = useQuery({
+  const accessToken = useAuth((state) => state.accessToken);
+
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["get user"],
-    queryFn:()=>getUser(accessToken!)
-  })
+    queryFn: () => getUser(accessToken!),
+  });
 
-  if (isLoading) return <LoadingPage />
+  if (isLoading) return <LoadingPage />;
 
-  if (isError || !user) throw error
+  if (isError || !user) throw error;
 
   return (
     <SectionWrapper as="main" header={`Welcome ${user?.name}`} styles="px-8">

@@ -1,7 +1,7 @@
-import { CartItem } from '@/types/types';
-import Item from './Item';
+import { CartItem } from "@/types/types";
+import Item from "./Item";
 
-function ItemSection({items}:{items:CartItem[]}) {
+function ItemSection({ items }: { items: CartItem[] }) {
   return (
     <section className="w-2/3 h-full overflow-scroll flex items-center flex-col">
       {items.map((item) => (
@@ -16,4 +16,4 @@ function ItemSection({items}:{items:CartItem[]}) {
   );
 }
 
-export default ItemSection
+export default ItemSection;

@@ -14,12 +14,13 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 
-
 export async function handleCloudUpload(
-  file: Express.Multer.File
+  file: Express.Multer.File,
 ): Promise<UploadApiResponse> {
   try {
-    console.log(chalk.yellow(`${getTimestamp()} Uploading file: ${file.originalname}...`));
+    console.log(
+      chalk.yellow(`${getTimestamp()} Uploading file: ${file.originalname}...`),
+    );
 
     const imageStringBase64 = `data:${
       file.mimetype
@@ -31,12 +32,17 @@ export async function handleCloudUpload(
 
     console.log(
       chalk.green(
-        `${getTimestamp()} File uploaded successfully: ${file.originalname}`
-      )
+        `${getTimestamp()} File uploaded successfully: ${file.originalname}`,
+      ),
     );
     return res;
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Failed to upload file: ${file.originalname}`),err);
+    console.log(
+      chalk.red(
+        `${getTimestamp()} Failed to upload file: ${file.originalname}`,
+      ),
+      err,
+    );
     throw err;
   }
 }
@@ -45,14 +51,21 @@ export async function deleteCloudAsset(url: string): Promise<void> {
   try {
     const publicId = url.split("/").slice(-1)[0]?.split(".")[0]!;
     console.log(
-      chalk.yellow(`${getTimestamp()} Deleting cloud asset: ${publicId}...`)
+      chalk.yellow(`${getTimestamp()} Deleting cloud asset: ${publicId}...`),
     );
 
     await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
 
-    console.log(chalk.green(`${getTimestamp()} Cloud asset deleted successfully: ${publicId}`));
+    console.log(
+      chalk.green(
+        `${getTimestamp()} Cloud asset deleted successfully: ${publicId}`,
+      ),
+    );
   } catch (err) {
-    console.log(chalk.red(`${getTimestamp()} Failed to delete cloud asset: ${url}`),err);
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to delete cloud asset: ${url}`),
+      err,
+    );
     throw err;
   }
 }

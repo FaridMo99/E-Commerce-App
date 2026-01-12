@@ -4,9 +4,8 @@ import "server-only";
 //thats the email link redirect for changing your password as a user when forgetting, the token is in searchparams
 //!!!! its not the route for when logged in changing the password
 async function page(props: PageProps<"/change-password">) {
-  const {token} = await props.searchParams;
+  const { token } = await props.searchParams;
   if (!token || typeof token !== "string") throw new Error();
-
 
   return <ChangePasswordForm token={token} />;
 }

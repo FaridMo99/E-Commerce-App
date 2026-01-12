@@ -13,9 +13,8 @@ import useAuth from "@/stores/authStore";
 import LogoutButton from "./LogoutButton";
 import MobileUserDopdown from "./MobileUserDopdown";
 
-
 export function MobileNavigation() {
-  const accessToken = useAuth(state=>state.accessToken)
+  const accessToken = useAuth((state) => state.accessToken);
   const links = [
     { href: "/", label: "Home" },
     { href: "/products", label: "Products" },
@@ -50,7 +49,7 @@ export function MobileNavigation() {
                 asChild
                 className="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
               >
-                <MobileUserDopdown/>
+                <MobileUserDopdown />
               </SheetClose>
               <SheetClose
                 asChild

@@ -1,4 +1,4 @@
-import { ReviewsQuerySchema } from "@monorepo/shared";
+import type { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { API_BASE_URL } from "@/config/constants";
 import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
@@ -14,7 +14,8 @@ export async function getAllReviews(
       params.set("page", String(queryParam.page));
     if (queryParam.limit !== undefined)
       params.set("limit", String(queryParam.limit));
-    if (queryParam.created_at) params.set("created_at", String(queryParam.created_at));
+    if (queryParam.created_at)
+      params.set("created_at", String(queryParam.created_at));
     if (queryParam.rating) params.set("rating", String(queryParam.rating));
     if (queryParam.sortBy !== undefined)
       params.set("sortBy", String(queryParam.sortBy));
@@ -31,15 +32,15 @@ export async function getAllReviews(
 }
 
 export async function getReviewByReviewId(id: string): Promise<ProductReview> {
-    
-
   const res = await fetch(`${API_BASE_URL}/reviews/${id}`);
 
   return await handleResponse(res);
 }
 
-export async function deleteReviewByReviewId(id: string, accessToken: AccessToken): Promise<void> {
-
+export async function deleteReviewByReviewId(
+  id: string,
+  accessToken: AccessToken,
+): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
@@ -54,9 +55,9 @@ export async function deleteReviewByReviewId(id: string, accessToken: AccessToke
 export async function setReviewPrivateOrPublic(
   reviewId: string,
   newState: boolean,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AuthProductReview> {
-  console.log(newState)
+  console.log(newState);
   const res = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
     credentials: "include",
     method: "PATCH",

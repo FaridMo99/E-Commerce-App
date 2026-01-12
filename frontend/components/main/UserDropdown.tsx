@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-
 export const userRoutes: Route[] = [
   { link: "/user/admin/dashboard", text: "Admin", icon: UserStar },
   { link: "/user", text: "My Profile", icon: User },
@@ -29,15 +28,13 @@ export const userRoutes: Route[] = [
   { link: "/user/reviews", text: "Product Reviews", icon: MessageSquare },
 ];
 
-
 export default function UserDropdown() {
-  const role = useAuth(state => state.user?.role)
-  
+  const role = useAuth((state) => state.user?.role);
 
-    const filteredRoutes = userRoutes.filter((route) =>
-      route.text === "Admin" ? role === "ADMIN" : true
-    );
-  
+  const filteredRoutes = userRoutes.filter((route) =>
+    route.text === "Admin" ? role === "ADMIN" : true,
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

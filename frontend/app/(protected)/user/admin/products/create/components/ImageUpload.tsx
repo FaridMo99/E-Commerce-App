@@ -11,9 +11,12 @@ import { useEffect, useMemo, useState } from "react";
 type ImageUploadProps = {
   value?: File[];
   onChange?: (files: File[]) => void;
-}
+};
 
-export default function ImageUpload({value = [], onChange  }: ImageUploadProps) {
+export default function ImageUpload({
+  value = [],
+  onChange,
+}: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>(value);
 
   const filePreviews = useMemo(() => {
@@ -36,7 +39,7 @@ export default function ImageUpload({value = [], onChange  }: ImageUploadProps) 
     setFiles([]);
     onChange?.([]);
   };
-  
+
   return (
     <Dropzone
       className="relative"

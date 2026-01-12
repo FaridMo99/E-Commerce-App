@@ -18,7 +18,8 @@ function FirstSection({ product }: FirstSectionProps) {
 
   const { mutate } = useMutation({
     mutationKey: ["add product to recently viewed", product],
-    mutationFn: () => addProductToRecentlyViewedProductsByProductId(product.id, accessToken!),
+    mutationFn: () =>
+      addProductToRecentlyViewedProductsByProductId(product.id, accessToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get recently viewed products"],
@@ -30,20 +31,18 @@ function FirstSection({ product }: FirstSectionProps) {
   });
 
   useEffect(() => {
-    
     if (accessToken && product.id) {
       mutate();
     }
-
   }, [mutate, accessToken, product.id]);
 
   return (
     <section className="flex justify-between w-full h-[85vh] pt-12">
       <div className="flex">
-      <ImagePart imageUrls={product.imageUrls}/>
-      <DescriptionPart product={product}/>
+        <ImagePart imageUrls={product.imageUrls} />
+        <DescriptionPart product={product} />
       </div>
-    <AddingPart product={product}/>
+      <AddingPart product={product} />
     </section>
   );
 }

@@ -95,7 +95,7 @@ describe("Currency Transformation Tests", () => {
       vi.mocked(redis.get).mockResolvedValue(
         JSON.stringify({
           rates: { EUR: 1.0, USD: 1.1 },
-        })
+        }),
       );
 
       const product = mockProduct();
@@ -128,7 +128,7 @@ describe("Currency Transformation Tests", () => {
       vi.mocked(redis.get).mockResolvedValue(
         JSON.stringify({
           rates: { EUR: 1, USD: 1.5 },
-        })
+        }),
       );
 
       const result = await convertAndFormatPriceInCents(1000, "EUR", "USD");

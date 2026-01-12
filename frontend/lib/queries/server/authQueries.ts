@@ -1,5 +1,9 @@
 "use server";
-import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
+import type {
+  EmailSchema,
+  LoginSchema,
+  SignupSchema,
+} from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { AccessToken, AuthResponse } from "@/types/types";
 import { API_BASE_URL } from "@/config/constants";
@@ -9,7 +13,7 @@ import { stripContentLengthHeader } from "../../helpers";
 
 export async function login(
   credentials: LoginSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<AuthResponse> {
   const additionalHeaders = await getAllHeaders();
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -27,7 +31,7 @@ export async function login(
 
 export async function signup(
   credentials: SignupSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
@@ -66,7 +70,7 @@ export async function logout(accessToken: AccessToken): Promise<void> {
 }
 
 export async function verifyAfterEmailLink(
-  token: string
+  token: string,
 ): Promise<AuthResponse> {
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
@@ -85,7 +89,7 @@ export async function verifyAfterEmailLink(
 
 export async function sendNewVerificationLink(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
@@ -104,7 +108,7 @@ export async function sendNewVerificationLink(
 
 export async function forgotPasswordSendEmail(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);
@@ -136,7 +140,7 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
 
 export async function changePasswordUnauthenticated(
   token: string,
-  password: string
+  password: string,
 ): Promise<AuthResponse> {
   const additionalHeaders = await getAllHeaders();
   const safeHeader = stripContentLengthHeader(additionalHeaders);

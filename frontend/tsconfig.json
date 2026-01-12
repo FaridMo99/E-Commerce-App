@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@monorepo/shared": ["../shared/index.ts"]
     }
   },
   "include": [

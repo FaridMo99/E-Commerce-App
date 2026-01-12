@@ -1,13 +1,16 @@
-import { Field } from '../ui/field';
-import OAuthButton from './OAuthButton';
-import Google from '../icons/Google';
+import { Field } from "../ui/field";
+import OAuthButton from "./OAuthButton";
+import Google from "../icons/Google";
 
 type OAuthButtonSectionProps = {
-    isSubmitting: boolean;
-    isPending:boolean
-}
+  isSubmitting: boolean;
+  isPending: boolean;
+};
 
-function OAuthButtonSection({isSubmitting, isPending}:OAuthButtonSectionProps) {
+function OAuthButtonSection({
+  isSubmitting,
+  isPending,
+}: OAuthButtonSectionProps) {
   return (
     <Field className="flex justify-center items-center">
       <OAuthButton
@@ -21,4 +24,4 @@ function OAuthButtonSection({isSubmitting, isPending}:OAuthButtonSectionProps) {
   );
 }
 
-export default OAuthButtonSection
+export default OAuthButtonSection;

@@ -15,7 +15,7 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 export async function refundOrder(
   paymentIntentId: string,
   amount: number,
-  currency: CurrencyISO
+  currency: CurrencyISO,
 ): Promise<Stripe.Response<Stripe.Refund> | void> {
   try {
     const refund = await stripe.refunds.create({
@@ -29,35 +29,33 @@ export async function refundOrder(
   } catch (error) {
     console.log(chalk.red(getTimestamp(), "Refund failed:", error));
     await notifyAdmin(
-      `Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`
+      `Failed to create a refund for PaymentIntentId ${paymentIntentId}. Please go to your Stripe Dashboard and handle that case manually`,
     );
   }
 }
 
-
-export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void> {
-
+export async function stripeEventHandler(
+  stripeEvent: Stripe.Event,
+): Promise<void> {
   const eventHappened = await prisma.stripeEvent.findUnique({
     where: {
-      id:stripeEvent.id
-    }
-  })
+      id: stripeEvent.id,
+    },
+  });
 
   if (eventHappened) {
-    console.log(chalk.green(getTimestamp(), "Already Processed Webhook"))
-    return
+    console.log(chalk.green(getTimestamp(), "Already Processed Webhook"));
+    return;
   }
-
 
   switch (stripeEvent.type) {
     //only for card payment not for async payments like klarna etc.
     case "checkout.session.completed": {
-
       const session = stripeEvent.data.object;
       const shippingAddress = session.customer_details?.address
         ? `${session.customer_details.address.line1 ?? ""}, ${session.customer_details.address.line2 ?? ""}, ${session.customer_details.address.city ?? ""}, ${session.customer_details.address.state ?? ""}, ${session.customer_details.address.postal_code ?? ""}, ${session.customer_details.address.country ?? ""}`
-          .replace(/(, )+/g, ", ")
-          .trim()
+            .replace(/(, )+/g, ", ")
+            .trim()
         : null;
       const orderId = session.metadata?.orderId!;
       const userId = session.metadata?.userId!;
@@ -69,8 +67,8 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
 
       console.log(
         chalk.yellow(
-          `${getTimestamp()} Processing checkout.session.completed, orderId: ${orderId}, userId: ${userId}`
-        )
+          `${getTimestamp()} Processing checkout.session.completed, orderId: ${orderId}, userId: ${userId}`,
+        ),
       );
 
       if (!paymentIntentId) {
@@ -100,8 +98,8 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
       if (expiredOrder) {
         console.log(
           chalk.yellow(
-            `${getTimestamp()} Order expired, checking if stock amount enough to proceed with order...`
-          )
+            `${getTimestamp()} Order expired, checking if stock amount enough to proceed with order...`,
+          ),
         );
 
         let stockIsEnoughToProceed: boolean = true;
@@ -125,32 +123,32 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
                     decrement: item.quantity,
                   },
                 },
-              })
-            )
+              }),
+            ),
           );
         }
 
         if (!stockIsEnoughToProceed) {
           console.log(
             chalk.yellow(
-              `${getTimestamp()} Stock Amount not enough to proceed, notifying user and admin...`
-            )
+              `${getTimestamp()} Stock Amount not enough to proceed, notifying user and admin...`,
+            ),
           );
 
           const [refund] = await Promise.all([
             refundOrder(
               paymentIntentId,
               expiredOrder.total_amount,
-              expiredOrder.currency
+              expiredOrder.currency,
             ),
             notifyAdmin(
-              `Failed to Proceed with Customer ${expiredOrder.user.name} Order with the Order ID: ${expiredOrder.id}. Amount will be automatically refunded.`
+              `Failed to Proceed with Customer ${expiredOrder.user.name} Order with the Order ID: ${expiredOrder.id}. Amount will be automatically refunded.`,
             ),
             notifyUser(
               expiredOrder.user.id,
               "Failed Order",
-              `Failed to Proceed with your Order:${expiredOrder.id} due to insufficient stock amount. Your Money will be refunded in your original Payment method.`
-            )
+              `Failed to Proceed with your Order:${expiredOrder.id} due to insufficient stock amount. Your Money will be refunded in your original Payment method.`,
+            ),
           ]);
 
           if (!refund) {
@@ -158,23 +156,24 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
           }
 
           await prisma.order.update({
-              where: {
-                id: expiredOrder.id,
-              },
-              data: {
-                status: "REFUND_PENDING",
-                payment: {
-                  update: {
-                    status: "REFUNDING",
-                    stripeRefundId: typeof refund?.payment_intent === "string"
-                  ? refund.payment_intent
-                  : refund.id
-                  },
+            where: {
+              id: expiredOrder.id,
+            },
+            data: {
+              status: "REFUND_PENDING",
+              payment: {
+                update: {
+                  status: "REFUNDING",
+                  stripeRefundId:
+                    typeof refund?.payment_intent === "string"
+                      ? refund.payment_intent
+                      : refund.id,
                 },
               },
-            })
+            },
+          });
 
-          break
+          break;
         }
       }
 
@@ -190,27 +189,29 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
             shipping_address: shippingAddress,
             payment: {
               update: {
-                status:"COMPLETED"
-              }
-            }
+                status: "COMPLETED",
+              },
+            },
           },
           select: orderSelect,
-        })
+        }),
       ]);
 
       console.log(
         chalk.green(
-          `${getTimestamp()} Cart cleared and order updated: orderId ${orderId}`
-        )
+          `${getTimestamp()} Cart cleared and order updated: orderId ${orderId}`,
+        ),
       );
 
       await sendOrderEmail(email, order);
-      break
+      break;
     }
-      
+
     case "checkout.session.expired": {
       console.log(
-        chalk.yellow(`${getTimestamp()} Processing checkout.session.expired...`)
+        chalk.yellow(
+          `${getTimestamp()} Processing checkout.session.expired...`,
+        ),
       );
 
       const session = stripeEvent.data.object;
@@ -220,79 +221,76 @@ export async function stripeEventHandler(stripeEvent: Stripe.Event):Promise<void
         releaseCartItems(orderId),
         prisma.order.update({
           where: {
-            id:orderId
+            id: orderId,
           },
           data: {
             status: "EXPIRED",
             payment: {
               update: {
-                status:"CANCELLED"
-              }
-            }
-          }
-        })])
+                status: "CANCELLED",
+              },
+            },
+          },
+        }),
+      ]);
 
       console.log(
         chalk.green(
-          `${getTimestamp()} Processed checkout.session.expired successfully`
-        )
+          `${getTimestamp()} Processed checkout.session.expired successfully`,
+        ),
       );
       break;
     }
-      
-    case "charge.refunded": {
 
+    case "charge.refunded": {
       const session = stripeEvent.data.object;
       const orderId = session.metadata?.orderId!;
 
       console.log(
-        chalk.yellow(
-          `${getTimestamp()} Processing charge.refunded...`
-        )
+        chalk.yellow(`${getTimestamp()} Processing charge.refunded...`),
       );
 
       await prisma.order.update({
         where: {
-          id:orderId
+          id: orderId,
         },
         data: {
           status: "REFUNDED",
           payment: {
             update: {
-              status:"REFUNDED"
-            }
-          }
-        }
-      })
-
+              status: "REFUNDED",
+            },
+          },
+        },
+      });
 
       console.log(
-        chalk.green(`${getTimestamp()} Processed charge.refunded successfully`)
+        chalk.green(`${getTimestamp()} Processed charge.refunded successfully`),
       );
-      
-      break
+
+      break;
     }
-      
-      
+
     default: {
       console.log(
         chalk.gray(
-          `${getTimestamp()} Unhandled Stripe event: ${stripeEvent.type}`
-        )
+          `${getTimestamp()} Unhandled Stripe event: ${stripeEvent.type}`,
+        ),
       );
       //only for mvp, for real app handle all the cases properly
-      await notifyAdmin(`Unknown Stripe event occured, please check your Stripe Dashboard for more information under the Event ID: ${stripeEvent.id}`)
+      await notifyAdmin(
+        `Unknown Stripe event occured, please check your Stripe Dashboard for more information under the Event ID: ${stripeEvent.id}`,
+      );
     }
   }
 
   //creates event in db to avoid multiple times doing the same action since stripe isnt idempotent (webhooks can fire multiple times)
-    await prisma.stripeEvent.create({
-      data: {
-        id: stripeEvent.id,
-        type: stripeEvent.type
-      },
-        })
+  await prisma.stripeEvent.create({
+    data: {
+      id: stripeEvent.id,
+      type: stripeEvent.type,
+    },
+  });
 }
-
 
 export default stripe;

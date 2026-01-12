@@ -1,13 +1,12 @@
-"use server"
+"use server";
 import { API_BASE_URL } from "@/config/constants";
 import { handleResponse } from "../utils";
 import { AccessToken } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
-
 //returns sessionid from stripe to then route to stripe checkout
 export async function makeOrder(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<{ redirectUrl: string }> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -26,20 +25,22 @@ export async function makeOrder(
   return await handleResponse(res);
 }
 
-export async function cancelOrder(orderId: string, accessToken: AccessToken): Promise<void> {
+export async function cancelOrder(
+  orderId: string,
+  accessToken: AccessToken,
+): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
   ]);
 
-
   const res = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
     credentials: "include",
     method: "POST",
     headers: {
-        ...csrfHeader,
-        Authorization: `Bearer ${accessToken}`,
-        ...additionalHeaders
+      ...csrfHeader,
+      Authorization: `Bearer ${accessToken}`,
+      ...additionalHeaders,
     },
   });
   return await handleResponse(res);

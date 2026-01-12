@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import prisma from "../services/prisma.js";
-import {redis} from "../services/redis.js";
+import { redis } from "../services/redis.js";
 import { CATEGORIES_REDIS_KEY } from "../config/constants.js";
 import chalk from "chalk";
 import { getTimestamp } from "../lib/utils.js";
@@ -10,11 +10,10 @@ import { getCategories } from "../lib/productQueries.js";
 export async function getAllProductCategories(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    
-    const categories = await getCategories()
+    const categories = await getCategories();
 
     return res.status(200).json(categories);
   } catch (err) {
@@ -26,33 +25,33 @@ export async function getAllProductCategories(
 export async function createCategory(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const category = req.body.category;
 
   if (!category) {
     console.log(
-      chalk.red(`${getTimestamp()} Category missing in request body`)
+      chalk.red(`${getTimestamp()} Category missing in request body`),
     );
     return res.status(400).json({ message: "Category missing" });
   }
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Creating category: ${category}`)
+      chalk.yellow(`${getTimestamp()} Creating category: ${category}`),
     );
 
     const exists = await prisma.category.findFirst({
       where: {
-        name: category
+        name: category,
       },
       select: {
-        ...categorySelect
-      }
+        ...categorySelect,
+      },
     });
     if (exists) {
       console.log(
-        chalk.red(`${getTimestamp()} Category already exists: ${category}`)
+        chalk.red(`${getTimestamp()} Category already exists: ${category}`),
       );
       return res.status(400).json({ message: "Category already exists" });
     }
@@ -67,16 +66,16 @@ export async function createCategory(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Error creating category: ${category}`),
-      err
+      err,
     );
     next(err);
   }
 }
 
 export async function deleteCategory(
-  req: Request,
+  req: Request<{ categoryId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.params.categoryId;
 
@@ -87,16 +86,21 @@ export async function deleteCategory(
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Deleting category with ID: ${id}`)
+      chalk.yellow(`${getTimestamp()} Deleting category with ID: ${id}`),
     );
 
     const productCount = await prisma.product.count({
       where: {
-        category_id:id
+        category_id: id,
       },
     });
 
-    if(productCount > 0) return res.status(400).json({message:`You still have ${productCount} products in that category, please move them first`})
+    if (productCount > 0)
+      return res
+        .status(400)
+        .json({
+          message: `You still have ${productCount} products in that category, please move them first`,
+        });
 
     await Promise.all([
       prisma.category.delete({ where: { id } }),
@@ -104,13 +108,13 @@ export async function deleteCategory(
     ]);
 
     console.log(
-      chalk.green(`${getTimestamp()} Category deleted with ID: ${id}`)
+      chalk.green(`${getTimestamp()} Category deleted with ID: ${id}`),
     );
     return res.status(200).json({ message: "Delete successful" });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Error deleting category with ID: ${id}`),
-      err
+      err,
     );
     next(err);
   }

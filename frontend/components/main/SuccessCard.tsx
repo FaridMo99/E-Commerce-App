@@ -7,20 +7,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type SuccessCardProps = {
-  action: "Signup" | "Login",
-  accessToken: AccessToken,
-  user:User
-}
+  action: "Signup" | "Login";
+  accessToken: AccessToken;
+  user: User;
+};
 
-function SuccessCard({ action, accessToken, user }:SuccessCardProps) {
+function SuccessCard({ action, accessToken, user }: SuccessCardProps) {
   const [counter, setCounter] = useState<number>(3);
   const router = useRouter();
-  const setState = useAuth(state => state.setState)
+  const setState = useAuth((state) => state.setState);
 
-    useEffect(() => {
-      setState(accessToken, user);
-    }, [accessToken, user, setState]);
-  
+  useEffect(() => {
+    setState(accessToken, user);
+  }, [accessToken, user, setState]);
+
   useEffect(() => {
     if (counter === 0) {
       router.push("/");

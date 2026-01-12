@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ReviewCardProps } from "./ReviewCard"
+import { ReviewCardProps } from "./ReviewCard";
 
-function ReviewCardContent({review}:ReviewCardProps) {
+function ReviewCardContent({ review }: ReviewCardProps) {
   return (
     <div>
       <h3 className="font-bold text-xl truncate">{review.title}</h3>
@@ -18,4 +18,4 @@ function ReviewCardContent({review}:ReviewCardProps) {
   );
 }
 
-export default ReviewCardContent
+export default ReviewCardContent;

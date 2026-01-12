@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch app.ts",
-    "build": "npx prisma generate --schema ./src/prisma/schema.prisma && tsc",
+    "copy-assets": "copyfiles -u 1 src/**/*.mmdb dist/",
+    "dev": "npx prisma generate && tsx watch ./src/app.ts",
+    "build": "npx prisma generate --schema ./prisma/schema.prisma && tsc && npm run copy-assets",
     "start": "node dist/app.js",
     "test": "vitest run",
     "test:watch": "vitest --watch",
@@ -36,8 +37,7 @@
     "rate-limit-redis": "^4.2.3",
     "redis": "^5.9.0",
     "stripe": "^19.3.0",
-    "uuid": "^13.0.0",
-    "zod": "^4.1.12"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -52,6 +52,7 @@
     "@types/redis": "^4.0.10",
     "@types/supertest": "^6.0.3",
     "chalk": "^4.1.2",
+    "copyfiles": "^2.4.1",
     "prisma": "^6.18.0",
     "supertest": "^7.2.2",
     "tsx": "^4.20.6",

@@ -1,6 +1,5 @@
 import SectionWrapper from "@/components/main/SectionWrapper";
-import ProductsTable from "./components/ProductsTable"
-
+import ProductsTable from "./components/ProductsTable";
 
 function page() {
   return (
@@ -10,4 +9,4 @@ function page() {
   );
 }
 
-export default page
+export default page;

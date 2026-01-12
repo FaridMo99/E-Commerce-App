@@ -3,9 +3,8 @@ import { Product } from "@/types/types";
 
 type ImageCarouselProps = {
   imageUrls: Product["imageUrls"];
-  setImageToShow:React.Dispatch<string>
+  setImageToShow: React.Dispatch<string>;
 };
-
 
 function ImageCarousel({ imageUrls, setImageToShow }: ImageCarouselProps) {
   return (
@@ -13,11 +12,11 @@ function ImageCarousel({ imageUrls, setImageToShow }: ImageCarouselProps) {
       {imageUrls.map((url) => (
         <img
           key={url}
-            onClick={() => setImageToShow(url)}
-            alt="product image"
-            className="h-30 w-1/6"
-            src={url}
-          />
+          onClick={() => setImageToShow(url)}
+          alt="product image"
+          className="h-30 w-1/6"
+          src={url}
+        />
       ))}
     </section>
   );

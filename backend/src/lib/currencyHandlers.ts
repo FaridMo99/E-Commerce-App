@@ -6,7 +6,7 @@ import {
 } from "../config/constants.js";
 import { OPEN_EXCHANGE_RATE_APP_KEY } from "../config/env.js";
 import { CurrencyISO } from "../generated/prisma/enums.js";
-import {redis} from "../services/redis.js";
+import { redis } from "../services/redis.js";
 import type { NicePrice, OpenExchangeRateApiReturn } from "../types/types.js";
 import chalk from "chalk";
 import { getTimestamp } from "./utils.js";
@@ -30,11 +30,13 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
     if (redisReturn) return JSON.parse(redisReturn);
 
     const res = await fetch(
-      `https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`
+      `https://openexchangerates.org/api/latest.json?app_id=${OPEN_EXCHANGE_RATE_APP_KEY}`,
     );
     if (!res.ok) {
       console.log(
-        chalk.red(`${getTimestamp()} Exchange rate API failed (${res.status})}`)
+        chalk.red(
+          `${getTimestamp()} Exchange rate API failed (${res.status})}`,
+        ),
       );
       throw new Error(`Exchange rate API failed (${res.status})}`);
     }
@@ -46,7 +48,7 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
     return data;
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp()} Exchange Rate Api failure: ` + err)
+      chalk.red(`${getTimestamp()} Exchange Rate Api failure: ` + err),
     );
     throw err;
   }
@@ -54,7 +56,7 @@ export async function getExchangeRates(): Promise<OpenExchangeRateApiReturn> {
 
 export function roundPriceUpInCents(
   amount: number,
-  ending: NicePrice = DEFAULT_NICE_PRICE
+  ending: NicePrice = DEFAULT_NICE_PRICE,
 ): number {
   //round up
   const cents = Math.ceil(amount);
@@ -77,7 +79,7 @@ export function formatPriceForClient(cents: number): number {
 
 //mutates on spot
 export function formatPricesForClientAndCalculateAverageRating(
-  product: ProductWithSelectedFields
+  product: ProductWithSelectedFields,
 ): void {
   product.price = formatPriceForClient(product.price);
 
@@ -91,7 +93,7 @@ export function formatPricesForClientAndCalculateAverageRating(
 export async function transformAndFormatProductPrice(
   product: ProductWithSelectedFields,
   baseCurrency: CurrencyISO,
-  wantedCurrency: CurrencyISO
+  wantedCurrency: CurrencyISO,
 ): Promise<void> {
   try {
     // 1. If currency is the same → nothing to exchange
@@ -103,7 +105,7 @@ export async function transformAndFormatProductPrice(
 
       if (!baseRate || !wantedRate) {
         throw new Error(
-          `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`
+          `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`,
         );
       }
 
@@ -144,7 +146,7 @@ export async function transformAndFormatProductPrice(
     calcAvgRating(product);
   } catch (err) {
     console.log(
-      chalk.red(getTimestamp(), "transformAndFormatProductPrice error:", err)
+      chalk.red(getTimestamp(), "transformAndFormatProductPrice error:", err),
     );
   }
 }
@@ -152,7 +154,7 @@ export async function transformAndFormatProductPrice(
 export async function transformAndFormatProductPriceInCents(
   product: ProductWithSelectedFields,
   baseCurrency: CurrencyISO,
-  wantedCurrency: CurrencyISO
+  wantedCurrency: CurrencyISO,
 ): Promise<void> {
   try {
     // 1. If currency is the same → nothing to exchange
@@ -164,7 +166,7 @@ export async function transformAndFormatProductPriceInCents(
 
       if (!baseRate || !wantedRate) {
         throw new Error(
-          `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`
+          `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`,
         );
       }
 
@@ -193,10 +195,13 @@ export async function transformAndFormatProductPriceInCents(
     if (product.sale_price) {
       product.sale_price = roundPriceUpInCents(product.sale_price);
     }
-
   } catch (err) {
     console.log(
-      chalk.red(getTimestamp(), "transformAndFormatProductPriceInCents error:", err)
+      chalk.red(
+        getTimestamp(),
+        "transformAndFormatProductPriceInCents error:",
+        err,
+      ),
     );
   }
 }
@@ -206,7 +211,7 @@ export async function convertAndFormatPriceInCents(
   amountInCents: number,
   baseCurrency: CurrencyISO,
   wantedCurrency: CurrencyISO,
-  format = true
+  format = true,
 ): Promise<number> {
   if (!amountInCents) return 0;
 
@@ -219,7 +224,7 @@ export async function convertAndFormatPriceInCents(
 
     if (!baseRate || !wantedRate) {
       throw new Error(
-        `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`
+        `Missing currency rate for ${baseCurrency} or ${wantedCurrency}`,
       );
     }
 
@@ -236,38 +241,35 @@ export async function convertAndFormatPriceInCents(
 
   // 3. Format for client
   if (format) {
-   return formatPriceForClient(amountInCents); 
+    return formatPriceForClient(amountInCents);
   }
 
-  return amountInCents
+  return amountInCents;
 }
 
-export async function getBaseCurrency():Promise<CurrencyISO> {
+export async function getBaseCurrency(): Promise<CurrencyISO> {
   try {
-    const cached = await redis.get(BASE_CURRENCY_KEY) as CurrencyISO
-  if (cached) {
-    return cached
-  }
-
-  const currency = await prisma.settings.findFirst({
-    where: {
-      key:BASE_CURRENCY_KEY
+    const cached = (await redis.get(BASE_CURRENCY_KEY)) as CurrencyISO;
+    if (cached) {
+      return cached;
     }
-  })
-    
+
+    const currency = await prisma.settings.findFirst({
+      where: {
+        key: BASE_CURRENCY_KEY,
+      },
+    });
+
     if (currency) {
-      redis.setEx(BASE_CURRENCY_KEY, TWELVE_HOURS_IN_SECONDS, currency.value)
-      return currency.value as CurrencyISO
+      redis.setEx(BASE_CURRENCY_KEY, TWELVE_HOURS_IN_SECONDS, currency.value);
+      return currency.value as CurrencyISO;
     }
 
-    throw new Error("Base Currency Not Found")
-
-
+    throw new Error("Base Currency Not Found");
   } catch (err) {
-    console.log(chalk.red("Base currency fetch error:", err))
-    throw err
+    console.log(chalk.red("Base currency fetch error:", err));
+    throw err;
   }
-
 }
 
 export function calcAvgRating(product: ProductWithAvgRating) {

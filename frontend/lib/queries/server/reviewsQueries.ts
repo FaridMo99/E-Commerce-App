@@ -1,5 +1,5 @@
-"use server"
-import { ReviewsQuerySchema } from "@monorepo/shared";
+"use server";
+import type { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { API_BASE_URL } from "@/config/constants";
 import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
@@ -8,7 +8,7 @@ import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 export async function getAllReviews(
   queryParam?: ReviewsQuerySchema,
 ): Promise<ProductReview[]> {
-  const additionalHeaders = await getAllHeaders()
+  const additionalHeaders = await getAllHeaders();
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -16,7 +16,8 @@ export async function getAllReviews(
       params.set("page", String(queryParam.page));
     if (queryParam.limit !== undefined)
       params.set("limit", String(queryParam.limit));
-    if (queryParam.created_at) params.set("created_at", String(queryParam.created_at));
+    if (queryParam.created_at)
+      params.set("created_at", String(queryParam.created_at));
     if (queryParam.rating) params.set("rating", String(queryParam.rating));
     if (queryParam.sortBy !== undefined)
       params.set("sortBy", String(queryParam.sortBy));
@@ -29,14 +30,14 @@ export async function getAllReviews(
   const res = await fetch(url, {
     credentials: "include",
     headers: {
-      ...additionalHeaders
-    }
+      ...additionalHeaders,
+    },
   });
   return await handleResponse(res);
 }
 
 export async function getReviewByReviewId(id: string): Promise<ProductReview> {
-    const additionalHeaders = await getAllHeaders();
+  const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
     headers: {
@@ -47,12 +48,14 @@ export async function getReviewByReviewId(id: string): Promise<ProductReview> {
   return await handleResponse(res);
 }
 
-export async function deleteReviewByReviewId(id: string, accessToken: AccessToken): Promise<void> {
+export async function deleteReviewByReviewId(
+  id: string,
+  accessToken: AccessToken,
+): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
   ]);
-
 
   const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
     method: "DELETE",
@@ -69,13 +72,12 @@ export async function deleteReviewByReviewId(id: string, accessToken: AccessToke
 export async function setReviewPrivateOrPublic(
   id: string,
   newState: boolean,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AuthProductReview> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
     getCsrfHeader(),
   ]);
-
 
   const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
     credentials: "include",
@@ -84,7 +86,7 @@ export async function setReviewPrivateOrPublic(
       "Content-Type": "application/json",
       ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
-      ...additionalHeaders
+      ...additionalHeaders,
     },
     body: JSON.stringify({ is_public: newState }),
   });

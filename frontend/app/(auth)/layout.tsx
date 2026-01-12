@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import "server-only"
+import "server-only";
 
 export const metadata: Metadata = {
   title: "Authentication",
@@ -14,4 +14,4 @@ async function layout(props: LayoutProps<"/">) {
   );
 }
 
-export default layout
+export default layout;

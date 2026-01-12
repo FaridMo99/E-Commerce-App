@@ -1,8 +1,6 @@
 "use client";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import {
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { OrderStatus } from "@/types/types";
 import OrdersFilterDropdownWrapper from "./OrdersFilterDropdownWrapper";
 

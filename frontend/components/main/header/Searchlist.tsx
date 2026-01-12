@@ -6,7 +6,6 @@ import Price from "../product/Price";
 import RatingPreview from "../product/Rating";
 
 function Searchlist({ products }: { products: Product[] }) {
-
   return (
     <div className="bg-white overflow-x-clip overflow-y-scroll w-full max-h-100 rounded-b-lg border border-foreground text-black absolute top-full left-0">
       {products?.map((product) => (

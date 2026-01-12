@@ -6,18 +6,17 @@ import { getTimestamp, getTotalRevenue } from "../lib/utils.js";
 import { BASE_CURRENCY_KEY } from "../config/constants.js";
 import { getDailyRevenue } from "../lib/currencyHandlers.js";
 
-
 export async function getRevenue(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { from, to } = req.timeframe!;
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching revenue from ${from} to ${to}...`
-      )
+        `${getTimestamp()} Fetching revenue from ${from} to ${to}...`,
+      ),
     );
 
     const [orders, currency] = await Promise.all([
@@ -48,7 +47,12 @@ export async function getRevenue(
 
     return res
       .status(200)
-      .json({ dailyRevenue, totalRevenue, currency: currency?.value, totalOrders});
+      .json({
+        dailyRevenue,
+        totalRevenue,
+        currency: currency?.value,
+        totalOrders,
+      });
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch revenue:`, err));
     next(err);
@@ -58,17 +62,16 @@ export async function getRevenue(
 export async function getTopsellers(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { from, to } = req.timeframe!;
   const { sortOrder = "desc", limit = 10 } = req.query;
 
-  
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching top sellers from ${from} to ${to}, sortOrder: ${sortOrder}, limit: ${limit}`
-      )
+        `${getTimestamp()} Fetching top sellers from ${from} to ${to}, sortOrder: ${sortOrder}, limit: ${limit}`,
+      ),
     );
 
     const validatedOrder = sortOrderSchema.safeParse(sortOrder);
@@ -103,8 +106,8 @@ export async function getTopsellers(
       },
       select: {
         name: true,
-        imageUrls: true, 
-        id:true
+        imageUrls: true,
+        id: true,
       },
     });
 
@@ -112,22 +115,21 @@ export async function getTopsellers(
     const response = topSellers.map((s) => {
       const product = productsWithInfo.find((p) => p.id === s.product_id)!;
 
-
-    return {
-      product,
-      totalSold: s._sum.quantity ?? 0,
-    };
+      return {
+        product,
+        totalSold: s._sum.quantity ?? 0,
+      };
     });
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Top sellers fetched successfully. Count: ${response.length}`
-      )
+        `${getTimestamp()} Top sellers fetched successfully. Count: ${response.length}`,
+      ),
     );
     res.json(response);
   } catch (error) {
     console.log(
-      chalk.red(`${getTimestamp()} Failed to fetch top sellers:`, error)
+      chalk.red(`${getTimestamp()} Failed to fetch top sellers:`, error),
     );
     next(error);
   }
@@ -136,27 +138,27 @@ export async function getTopsellers(
 export async function getNewUsers(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { from, to } = req.timeframe!;
 
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Counting new users from ${from} to ${to}...`
-      )
+        `${getTimestamp()} Counting new users from ${from} to ${to}...`,
+      ),
     );
 
     const userCount = await prisma.user.count({
       where: {
-        created_at: { ...(from && { gte: from }), lte: to }
-      }
+        created_at: { ...(from && { gte: from }), lte: to },
+      },
     });
 
     console.log(
-      chalk.green(`${getTimestamp()} New users count fetched: ${userCount}`)
+      chalk.green(`${getTimestamp()} New users count fetched: ${userCount}`),
     );
-    return res.status(200).json({count:userCount});
+    return res.status(200).json({ count: userCount });
   } catch (err) {
     console.log(chalk.red(`${getTimestamp()} Failed to fetch new users:`, err));
     next(err);

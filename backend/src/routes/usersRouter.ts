@@ -18,25 +18,34 @@ import {
   addProductToRecentlyViewedProductsByProductId,
   getSingleStripeOrderByUser,
 } from "../controller/usersController.js";
-import {
-  hasCsrfToken,
-} from "../middleware/authMiddleware.js";
+import { hasCsrfToken } from "../middleware/authMiddleware.js";
 import {
   validateBody,
   validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
-import { addCartItemSchema, itemQuantitySchema, ordersQuerySchema, productIdSchema, updateUserSchema } from "@monorepo/shared";
+import {
+  addCartItemSchema,
+  itemQuantitySchema,
+  ordersQuerySchema,
+  productIdSchema,
+  updateUserSchema,
+} from "@monorepo/shared";
 import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
 
 const usersRouter = Router();
 
 //user related routes
 usersRouter.get("/me", getUserByUserId);
-usersRouter.patch("/me",validateBody(updateUserSchema), hasCsrfToken, updateUserByUserId);
+usersRouter.patch(
+  "/me",
+  validateBody(updateUserSchema),
+  hasCsrfToken,
+  updateUserByUserId,
+);
 usersRouter.delete("/me", hasCsrfToken, deleteUserByUserId);
 
 //cart related routes
-usersRouter.get("/me/cart", geoCurrencyMiddleware,getUserCart);
+usersRouter.get("/me/cart", geoCurrencyMiddleware, getUserCart);
 usersRouter.delete("/me/cart", hasCsrfToken, emptyCart);
 
 //cart items related routes
@@ -64,13 +73,19 @@ usersRouter.patch(
 usersRouter.get("/me/reviews", getReviewsByUser);
 
 //orders related routes
-usersRouter.get("/me/orders", validateSearchQueries(ordersQuerySchema), getAllOrdersByUser);
+usersRouter.get(
+  "/me/orders",
+  validateSearchQueries(ordersQuerySchema),
+  getAllOrdersByUser,
+);
 usersRouter.get("/me/orders/:orderId", getSingleOrderByUser);
-usersRouter.get("/me/orders/stripe/:stripeSessionId", getSingleStripeOrderByUser);
-
+usersRouter.get(
+  "/me/orders/stripe/:stripeSessionId",
+  getSingleStripeOrderByUser,
+);
 
 //favorite articles routes
-usersRouter.get("/me/favorites",geoCurrencyMiddleware, getFavoriteItems);
+usersRouter.get("/me/favorites", geoCurrencyMiddleware, getFavoriteItems);
 usersRouter.post(
   "/me/favorites",
   hasCsrfToken,
@@ -94,7 +109,7 @@ usersRouter.get(
 usersRouter.post(
   "/me/recently-viewed-products",
   geoCurrencyMiddleware,
-  addProductToRecentlyViewedProductsByProductId
+  addProductToRecentlyViewedProductsByProductId,
 );
 
 export default usersRouter;

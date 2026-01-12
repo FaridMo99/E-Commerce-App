@@ -1,5 +1,5 @@
-import SectionWrapper from '@/components/main/SectionWrapper';
-import OrdersTable from './components/OrdersTable';
+import SectionWrapper from "@/components/main/SectionWrapper";
+import OrdersTable from "./components/OrdersTable";
 
 function page() {
   return (
@@ -9,4 +9,4 @@ function page() {
   );
 }
 
-export default page
+export default page;

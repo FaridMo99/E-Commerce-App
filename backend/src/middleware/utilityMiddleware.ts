@@ -1,5 +1,5 @@
 import RedisStore from "rate-limit-redis";
-import {redis} from "../services/redis.js";
+import { redis } from "../services/redis.js";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { NODE_ENV } from "../config/env.js";
 import type { NextFunction, Request, Response } from "express";
@@ -14,12 +14,11 @@ import {
 import { lookup } from "../services/geo.js";
 import type { CurrencyISO } from "../generated/prisma/enums.js";
 
-
 type MaxMindResponse = {
   continent_code: string;
   country_code: string;
   country_name: string;
-} | null
+} | null;
 
 export const authRateLimiter = rateLimit({
   store: new RedisStore({
@@ -29,7 +28,7 @@ export const authRateLimiter = rateLimit({
   max: 5,
   handler: (req, res) => {
     console.log(
-      `${getTimestamp()} Rate limit reached for: " + req.ip + " on " + req.url`
+      `${getTimestamp()} Rate limit reached for: " + req.ip + " on " + req.url`,
     );
     res.status(429).json({
       message:
@@ -44,12 +43,12 @@ export const authRateLimiter = rateLimit({
 export function loggerMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   console.log(
     chalk.blue(
-      `${getTimestamp()} Incoming request: ${req.method} ${req.originalUrl} from IP ${req.ip} to ${req.url}`
-    )
+      `${getTimestamp()} Incoming request: ${req.method} ${req.originalUrl} from IP ${req.ip} to ${req.url}`,
+    ),
   );
   next();
 }
@@ -58,18 +57,18 @@ export function loggerMiddleware(
 export async function geoCurrencyMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     //authed user check
     console.log(
-      chalk.yellow(`${getTimestamp()} Geolocation Middleware running...`)
+      chalk.yellow(`${getTimestamp()} Geolocation Middleware running...`),
     );
     if (req.user?.countryCode && req.user?.currency) {
       console.log(
         chalk.green(
-          `${getTimestamp()} Using authenticated user settings: ${req.user.countryCode}, ${req.user.currency}`
-        )
+          `${getTimestamp()} Using authenticated user settings: ${req.user.countryCode}, ${req.user.currency}`,
+        ),
       );
       req.countryCode = req.user.countryCode;
       req.currency = req.user.currency;
@@ -86,8 +85,8 @@ export async function geoCurrencyMiddleware(
     if (cached && cached.country && cached.currency) {
       console.log(
         chalk.green(
-          `${getTimestamp()} Cache hit for IP ${ip}: ${cached.country}, ${cached.currency}`
-        )
+          `${getTimestamp()} Cache hit for IP ${ip}: ${cached.country}, ${cached.currency}`,
+        ),
       );
       req.countryCode = cached.country;
       req.currency = cached.currency as CurrencyISO;
@@ -96,7 +95,7 @@ export async function geoCurrencyMiddleware(
     console.log(chalk.yellow(`${getTimestamp()} Cache miss for IP ${ip}`));
 
     //maxmind lookup
-    const geo = lookup.get(ip) as MaxMindResponse;//doesnt work differently
+    const geo = lookup.get(ip) as MaxMindResponse; //doesnt work differently
     const country = geo?.country_code ?? FALLBACK_COUNTRY_ISO_CODE;
     console.log(chalk.magenta(`${getTimestamp()} maxmind lookup: ${country}`));
 
@@ -111,7 +110,7 @@ export async function geoCurrencyMiddleware(
     await redis.expire(`geo:${ip}`, 60 * 60 * 2);
 
     console.log(
-      chalk.green(`${getTimestamp()} Stored geo info in Redis for IP ${ip}`)
+      chalk.green(`${getTimestamp()} Stored geo info in Redis for IP ${ip}`),
     );
 
     //attach to req
@@ -128,11 +127,10 @@ export async function geoCurrencyMiddleware(
   }
 }
 
-
 export function transformProductFormData(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const body = { ...req.body };
 
@@ -144,5 +142,5 @@ export function transformProductFormData(
   body.is_public = body.is_public === "true";
 
   req.body = body;
-  next(); 
+  next();
 }

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Manage your Profile, Orders and Setting.",
 };
 
-async function layout(props:LayoutProps<"/user">) {
+async function layout(props: LayoutProps<"/user">) {
   let res;
   let user: User | undefined;
   let accessToken: AccessToken | undefined;

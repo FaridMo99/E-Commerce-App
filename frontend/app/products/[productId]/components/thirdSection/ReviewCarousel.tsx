@@ -6,11 +6,10 @@ import Review from "./Review";
 import BaseSlider from "@/components/main/BaseSlider";
 
 type ReviewsCarouselProps = {
-  reviews:ProductReview[];
+  reviews: ProductReview[];
 };
 
 function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
-
   return (
     <BaseSlider>
       {reviews.map((review) => (

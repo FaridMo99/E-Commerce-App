@@ -26,7 +26,9 @@ function ImageWithPlaceholder({
   }
 
   return (
-    <CardContent className={`${width} ${height} relative overflow-hidden bg-white`}>
+    <CardContent
+      className={`${width} ${height} relative overflow-hidden bg-white`}
+    >
       <img
         src={firstImage}
         alt="product image"

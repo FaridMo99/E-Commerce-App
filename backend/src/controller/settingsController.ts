@@ -9,23 +9,23 @@ import { settingsSelect } from "../config/prismaHelpers.js";
 export async function getAllSettings(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching all settings...`));
     const settings = await prisma.settings.findMany({
       select: {
-        ...settingsSelect
-      }
+        ...settingsSelect,
+      },
     });
     console.log(
-      chalk.green(`${getTimestamp()} Fetched ${settings.length} settings`)
+      chalk.green(`${getTimestamp()} Fetched ${settings.length} settings`),
     );
     return res.status(200).json(settings);
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch all settings`),
-      err
+      err,
     );
     next(err);
   }
@@ -34,13 +34,13 @@ export async function getAllSettings(
 export async function deleteAllSettings(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Deleting all settings except base currency...`
-      )
+        `${getTimestamp()} Deleting all settings except base currency...`,
+      ),
     );
     await prisma.settings.deleteMany({
       where: {
@@ -58,34 +58,35 @@ export async function deleteAllSettings(
 export async function createSetting(
   req: Request<{}, {}, SettingsSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { key, value } = req.body;
   try {
     console.log(chalk.yellow(`${getTimestamp()} Creating setting: ${key}...`));
     const setting = await prisma.settings.create({
       data: {
-        key, value
+        key,
+        value,
       },
       select: {
-        ...settingsSelect
-      }
+        ...settingsSelect,
+      },
     });
     console.log(chalk.green(`${getTimestamp()} Setting created: ${key}`));
     return res.status(200).json(setting);
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to create setting: ${key}`),
-      err
+      err,
     );
     next(err);
   }
 }
 
 export async function getSettingBySettingId(
-  req: Request,
+  req: Request<{ settingId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const settingId = req.params.settingId;
   if (!settingId) {
@@ -94,7 +95,7 @@ export async function getSettingBySettingId(
   }
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching setting by ID: ${settingId}...`)
+      chalk.yellow(`${getTimestamp()} Fetching setting by ID: ${settingId}...`),
     );
 
     if (settingId === BASE_CURRENCY_KEY) {
@@ -107,9 +108,7 @@ export async function getSettingBySettingId(
         },
       });
       if (!baseCurrency) {
-        console.log(
-          chalk.red(`${getTimestamp()} Base Currency not set yet`)
-        );
+        console.log(chalk.red(`${getTimestamp()} Base Currency not set yet`));
         return res.status(404).json({ message: "Base Currency not set yet" });
       }
 
@@ -117,15 +116,15 @@ export async function getSettingBySettingId(
     }
     const setting = await prisma.settings.findUnique({
       where: {
-        id: settingId
+        id: settingId,
       },
       select: {
-        ...settingsSelect
-      }
+        ...settingsSelect,
+      },
     });
     if (!setting) {
       console.log(
-        chalk.red(`${getTimestamp()} Setting not found: ${settingId}`)
+        chalk.red(`${getTimestamp()} Setting not found: ${settingId}`),
       );
       return res.status(404).json({ message: "Setting not found" });
     }
@@ -135,16 +134,16 @@ export async function getSettingBySettingId(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch setting: ${settingId}`),
-      err
+      err,
     );
     next(err);
   }
 }
 
 export async function deleteSettingBySettingId(
-  req: Request,
+  req: Request<{ settingId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const settingId = req.params.settingId;
   if (!settingId) {
@@ -153,7 +152,7 @@ export async function deleteSettingBySettingId(
   }
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Deleting setting: ${settingId}...`)
+      chalk.yellow(`${getTimestamp()} Deleting setting: ${settingId}...`),
     );
     const setting = await prisma.settings.deleteMany({
       where: {
@@ -164,17 +163,17 @@ export async function deleteSettingBySettingId(
     if (!setting) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Setting not found for deletion: ${settingId}`
-        )
+          `${getTimestamp()} Setting not found for deletion: ${settingId}`,
+        ),
       );
       return res.status(404).json({ message: "Setting not found" });
     }
     console.log(chalk.green(`${getTimestamp()} Setting deleted: ${settingId}`));
-    return res.status(200).json({message:"Deleted Setting successfully"});
+    return res.status(200).json({ message: "Deleted Setting successfully" });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to delete setting: ${settingId}`),
-      err
+      err,
     );
     next(err);
   }
@@ -183,7 +182,7 @@ export async function deleteSettingBySettingId(
 export async function updateSettingBySettingId(
   req: Request<{ settingId?: string }, {}, SettingsSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const settingId = req.params.settingId;
   const { key, value } = req.body;
@@ -193,31 +192,32 @@ export async function updateSettingBySettingId(
   }
   if (key === BASE_CURRENCY_KEY) {
     console.log(
-      chalk.red(`${getTimestamp()} Attempted to change base currency key`)
+      chalk.red(`${getTimestamp()} Attempted to change base currency key`),
     );
     return res.status(400).json({ message: "Currency cant be changed" });
   }
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Updating setting: ${settingId}...`)
+      chalk.yellow(`${getTimestamp()} Updating setting: ${settingId}...`),
     );
     const setting = await prisma.settings.update({
       where: {
-        id: settingId, key
+        id: settingId,
+        key,
       },
       data: {
-        value
+        value,
       },
       select: {
-        ...settingsSelect
-      }
+        ...settingsSelect,
+      },
     });
     if (!setting) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Setting not found for update: ${settingId}`
-        )
+          `${getTimestamp()} Setting not found for update: ${settingId}`,
+        ),
       );
       return res.status(404).json({ message: "Setting not found" });
     }
@@ -226,7 +226,7 @@ export async function updateSettingBySettingId(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update setting: ${settingId}`),
-      err
+      err,
     );
     next(err);
   }

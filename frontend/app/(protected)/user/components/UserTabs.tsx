@@ -1,11 +1,11 @@
-"use client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UpdateAccountForm } from './UpdateAccountForm';
-import { AuthUser } from '@/types/types';
-import SetPasswordForm from './SetPasswordForm';
-import ChangePasswordForm from './ChangePasswordForm';
+"use client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UpdateAccountForm } from "./UpdateAccountForm";
+import { AuthUser } from "@/types/types";
+import SetPasswordForm from "./SetPasswordForm";
+import ChangePasswordForm from "./ChangePasswordForm";
 
-function UserTabs({user}:{user:AuthUser}) {
+function UserTabs({ user }: { user: AuthUser }) {
   return (
     <div className="mx-auto w-full md:w-1/2">
       <Tabs defaultValue="profile" className="w-full">
@@ -24,4 +24,4 @@ function UserTabs({user}:{user:AuthUser}) {
   );
 }
 
-export default UserTabs
+export default UserTabs;

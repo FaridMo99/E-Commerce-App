@@ -3,9 +3,8 @@ import { handleResponse } from "../utils";
 import { AccessToken } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
-
 export async function makeOrder(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<{ redirectUrl: string }> {
   const res = await fetch(`${API_BASE_URL}/orders`, {
     credentials: "include",
@@ -18,9 +17,10 @@ export async function makeOrder(
   return await handleResponse(res);
 }
 
-
-export async function cancelOrder(orderId: string, accessToken: AccessToken): Promise<void> {
-
+export async function cancelOrder(
+  orderId: string,
+  accessToken: AccessToken,
+): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
     credentials: "include",
     method: "POST",

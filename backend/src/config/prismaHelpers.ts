@@ -95,10 +95,10 @@ export const orderSelect = {
 } satisfies Prisma.OrderSelect;
 
 export const cartItemSelect = {
-      quantity: true,
-      id: true,
-      product: {
-        select: { ...productSelect },
+  quantity: true,
+  id: true,
+  product: {
+    select: { ...productSelect },
   },
 } satisfies Prisma.CartItemSelect;
 
@@ -109,7 +109,7 @@ export const cartSelect = {
       quantity: true,
       id: true,
       product: {
-        select: {...productSelect},
+        select: { ...productSelect },
       },
     },
   },

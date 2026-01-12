@@ -5,7 +5,15 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "build:shared": "npm run build -w shared",
+    "build:frontend": "npm run build -w frontend",
+    "build:backend": "npm run build -w backend",
+    "prisma:dev": "cd ./backend && npx prisma dev --detach",
+    "redis:start": "redis-server --daemonize yes",
+    "dev:backend": "npm run build:shared && npm run redis:start && npm run prisma:dev && npm run dev -w backend",
+    "dev:frontend": "npm run build:shared && npm run dev -w frontend",
+    "dev:all": "npm run build:shared && concurrently -k -n \"BACKEND,FRONTEND\" -c \"magenta,cyan\" \"npm run dev -w backend\" \"npm run dev -w frontend\""
   },
   "keywords": [],
   "author": "",
@@ -18,7 +26,11 @@
   ],
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.16",
+    "concurrently": "^9.2.1",
     "prettier": "^3.6.2",
     "vitest": "^4.0.16"
+  },
+  "dependencies": {
+    "zod": "^4.3.5"
   }
 }

@@ -1,13 +1,16 @@
 import z from "zod";
-import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants";
+import { DEFAULT_NICE_PRICE, STRIPE_ORDER_PRICE_LIMIT } from "./constants.js";
 
-const allowedCountries = ["US", "GB", "DE"]
-const countryCodeSchema = z.enum(allowedCountries, "Country code must be one of US, GB, or DE" );
+const allowedCountries = ["US", "GB", "DE"];
+const countryCodeSchema = z.enum(
+  allowedCountries,
+  "Country code must be one of US, GB, or DE"
+);
 /** --- Price Schema --- */
 //here as float, in controller turn to cents
 export const priceSchema = z
   .preprocess(
-    (val:string | number) => {
+    (val: string | number) => {
       if (typeof val === "string") val = val.replace(",", ".");
       const number = typeof val === "number" ? val : parseFloat(val);
       return number;
@@ -28,7 +31,10 @@ export const priceSchema = z
   );
 
 /** --- Currency Schema --- */
-export const currencySchema = z.enum(["USD", "EUR", "GBP"],"Must be USD EUR or GBP");
+export const currencySchema = z.enum(
+  ["USD", "EUR", "GBP"],
+  "Must be USD EUR or GBP"
+);
 
 /** --- Password Schema --- */
 export const passwordSchema = z
@@ -55,13 +61,16 @@ export const signupSchema = loginSchema.extend({
     .preprocess((val) => {
       if (!val || val === "") return undefined;
       return typeof val === "string" ? new Date(val) : val;
-    }, z.date().optional()) 
-    .refine((val) => {
-      if (val === undefined) return true;
-      return !isNaN(val.getTime());
-    }, {
-      message: "Birthdate must be a valid date",
-    }),
+    }, z.date().optional())
+    .refine(
+      (val) => {
+        if (val === undefined) return true;
+        return !isNaN(val.getTime());
+      },
+      {
+        message: "Birthdate must be a valid date",
+      }
+    ),
 });
 
 /** --- Update User Schema --- */
@@ -258,7 +267,7 @@ export const itemQuantitySchema = z.object({
 
 export const productIdSchema = z.object({
   productId: z.string(),
-})
+});
 
 export const addCartItemSchema = productIdSchema.extend({
   quantity: itemQuantity,

@@ -83,7 +83,7 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   }
 
   function handlePriceCommit(values: [number, number]) {
-    setDragValues(null); 
+    setDragValues(null);
     const params = new URLSearchParams(searchParams.toString());
     params.set("minPrice", values[0].toString());
     params.set("maxPrice", values[1].toString());

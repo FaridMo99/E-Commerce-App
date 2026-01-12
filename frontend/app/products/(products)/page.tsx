@@ -3,10 +3,8 @@ import ProductView from "./components/ProductView";
 import { getProducts } from "@/lib/queries/server/productQueries";
 import { SearchParamsProps } from "@/types/types";
 
-
-async function page({ searchParams }:SearchParamsProps) {
+async function page({ searchParams }: SearchParamsProps) {
   const params = await searchParams;
-
 
   const products = await getProducts(params);
 

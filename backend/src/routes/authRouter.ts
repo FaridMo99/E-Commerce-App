@@ -18,7 +18,10 @@ import {
   verifyCaptcha,
 } from "../middleware/authMiddleware.js";
 import { validateBody } from "../middleware/validationMiddleware.js";
-import { authRateLimiter, geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
+import {
+  authRateLimiter,
+  geoCurrencyMiddleware,
+} from "../middleware/utilityMiddleware.js";
 import passport from "../services/passport.js";
 import { OauthLogin } from "../lib/auth.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
@@ -26,7 +29,13 @@ import { emailSchema, loginSchema, signupSchema } from "@monorepo/shared";
 
 const authRouter = Router();
 
-authRouter.post("/login", authRateLimiter, validateBody(loginSchema), verifyCaptcha, login);
+authRouter.post(
+  "/login",
+  authRateLimiter,
+  validateBody(loginSchema),
+  verifyCaptcha,
+  login,
+);
 authRouter.post(
   "/signup",
   authRateLimiter,
@@ -48,21 +57,31 @@ authRouter.post(
   authRateLimiter,
   validateBody(emailSchema),
   verifyCaptcha,
-  sendNewVerifyLink
+  sendNewVerifyLink,
 );
 
-authRouter.patch("/change-password", authRateLimiter, validateBody(loginSchema.shape.password), changePassword);
+authRouter.patch(
+  "/change-password",
+  authRateLimiter,
+  validateBody(loginSchema.shape.password),
+  changePassword,
+);
 
 authRouter.patch(
   "/change-password-authenticated",
   validateBody(loginSchema.shape.password),
   isAuthenticated,
   hasCsrfToken,
-  changePasswordAuthenticated
+  changePasswordAuthenticated,
 );
 
-authRouter.patch("/set-password",validateBody(loginSchema.shape.password), isAuthenticated, hasCsrfToken, setPassword);
-
+authRouter.patch(
+  "/set-password",
+  validateBody(loginSchema.shape.password),
+  isAuthenticated,
+  hasCsrfToken,
+  setPassword,
+);
 
 authRouter.post(
   "/forgot-password",
@@ -88,7 +107,6 @@ authRouter.get(
   }),
 );
 
-
 authRouter.get(
   "/oauth/google/callback",
   authRateLimiter,
@@ -97,7 +115,7 @@ authRouter.get(
     session: false,
     failureRedirect: `${CLIENT_ORIGIN}/login`,
   }),
-  OauthLogin
+  OauthLogin,
 );
 
 export default authRouter;

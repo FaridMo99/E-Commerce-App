@@ -14,7 +14,7 @@ import { updateUser } from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import { AuthUser } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserSchema, UpdateUserSchema } from "@monorepo/shared";
+import { updateUserSchema, type UpdateUserSchema } from "@monorepo/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,7 +57,7 @@ export function UpdateAccountForm({ user }: { user: AuthUser }) {
   }
 
   return (
-    <Card className="sm:max-w-[425px] mx-auto p-6 bg-backgroundBright text-white">
+    <Card className="sm:max-w-106.25 mx-auto p-6 bg-backgroundBright text-white">
       <form onSubmit={handleSubmit(submitHandler)}>
         <CardHeader className="p-0">
           <CardTitle>Update Account Settings</CardTitle>

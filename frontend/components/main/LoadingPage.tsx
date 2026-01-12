@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 
 function LoadingPage() {
   return (
@@ -8,4 +8,4 @@ function LoadingPage() {
   );
 }
 
-export default LoadingPage
+export default LoadingPage;

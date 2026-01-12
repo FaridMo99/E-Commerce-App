@@ -1,19 +1,17 @@
 import type { DailyRevenue } from "@monorepo/shared";
-import type {
-  CartWithSelectedFields,
-} from "../config/prismaHelpers.js";
+import type { CartWithSelectedFields } from "../config/prismaHelpers.js";
 import type { CartWithTotals, JWTUserPayload } from "../types/types.js";
 
 export const getTimestamp = () =>
   `[${new Date().toISOString().replace("T", ", ").replace("Z", "")}]`;
 
-
 export function getTotalRevenue(dailyRevenue: DailyRevenue[]): number {
   return dailyRevenue.reduce((sum, day) => sum + day.revenue, 0);
 }
 
-
-export function calculateCartTotalsInCents(cart: CartWithSelectedFields): CartWithTotals {
+export function calculateCartTotalsInCents(
+  cart: CartWithSelectedFields,
+): CartWithTotals {
   let cartTotal = 0;
 
   const itemsWithTotals = cart.items.map((item) => {
@@ -27,7 +25,6 @@ export function calculateCartTotalsInCents(cart: CartWithSelectedFields): CartWi
     };
   });
 
-
   return {
     ...cart,
     items: itemsWithTotals,
@@ -36,7 +33,7 @@ export function calculateCartTotalsInCents(cart: CartWithSelectedFields): CartWi
 }
 
 export function calculateCartTotals(
-  cart: CartWithSelectedFields
+  cart: CartWithSelectedFields,
 ): CartWithTotals {
   let cartTotal = 0;
 
@@ -58,7 +55,7 @@ export function calculateCartTotals(
   };
 }
 
-export function isValidUserPayload(payload:any): payload is JWTUserPayload {
+export function isValidUserPayload(payload: any): payload is JWTUserPayload {
   return (
     payload &&
     typeof payload.id === "string" &&

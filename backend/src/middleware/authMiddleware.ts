@@ -9,14 +9,13 @@ import {
 import { validateTurnstile } from "../lib/auth.js";
 import { getTimestamp, isValidUserPayload } from "../lib/utils.js";
 
-
 export async function isAdmin(req: Request, res: Response, next: NextFunction) {
   const userId = req.user?.id!;
   console.log(
     chalk.yellow(
       getTimestamp(),
-      `Checking if User with userId:${userId} is Admin...`
-    )
+      `Checking if User with userId:${userId} is Admin...`,
+    ),
   );
   const role = req.user?.role;
 
@@ -24,14 +23,14 @@ export async function isAdmin(req: Request, res: Response, next: NextFunction) {
     console.log(
       chalk.redBright(
         getTimestamp(),
-        `Unauthorized attempt to do Admin action, userId: ${userId} on Ressource: ${req.url} method: ${req.method}`
-      )
+        `Unauthorized attempt to do Admin action, userId: ${userId} on Ressource: ${req.url} method: ${req.method}`,
+      ),
     );
     return res.status(403).json({ message: "User not authorized" });
   }
 
   console.log(
-    chalk.green(getTimestamp(), `User with userId: ${userId} is Admin`)
+    chalk.green(getTimestamp(), `User with userId: ${userId} is Admin`),
   );
   next();
 }
@@ -42,7 +41,7 @@ export async function isAuthenticated(
   next: NextFunction,
 ) {
   console.log(
-    chalk.yellow(getTimestamp(), "Checking if user is authenticated")
+    chalk.yellow(getTimestamp(), "Checking if user is authenticated"),
   );
   const accessToken = req.headers.authorization?.split(" ")[1];
 
@@ -52,17 +51,14 @@ export async function isAuthenticated(
   }
 
   try {
-    const payload = jwt.verify(
-      accessToken,
-      JWT_ACCESS_TOKEN_SECRET)
-    
+    const payload = jwt.verify(accessToken, JWT_ACCESS_TOKEN_SECRET);
 
     if (!isValidUserPayload(payload))
       return res.status(401).json({ message: "Invalid token" });
     req.user = payload as JWTUserPayload;
 
     console.log(
-      chalk.green(getTimestamp(), "User is logged in, UserId: " + payload.id)
+      chalk.green(getTimestamp(), "User is logged in, UserId: " + payload.id),
     );
     next();
   } catch (err) {
@@ -76,20 +72,17 @@ export async function hasRefreshToken(
   res: Response,
   next: NextFunction,
 ) {
-
-  console.log(chalk.yellow(getTimestamp(),"Checking for Refresh Token..."))
+  console.log(chalk.yellow(getTimestamp(), "Checking for Refresh Token..."));
   const token = req.cookies.refreshToken;
 
-  
   if (!token) {
     console.log(
-      chalk.red(getTimestamp(), "No Refresh Token available, access denied!")
+      chalk.red(getTimestamp(), "No Refresh Token available, access denied!"),
     );
     return res.status(401).json({ message: "No refresh token" });
   }
 
   try {
-
     const verifiedToken = jwt.verify(
       token,
       JWT_REFRESH_TOKEN_SECRET,
@@ -97,7 +90,7 @@ export async function hasRefreshToken(
     req.refreshTokenPayload = verifiedToken;
 
     console.log(
-      chalk.green(getTimestamp(), "Refresh Token verification successful!")
+      chalk.green(getTimestamp(), "Refresh Token verification successful!"),
     );
 
     next();
@@ -105,8 +98,8 @@ export async function hasRefreshToken(
     console.log(
       chalk.red(
         getTimestamp(),
-        "Invalid or expired Refresh Token, access denied!"
-      )
+        "Invalid or expired Refresh Token, access denied!",
+      ),
     );
     return res
       .status(403)
@@ -120,7 +113,7 @@ export async function hasCsrfToken(
   next: NextFunction,
 ) {
   console.log(
-    chalk.yellow(getTimestamp(), "Verifying existence of CSRF Token...")
+    chalk.yellow(getTimestamp(), "Verifying existence of CSRF Token..."),
   );
   const csrfHeader = req.headers["x-csrf-token"];
   const csrfCookie = req.cookies.csrfToken;
@@ -131,7 +124,7 @@ export async function hasCsrfToken(
   }
 
   console.log(
-    chalk.green(getTimestamp(), "CSRF Token exists, mutation allowed")
+    chalk.green(getTimestamp(), "CSRF Token exists, mutation allowed"),
   );
   next();
 }
@@ -145,9 +138,9 @@ export async function verifyCaptcha(
   const cfToken = req.headers["x-cf-turnstile-token"];
   const ip = req.ip;
 
-  if (!cfToken || !ip || typeof cfToken !== "string"){
+  if (!cfToken || !ip || typeof cfToken !== "string") {
     console.log(
-      chalk.red(getTimestamp(), `Captcha verification failed, IP: ${ip}`)
+      chalk.red(getTimestamp(), `Captcha verification failed, IP: ${ip}`),
     );
     return res.status(400).json({ message: "Failed Captcha" });
   }
@@ -156,7 +149,7 @@ export async function verifyCaptcha(
 
   if (!verificationResult.success) {
     console.log(
-      chalk.red(getTimestamp(), `Captcha verification failed, IP: ${ip}`)
+      chalk.red(getTimestamp(), `Captcha verification failed, IP: ${ip}`),
     );
     return res.status(400).json({
       message: "Captcha verification failed",
@@ -180,10 +173,7 @@ export async function attachUserIfExists(
   }
 
   try {
-    const payload = jwt.verify(
-      accessToken,
-      JWT_ACCESS_TOKEN_SECRET,
-    )
+    const payload = jwt.verify(accessToken, JWT_ACCESS_TOKEN_SECRET);
 
     if (isValidUserPayload(payload)) {
       req.user = payload as JWTUserPayload;

@@ -11,7 +11,11 @@ import { validateSearchQueries } from "../middleware/validationMiddleware.js";
 
 const reviewsRouter = Router();
 
-reviewsRouter.get("/", validateSearchQueries(reviewsQuerySchema), getAllReviews);
+reviewsRouter.get(
+  "/",
+  validateSearchQueries(reviewsQuerySchema),
+  getAllReviews,
+);
 reviewsRouter.get("/:reviewId", getReviewByReviewId);
 reviewsRouter.delete(
   "/:reviewId",

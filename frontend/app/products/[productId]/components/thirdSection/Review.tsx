@@ -13,8 +13,7 @@ type ReviewProps = {
 };
 
 function Review({ review }: ReviewProps) {
-  const formattedDate =  new Date(review.created_at).toLocaleDateString('en-US')
-
+  const formattedDate = new Date(review.created_at).toLocaleDateString("en-US");
 
   return (
     <Card className="max-w-md mx-auto my-4 shadow-lg hover:shadow-xl transition-shadow duration-300">

@@ -1,15 +1,14 @@
-"use client"
-import { useState } from 'react';
-import ImageCarousel from './ImageCarousel';
-import MainImage from './MainImage';
+"use client";
+import { useState } from "react";
+import ImageCarousel from "./ImageCarousel";
+import MainImage from "./MainImage";
 
 type ImagePartProps = {
-    imageUrls:string[]
-}
-
+  imageUrls: string[];
+};
 
 function ImagePart({ imageUrls }: ImagePartProps) {
-  const [imageToShow, setImageToShow] = useState<string>(imageUrls[0])
+  const [imageToShow, setImageToShow] = useState<string>(imageUrls[0]);
 
   return (
     <div className="flex flex-col">
@@ -22,4 +21,4 @@ function ImagePart({ imageUrls }: ImagePartProps) {
   );
 }
 
-export default ImagePart
+export default ImagePart;

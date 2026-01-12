@@ -1,8 +1,5 @@
 import { Router } from "express";
-import {
-  hasCsrfToken,
-  isAdmin,
-} from "../middleware/authMiddleware.js";
+import { hasCsrfToken, isAdmin } from "../middleware/authMiddleware.js";
 import { validateTimeframeQuery } from "../middleware/validationMiddleware.js";
 import {
   cancelOrder,
@@ -13,17 +10,8 @@ import { geoCurrencyMiddleware } from "../middleware/utilityMiddleware.js";
 
 const ordersRouter = Router();
 
-ordersRouter.get(
-  "/",
-  isAdmin,
-  validateTimeframeQuery,
-  getOrders,
-);
+ordersRouter.get("/", isAdmin, validateTimeframeQuery, getOrders);
 ordersRouter.post("/", hasCsrfToken, geoCurrencyMiddleware, makeOrder);
-ordersRouter.post(
-  "/:orderId/cancel",
-  hasCsrfToken,
-  cancelOrder,
-);
+ordersRouter.post("/:orderId/cancel", hasCsrfToken, cancelOrder);
 
 export default ordersRouter;

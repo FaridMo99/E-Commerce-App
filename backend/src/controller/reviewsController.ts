@@ -11,13 +11,14 @@ const reviewCountToInvalidateCache = 50;
 export async function getAllReviews(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const { rating, created_at, sortBy, sortOrder, page, limit } = req.validatedQuery as ReviewsQuerySchema;
+  const { rating, created_at, sortBy, sortOrder, page, limit } =
+    req.validatedQuery as ReviewsQuerySchema;
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching reviews with query:`, req.query)
+      chalk.yellow(`${getTimestamp()} Fetching reviews with query:`, req.query),
     );
 
     const reviews = await prisma.review.findMany({
@@ -30,12 +31,12 @@ export async function getAllReviews(
       ...(limit && { take: limit }),
       ...(page && limit && { skip: (page - 1) * limit }),
       select: {
-        ...reviewSelect
-      }
+        ...reviewSelect,
+      },
     });
 
     console.log(
-      chalk.green(`${getTimestamp()} Fetched ${reviews.length} reviews`)
+      chalk.green(`${getTimestamp()} Fetched ${reviews.length} reviews`),
     );
     return res.status(200).json(reviews);
   } catch (err) {
@@ -47,7 +48,7 @@ export async function getAllReviews(
 export async function getReviewByReviewId(
   req: Request<{ reviewId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.params.reviewId;
   if (!id) {
@@ -64,8 +65,8 @@ export async function getReviewByReviewId(
         id,
       },
       select: {
-        ...reviewSelect
-      }
+        ...reviewSelect,
+      },
     });
 
     if (!review) {
@@ -78,7 +79,7 @@ export async function getReviewByReviewId(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch review: ${id}`),
-      err
+      err,
     );
     next(err);
   }
@@ -87,13 +88,13 @@ export async function getReviewByReviewId(
 export async function deleteReviewByReviewId(
   req: Request<{ reviewId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { reviewId } = req.params;
   const userId = req.user?.id!;
   if (!reviewId) {
     console.log(
-      chalk.red(`${getTimestamp()} No review ID provided for deletion`)
+      chalk.red(`${getTimestamp()} No review ID provided for deletion`),
     );
     return res.status(400).json({ message: "No Id" });
   }
@@ -101,8 +102,8 @@ export async function deleteReviewByReviewId(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Deleting review: ${reviewId} by user: ${userId}`
-      )
+        `${getTimestamp()} Deleting review: ${reviewId} by user: ${userId}`,
+      ),
     );
 
     const review = await prisma.review.findUnique({
@@ -139,8 +140,8 @@ export async function deleteReviewByReviewId(
     if (review.user_id !== userId) {
       console.log(
         chalk.red(
-          `${getTimestamp()} User ${userId} not authorized to delete review ${reviewId}`
-        )
+          `${getTimestamp()} User ${userId} not authorized to delete review ${reviewId}`,
+        ),
       );
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -154,8 +155,8 @@ export async function deleteReviewByReviewId(
       promises.push(
         clearAllCachesProductIsIn(
           review.product.name,
-          review.product.category.name
-        )
+          review.product.category.name,
+        ),
       );
     }
 
@@ -166,42 +167,42 @@ export async function deleteReviewByReviewId(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to delete review: ${reviewId}`),
-      err
+      err,
     );
     next(err);
   }
 }
 
 export async function setPublicByReviewId(
-  req: Request<{ reviewId: string }, {}, { isPublic?:"true" | "false" }>,
+  req: Request<{ reviewId: string }, {}, { isPublic?: "true" | "false" }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const { reviewId } = req.params;
   const userId = req.user?.id!;
   const isPublic = req.body.isPublic;
 
-  console.log(isPublic)
+  console.log(isPublic);
 
-    let isPublicBoolean: boolean;
+  let isPublicBoolean: boolean;
 
-    if (typeof isPublic === "string") {
-      if (isPublic.toLowerCase() === "true") isPublicBoolean = true;
-      else if (isPublic.toLowerCase() === "false") isPublicBoolean = false;
-      else {
-        return res.status(400).json({ message: "Invalid isPublic value" });
-      }
-    } else if (typeof isPublic === "boolean") {
-      isPublicBoolean = isPublic;
-    } else {
+  if (typeof isPublic === "string") {
+    if (isPublic.toLowerCase() === "true") isPublicBoolean = true;
+    else if (isPublic.toLowerCase() === "false") isPublicBoolean = false;
+    else {
       return res.status(400).json({ message: "Invalid isPublic value" });
     }
+  } else if (typeof isPublic === "boolean") {
+    isPublicBoolean = isPublic;
+  } else {
+    return res.status(400).json({ message: "Invalid isPublic value" });
+  }
 
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Updating review public status: ${reviewId} to ${isPublic}`
-      )
+        `${getTimestamp()} Updating review public status: ${reviewId} to ${isPublic}`,
+      ),
     );
 
     const review = await prisma.review.findUnique({
@@ -240,8 +241,8 @@ export async function setPublicByReviewId(
     if (review.user_id !== userId) {
       console.log(
         chalk.red(
-          `${getTimestamp()} User ${userId} not authorized to update review ${reviewId}`
-        )
+          `${getTimestamp()} User ${userId} not authorized to update review ${reviewId}`,
+        ),
       );
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -262,8 +263,8 @@ export async function setPublicByReviewId(
       promises.push(
         clearAllCachesProductIsIn(
           review.product.name,
-          review.product.category.name
-        )
+          review.product.category.name,
+        ),
       );
     }
 
@@ -271,18 +272,16 @@ export async function setPublicByReviewId(
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Review ${reviewId} public status updated to ${isPublic}`
-      )
+        `${getTimestamp()} Review ${reviewId} public status updated to ${isPublic}`,
+      ),
     );
-    res
-      .status(200)
-      .json({
-        message: `Review successfully  ${isPublic ? "published" : "deactivated"}`,
-      });
+    res.status(200).json({
+      message: `Review successfully  ${isPublic ? "published" : "deactivated"}`,
+    });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to update review: ${reviewId}`),
-      err
+      err,
     );
     next(err);
   }

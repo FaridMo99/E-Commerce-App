@@ -3,8 +3,8 @@ import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
 type RatingPreviewProps = {
   size?: number;
   styles?: string;
-  value: number; 
-  onChange: (value: number) => void
+  value: number;
+  onChange: (value: number) => void;
 };
 
 function InteractiveRating({

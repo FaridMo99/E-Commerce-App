@@ -96,7 +96,7 @@ export function ReviewModal({
           {buttonText}
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-backgroundBright text-white">
+      <DialogContent className="sm:max-w-106.25 bg-backgroundBright text-white">
         <form onSubmit={handleSubmit(submitHandler)}>
           <DialogHeader>
             <DialogTitle>Create a Review</DialogTitle>

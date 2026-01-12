@@ -8,24 +8,31 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 function StripeCheckoutButton({ disabled }: { disabled: boolean }) {
-  const accessToken = useAuth(state => state.accessToken)
-  const queryClient = useQueryClient()
-  const router = useRouter()
-  
+  const accessToken = useAuth((state) => state.accessToken);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
   const { mutate, isPending } = useMutation({
     mutationKey: ["checkout"],
     mutationFn: () => makeOrder(accessToken!),
     onError: (err) => {
-      toast.error(err.message)
+      toast.error(err.message);
       queryClient.invalidateQueries({ queryKey: ["get user shopping cart"] });
     },
     onSuccess: (data) => {
       router.push(data.redirectUrl);
-    }
-  })
+    },
+  });
 
-
-  return <Button className="self-center md:w-auto w-18 md:my-0 my-4" onClick={()=>mutate()} disabled={disabled || isPending}>{isPending ? <Loader2 className="animate-spin text-white"/> : "Checkout"}</Button>;
+  return (
+    <Button
+      className="self-center md:w-auto w-18 md:my-0 my-4"
+      onClick={() => mutate()}
+      disabled={disabled || isPending}
+    >
+      {isPending ? <Loader2 className="animate-spin text-white" /> : "Checkout"}
+    </Button>
+  );
 }
 
 export default StripeCheckoutButton;

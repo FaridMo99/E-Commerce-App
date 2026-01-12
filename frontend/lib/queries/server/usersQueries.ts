@@ -1,6 +1,6 @@
 "use server";
 
-import {
+import type {
   AddCartItemSchema,
   ItemQuantitySchema,
   OrdersQuerySchema,
@@ -32,7 +32,7 @@ export async function getUser(accessToken: AccessToken): Promise<User> {
 
 export async function updateUser(
   content: UpdateUserSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<User> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -104,7 +104,7 @@ export async function deleteUserCart(accessToken: AccessToken): Promise<void> {
 
 export async function addProductToUserCart(
   product: AddCartItemSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Cart> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -127,7 +127,7 @@ export async function addProductToUserCart(
 
 export async function removeItemFromCart(
   itemId: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Cart> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -149,7 +149,7 @@ export async function removeItemFromCart(
 export async function changeItemQuantitiy(
   itemQuantity: ItemQuantitySchema,
   itemId: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Cart> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -171,7 +171,7 @@ export async function changeItemQuantitiy(
 }
 
 export async function getUserReviews(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AuthProductReview[]> {
   const additionalHeaders = await getAllHeaders();
 
@@ -187,7 +187,7 @@ export async function getUserReviews(
 
 export async function getUserOrders(
   accessToken: AccessToken,
-  queryParam?: OrdersQuerySchema
+  queryParam?: OrdersQuerySchema,
 ): Promise<Order[]> {
   const additionalHeaders = await getAllHeaders();
 
@@ -219,7 +219,7 @@ export async function getUserOrders(
 
 export async function getUserOrderByOrderId(
   id: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Order> {
   const additionalHeaders = await getAllHeaders();
 
@@ -234,7 +234,7 @@ export async function getUserOrderByOrderId(
 }
 
 export async function getUserFavoriteItems(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders();
 
@@ -250,7 +250,7 @@ export async function getUserFavoriteItems(
 
 export async function addFavoriteItemByProductId(
   productId: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Product> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -273,7 +273,7 @@ export async function addFavoriteItemByProductId(
 
 export async function deleteFavoriteItemByProductId(
   productId: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -293,7 +293,7 @@ export async function deleteFavoriteItemByProductId(
 }
 
 export async function getRecentlyViewedProducts(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders();
 
@@ -309,7 +309,7 @@ export async function getRecentlyViewedProducts(
 
 export async function addProductToRecentlyViewedProductsByProductId(
   productId: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<Product> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),

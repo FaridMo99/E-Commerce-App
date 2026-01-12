@@ -3,7 +3,7 @@ import { DOMAIN } from "@/config/constants";
 import { getProducts } from "@/lib/queries/client/productQueries";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await getProducts()
+  const products = await getProducts();
 
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${DOMAIN}/products/${product.id}`,

@@ -10,8 +10,9 @@ import ReviewsSection from "./components/thirdSection/ReviewsSection";
 import { Metadata } from "next";
 import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
 
-
-export async function generateMetadata({ params }: PageProps<"/products/[productId]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/products/[productId]">): Promise<Metadata> {
   const { productId } = await params;
   const product = await getProductByProductId(productId);
 
@@ -39,8 +40,7 @@ export async function generateMetadata({ params }: PageProps<"/products/[product
   };
 }
 
-
-async function page(props:PageProps<"/products/[productId]">) {
+async function page(props: PageProps<"/products/[productId]">) {
   const { productId } = await props.params;
   let product: Product;
 
@@ -55,23 +55,23 @@ async function page(props:PageProps<"/products/[productId]">) {
     notFound();
   }
 
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product.name,
-      image: product.imageUrls[0],
-      description: product.description,
-      offers: {
-        "@type": "Offer",
-        price: product.price,
-        priceCurrency: product.currency,
-        availability:
-          product.stock_quantity > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-        url: `${DOMAIN}/products/${product.id}`,
-      },
-    };
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.imageUrls[0],
+    description: product.description,
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: product.currency,
+      availability:
+        product.stock_quantity > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: `${DOMAIN}/products/${product.id}`,
+    },
+  };
 
   return (
     <main className="flex flex-col w-full justify-center px-4">

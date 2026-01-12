@@ -6,13 +6,13 @@ import {
   ChangePasswordSchema,
   User,
 } from "@/types/types";
-import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
+import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { getCsrfHeaderClientSide } from "../../helpers";
 
 export async function login(
   credentials: LoginSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<AuthResponse> {
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
@@ -28,7 +28,7 @@ export async function login(
 
 export async function signup(
   credentials: SignupSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: "POST",
@@ -43,7 +43,7 @@ export async function signup(
 
 export async function forgotPasswordSendEmail(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
     method: "POST",
@@ -57,7 +57,7 @@ export async function forgotPasswordSendEmail(
 }
 
 export async function verifyAfterEmailLink(
-  token: string
+  token: string,
 ): Promise<AuthResponse> {
   const res = await fetch(`${API_BASE_URL}/auth/verify`, {
     method: "POST",
@@ -72,7 +72,7 @@ export async function verifyAfterEmailLink(
 
 export async function sendNewVerificationLink(
   email: EmailSchema,
-  captchaToken: string
+  captchaToken: string,
 ): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/auth/new-verify-link`, {
     method: "POST",
@@ -95,7 +95,7 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
 
 export async function changePasswordUnauthenticated(
   token: string,
-  password: string
+  password: string,
 ): Promise<AuthResponse> {
   const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
     method: "PATCH",
@@ -124,25 +124,28 @@ export async function logout(accessToken: AccessToken): Promise<void> {
 
 export async function changePasswordAuthenticated(
   passwords: ChangePasswordAuthenticatedSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<User> {
   const { oldPassword, password } = passwords;
-  const res = await fetch(`${API_BASE_URL}/auth/change-password-authenticated`, {
-    credentials: "include",
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getCsrfHeaderClientSide(),
-      Authorization: `Bearer ${accessToken}`,
+  const res = await fetch(
+    `${API_BASE_URL}/auth/change-password-authenticated`,
+    {
+      credentials: "include",
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaderClientSide(),
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ password, oldPassword }),
     },
-    body: JSON.stringify({ password, oldPassword }),
-  });
+  );
   return await handleResponse(res);
 }
 
 export async function setPassword(
   passwords: ChangePasswordSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<User> {
   const { password } = passwords;
   const res = await fetch(`${API_BASE_URL}/auth/set-password`, {

@@ -11,9 +11,8 @@ function ProductCardTags({
   stock_quantity,
   sale_price,
   published_at,
-  position = "right"
+  position = "right",
 }: ProductCardTagsProps) {
-
   const positionClass = position === "left" ? "left-0" : "right-0";
   const roundedClass = position === "left" ? "rounded-r-lg" : "rounded-l-lg";
 

@@ -1,8 +1,8 @@
-import Price from '@/components/main/product/Price';
-import RemoveItemButton from './RemoveItemButton';
-import { CartItem } from '@/types/types';
+import Price from "@/components/main/product/Price";
+import RemoveItemButton from "./RemoveItemButton";
+import { CartItem } from "@/types/types";
 
-function ItemInfo({item}:{item:CartItem}) {
+function ItemInfo({ item }: { item: CartItem }) {
   return (
     <div className="h-full flex flex-col justify-around items-end w-1/3 p-2">
       <p>{item.quantity}x</p>
@@ -19,4 +19,4 @@ function ItemInfo({item}:{item:CartItem}) {
   );
 }
 
-export default ItemInfo
+export default ItemInfo;

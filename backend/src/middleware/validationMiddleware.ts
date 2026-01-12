@@ -8,13 +8,13 @@ import { imageSchema } from "../config/schemas.js";
 export function validateBody<T>(schema: ZodType<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     const parsed = schema.safeParse(req.body);
-    
+
     if (!parsed.success) {
       console.log(
         chalk.red(`${getTimestamp()} Body validation failed:`),
-        req.body
+        req.body,
       );
-      return res.status(400).json({ message:parsed.error.message  });
+      return res.status(400).json({ message: parsed.error.message });
     }
 
     req.body = parsed.data;
@@ -23,33 +23,37 @@ export function validateBody<T>(schema: ZodType<T>) {
   };
 }
 
-export function validateImages(req:Request,res:Response,next:NextFunction) {
+export function validateImages(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const images = req.files;
-  console.log(chalk.yellow(getTimestamp(),"validating images..."))
+  console.log(chalk.yellow(getTimestamp(), "validating images..."));
 
-    if (images && Array.isArray(images)) {
-      const validatedImages = z.array(imageSchema).safeParse(images);
-      if (!validatedImages.success) {
-        console.log(
-          chalk.red(`${getTimestamp()} Product validation failed (images)`)
-        );
-        return res.status(400).json({ message: validatedImages.error.message });
-      }
+  if (images && Array.isArray(images)) {
+    const validatedImages = z.array(imageSchema).safeParse(images);
+    if (!validatedImages.success) {
+      console.log(
+        chalk.red(`${getTimestamp()} Product validation failed (images)`),
+      );
+      return res.status(400).json({ message: validatedImages.error.message });
     }
-    console.log(chalk.green(getTimestamp(), "Image validation successful!"));
+  }
+  console.log(chalk.green(getTimestamp(), "Image validation successful!"));
 
-  next()
+  next();
 }
 
 export function validateTimeframeQuery(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const validated = timeframeQuerySchema.safeParse(req.query);
   if (!validated.success) {
     console.log(
-      chalk.red(`${getTimestamp()} Timeframe query validation failed`)
+      chalk.red(`${getTimestamp()} Timeframe query validation failed`),
     );
     return res.status(400).json({ error: validated.error.message });
   }
@@ -60,7 +64,7 @@ export function validateTimeframeQuery(
 
   req.timeframe = { from, to };
   console.log(
-    chalk.green(`${getTimestamp()} Timeframe query validated successfully`)
+    chalk.green(`${getTimestamp()} Timeframe query validated successfully`),
   );
   next();
 }
@@ -69,26 +73,25 @@ export function validateSearchQueries<T>(schema: ZodType<T>) {
   return function validateQuery(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
-    console.log(1,req.query)
+    console.log(1, req.query);
     const validated = schema.safeParse(req.query);
 
     if (!validated.success) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Query validation failed: ${JSON.stringify(req.query)}`
-        )
+          `${getTimestamp()} Query validation failed: ${JSON.stringify(req.query)}`,
+        ),
       );
-      return res.status(400).json({message:validated.error.message})
+      return res.status(400).json({ message: validated.error.message });
     }
 
     console.log(chalk.green(`${getTimestamp()} Query validation succeeded`));
 
-
     // Express makes issues so unavoidable
-    req.validatedQuery = validated.data
-    
+    req.validatedQuery = validated.data;
+
     next();
   };
-} 
+}

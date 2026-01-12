@@ -22,8 +22,17 @@ import {
   validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
 import { upload } from "../services/cloud.js";
-import { productSchema, productsMetaInfosQuerySchema, productsQuerySchema, reviewSchema, updateProductSchema } from "@monorepo/shared";
-import { geoCurrencyMiddleware, transformProductFormData } from "../middleware/utilityMiddleware.js";
+import {
+  productSchema,
+  productsMetaInfosQuerySchema,
+  productsQuerySchema,
+  reviewSchema,
+  updateProductSchema,
+} from "@monorepo/shared";
+import {
+  geoCurrencyMiddleware,
+  transformProductFormData,
+} from "../middleware/utilityMiddleware.js";
 
 const productsRouter = Router();
 
@@ -32,17 +41,22 @@ productsRouter.get(
   validateSearchQueries(productsQuerySchema),
   attachUserIfExists,
   geoCurrencyMiddleware,
-  getAllProducts
+  getAllProducts,
 );
 productsRouter.get(
   "/meta",
   validateSearchQueries(productsMetaInfosQuerySchema),
   attachUserIfExists,
   geoCurrencyMiddleware,
-  getProductsMetaInfos
+  getProductsMetaInfos,
 );
 
-productsRouter.get("/home", attachUserIfExists, geoCurrencyMiddleware, getHomeProducts);
+productsRouter.get(
+  "/home",
+  attachUserIfExists,
+  geoCurrencyMiddleware,
+  getHomeProducts,
+);
 productsRouter.post(
   "/",
   isAuthenticated,
@@ -53,7 +67,7 @@ productsRouter.post(
   transformProductFormData,
   validateBody(productSchema),
   geoCurrencyMiddleware,
-  createProduct
+  createProduct,
 );
 productsRouter.get("/:productId/reviews", getAllReviewsByProductId);
 productsRouter.post(
@@ -63,7 +77,12 @@ productsRouter.post(
   hasCsrfToken,
   createReviewByProductId,
 );
-productsRouter.get("/:productId",attachUserIfExists, geoCurrencyMiddleware,getProductByProductId);
+productsRouter.get(
+  "/:productId",
+  attachUserIfExists,
+  geoCurrencyMiddleware,
+  getProductByProductId,
+);
 productsRouter.delete(
   "/:productId",
   isAuthenticated,

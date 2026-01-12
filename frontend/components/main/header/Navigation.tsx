@@ -11,16 +11,15 @@ import UserDropdown from "../UserDropdown";
 import LogoutButton from "./LogoutButton";
 import { MobileNavigation } from "./MobileNavigation";
 
-
 function Navigation() {
-  const { accessToken,user } = useAuth((state) => state);
+  const { accessToken, user } = useAuth((state) => state);
   const {
     data: cart,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ["get user shopping cart",user],
+    queryKey: ["get user shopping cart", user],
     queryFn: () => {
       if (!accessToken) return Promise.resolve(null);
       return getUserCart(accessToken);

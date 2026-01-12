@@ -1,11 +1,10 @@
-//this whole file shouldnt be send when the user is not a admin
-import {
+import type {
   OrdersQuerySchema,
   TimeframeQuerySchema,
   UpdateProductSchema,
+  SettingsSchema,
 } from "@monorepo/shared";
 import { API_BASE_URL } from "@/config/constants";
-import { SettingsSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import {
   AccessToken,
@@ -18,13 +17,13 @@ import {
   ProductCategory,
 } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
-import { BASE_CURRENCY_KEY } from "@monorepo/shared/constants";
-import { ClientProductSchema } from "@/schemas/schemas";
+import { BASE_CURRENCY_KEY } from "@monorepo/shared";
+import {type ClientProductSchema } from "@/schemas/schemas";
 
 //analytics
 export async function getRevenue(
   accessToken: AccessToken,
-  timeframe?: TimeframeQuerySchema
+  timeframe?: TimeframeQuerySchema,
 ): Promise<AdminRevenue> {
   const params = new URLSearchParams();
 
@@ -34,7 +33,6 @@ export async function getRevenue(
   }
 
   const url = `${API_BASE_URL}/admin/analytics/revenue?${params.toString()}`;
-
 
   const res = await fetch(url, {
     credentials: "include",
@@ -48,7 +46,7 @@ export async function getRevenue(
 
 export async function getTopsellers(
   accessToken: AccessToken,
-  timeframe?: TimeframeQuerySchema
+  timeframe?: TimeframeQuerySchema,
 ): Promise<AdminTopseller[]> {
   const params = new URLSearchParams();
 
@@ -58,7 +56,6 @@ export async function getTopsellers(
   }
 
   const url = `${API_BASE_URL}/admin/analytics/topsellers?${params.toString()}`;
-
 
   const res = await fetch(url, {
     credentials: "include",
@@ -72,7 +69,7 @@ export async function getTopsellers(
 
 export async function getNewUsers(
   accessToken: AccessToken,
-  timeframe?: TimeframeQuerySchema
+  timeframe?: TimeframeQuerySchema,
 ): Promise<AdminNewUser> {
   const params = new URLSearchParams();
 
@@ -82,7 +79,6 @@ export async function getNewUsers(
   }
 
   const url = `${API_BASE_URL}/admin/analytics/new-users?${params.toString()}`;
-
 
   const res = await fetch(url, {
     credentials: "include",
@@ -96,7 +92,7 @@ export async function getNewUsers(
 
 //settings
 export async function getAllSettings(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AdminSetting[]> {
   const res = await fetch(`${API_BASE_URL}/settings`, {
     credentials: "include",
@@ -110,9 +106,8 @@ export async function getAllSettings(
 
 export async function createSetting(
   setting: SettingsSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AdminSetting> {
-
   const res = await fetch(`${API_BASE_URL}/settings`, {
     credentials: "include",
     method: "POST",
@@ -123,13 +118,13 @@ export async function createSetting(
     },
     body: JSON.stringify(setting),
   });
-    
+
   return await handleResponse(res);
 }
 
 export async function getSettingBySettingId(
   id: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AdminSetting> {
   const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
     credentials: "include",
@@ -141,7 +136,6 @@ export async function getSettingBySettingId(
 }
 
 type Replace<T, K extends keyof T, U> = Omit<T, K> & U;
-
 
 export async function getBaseCurrency(accessToken: AccessToken): Promise<
   Replace<
@@ -163,9 +157,8 @@ export async function getBaseCurrency(accessToken: AccessToken): Promise<
 }
 
 export async function deleteAllSettings(
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
-
   const res = await fetch(`${API_BASE_URL}/settings`, {
     credentials: "include",
     method: "DELETE",
@@ -179,9 +172,8 @@ export async function deleteAllSettings(
 
 export async function deleteSettingBySettingId(
   id: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
-
   const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
@@ -196,9 +188,8 @@ export async function deleteSettingBySettingId(
 export async function updateSettingBySettingId(
   id: string,
   content: SettingsSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<AdminSetting> {
-
   const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -216,20 +207,20 @@ export async function updateSettingBySettingId(
 //products
 export async function createProduct(
   product: ClientProductSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
   const formData = new FormData();
 
   formData.append("name", product.name);
   formData.append("description", product.description);
-    formData.append("category", product.category);
+  formData.append("category", product.category);
   formData.append("price", product.price.toString());
   if (product.sale_price !== undefined)
-  formData.append("sale_price", product.sale_price.toString());
+    formData.append("sale_price", product.sale_price.toString());
   formData.append("stock_quantity", product.stock_quantity.toString());
   formData.append("is_public", String(product.is_public));
 
-  product.images.forEach((file) => {
+  product.images.forEach((file: File) => {
     formData.append("images", file);
   });
 
@@ -248,9 +239,8 @@ export async function createProduct(
 
 export async function deleteProductByProductId(
   id: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
-
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
@@ -265,9 +255,8 @@ export async function deleteProductByProductId(
 export async function updateProductByProductId(
   id: string,
   content: UpdateProductSchema,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
-
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
@@ -285,9 +274,8 @@ export async function updateProductByProductId(
 export async function getOrders(
   accessToken: AccessToken,
   timeframe?: TimeframeQuerySchema,
-  queryParam?: OrdersQuerySchema
+  queryParam?: OrdersQuerySchema,
 ): Promise<Order[]> {
-
   const params = new URLSearchParams();
 
   if (queryParam) {
@@ -317,9 +305,8 @@ export async function getOrders(
 //categories
 export async function createCategory(
   category: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<ProductCategory> {
-
   const res = await fetch(`${API_BASE_URL}/categories`, {
     credentials: "include",
     method: "POST",
@@ -335,9 +322,8 @@ export async function createCategory(
 
 export async function deleteCategoryByCategoryId(
   id: string,
-  accessToken: AccessToken
+  accessToken: AccessToken,
 ): Promise<void> {
-
   const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",

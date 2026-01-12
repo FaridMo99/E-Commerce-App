@@ -21,53 +21,53 @@ describe("Searchbar Component", () => {
     (useRouter as Mock).mockReturnValue({ push: mockPush });
   });
 
-    it("updates the input value on change", () => {
-      (useQuery as Mock).mockReturnValue({ data: [] });
-      render(<Searchbar />);
+  it("updates the input value on change", () => {
+    (useQuery as Mock).mockReturnValue({ data: [] });
+    render(<Searchbar />);
 
-      const input = screen.getByPlaceholderText("Search...");
-      fireEvent.change(input, { target: { value: "iphone" } });
+    const input = screen.getByPlaceholderText("Search...");
+    fireEvent.change(input, { target: { value: "iphone" } });
 
-      expect(input).toHaveValue("iphone");
+    expect(input).toHaveValue("iphone");
+  });
+
+  it("shows the Searchlist only when focused and input value", async () => {
+    (useQuery as Mock).mockReturnValue({
+      data: [{ id: "1", name: "iPhone" }],
     });
 
-    it("shows the Searchlist only when focused and input value", async () => {
-      (useQuery as Mock).mockReturnValue({
-        data: [{ id: "1", name: "iPhone" }],
-      });
+    render(<Searchbar />);
+    const input = screen.getByPlaceholderText("Search...");
 
-      render(<Searchbar />);
-      const input = screen.getByPlaceholderText("Search...");
+    fireEvent.change(input, { target: { value: "iph" } });
+    fireEvent.focus(input);
 
-      fireEvent.change(input, { target: { value: "iph" } });
-      fireEvent.focus(input);
-
-      act(() => {
-        vi.advanceTimersByTime(600);
-      });
-
-      expect(screen.getByText("iPhone")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(600);
     });
 
-    it("navigates to the products page on submit", () => {
-      (useQuery as Mock).mockReturnValue({ data: [{ id: "1" }] });
-      render(<Searchbar />);
+    expect(screen.getByText("iPhone")).toBeInTheDocument();
+  });
 
-      const input = screen.getByPlaceholderText("Search...");
-      fireEvent.change(input, { target: { value: "laptop" } });
+  it("navigates to the products page on submit", () => {
+    (useQuery as Mock).mockReturnValue({ data: [{ id: "1" }] });
+    render(<Searchbar />);
 
-      const form =
-        screen.getByRole("textbox", { hidden: true }) || input.closest("form");
-      fireEvent.submit(form!);
+    const input = screen.getByPlaceholderText("Search...");
+    fireEvent.change(input, { target: { value: "laptop" } });
 
-      expect(mockPush).toHaveBeenCalledWith("/products?search=laptop");
-    });
+    const form =
+      screen.getByRole("textbox", { hidden: true }) || input.closest("form");
+    fireEvent.submit(form!);
 
-    it("disables the search button when no result", () => {
-      (useQuery as Mock).mockReturnValue({ data: [] });
-      render(<Searchbar />);
+    expect(mockPush).toHaveBeenCalledWith("/products?search=laptop");
+  });
 
-      const button = screen.getByRole("button", { name: /search users/i });
-      expect(button).toBeDisabled();
-    });
+  it("disables the search button when no result", () => {
+    (useQuery as Mock).mockReturnValue({ data: [] });
+    render(<Searchbar />);
+
+    const button = screen.getByRole("button", { name: /search users/i });
+    expect(button).toBeDisabled();
+  });
 });

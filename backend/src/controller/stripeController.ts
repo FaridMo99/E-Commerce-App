@@ -8,12 +8,12 @@ import { getTimestamp } from "../lib/utils.js";
 export async function stripeHandler(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const sig = req.headers["stripe-signature"];
   if (!sig) {
     console.log(
-      chalk.red(`${getTimestamp()} Stripe webhook call missing signature`)
+      chalk.red(`${getTimestamp()} Stripe webhook call missing signature`),
     );
     return res.status(400).send("Missing signature");
   }
@@ -24,25 +24,25 @@ export async function stripeHandler(
     const event = stripe.webhooks.constructEvent(
       req.body,
       sig,
-      STRIPE_WEBHOOK_SECRET
+      STRIPE_WEBHOOK_SECRET,
     );
 
     console.log(
-      chalk.yellow(`${getTimestamp()} Stripe event constructed: ${event.type}`)
+      chalk.yellow(`${getTimestamp()} Stripe event constructed: ${event.type}`),
     );
 
     await stripeEventHandler(event);
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Stripe event handled successfully: ${event.type}`
-      )
+        `${getTimestamp()} Stripe event handled successfully: ${event.type}`,
+      ),
     );
     res.send({ received: true });
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Stripe webhook handling failed`),
-      err
+      err,
     );
     next(err);
   }

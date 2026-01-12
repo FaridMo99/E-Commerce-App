@@ -9,9 +9,7 @@ export type ProductViewProps = {
   product: Product;
 };
 
-
 function ProductView({ product }: ProductViewProps) {
-
   return (
     <Link
       href={`/products/${product.id}`}

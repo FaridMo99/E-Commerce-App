@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {hasCsrfToken} from "../middleware/authMiddleware.js";
+import { hasCsrfToken } from "../middleware/authMiddleware.js";
 import { validateBody } from "../middleware/validationMiddleware.js";
 import {
   createSetting,
@@ -16,7 +16,12 @@ const settingsRouter = Router();
 //get all settings
 settingsRouter.get("/", getAllSettings);
 //create a setting
-settingsRouter.post("/", validateBody(settingsSchema), hasCsrfToken, createSetting);
+settingsRouter.post(
+  "/",
+  validateBody(settingsSchema),
+  hasCsrfToken,
+  createSetting,
+);
 //delete all except base currency
 settingsRouter.delete("/", hasCsrfToken, deleteAllSettings);
 //get a setting

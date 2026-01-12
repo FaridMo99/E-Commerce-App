@@ -25,7 +25,6 @@ const googleConfig: GoogleStrategyOptions = {
   passReqToCallback: true,
 };
 
-
 function makeVerifyCb(provider: UserCreatedBy) {
   return async function (
     req: Request,
@@ -39,31 +38,49 @@ function makeVerifyCb(provider: UserCreatedBy) {
       const email = profile.emails?.[0]?.value;
 
       if (!email) {
-        console.log(chalk.red(`${getTimestamp()} OAuth login failed: email not provided for provider ${provider}, profile ID: ${profile.id}`));
+        console.log(
+          chalk.red(
+            `${getTimestamp()} OAuth login failed: email not provided for provider ${provider}, profile ID: ${profile.id}`,
+          ),
+        );
         return done(new Error("Email not provided"));
       }
-      console.log(chalk.blue(`${getTimestamp()} OAuth login attempt via ${provider} for email: ${email} from IP: ${req.ip}`));
+      console.log(
+        chalk.blue(
+          `${getTimestamp()} OAuth login attempt via ${provider} for email: ${email} from IP: ${req.ip}`,
+        ),
+      );
       //look for existing user by email
       let user = await prisma.user.findUnique({ where: { email } });
 
       //if user exists but OAuth not linked, link provider
       if (user && !user.providerId) {
-
-        console.log(chalk.yellow(`${getTimestamp()} Linking ${provider} OAuth to existing user: ${email}...`));
+        console.log(
+          chalk.yellow(
+            `${getTimestamp()} Linking ${provider} OAuth to existing user: ${email}...`,
+          ),
+        );
 
         user = await prisma.user.update({
           where: { email },
-          data: { providerId: profile.id, verified:true },
+          data: { providerId: profile.id, verified: true },
         });
 
-        console.log(chalk.green(`${getTimestamp()} Linking ${provider} OAuth to existing user: ${email} successful`));
+        console.log(
+          chalk.green(
+            `${getTimestamp()} Linking ${provider} OAuth to existing user: ${email} successful`,
+          ),
+        );
       }
 
       //if no user, create one
       if (!user) {
-
-        console.log(chalk.yellow(`${getTimestamp()} Creating new user via ${provider} OAuth: ${email}...`));
-        const currency = req.currency!
+        console.log(
+          chalk.yellow(
+            `${getTimestamp()} Creating new user via ${provider} OAuth: ${email}...`,
+          ),
+        );
+        const currency = req.currency!;
         const countryCode = req.countryCode!;
         user = await prisma.user.create({
           data: {
@@ -78,14 +95,23 @@ function makeVerifyCb(provider: UserCreatedBy) {
           },
         });
 
-        console.log(chalk.green(`${getTimestamp()} Creating new user via ${provider} successful!`));
+        console.log(
+          chalk.green(
+            `${getTimestamp()} Creating new user via ${provider} successful!`,
+          ),
+        );
       }
 
       req.oAuthUser = { user };
 
       done(null, user);
     } catch (err) {
-      console.log(chalk.red(`${getTimestamp()} OAuth verification error for provider ${provider}`,err));
+      console.log(
+        chalk.red(
+          `${getTimestamp()} OAuth verification error for provider ${provider}`,
+          err,
+        ),
+      );
       done(err);
     }
   };

@@ -10,6 +10,7 @@ export const redis = createClient({ url: REDIS_URL });
     await redis.connect();
   } catch (err) {
     console.log(chalk.red(getTimestamp(), "Redis connection error: " + err));
+    process.exit(1);
   }
 })();
 

@@ -3,11 +3,11 @@ import { getProducts } from "@/lib/queries/server/productQueries";
 import { Product, ProductCategory } from "@/types/types";
 
 async function SimilarProductsSection({
-  category
+  category,
 }: {
   category: ProductCategory;
 }) {
-  let products:Product[] = [];
+  let products: Product[] = [];
 
   try {
     products = await getProducts({ category: category.name });
@@ -16,7 +16,6 @@ async function SimilarProductsSection({
   }
 
   if (!products || products.length === 0) return null;
-
 
   return <ProductsCarousel title="Similar Products" products={products} />;
 }

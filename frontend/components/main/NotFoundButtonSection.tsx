@@ -1,17 +1,17 @@
-"use client"
-import { useRouter } from "next/navigation"
-import { Button } from "../ui/button"
+"use client";
+import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 function NotFoundButtonSection() {
-    const router = useRouter()
+  const router = useRouter();
 
-    function goHome():void {
-        router.push("/")
-    }
+  function goHome(): void {
+    router.push("/");
+  }
 
-    function goBack():void {
-        router.back()
-    }
+  function goBack(): void {
+    router.back();
+  }
   return (
     <div className="w-full flex justify-center items-center gap-3 mt-4">
       <Button className="bg-foreground" variant="outline" onClick={goBack}>
@@ -24,4 +24,4 @@ function NotFoundButtonSection() {
   );
 }
 
-export default NotFoundButtonSection
+export default NotFoundButtonSection;

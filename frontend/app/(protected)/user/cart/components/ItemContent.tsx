@@ -1,8 +1,8 @@
-import RatingPreview from '@/components/main/product/Rating';
-import { CartItem } from '@/types/types'
-import Link from 'next/link';
+import RatingPreview from "@/components/main/product/Rating";
+import { CartItem } from "@/types/types";
+import Link from "next/link";
 
-function ItemContent({item}:{item:CartItem}) {
+function ItemContent({ item }: { item: CartItem }) {
   return (
     <div className="h-full flex flex-col w-2/3 pl-2">
       <Link
@@ -23,4 +23,4 @@ function ItemContent({item}:{item:CartItem}) {
   );
 }
 
-export default ItemContent
+export default ItemContent;

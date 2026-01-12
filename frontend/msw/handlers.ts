@@ -1,38 +1,44 @@
 import { API_BASE_URL } from "@/config/constants";
 import { AuthResponse } from "@/types/types";
-import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
-import { http, HttpRequestResolverExtras, HttpResponse, PathParams, ResponseResolver } from "msw";
+import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
+import {
+  http,
+  HttpRequestResolverExtras,
+  HttpResponse,
+  PathParams,
+  ResponseResolver,
+} from "msw";
 
 const loginUrl = `${API_BASE_URL}/auth/login`;
 const signupUrl = `${API_BASE_URL}/auth/signup`;
 
 const verificationData: EmailSchema = {
-  email: "John@gmail.com"
+  email: "John@gmail.com",
 };
 
 const loginData: LoginSchema = {
   email: verificationData.email,
   password: "John123",
 };
-    
+
 const signupData: SignupSchema = {
-    name: "John",
-    ...loginData,
-}
+  name: "John",
+  ...loginData,
+};
 
 const user1 = {
-    ...signupData,
-    verified: false,
-    name: "John",
-    role: "USER",
-    countryCode: "DE",
-    currency: "EUR",
-    accessToken:"accessToken"
-}
+  ...signupData,
+  verified: false,
+  name: "John",
+  role: "USER",
+  countryCode: "DE",
+  currency: "EUR",
+  accessToken: "accessToken",
+};
 
 const user2 = {
-    ...signupData,
-    email:"Boe@gmail.com",
+  ...signupData,
+  email: "Boe@gmail.com",
   verified: true,
   name: "john",
   role: "USER",
@@ -42,10 +48,10 @@ const user2 = {
 };
 
 const users: {
-    name: string,
-    email: string,
-    accessToken: string,
-    verified:boolean
+  name: string;
+  email: string;
+  accessToken: string;
+  verified: boolean;
 }[] = [user1, user2];
 
 const handleLogin: ResponseResolver<
@@ -65,7 +71,7 @@ const handleLogin: ResponseResolver<
   if (existingUser && !existingUser.verified) {
     return HttpResponse.json(
       { message: "account not verified yet" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -96,7 +102,7 @@ const handleSignup: ResponseResolver<
   if (userExists) {
     return HttpResponse.json(
       { message: "User with that email already exists" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -107,5 +113,5 @@ const handleSignup: ResponseResolver<
 
 export const handlers = [
   http.post(loginUrl, handleLogin),
-    http.post(signupUrl, handleSignup),
+  http.post(signupUrl, handleSignup),
 ];

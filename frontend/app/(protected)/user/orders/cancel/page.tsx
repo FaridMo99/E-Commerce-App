@@ -1,16 +1,19 @@
-import { notFound } from "next/navigation"
-import "server-only"
-import Screen from "./Screen"
+import { notFound } from "next/navigation";
+import "server-only";
+import Screen from "./Screen";
 
-async function page({ searchParams }: { searchParams?: { cancelOrderId: string } }) {
-  
-  const params = await searchParams
+async function page({
+  searchParams,
+}: {
+  searchParams?: { cancelOrderId: string };
+}) {
+  const params = await searchParams;
   const cancelOrderId = params?.cancelOrderId;
   console.log(cancelOrderId);
 
-  if (!cancelOrderId) return notFound()
-console.log(cancelOrderId)
-  return <Screen cancelOrderId={ cancelOrderId } />
+  if (!cancelOrderId) return notFound();
+  console.log(cancelOrderId);
+  return <Screen cancelOrderId={cancelOrderId} />;
 }
 
-export default page
+export default page;

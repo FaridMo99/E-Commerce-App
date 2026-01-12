@@ -1,19 +1,29 @@
-import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
+import type {
+  ProductsMetaInfosQuerySchema,
+  ProductsQuerySchema,
+  ReviewSchema,
+} from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { API_BASE_URL } from "@/config/constants";
-import { AccessToken, AdminProduct, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
+import {
+  AccessToken,
+  AdminProduct,
+  AuthProductReview,
+  HomeProducts,
+  Product,
+  ProductMetaInfos,
+  ProductReview,
+} from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
-
 
 export async function getProducts(
   queryParam?: ProductsQuerySchema,
 ): Promise<Product[]> {
-
   const params = new URLSearchParams();
 
   if (queryParam) {
-      params.set("page", String(queryParam.page ?? 1));
-      params.set("limit", String(queryParam.limit ?? 10));
+    params.set("page", String(queryParam.page ?? 1));
+    params.set("limit", String(queryParam.limit ?? 10));
     if (queryParam.search) params.set("search", queryParam.search);
     if (queryParam.category) params.set("category", queryParam.category);
     if (queryParam.minPrice !== undefined)
@@ -35,7 +45,7 @@ export async function getProducts(
 }
 
 export async function getProductsAdmin(
-    accessToken:AccessToken,
+  accessToken: AccessToken,
   queryParam?: ProductsQuerySchema,
 ): Promise<AdminProduct[]> {
   const params = new URLSearchParams();
@@ -67,9 +77,8 @@ export async function getProductsAdmin(
 }
 
 export async function getProductsMetaInfos(
-  queryParams?: ProductsMetaInfosQuerySchema
+  queryParams?: ProductsMetaInfosQuerySchema,
 ): Promise<ProductMetaInfos> {
-
   const params = new URLSearchParams();
 
   if (queryParams) {
@@ -96,15 +105,15 @@ export async function getProductsMetaInfos(
 }
 
 export async function getProductByProductId(id: string): Promise<Product> {
-
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
   });
   return await handleResponse(res);
 }
 
-export async function getAllProductReviewsByProductId(id: string): Promise<ProductReview[]> {
-
+export async function getAllProductReviewsByProductId(
+  id: string,
+): Promise<ProductReview[]> {
   const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`);
   return await handleResponse(res);
 }
@@ -112,9 +121,8 @@ export async function getAllProductReviewsByProductId(id: string): Promise<Produ
 export async function createProductReviewByProductId(
   id: string,
   content: ReviewSchema,
-  accessToken:AccessToken
+  accessToken: AccessToken,
 ): Promise<AuthProductReview[]> {
-
   const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
@@ -128,8 +136,9 @@ export async function createProductReviewByProductId(
   return await handleResponse(res);
 }
 
-export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
-  
+export async function getHomeProducts(
+  accessToken?: AccessToken,
+): Promise<HomeProducts> {
   const res = await fetch(`${API_BASE_URL}/products/home`, {
     credentials: "include",
     headers: {

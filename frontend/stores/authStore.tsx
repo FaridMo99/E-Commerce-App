@@ -1,16 +1,16 @@
 import type { AccessToken, AuthUser, User } from "@/types/types";
 import { create } from "zustand";
 
-export type ZustandUser = null | User | AuthUser
-export type ZustandToken = null | AccessToken
+export type ZustandUser = null | User | AuthUser;
+export type ZustandToken = null | AccessToken;
 
 type AuthStore = {
   user: ZustandUser;
   accessToken: ZustandToken;
   clearState: () => void;
   setAccessToken: (accessToken: AccessToken) => void;
-  setUser: (user: User) => void
-  setState:(accessToken:ZustandToken,user:ZustandUser)=>void
+  setUser: (user: User) => void;
+  setState: (accessToken: ZustandToken, user: ZustandUser) => void;
 };
 
 const useAuth = create<AuthStore>((set) => ({
@@ -20,14 +20,14 @@ const useAuth = create<AuthStore>((set) => ({
     set({ user: null, accessToken: null });
   },
   setAccessToken: (accessToken) => {
-    set({accessToken})
+    set({ accessToken });
   },
   setUser: (user) => {
-    set({user})
+    set({ user });
   },
   setState: (accessToken, user) => {
-    set({accessToken,user})
-  }
+    set({ accessToken, user });
+  },
 }));
 
 export default useAuth;

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
 import Zoom, {
   type ControlledProps,
   type UncontrolledProps,
-} from 'react-medium-image-zoom';
-import { cn } from '@/lib/utils';
+} from "react-medium-image-zoom";
+import { cn } from "@/lib/utils";
 
 export type ImageZoomProps = UncontrolledProps & {
-  isZoomed?: ControlledProps['isZoomed'];
-  onZoomChange?: ControlledProps['onZoomChange'];
+  isZoomed?: ControlledProps["isZoomed"];
+  onZoomChange?: ControlledProps["onZoomChange"];
   className?: string;
   backdropClassName?: string;
 };
@@ -31,7 +31,7 @@ export const ImageZoom = ({
       '[&_[data-rmiz-content="found"]_svg]:cursor-zoom-in',
       '[&_[data-rmiz-content="found"]_[role="img"]]:cursor-zoom-in',
       '[&_[data-rmiz-content="found"]_[data-zoom]]:cursor-zoom-in',
-      className
+      className,
     )}
   >
     <Zoom
@@ -44,7 +44,7 @@ export const ImageZoom = ({
         "[&_[data-rmiz-modal-content]]:relative [&_[data-rmiz-modal-content]]:size-full",
         "[&_[data-rmiz-modal-img]]:absolute [&_[data-rmiz-modal-img]]:origin-top-left [&_[data-rmiz-modal-img]]:cursor-zoom-out [&_[data-rmiz-modal-img]]:transition-transform",
         "motion-reduce:[&_[data-rmiz-modal-img]]:transition-none motion-reduce:[&_[data-rmiz-modal-overlay]]:transition-none",
-        backdropClassName
+        backdropClassName,
       )}
       {...props}
     />

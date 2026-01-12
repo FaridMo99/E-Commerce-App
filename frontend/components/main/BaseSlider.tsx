@@ -1,10 +1,10 @@
-"use client"
-import { ReactNode } from 'react'
-import Slider, { type Settings } from 'react-slick';
+"use client";
+import { ReactNode } from "react";
+import Slider, { type Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-export   const settings: Settings = {
+export const settings: Settings = {
   slidesToShow: 5,
   slidesToScroll: 1,
   swipe: true,
@@ -19,13 +19,8 @@ export   const settings: Settings = {
   ],
 };
 
-function BaseSlider({children}:{children:ReactNode}) {
-
-  return (
-    <Slider {...settings}>
-        {children}
-    </Slider>
-  );
+function BaseSlider({ children }: { children: ReactNode }) {
+  return <Slider {...settings}>{children}</Slider>;
 }
 
-export default BaseSlider
+export default BaseSlider;

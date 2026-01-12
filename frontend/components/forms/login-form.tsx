@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { LoginSchema, loginSchema } from "@monorepo/shared";
+import { type LoginSchema, loginSchema } from "@monorepo/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
 import useAuth from "@/stores/authStore";

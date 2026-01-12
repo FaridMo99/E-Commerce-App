@@ -1,9 +1,9 @@
-import { ReviewCardProps } from './ReviewCard'
-import RatingPreview from '@/components/main/product/Rating';
-import DeleteButton from './DeleteButton';
-import TogglePublicButton from './TogglePublicButton';
+import { ReviewCardProps } from "./ReviewCard";
+import RatingPreview from "@/components/main/product/Rating";
+import DeleteButton from "./DeleteButton";
+import TogglePublicButton from "./TogglePublicButton";
 
-function ReviewCardInfo({review}:ReviewCardProps) {
+function ReviewCardInfo({ review }: ReviewCardProps) {
   return (
     <div className="flex flex-col items-center justify-between h-full">
       <RatingPreview rating={review.rating} />
@@ -15,4 +15,4 @@ function ReviewCardInfo({review}:ReviewCardProps) {
   );
 }
 
-export default ReviewCardInfo
+export default ReviewCardInfo;

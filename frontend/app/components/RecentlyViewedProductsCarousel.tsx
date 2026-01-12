@@ -8,7 +8,6 @@ import useAuth from "@/stores/authStore";
 import ProductCard from "@/components/main/product/ProductCard";
 import SectionWrapper from "@/components/main/SectionWrapper";
 
-
 function RecentlyViewedProductsCarousel() {
   const accessToken = useAuth((state) => state.accessToken);
 

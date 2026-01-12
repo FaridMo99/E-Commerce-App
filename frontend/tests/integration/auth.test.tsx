@@ -9,7 +9,7 @@ vi.mock("sonner", async (importOriginal) => {
     },
   };
 });
-import { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
+import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import useAuth from "@/stores/authStore";
@@ -41,7 +41,7 @@ const loginData: LoginSchema = {
 const signupData: SignupSchema = {
   name: "John",
   password: loginData.password,
-  email:"Jorge@gmail.com"
+  email: "Jorge@gmail.com",
 };
 
 const mockPush = vi.fn();
@@ -70,7 +70,6 @@ const mockRouter: AppRouterInstance = {
 };
 
 describe("Login Integration Tests", () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useRouter).mockReturnValue(mockRouter);
@@ -83,7 +82,7 @@ describe("Login Integration Tests", () => {
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <LoginForm />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
   it("should update auth store and redirect on successful login", async () => {
@@ -111,13 +110,12 @@ describe("Login Integration Tests", () => {
     await user.click(screen.getByTestId("submitButton"));
 
     expect(
-      await screen.findByText(/account not verified yet/i)
+      await screen.findByText(/account not verified yet/i),
     ).toBeInTheDocument();
   });
 });
 
 describe("Signup Tests", () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useRouter).mockReturnValue(mockRouter);
@@ -130,7 +128,7 @@ describe("Signup Tests", () => {
       <QueryClientProvider client={queryClient}>
         <Toaster />
         <SignupForm />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
   it("should successfully sign up a new user and redirect", async () => {
@@ -142,12 +140,17 @@ describe("Signup Tests", () => {
     await user.type(screen.getByLabelText(/^name/i), signupData.name);
     await user.type(screen.getByLabelText(/^email/i), signupData.email);
     await user.type(screen.getByLabelText(/^password/i), signupData.password);
-    await user.type(screen.getByLabelText(/confirm password/i), signupData.password);
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      signupData.password,
+    );
 
     await user.click(screen.getByTestId("submitButton"));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Signup successful. Check your E-Mails and follow the link");
+      expect(toast.success).toHaveBeenCalledWith(
+        "Signup successful. Check your E-Mails and follow the link",
+      );
       expect(mockPush).toHaveBeenCalledWith("/");
     });
   });
@@ -159,13 +162,16 @@ describe("Signup Tests", () => {
     await user.type(screen.getByLabelText(/^name/i), signupData.name);
     await user.type(screen.getByLabelText(/^email/i), "John@gmail.com");
     await user.type(screen.getByLabelText(/^password/i), signupData.password);
-    await user.type(screen.getByLabelText(/confirm password/i), signupData.password);
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      signupData.password,
+    );
 
     await user.click(screen.getByTestId("submitButton"));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "User with that email already exists"
+        "User with that email already exists",
       );
     });
   });

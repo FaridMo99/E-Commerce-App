@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/select";
 
 export type SingleSelectItem = {
-    value: string,
-    title:string
-}
+  value: string;
+  title: string;
+};
 
 type SidebarSelectProps = {
   valueChangeHandler: (value: string) => void;
@@ -21,14 +21,15 @@ type SidebarSelectProps = {
   selectItems: SingleSelectItem[];
 };
 
-
-
-function SidebarSelect({valueChangeHandler,placeholder,label,selectItems, value}:SidebarSelectProps) {
+function SidebarSelect({
+  valueChangeHandler,
+  placeholder,
+  label,
+  selectItems,
+  value,
+}: SidebarSelectProps) {
   return (
-    <Select
-      value={value}
-      onValueChange={valueChangeHandler}
-    >
+    <Select value={value} onValueChange={valueChangeHandler}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -36,7 +37,9 @@ function SidebarSelect({valueChangeHandler,placeholder,label,selectItems, value}
         <SelectGroup>
           <SelectLabel>{label}</SelectLabel>
           {selectItems.map((item) => (
-              <SelectItem key={item.value} value={item.value}>{item.title}</SelectItem>
+            <SelectItem key={item.value} value={item.value}>
+              {item.title}
+            </SelectItem>
           ))}
         </SelectGroup>
       </SelectContent>
@@ -44,4 +47,4 @@ function SidebarSelect({valueChangeHandler,placeholder,label,selectItems, value}
   );
 }
 
-export default SidebarSelect
+export default SidebarSelect;

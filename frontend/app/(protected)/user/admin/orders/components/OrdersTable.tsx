@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
@@ -12,7 +12,10 @@ import {
   TableProvider,
   TableRow,
 } from "@/components/ui/shadcn-io/table";
-import { OrdersQuerySchema, TimeframeQuerySchema } from "@monorepo/shared";
+import type {
+  OrdersQuerySchema,
+  TimeframeQuerySchema,
+} from "@monorepo/shared";
 import { Order } from "@/types/types";
 import LoadingPage from "@/components/main/LoadingPage";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,7 +25,6 @@ import ButtonPagination from "./ButtonPagination";
 import { User2 } from "lucide-react";
 import ShowOrderButton from "./ShowOrderButton";
 import ChangeTimeframeDropdown from "./Timeframe";
-
 
 export default function OrdersTable() {
   const accessToken = useAuth((state) => state.accessToken);
@@ -136,9 +138,7 @@ export default function OrdersTable() {
     {
       id: "showOrder",
       header: () => <span>Show Order</span>,
-      cell: ({ row }) => (
-            <ShowOrderButton order={row.original}/>
-      ),
+      cell: ({ row }) => <ShowOrderButton order={row.original} />,
     },
   ];
 

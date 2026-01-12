@@ -1,6 +1,6 @@
-import { ProductViewProps } from './ProductView'
+import { ProductViewProps } from "./ProductView";
 
-function ProductViewContent({product}:ProductViewProps) {
+function ProductViewContent({ product }: ProductViewProps) {
   return (
     <div className="h-full flex flex-col w-2/3 pl-2">
       <h2 className="text-lg font-bold mt-4 truncate">{product.name}</h2>
@@ -11,4 +11,4 @@ function ProductViewContent({product}:ProductViewProps) {
   );
 }
 
-export default ProductViewContent
+export default ProductViewContent;

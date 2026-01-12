@@ -1,9 +1,7 @@
 import LoadingPage from "@/components/main/LoadingPage";
 
 function loading() {
-  return (
-    <LoadingPage />
-  );
+  return <LoadingPage />;
 }
 
 export default loading;

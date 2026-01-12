@@ -22,7 +22,7 @@ const mailjet = new Mailjet.Client({
 export async function sendVerificationEmail(
   receiver: string,
   url: UrlType,
-  token: string
+  token: string,
 ): Promise<Mailjet.LibraryResponse<RequestData>> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 
@@ -81,7 +81,7 @@ export async function sendVerificationEmail(
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Sending ${url} email to: ${receiver}...`)
+      chalk.yellow(`${getTimestamp()} Sending ${url} email to: ${receiver}...`),
     );
     const request = await mailjet
       .post("send", { version: "v3.1" })
@@ -89,15 +89,15 @@ export async function sendVerificationEmail(
 
     console.log(
       chalk.green(
-        `${getTimestamp()} ${url} email successfully sent to: ${receiver}`
-      )
+        `${getTimestamp()} ${url} email successfully sent to: ${receiver}`,
+      ),
     );
 
     return request;
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to send email to: ${receiver}`),
-      err
+      err,
     );
     throw err;
   }
@@ -105,7 +105,7 @@ export async function sendVerificationEmail(
 
 export async function sendOrderEmail(
   receiver: string,
-  order: OrderWithSelectedFields
+  order: OrderWithSelectedFields,
 ): Promise<Mailjet.LibraryResponse<RequestData>> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
 
@@ -120,14 +120,14 @@ export async function sendOrderEmail(
         <td style="padding:8px; text-align:center;">${item.quantity}</td>
         <td style="padding:8px; text-align:right;">${formatPriceForClient(item.price_at_purchase)}</td>
       </tr>
-    `
+    `,
     )
     .join("");
 
   const orderItemsText = order.items
     .map(
       (item) =>
-        `${item.product.name} x${item.quantity} - ${formatPriceForClient(item.price_at_purchase)}`
+        `${item.product.name} x${item.quantity} - ${formatPriceForClient(item.price_at_purchase)}`,
     )
     .join("\n");
 
@@ -185,31 +185,31 @@ The ${CLIENT_ORIGIN} Team
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Sending order email to: ${receiver}, order ID: ${order.id}`
-      )
+        `${getTimestamp()} Sending order email to: ${receiver}, order ID: ${order.id}`,
+      ),
     );
     const request = await mailjet
       .post("send", { version: "v3.1" })
       .request(data);
     console.log(
       chalk.green(
-        `${getTimestamp()} Order email successfully sent to: ${receiver}, order ID: ${order.id}`
-      )
+        `${getTimestamp()} Order email successfully sent to: ${receiver}, order ID: ${order.id}`,
+      ),
     );
     return request;
   } catch (err) {
     console.log(
       chalk.red(
-        `${getTimestamp()} Failed to send order email to: ${receiver}, order ID: ${order.id}`
+        `${getTimestamp()} Failed to send order email to: ${receiver}, order ID: ${order.id}`,
       ),
-      err
+      err,
     );
     throw err;
   }
 }
 
 export async function notifyAdmin(
-  about: string
+  about: string,
 ): Promise<Mailjet.LibraryResponse<any> | void> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
   const subject = `Admin Notification - ${CLIENT_ORIGIN}`;
@@ -221,7 +221,7 @@ export async function notifyAdmin(
   } catch (err) {
     console.log(
       chalk.red(`${getTimestamp()} Failed to fetch admin from DB`),
-      err
+      err,
     );
     adminEmail = DEV_EMAIL_FALLBACK_IF_NO_ADMIN;
   }
@@ -229,8 +229,8 @@ export async function notifyAdmin(
   if (!adminEmail) {
     console.log(
       chalk.red(
-        `${getTimestamp()} No admin email configured, skipping notification.`
-      )
+        `${getTimestamp()} No admin email configured, skipping notification.`,
+      ),
     );
     return;
   }
@@ -262,24 +262,24 @@ Sent from ${CLIENT_ORIGIN}`;
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Sending admin notification to: ${adminEmail}...`
-      )
+        `${getTimestamp()} Sending admin notification to: ${adminEmail}...`,
+      ),
     );
     const request = await mailjet
       .post("send", { version: "v3.1" })
       .request(data);
     console.log(
       chalk.green(
-        `${getTimestamp()} Admin notification sent successfully to: ${adminEmail}`
-      )
+        `${getTimestamp()} Admin notification sent successfully to: ${adminEmail}`,
+      ),
     );
     return request;
   } catch (err) {
     console.log(
       chalk.red(
-        `${getTimestamp()} Failed to send admin notification to: ${adminEmail}`
+        `${getTimestamp()} Failed to send admin notification to: ${adminEmail}`,
       ),
-      err
+      err,
     );
     throw err;
   }
@@ -287,75 +287,74 @@ Sent from ${CLIENT_ORIGIN}`;
 
 export async function notifyUser(
   userId: string,
-  subject:string,
-  content: string
+  subject: string,
+  content: string,
 ): Promise<Mailjet.LibraryResponse<any> | void> {
   const senderName = `The ${CLIENT_ORIGIN} Team`;
-    try {
-      const user = await prisma.user.findFirst({
-        where: {
-          id:userId
-        }
-       });
-      const email = user?.email;
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+    const email = user?.email;
 
-      if (!email) return console.log(chalk.red(`${getTimestamp()} No admin email configured, skipping notification.`))
-      
-        const htmlPart = `
+    if (!email)
+      return console.log(
+        chalk.red(
+          `${getTimestamp()} No admin email configured, skipping notification.`,
+        ),
+      );
+
+    const htmlPart = `
           <h2>Notification 👋</h2>
           <p>${content}</p>
           <p>Sent from ${CLIENT_ORIGIN}</p>`;
 
-        const textPart = `
+    const textPart = `
           Notification
 
           ${content}
 
           Sent from ${CLIENT_ORIGIN}`;
 
-        const data = {
-          Messages: [
-            {
-              From: { Email: EMAIL_ADDRESS, Name: senderName },
-              To: [{ Email: email }],
-              Subject: subject,
-              TextPart: textPart,
-              HTMLPart: htmlPart,
-            },
-          ],
-        };
-      
-          try {
-            console.log(
-              chalk.yellow(
-                `${getTimestamp()} Sending notification to: ${email}...`
-              )
-            );
-            const request = await mailjet
-              .post("send", { version: "v3.1" })
-              .request(data);
-            console.log(
-              chalk.green(
-                `${getTimestamp()} Notification sent successfully to: ${email}`
-              )
-            );
-            return request;
-          } catch (err) {
-            console.log(
-              chalk.red(
-                `${getTimestamp()} Failed to send Notification to: ${email}`
-              ),
-              err
-            );
-            throw err;
-          }
+    const data = {
+      Messages: [
+        {
+          From: { Email: EMAIL_ADDRESS, Name: senderName },
+          To: [{ Email: email }],
+          Subject: subject,
+          TextPart: textPart,
+          HTMLPart: htmlPart,
+        },
+      ],
+    };
 
+    try {
+      console.log(
+        chalk.yellow(`${getTimestamp()} Sending notification to: ${email}...`),
+      );
+      const request = await mailjet
+        .post("send", { version: "v3.1" })
+        .request(data);
+      console.log(
+        chalk.green(
+          `${getTimestamp()} Notification sent successfully to: ${email}`,
+        ),
+      );
+      return request;
     } catch (err) {
       console.log(
-        chalk.red(`${getTimestamp()} Failed to fetch user from DB`),
-        err
+        chalk.red(`${getTimestamp()} Failed to send Notification to: ${email}`),
+        err,
       );
-      throw err
+      throw err;
     }
-
+  } catch (err) {
+    console.log(
+      chalk.red(`${getTimestamp()} Failed to fetch user from DB`),
+      err,
+    );
+    throw err;
+  }
 }

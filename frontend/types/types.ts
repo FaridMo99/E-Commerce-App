@@ -1,5 +1,8 @@
-import { changePasswordAuthenticatedSchema, changePasswordSchema } from "@/schemas/schemas";
-import { DailyRevenue } from "@monorepo/shared";
+import {
+  changePasswordAuthenticatedSchema,
+  changePasswordSchema,
+} from "@/schemas/schemas";
+import type { DailyRevenue } from "@monorepo/shared";
 import { LucideIcon } from "lucide-react";
 import { ReactNode } from "react";
 import z from "zod";
@@ -11,32 +14,41 @@ export type AccessToken = string;
 export type OAuthProvider = "google";
 
 export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
-export type ChangePasswordAuthenticatedSchema = z.infer<typeof changePasswordAuthenticatedSchema>;
-
+export type ChangePasswordAuthenticatedSchema = z.infer<
+  typeof changePasswordAuthenticatedSchema
+>;
 
 //prisma enums
-export type OrderStatus = "PENDING" | "CANCELLED" | "ORDERED" | "DELIVERING" | "DELIVERED"
-export type PaymentStatus =  "PENDING" | "CANCELLED" | "COMPLETED" | "FAILED"
-export type PaymentMethod = "CARD" | "PAYPAL" | "GIROPAY" | "KLARNA"
+export type OrderStatus =
+  | "PENDING"
+  | "CANCELLED"
+  | "ORDERED"
+  | "DELIVERING"
+  | "DELIVERED";
+export type PaymentStatus = "PENDING" | "CANCELLED" | "COMPLETED" | "FAILED";
+export type PaymentMethod = "CARD" | "PAYPAL" | "GIROPAY" | "KLARNA";
 export type CurrencyISO = "EUR" | "USD" | "GBP";
-
-
 
 //frontend types for return of api
 export type UserRole = "ADMIN" | "USER";
-export type User = { name: string; role: UserRole, countryCode:string, currency:CurrencyISO };
+export type User = {
+  name: string;
+  role: UserRole;
+  countryCode: string;
+  currency: CurrencyISO;
+};
 export type AuthResponse = { accessToken: AccessToken; user: User };
 
 export type ProductCategory = {
-    id: string,
-    name:string
-}
+  id: string;
+  name: string;
+};
 
 export type CartItem = {
   quantity: number;
   id: string;
   product: Product;
-  total:number
+  total: number;
 };
 
 export type Product = {
@@ -59,9 +71,9 @@ export type Product = {
 
 export type OrderItem = {
   price_at_purchase: true;
-  quantity:number;
+  quantity: number;
   currency: CurrencyISO;
-  product:Product
+  product: Product;
 };
 
 export type AdminProduct = Product & { is_public: boolean };
@@ -74,37 +86,37 @@ export type ProductMetaInfos = {
 };
 
 export type Order = {
-    id: string,
-    ordered_at: Date,
-    status: OrderStatus,
-    total_amount: number,
-    currency: CurrencyISO,
-    shipping_address: string | null,
-    items: OrderItem[],
-    user:AuthUser,
-    payment: {
-        method:PaymentMethod,
-        status:PaymentStatus
-    } | null
+  id: string;
+  ordered_at: Date;
+  status: OrderStatus;
+  total_amount: number;
+  currency: CurrencyISO;
+  shipping_address: string | null;
+  items: OrderItem[];
+  user: AuthUser;
+  payment: {
+    method: PaymentMethod;
+    status: PaymentStatus;
+  } | null;
 };
 
 export type Cart = {
-    id: string,
-  items: CartItem[]
-    total:number
+  id: string;
+  items: CartItem[];
+  total: number;
 };
-    
+
 export type ProductReview = {
   id: string;
   product_id: string;
   product: {
-    name: string
+    name: string;
     category: {
-      name:string
-    }
-  },
-  user: {
       name: string;
+    };
+  };
+  user: {
+    name: string;
   };
   title: string;
   content: string | null;
@@ -119,8 +131,6 @@ export type HomeProducts = {
   categoryProducts: Product[];
 };
 
-
-
 export type AuthUser = User & {
   birthdate: Date | null;
   created_at: Date;
@@ -130,14 +140,13 @@ export type AuthUser = User & {
   city: string | null;
   state: string | null;
   postalCode: string | null;
-  createdBy: "SELF" | "GOOGLE"
-  hasPassword:boolean //can only be false if createdby is not self
+  createdBy: "SELF" | "GOOGLE";
+  hasPassword: boolean; //can only be false if createdby is not self
 };
 
 export type AuthProductReview = ProductReview & {
-    is_public:boolean
-}
-
+  is_public: boolean;
+};
 
 export type AdminSetting = {
   key: string;
@@ -153,16 +162,16 @@ export type AdminRevenue = DailyRevenue[] & {
 };
 
 export type AdminNewUser = {
-    count: number
+  count: number;
 };
 export type AdminTopseller = {
-    product: {
-        id: string;
-        name: string;
-        imageUrls:string[]
-    };
-    totalSold: number;
-}
+  product: {
+    id: string;
+    name: string;
+    imageUrls: string[];
+  };
+  totalSold: number;
+};
 
 //utility nextjs type
 export type SearchParams = Record<string, string | string[] | undefined>;

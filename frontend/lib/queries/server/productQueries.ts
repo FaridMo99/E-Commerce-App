@@ -1,21 +1,31 @@
-"use server"
-import { ProductsMetaInfosQuerySchema, ProductsQuerySchema, ReviewSchema } from "@monorepo/shared";
+"use server";
+import type {
+  ProductsMetaInfosQuerySchema,
+  ProductsQuerySchema,
+  ReviewSchema,
+} from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { API_BASE_URL } from "@/config/constants";
-import { AccessToken, AuthProductReview, HomeProducts, Product, ProductMetaInfos, ProductReview } from "@/types/types";
+import {
+  AccessToken,
+  AuthProductReview,
+  HomeProducts,
+  Product,
+  ProductMetaInfos,
+  ProductReview,
+} from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
-
 
 export async function getProducts(
   queryParams?: ProductsQuerySchema,
 ): Promise<Product[]> {
-  const additionalHeaders = await getAllHeaders()
+  const additionalHeaders = await getAllHeaders();
 
   const params = new URLSearchParams();
 
   if (queryParams) {
-      params.set("page", String(queryParams.page ?? 1));
-      params.set("limit", String(queryParams.limit ?? 10));
+    params.set("page", String(queryParams.page ?? 1));
+    params.set("limit", String(queryParams.limit ?? 10));
     if (queryParams.search) params.set("search", queryParams.search);
     if (queryParams.category) params.set("category", queryParams.category);
     if (queryParams.minPrice !== undefined)
@@ -40,7 +50,7 @@ export async function getProducts(
 }
 
 export async function getProductsMetaInfos(
-  queryParams?: ProductsMetaInfosQuerySchema
+  queryParams?: ProductsMetaInfosQuerySchema,
 ): Promise<ProductMetaInfos> {
   const additionalHeaders = await getAllHeaders();
 
@@ -73,7 +83,7 @@ export async function getProductsMetaInfos(
 }
 
 export async function getProductByProductId(id: string): Promise<Product> {
-    const additionalHeaders = await getAllHeaders();
+  const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${API_BASE_URL}/products/${id}`, {
     credentials: "include",
@@ -84,8 +94,10 @@ export async function getProductByProductId(id: string): Promise<Product> {
   return await handleResponse(res);
 }
 
-export async function getAllProductReviewsByProductId(id: string): Promise<ProductReview[]> {
-    const additionalHeaders = await getAllHeaders();
+export async function getAllProductReviewsByProductId(
+  id: string,
+): Promise<ProductReview[]> {
+  const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
     headers: {
@@ -98,7 +110,7 @@ export async function getAllProductReviewsByProductId(id: string): Promise<Produ
 export async function createProductReviewByProductId(
   id: string,
   content: ReviewSchema,
-  accessToken:AccessToken
+  accessToken: AccessToken,
 ): Promise<AuthProductReview[]> {
   const [additionalHeaders, csrfHeader] = await Promise.all([
     getAllHeaders(),
@@ -112,14 +124,16 @@ export async function createProductReviewByProductId(
       "Content-Type": "application/json",
       ...csrfHeader,
       Authorization: `Bearer ${accessToken}`,
-      ...additionalHeaders
+      ...additionalHeaders,
     },
     body: JSON.stringify(content),
   });
   return await handleResponse(res);
 }
 
-export async function getHomeProducts(accessToken?: AccessToken): Promise<HomeProducts> {
+export async function getHomeProducts(
+  accessToken?: AccessToken,
+): Promise<HomeProducts> {
   const additionalHeaders = await getAllHeaders();
   console.log(additionalHeaders);
   const res = await fetch(`${API_BASE_URL}/products/home`, {

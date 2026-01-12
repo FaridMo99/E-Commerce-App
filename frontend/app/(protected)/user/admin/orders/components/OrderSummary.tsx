@@ -34,8 +34,8 @@ function OrderSummary({ order }: { order: Order }) {
           Order Summary
         </h2>
         <p>
-          <span className="font-semibold">Total Price:</span> {order.total_amount}{" "}
-          {order.items[0]?.product.currency}
+          <span className="font-semibold">Total Price:</span>{" "}
+          {order.total_amount} {order.items[0]?.product.currency}
         </p>
         <p>
           <span className="font-semibold">Ordered At:</span>{" "}

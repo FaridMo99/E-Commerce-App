@@ -12,9 +12,8 @@ import {
   TableProvider,
   TableRow,
 } from "@/components/ui/shadcn-io/table";
-
 import { getProductsAdmin } from "@/lib/queries/client/productQueries";
-import { ProductsQuerySchema } from "@monorepo/shared";
+import type { ProductsQuerySchema } from "@monorepo/shared";
 import { AdminProduct } from "@/types/types";
 import LoadingPage from "@/components/main/LoadingPage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,23 +23,21 @@ import DeleteProduct from "./DeleteProduct";
 import { EditProduct } from "./EditProduct";
 import useAuth from "@/stores/authStore";
 
-
 export default function ProductsTable() {
-  const accessToken = useAuth(state => state.accessToken)
+  const accessToken = useAuth((state) => state.accessToken);
   const [queryParams, setQueryParams] = useState<ProductsQuerySchema>({
     page: 1,
     limit: 20,
     sortBy: "name",
     sortOrder: "asc",
-    search:""
+    search: "",
   });
 
-
-  const { data:products, isLoading  } = useQuery({
+  const { data: products, isLoading } = useQuery({
     queryKey: ["get admin products", queryParams],
     queryFn: () => getProductsAdmin(accessToken!, queryParams),
-    placeholderData: pre => pre,
-    enabled:!!accessToken
+    placeholderData: (pre) => pre,
+    enabled: !!accessToken,
   });
 
   const columns: ColumnDef<AdminProduct>[] = [
@@ -114,7 +111,9 @@ export default function ProductsTable() {
         <TableColumnHeader column={column} title="Public" />
       ),
       cell: ({ row }) => (
-        <span className={row.original.is_public ? "text-green-600" : "text-red-600"}>
+        <span
+          className={row.original.is_public ? "text-green-600" : "text-red-600"}
+        >
           {row.original.is_public ? "Yes" : "No"}
         </span>
       ),
@@ -128,43 +127,46 @@ export default function ProductsTable() {
         return (
           <section className="flex items-center gap-3 pl-4">
             <EditProduct product={product} />
-            <DeleteProduct product={product}/>
+            <DeleteProduct product={product} />
           </section>
         );
       },
     },
   ];
 
-  if (isLoading)
-    return <LoadingPage />;
+  if (isLoading) return <LoadingPage />;
 
-  if(!products) return <p>No Products found</p>
+  if (!products) return <p>No Products found</p>;
 
   return (
     <>
-      <HeadSection queryParams={queryParams} setQueryParams={setQueryParams}/>
+      <HeadSection queryParams={queryParams} setQueryParams={setQueryParams} />
       <TableProvider
         className="bg-backgroundBright rounded-lg overflow-clip"
         columns={columns}
         data={products}
       >
-          <TableHeader className="pl-2">
-            {({ headerGroup }) => (
-              <TableHeaderGroup headerGroup={headerGroup} key={headerGroup.id}>
-                {({ header }) => <TableHead header={header} key={header.id} />}
-              </TableHeaderGroup>
-            )}
-          </TableHeader>
+        <TableHeader className="pl-2">
+          {({ headerGroup }) => (
+            <TableHeaderGroup headerGroup={headerGroup} key={headerGroup.id}>
+              {({ header }) => <TableHead header={header} key={header.id} />}
+            </TableHeaderGroup>
+          )}
+        </TableHeader>
 
-          <TableBody>
-            {({ row }) => (
-              <TableRow key={row.id} row={row}>
-                {({ cell }) => <TableCell cell={cell} key={cell.id} />}
-              </TableRow>
-            )}
-          </TableBody>
-        </TableProvider>
-        <ButtonPagination queryParams={queryParams} setQueryParams={setQueryParams} length={products.length}/>
+        <TableBody>
+          {({ row }) => (
+            <TableRow key={row.id} row={row}>
+              {({ cell }) => <TableCell cell={cell} key={cell.id} />}
+            </TableRow>
+          )}
+        </TableBody>
+      </TableProvider>
+      <ButtonPagination
+        queryParams={queryParams}
+        setQueryParams={setQueryParams}
+        length={products.length}
+      />
     </>
   );
 }

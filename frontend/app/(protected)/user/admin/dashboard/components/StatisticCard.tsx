@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type StatisticCardProps = {
-  title: string
-  isError: boolean
-  isLoading: boolean,
-  statistic: string | number | undefined
+  title: string;
+  isError: boolean;
+  isLoading: boolean;
+  statistic: string | number | undefined;
 };
 
 function StatisticCard({
@@ -14,11 +14,10 @@ function StatisticCard({
   isLoading,
   statistic,
 }: StatisticCardProps) {
-
-  const sharedSizes = "md:w-[20%] w-[30%] min-w-30 h-40 my-10"
+  const sharedSizes = "md:w-[20%] w-[30%] min-w-30 h-40 my-10";
 
   if (isLoading) return <Skeleton className={sharedSizes} />;
-  
+
   return (
     <Card className={`bg-backgroundBright border ${sharedSizes}`}>
       <CardHeader className="font-extrabold text-lg text-center">

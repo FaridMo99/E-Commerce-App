@@ -15,19 +15,30 @@ import { ReactNode, useRef } from "react";
 import { toast } from "sonner";
 
 type CategoryButtonProps<T, U> = {
-    mutationKey: string[];
-    mutationFn: (args: U) => Promise<T>;
-    mutationArgs: U;
-    invalidQueries: string[];
-    successMessage: string;
-    buttonText: string;
-    title: string;
-    children: ReactNode;
-    submitButtonText: string;
-    categoryLength: number;
-};  
+  mutationKey: string[];
+  mutationFn: (args: U) => Promise<T>;
+  mutationArgs: U;
+  invalidQueries: string[];
+  successMessage: string;
+  buttonText: string;
+  title: string;
+  children: ReactNode;
+  submitButtonText: string;
+  categoryLength: number;
+};
 
-export function CategoryButton<T,U>({mutationKey,mutationFn, mutationArgs, invalidQueries, successMessage, buttonText, title, submitButtonText, categoryLength, children}:CategoryButtonProps<T,U>) {
+export function CategoryButton<T, U>({
+  mutationKey,
+  mutationFn,
+  mutationArgs,
+  invalidQueries,
+  successMessage,
+  buttonText,
+  title,
+  submitButtonText,
+  categoryLength,
+  children,
+}: CategoryButtonProps<T, U>) {
   const queryClient = useQueryClient();
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -51,10 +62,10 @@ export function CategoryButton<T,U>({mutationKey,mutationFn, mutationArgs, inval
           type="button"
           className="text-white cursor-pointer hover:text-white/80 border"
         >
-            {buttonText}
+          {buttonText}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-backgroundBright text-white">
+      <DialogContent className="sm:max-w-106.25 bg-backgroundBright text-white">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -63,18 +74,15 @@ export function CategoryButton<T,U>({mutationKey,mutationFn, mutationArgs, inval
         >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-                  </DialogHeader>
-                  
-                  {children}
-                  
+          </DialogHeader>
+
+          {children}
+
           <DialogFooter className="mt-4">
             <DialogClose asChild ref={closeRef}>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button
-              disabled={isPending || categoryLength === 0}
-              type="submit"
-            >
+            <Button disabled={isPending || categoryLength === 0} type="submit">
               {isPending ? (
                 <Loader2 className="animate-spin text-white" />
               ) : (

@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-import { DailyRevenue } from "@monorepo/shared"
-import { Skeleton } from "../../skeleton"
+} from "@/components/ui/chart";
+import type { DailyRevenue } from "@monorepo/shared";
+import { Skeleton } from "../../skeleton";
 
-export const description = "An area chart with gradient fill"
+export const description = "An area chart with gradient fill";
 
 const chartConfig = {
   revenue: {
@@ -20,18 +20,23 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartAreaGradient({ dailyRevenue, isLoading }: { dailyRevenue: DailyRevenue[],isLoading:boolean }) {
+export function ChartAreaGradient({
+  dailyRevenue,
+  isLoading,
+}: {
+  dailyRevenue: DailyRevenue[];
+  isLoading: boolean;
+}) {
+  if (isLoading) return <Skeleton className="h-75 w-full rounded-lg" />;
 
-  
-  if(isLoading) return (
-    <Skeleton className="h-[300px] w-full rounded-lg" />
-  );
-
-      const chartData =
-        dailyRevenue.length > 0 ? dailyRevenue : [{ day: "N/A", revenue: 0 }];
+  const chartData =
+    dailyRevenue.length > 0 ? dailyRevenue : [{ day: "N/A", revenue: 0 }];
 
   return (
-    <ChartContainer config={chartConfig} className="h-[300px] w-full bg-backgroundBright rounded-lg border">
+    <ChartContainer
+      config={chartConfig}
+      className="h-75 w-full bg-backgroundBright rounded-lg border"
+    >
       <AreaChart
         accessibilityLayer
         data={chartData}
@@ -50,15 +55,17 @@ export function ChartAreaGradient({ dailyRevenue, isLoading }: { dailyRevenue: D
         />
         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         <defs>
-          <linearGradient
-            id="area-chart-09"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop offset="5%" stopColor="var(--color-foreground)" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="var(--color-foreground)" stopOpacity={0.1} />
+          <linearGradient id="area-chart-09" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="5%"
+              stopColor="var(--color-foreground)"
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="95%"
+              stopColor="var(--color-foreground)"
+              stopOpacity={0.1}
+            />
           </linearGradient>
         </defs>
         <Area

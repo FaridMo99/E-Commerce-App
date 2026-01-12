@@ -1,9 +1,8 @@
-import NotFound from "@/components/main/NotFound"
-import { PackageSearch } from "lucide-react"
-
+import NotFound from "@/components/main/NotFound";
+import { PackageSearch } from "lucide-react";
 
 function notFound() {
-  return <NotFound icon={PackageSearch} text="Product not found..."/>
+  return <NotFound icon={PackageSearch} text="Product not found..." />;
 }
 
-export default notFound
+export default notFound;

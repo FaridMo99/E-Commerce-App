@@ -5,7 +5,7 @@ import {
 } from "../config/constants.js";
 import type { Category, Product } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
-import {redis} from "../services/redis.js";
+import { redis } from "../services/redis.js";
 import {
   NEW_PRODUCTS_REDIS_KEY,
   TRENDING_PRODUCTS_REDIS_KEY,
@@ -36,7 +36,7 @@ export async function getNewProducts(): Promise<ProductWithSelectedFields[]> {
 
   const timeDifference = new Date();
   timeDifference.setDate(
-    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS
+    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS,
   );
 
   const products = await prisma.product.findMany({
@@ -86,7 +86,9 @@ export async function getSaleProducts(): Promise<ProductWithSelectedFields[]> {
   return products;
 }
 
-export async function getCategoryProducts(category: Category["name"]): Promise<ProductWithSelectedFields[]> {
+export async function getCategoryProducts(
+  category: Category["name"],
+): Promise<ProductWithSelectedFields[]> {
   const redisKey = `${CATEGORIES_REDIS_KEY}:${category}`;
   const cached = await redis.get(redisKey);
   if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
@@ -111,13 +113,15 @@ export async function getCategoryProducts(category: Category["name"]): Promise<P
   return products;
 }
 
-export async function getTrendingProducts(): Promise<ProductWithSelectedFields[]> {
+export async function getTrendingProducts(): Promise<
+  ProductWithSelectedFields[]
+> {
   const cached = await redis.get(TRENDING_PRODUCTS_REDIS_KEY);
   if (cached) return JSON.parse(cached) as ProductWithSelectedFields[];
 
   const timeDifference = new Date();
   timeDifference.setDate(
-    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS
+    timeDifference.getDate() - TIME_DIFFERENCE_FOR_NEW_PRODUCTS_IN_DAYS,
   );
 
   // fetch all products with computed metrics
@@ -159,10 +163,10 @@ export async function getTrendingProducts(): Promise<ProductWithSelectedFields[]
     const { _count, score, ...productRest } = product;
     const { favoredBy, order_items, recentlyViewed, ...countRest } = _count;
 
-  return {
-    ...productRest,
-    _count: countRest,
-  } as ProductWithSelectedFields;
+    return {
+      ...productRest,
+      _count: countRest,
+    } as ProductWithSelectedFields;
   });
 
   await redis.set(TRENDING_PRODUCTS_REDIS_KEY, JSON.stringify(returnProducts), {
@@ -179,8 +183,8 @@ export async function getCategories(): Promise<Category[]> {
     const parsed: Category[] = JSON.parse(cached);
     console.log(
       chalk.green(
-        `${getTimestamp()} Categories fetched from cache (${parsed.length})`
-      )
+        `${getTimestamp()} Categories fetched from cache (${parsed.length})`,
+      ),
     );
     return parsed;
   }
@@ -196,14 +200,14 @@ export async function getCategories(): Promise<Category[]> {
 
   console.log(
     chalk.green(
-      `${getTimestamp()} Categories fetched from DB and cached (${categories.length})`
-    )
+      `${getTimestamp()} Categories fetched from DB and cached (${categories.length})`,
+    ),
   );
   return categories;
 }
 
 export async function clearAllProductCaches(
-  productCategory: Category["name"]
+  productCategory: Category["name"],
 ): Promise<void> {
   const redisKey = `${CATEGORIES_REDIS_KEY}:${productCategory}`;
 
@@ -218,7 +222,7 @@ export async function clearAllProductCaches(
 
 export async function getAllProductCaches(
   productName: Product["name"],
-  productCategory: Category["name"]
+  productCategory: Category["name"],
 ): Promise<AllProductCachesReturn> {
   const categoryRedisKey = `${CATEGORIES_REDIS_KEY}:${productCategory}`;
 
@@ -245,7 +249,7 @@ export async function getAllProductCaches(
 
 export async function clearAllCachesProductIsIn(
   productName: Product["name"],
-  productCategory: Category["name"]
+  productCategory: Category["name"],
 ): Promise<void> {
   const caches = await getAllProductCaches(productName, productCategory);
 

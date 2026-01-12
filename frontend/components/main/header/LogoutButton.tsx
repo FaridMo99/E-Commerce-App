@@ -7,25 +7,25 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 type LogoutButtonProps = {
-  text?:boolean
+  text?: boolean;
 };
 
 function LogoutButton({ text }: LogoutButtonProps) {
   const router = useRouter();
-  const {clearState, accessToken} = useAuth((state) => state);
+  const { clearState, accessToken } = useAuth((state) => state);
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["logging user out"],
     mutationFn: () => logout(accessToken!),
     onError: () => {
-      toast.error("Something went wrong.Try again")
+      toast.error("Something went wrong.Try again");
     },
     onSuccess: () => {
-      clearState()
-      router.refresh()
+      clearState();
+      router.refresh();
       toast.success("Logout successful!");
-    }
-  })
+    },
+  });
 
   return (
     <button

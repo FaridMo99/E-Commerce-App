@@ -6,7 +6,10 @@ import type {
   OrdersQuerySchema,
   UpdateUserSchema,
 } from "@monorepo/shared";
-import { formatPriceForClient, transformAndFormatProductPrice } from "../lib/currencyHandlers.js";
+import {
+  formatPriceForClient,
+  transformAndFormatProductPrice,
+} from "../lib/currencyHandlers.js";
 import { deleteUserCart } from "../lib/controllerUtils.js";
 import chalk from "chalk";
 import { calculateCartTotals, getTimestamp } from "../lib/utils.js";
@@ -24,9 +27,9 @@ import type { User } from "../generated/prisma/client.js";
 export async function getUserByUserId(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const id = req.user?.id!
+  const id = req.user?.id!;
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Fetching user ${id}`));
@@ -37,7 +40,7 @@ export async function getUserByUserId(
       },
       select: {
         ...userAuthenticatedSelect,
-        password:true
+        password: true,
       },
     });
 
@@ -47,7 +50,7 @@ export async function getUserByUserId(
     }
 
     console.log(
-      chalk.green(`${getTimestamp()} Fetched user ${id} successfully`)
+      chalk.green(`${getTimestamp()} Fetched user ${id} successfully`),
     );
 
     const { password, ...userData } = user;
@@ -55,11 +58,11 @@ export async function getUserByUserId(
       ...userData,
       hasPassword: !!password,
     };
-    
+
     return res.status(200).json(safeUser);
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp()} Failed to fetch user ${id}:`, err)
+      chalk.red(`${getTimestamp()} Failed to fetch user ${id}:`, err),
     );
     next(err);
   }
@@ -69,9 +72,19 @@ export async function getUserByUserId(
 export async function updateUserByUserId(
   req: Request<{}, {}, UpdateUserSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const { name, birthdate, countryCode, currency, street, houseNumber, postalCode, city, state } = req.body;
+  const {
+    name,
+    birthdate,
+    countryCode,
+    currency,
+    street,
+    houseNumber,
+    postalCode,
+    city,
+    state,
+  } = req.body;
   const id = req.user?.id;
 
   if (!id) {
@@ -81,7 +94,6 @@ export async function updateUserByUserId(
 
   try {
     console.log(chalk.yellow(`${getTimestamp()} Updating user ${id}`));
-
 
     const data: Partial<User> = {
       ...(name && { name }),
@@ -100,14 +112,14 @@ export async function updateUserByUserId(
       data,
       select: {
         ...userAuthenticatedSelect,
-        password:true
-      }
+        password: true,
+      },
     });
 
     console.log(
-      chalk.green(`${getTimestamp()} User ${id} updated successfully`)
+      chalk.green(`${getTimestamp()} User ${id} updated successfully`),
     );
-    
+
     const { password, ...userData } = user;
     const safeUser = {
       ...userData,
@@ -115,10 +127,9 @@ export async function updateUserByUserId(
     };
 
     return res.status(200).json(safeUser);
-    
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp()} Failed to update user ${id}:`, err)
+      chalk.red(`${getTimestamp()} Failed to update user ${id}:`, err),
     );
     next(err);
   }
@@ -128,7 +139,7 @@ export async function updateUserByUserId(
 export async function deleteUserByUserId(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const id = req.user?.id;
 
@@ -141,12 +152,12 @@ export async function deleteUserByUserId(
     console.log(chalk.yellow(`${getTimestamp()} Deleting user ${id}`));
     await prisma.user.delete({ where: { id } });
     console.log(
-      chalk.green(`${getTimestamp()} User ${id} deleted successfully`)
+      chalk.green(`${getTimestamp()} User ${id} deleted successfully`),
     );
     return res.status(200).json({ message: "Delete successful" });
   } catch (err) {
     console.log(
-      chalk.red(`${getTimestamp()} Failed to delete user ${id}:`, err)
+      chalk.red(`${getTimestamp()} Failed to delete user ${id}:`, err),
     );
     next(err);
   }
@@ -156,14 +167,15 @@ export async function deleteUserByUserId(
 export async function getAllOrdersByUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const userId = req.user?.id!
-  const { sort, order, page, limit, status } = req.validatedQuery as OrdersQuerySchema;
+  const userId = req.user?.id!;
+  const { sort, order, page, limit, status } =
+    req.validatedQuery as OrdersQuerySchema;
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching orders for user ${userId}`)
+      chalk.yellow(`${getTimestamp()} Fetching orders for user ${userId}`),
     );
     const orders = await prisma.order.findMany({
       where: {
@@ -176,26 +188,27 @@ export async function getAllOrdersByUser(
       orderBy: {
         [sort]: order,
       },
-      ...(limit && page && { skip: (page - 1) * limit}),
-      ...(page && {take: page}),
+      ...(limit && page && { skip: (page - 1) * limit }),
+      ...(page && { take: page }),
     });
 
     orders.forEach(
-      (order) => (order.total_amount = formatPriceForClient(order.total_amount))
+      (order) =>
+        (order.total_amount = formatPriceForClient(order.total_amount)),
     );
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Orders fetched successfully for user ${userId}`
-      )
+        `${getTimestamp()} Orders fetched successfully for user ${userId}`,
+      ),
     );
     return res.status(200).json(orders);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch orders for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -203,9 +216,9 @@ export async function getAllOrdersByUser(
 
 // Get single order by user
 export async function getSingleOrderByUser(
-  req: Request,
+  req: Request<{ orderId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const orderId = req.params.orderId!;
@@ -213,8 +226,8 @@ export async function getSingleOrderByUser(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching order ${orderId} for user ${userId}`
-      )
+        `${getTimestamp()} Fetching order ${orderId} for user ${userId}`,
+      ),
     );
     const order = await prisma.order.findFirst({
       where: {
@@ -229,8 +242,8 @@ export async function getSingleOrderByUser(
     if (!order) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Order ${orderId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Order ${orderId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Order not found" });
     }
@@ -238,25 +251,25 @@ export async function getSingleOrderByUser(
     order.total_amount = formatPriceForClient(order.total_amount);
     console.log(
       chalk.green(
-        `${getTimestamp()} Order ${orderId} fetched successfully for user ${userId}`
-      )
+        `${getTimestamp()} Order ${orderId} fetched successfully for user ${userId}`,
+      ),
     );
     return res.status(200).json(order);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch order ${orderId} for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
 }
 
 export async function getSingleStripeOrderByUser(
-  req: Request,
+  req: Request<{ stripeSessionId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const sessionId = req.params.stripeSessionId!;
@@ -264,8 +277,8 @@ export async function getSingleStripeOrderByUser(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching stripe order ${sessionId} for user ${userId}`
-      )
+        `${getTimestamp()} Fetching stripe order ${sessionId} for user ${userId}`,
+      ),
     );
     const order = await prisma.order.findFirst({
       where: {
@@ -280,8 +293,8 @@ export async function getSingleStripeOrderByUser(
     if (!order) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Stripe Order ${sessionId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Stripe Order ${sessionId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Order not found" });
     }
@@ -289,16 +302,16 @@ export async function getSingleStripeOrderByUser(
     order.total_amount = formatPriceForClient(order.total_amount);
     console.log(
       chalk.green(
-        `${getTimestamp()} Stripe Order ${sessionId} fetched successfully for user ${userId}`
-      )
+        `${getTimestamp()} Stripe Order ${sessionId} fetched successfully for user ${userId}`,
+      ),
     );
     return res.status(200).json(order);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch Stripe order ${sessionId} for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -308,13 +321,13 @@ export async function getSingleStripeOrderByUser(
 export async function getReviewsByUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching reviews for user ${userId}`)
+      chalk.yellow(`${getTimestamp()} Fetching reviews for user ${userId}`),
     );
     const reviews = await prisma.review.findMany({
       where: {
@@ -324,19 +337,19 @@ export async function getReviewsByUser(
         ...authenticatedReviewSelect,
       },
     });
-    
+
     console.log(
       chalk.green(
-        `${getTimestamp()} Reviews fetched successfully for user ${userId}`
-      )
+        `${getTimestamp()} Reviews fetched successfully for user ${userId}`,
+      ),
     );
     return res.status(200).json(reviews);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch reviews for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -346,51 +359,54 @@ export async function getReviewsByUser(
 export async function getUserCart(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const currency = req.currency!
-  
+  const currency = req.currency!;
+
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Fetching cart for user ${userId}`)
+      chalk.yellow(`${getTimestamp()} Fetching cart for user ${userId}`),
     );
     const cart = await prisma.cart.findFirst({
       where: {
         userId,
       },
-      select: cartSelect
+      select: cartSelect,
     });
 
     if (!cart) {
       console.log(
-        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`)
+        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`),
       );
       return res.status(404).json({ message: "Cart not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Cart fetched successfully for user ${userId}`
-      )
+        `${getTimestamp()} Cart fetched successfully for user ${userId}`,
+      ),
     );
 
-        await Promise.all(
-          cart.items.map((item) =>
-            transformAndFormatProductPrice(item.product, item.product.currency, currency)
-          )
-        );
-    
-    
-    calculateCartTotals(cart)
+    await Promise.all(
+      cart.items.map((item) =>
+        transformAndFormatProductPrice(
+          item.product,
+          item.product.currency,
+          currency,
+        ),
+      ),
+    );
+
+    calculateCartTotals(cart);
 
     return res.status(200).json(cart);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch cart for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -400,35 +416,35 @@ export async function getUserCart(
 export async function emptyCart(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
 
   try {
     console.log(
-      chalk.yellow(`${getTimestamp()} Emptying cart for user ${userId}`)
+      chalk.yellow(`${getTimestamp()} Emptying cart for user ${userId}`),
     );
     const [_, cart] = await deleteUserCart(userId);
 
     if (!cart) {
       console.log(
-        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`)
+        chalk.red(`${getTimestamp()} Cart not found for user ${userId}`),
       );
       return res.status(404).json({ message: "Cart not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Cart emptied successfully for user ${userId}`
-      )
+        `${getTimestamp()} Cart emptied successfully for user ${userId}`,
+      ),
     );
     return res.status(200).json({ message: "Emptied successful" });
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to empty cart for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -438,7 +454,7 @@ export async function emptyCart(
 export async function addProductToUserCart(
   req: Request<{}, {}, AddCartItemSchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user!.id;
   const { productId, quantity } = req.body;
@@ -447,8 +463,8 @@ export async function addProductToUserCart(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Adding product ${productId} to cart for user ${userId}`
-      )
+        `${getTimestamp()} Adding product ${productId} to cart for user ${userId}`,
+      ),
     );
 
     //check if item already exists in cart
@@ -460,9 +476,11 @@ export async function addProductToUserCart(
     });
 
     //check if amount in cart is more than available
-    const product = await prisma.product.findUnique({ where: { id: productId } })
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
 
-    if (!product) return res.status(404).json({ message: "Product not found" })
+    if (!product) return res.status(404).json({ message: "Product not found" });
     if (quantity > product.stock_quantity)
       return res.status(400).json({ message: "Not enough stock" });
     if (
@@ -482,8 +500,8 @@ export async function addProductToUserCart(
 
       console.log(
         chalk.green(
-          `${getTimestamp()} Increased quantity for ${productId} in cart for user ${userId}`
-        )
+          `${getTimestamp()} Increased quantity for ${productId} in cart for user ${userId}`,
+        ),
       );
     } else {
       //create new item
@@ -497,15 +515,15 @@ export async function addProductToUserCart(
 
       console.log(
         chalk.green(
-          `${getTimestamp()} Product ${productId} added to cart for user ${userId}`
-        )
+          `${getTimestamp()} Product ${productId} added to cart for user ${userId}`,
+        ),
       );
     }
 
     //return full updated cart
     updatedCart = await prisma.cart.findUnique({
       where: { userId },
-      select: cartSelect
+      select: cartSelect,
     });
 
     //convert and format prices
@@ -514,9 +532,9 @@ export async function addProductToUserCart(
         transformAndFormatProductPrice(
           item.product,
           item.product.currency,
-          currency
-        )
-      )
+          currency,
+        ),
+      ),
     );
 
     calculateCartTotals(updatedCart!);
@@ -526,8 +544,8 @@ export async function addProductToUserCart(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to add product ${productId} to cart for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -535,16 +553,16 @@ export async function addProductToUserCart(
 
 // Remove product from user cart
 export async function removeProductFromUserCart(
-  req: Request,
+  req: Request<{ itemId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const itemId = req.params.itemId;
 
   if (!itemId) {
     console.log(
-      chalk.red(`${getTimestamp()} No ProductId received for removal`)
+      chalk.red(`${getTimestamp()} No ProductId received for removal`),
     );
     return res.status(400).json({ message: "No ProductId received" });
   }
@@ -552,14 +570,14 @@ export async function removeProductFromUserCart(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Removing item ${itemId} from cart for user ${userId}`
-      )
+        `${getTimestamp()} Removing item ${itemId} from cart for user ${userId}`,
+      ),
     );
     const cart = await prisma.cartItem.delete({
       where: { cart: { userId }, id: itemId },
       select: {
         cart: {
-          select: cartSelect
+          select: cartSelect,
         },
       },
     });
@@ -567,26 +585,26 @@ export async function removeProductFromUserCart(
     if (!cart) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Item ${itemId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Item ${itemId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Item not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Item ${itemId} removed successfully for user ${userId}`
-      )
+        `${getTimestamp()} Item ${itemId} removed successfully for user ${userId}`,
+      ),
     );
 
-    calculateCartTotals(cart.cart)
+    calculateCartTotals(cart.cart);
     return res.status(200).json(cart.cart);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to remove item ${itemId} from cart for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -595,14 +613,13 @@ export async function removeProductFromUserCart(
 export async function updateItemQuantity(
   req: Request<{ itemId: string }, {}, ItemQuantitySchema>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const itemId = req.params.itemId;
   const { quantity } = req.body;
-  const currency = req.currency!
+  const currency = req.currency!;
 
-  
   if (!itemId) {
     console.log(chalk.red(`${getTimestamp()} No ProductId received`));
     return res.status(400).json({ message: "No ProductId received" });
@@ -611,8 +628,8 @@ export async function updateItemQuantity(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Updating quantity for item ${itemId}, user ${userId}`
-      )
+        `${getTimestamp()} Updating quantity for item ${itemId}, user ${userId}`,
+      ),
     );
 
     //check if item already exists in cart
@@ -657,16 +674,16 @@ export async function updateItemQuantity(
     if (!cart) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Item ${itemId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Item ${itemId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Item not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Quantity updated for item ${itemId}, user ${userId}`
-      )
+        `${getTimestamp()} Quantity updated for item ${itemId}, user ${userId}`,
+      ),
     );
 
     await Promise.all(
@@ -674,9 +691,9 @@ export async function updateItemQuantity(
         transformAndFormatProductPrice(
           item.product,
           item.product.currency,
-          currency
-        )
-      )
+          currency,
+        ),
+      ),
     );
 
     calculateCartTotals(cart.cart);
@@ -686,8 +703,8 @@ export async function updateItemQuantity(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to update quantity for item ${itemId}, user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -697,17 +714,16 @@ export async function updateItemQuantity(
 export async function getFavoriteItems(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-    const currency = req.currency!;
+  const currency = req.currency!;
 
-  
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching favorite items for user ${userId}`
-      )
+        `${getTimestamp()} Fetching favorite items for user ${userId}`,
+      ),
     );
 
     const favorites = await prisma.product.findMany({
@@ -724,27 +740,23 @@ export async function getFavoriteItems(
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Successfully fetched favorite items for user ${userId}`
-      )
+        `${getTimestamp()} Successfully fetched favorite items for user ${userId}`,
+      ),
     );
 
     await Promise.all(
       favorites.map((favorite) =>
-        transformAndFormatProductPrice(
-          favorite,
-          favorite.currency,
-          currency
-        )
-      )
-    );    
+        transformAndFormatProductPrice(favorite, favorite.currency, currency),
+      ),
+    );
 
     return res.status(200).json(favorites);
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch favorite items for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -752,15 +764,15 @@ export async function getFavoriteItems(
 
 // Delete a favorite item
 export async function deleteFavoriteItem(
-  req: Request,
+  req: Request<{ productId: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const productId = req.params.productId;
   if (!productId) {
     console.log(
-      chalk.red(`${getTimestamp()} No product provided for deletion`)
+      chalk.red(`${getTimestamp()} No product provided for deletion`),
     );
     return res.status(400).json({ message: "No product provided" });
   }
@@ -768,8 +780,8 @@ export async function deleteFavoriteItem(
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Deleting favorite product ${productId} for user ${userId}`
-      )
+        `${getTimestamp()} Deleting favorite product ${productId} for user ${userId}`,
+      ),
     );
     const user = await prisma.user.update({
       where: { id: userId },
@@ -784,24 +796,24 @@ export async function deleteFavoriteItem(
     if (!user) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Product ${productId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Product ${productId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Product not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Successfully deleted favorite product ${productId} for user ${userId}`
-      )
+        `${getTimestamp()} Successfully deleted favorite product ${productId} for user ${userId}`,
+      ),
     );
     return res.status(200).json({ message: "Deleted item successful" });
   } catch (err) {
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to delete favorite product ${productId} for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -811,18 +823,17 @@ export async function deleteFavoriteItem(
 export async function addFavoriteItem(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const productId = req.body.productId
+  const productId = req.body.productId;
   const currency = req.currency!;
-
 
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Adding favorite product ${productId} for user ${userId}`
-      )
+        `${getTimestamp()} Adding favorite product ${productId} for user ${userId}`,
+      ),
     );
     const response = await prisma.user.update({
       where: { id: userId },
@@ -841,27 +852,27 @@ export async function addFavoriteItem(
     if (!response) {
       console.log(
         chalk.red(
-          `${getTimestamp()} Product ${productId} not found for user ${userId}`
-        )
+          `${getTimestamp()} Product ${productId} not found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Product not found" });
     }
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Successfully added favorite product ${productId} for user ${userId}`
-      )
+        `${getTimestamp()} Successfully added favorite product ${productId} for user ${userId}`,
+      ),
     );
 
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: {
-        ...productSelect
+        ...productSelect,
       },
     });
 
     if (product) {
-     await transformAndFormatProductPrice(product,product.currency,currency)
+      await transformAndFormatProductPrice(product, product.currency, currency);
     }
 
     return res.status(200).json(product);
@@ -869,8 +880,8 @@ export async function addFavoriteItem(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to add favorite product ${productId} for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -880,17 +891,16 @@ export async function addFavoriteItem(
 export async function getRecentlyViewedProducts(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
   const currency = req.currency!;
 
-
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} Fetching recently viewed products for user ${userId}`
-      )
+        `${getTimestamp()} Fetching recently viewed products for user ${userId}`,
+      ),
     );
     const recentlyViewedProductsObj = await prisma.user.findUnique({
       where: { id: userId },
@@ -898,7 +908,7 @@ export async function getRecentlyViewedProducts(
         recentlyViewedProducts: {
           where: {
             product: {
-              ...productWhere, 
+              ...productWhere,
             },
           },
           select: {
@@ -909,7 +919,7 @@ export async function getRecentlyViewedProducts(
           orderBy: {
             viewedAt: "desc",
           },
-          take:15
+          take: 15,
         },
       },
     });
@@ -917,32 +927,27 @@ export async function getRecentlyViewedProducts(
     if (!recentlyViewedProductsObj) {
       console.log(
         chalk.red(
-          `${getTimestamp()} No recently viewed products found for user ${userId}`
-        )
+          `${getTimestamp()} No recently viewed products found for user ${userId}`,
+        ),
       );
       return res.status(404).json({ message: "Favorite products not found" });
     }
 
     const recentlyViewedProducts =
       recentlyViewedProductsObj?.recentlyViewedProducts.map(
-        (rv) => rv.product
+        (rv) => rv.product,
       ) || [];
-
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Successfully fetched recently viewed products for user ${userId}`
-      )
+        `${getTimestamp()} Successfully fetched recently viewed products for user ${userId}`,
+      ),
     );
 
     await Promise.all(
       recentlyViewedProducts.map((product) =>
-        transformAndFormatProductPrice(
-          product,
-          product.currency,
-          currency
-        )
-      )
+        transformAndFormatProductPrice(product, product.currency, currency),
+      ),
     );
 
     return res.status(200).json(recentlyViewedProducts);
@@ -950,8 +955,8 @@ export async function getRecentlyViewedProducts(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to fetch recently viewed products for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }
@@ -960,20 +965,20 @@ export async function getRecentlyViewedProducts(
 export async function addProductToRecentlyViewedProductsByProductId(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const userId = req.user?.id!;
-  const productId = req.body.productId
-  const currency = req.currency!
+  const productId = req.body.productId;
+  const currency = req.currency!;
 
+  if (!productId)
+    return res.status(400).json({ message: "No Product provided" });
 
-  if (!productId) return res.status(400).json({ message: "No Product provided" })
-  
   try {
     console.log(
       chalk.yellow(
-        `${getTimestamp()} adding product to recently viewed products for user ${userId}`
-      )
+        `${getTimestamp()} adding product to recently viewed products for user ${userId}`,
+      ),
     );
 
     const recentlyViewed = await prisma.user.update({
@@ -1006,16 +1011,15 @@ export async function addProductToRecentlyViewedProductsByProductId(
       },
     });
 
-
     console.log(
       chalk.green(
-        `${getTimestamp()} Successfully added recently viewed product for user ${userId}`
-      )
+        `${getTimestamp()} Successfully added recently viewed product for user ${userId}`,
+      ),
     );
     const product = recentlyViewed.recentlyViewedProducts[0]?.product;
 
     if (product) {
-    await transformAndFormatProductPrice(product,product.currency, currency);  
+      await transformAndFormatProductPrice(product, product.currency, currency);
     }
 
     return res.status(200).json(product);
@@ -1023,8 +1027,8 @@ export async function addProductToRecentlyViewedProductsByProductId(
     console.log(
       chalk.red(
         `${getTimestamp()} Failed to add to recently viewed products for user ${userId}:`,
-        err
-      )
+        err,
+      ),
     );
     next(err);
   }

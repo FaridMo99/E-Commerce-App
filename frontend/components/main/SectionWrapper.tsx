@@ -1,14 +1,19 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode } from "react";
 
 type SectionWrapperProps = {
-  as?:"main" | "section"
-    header: string;
-  children: ReactNode
-    styles:string
-}
+  as?: "main" | "section";
+  header: string;
+  children: ReactNode;
+  styles: string;
+};
 
-function SectionWrapper({ header, children, styles, as = "section" }: SectionWrapperProps) {
-    const Tag = as;
+function SectionWrapper({
+  header,
+  children,
+  styles,
+  as = "section",
+}: SectionWrapperProps) {
+  const Tag = as;
 
   return (
     <Tag className={styles}>
@@ -18,4 +23,4 @@ function SectionWrapper({ header, children, styles, as = "section" }: SectionWra
   );
 }
 
-export default SectionWrapper
+export default SectionWrapper;

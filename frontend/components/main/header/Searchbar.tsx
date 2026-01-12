@@ -8,9 +8,8 @@ import { getProducts } from "@/lib/queries/client/productQueries";
 import { Input } from "@/components/ui/input";
 import Searchlist from "./Searchlist";
 
-
 function Searchbar() {
-  const [search, setSearch] = useState<string>("")
+  const [search, setSearch] = useState<string>("");
   const debouncedSearch = useDebounce(search, 600);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -19,15 +18,15 @@ function Searchbar() {
 
   const { data } = useQuery({
     queryKey: ["search", debouncedSearch],
-    queryFn: () => getProducts({search:debouncedSearch}),
+    queryFn: () => getProducts({ search: debouncedSearch }),
     enabled: debouncedSearch.length > 0,
   });
 
   function searchHandler(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-      setIsFocused(false);
-      inputRef.current?.blur();
-      router.push(`/products?search=${search}`);
+    e.preventDefault();
+    setIsFocused(false);
+    inputRef.current?.blur();
+    router.push(`/products?search=${search}`);
   }
 
   return (
@@ -63,10 +62,9 @@ function Searchbar() {
           <Search className="text-foreground h-[3vh]" />
         </button>
       </div>
-      {debouncedSearch.length > 0 &&
-        isFocused &&
+      {debouncedSearch.length > 0 && isFocused && (
         <Searchlist products={data ?? []} />
-      }
+      )}
     </form>
   );
 }

@@ -1,40 +1,43 @@
-"use client"
-import { Button } from '@/components/ui/button'
-import { addProductToUserCart } from '@/lib/queries/client/usersQueries'
-import useAuth from '@/stores/authStore'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
-
+"use client";
+import { Button } from "@/components/ui/button";
+import { addProductToUserCart } from "@/lib/queries/client/usersQueries";
+import useAuth from "@/stores/authStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type AddCartProps = {
-    itemId: string
-    quantity:number
-}
+  itemId: string;
+  quantity: number;
+};
 
 function AddCart({ itemId, quantity }: AddCartProps) {
-    const accessToken = useAuth(state => state.accessToken)
-    const queryClient = useQueryClient()
-    const router = useRouter()
-    
-    const { mutate, isPending } = useMutation({
-        mutationKey: ["add item to cart", itemId, quantity],
-        mutationFn: () => addProductToUserCart({ productId: itemId, quantity }, accessToken!),
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["get user shopping cart"]})
-            toast.success("Product successfully added to shopping cart")
-        },
-        onError: (err) => {
-            toast.error(err.message)
-        }
-    })
+  const accessToken = useAuth((state) => state.accessToken);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["add item to cart", itemId, quantity],
+    mutationFn: () =>
+      addProductToUserCart({ productId: itemId, quantity }, accessToken!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get user shopping cart"] });
+      toast.success("Product successfully added to shopping cart");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
   return (
-      <Button
-          className='mt-6 w-22'
-          onClick={() => accessToken ? mutate() : router.push("/login")}
-          disabled={isPending || quantity === 0}>{isPending ? <Loader2 className='animate-spin' /> : "Add to Cart"}</Button>
-  )
+    <Button
+      className="mt-6 w-22"
+      onClick={() => (accessToken ? mutate() : router.push("/login"))}
+      disabled={isPending || quantity === 0}
+    >
+      {isPending ? <Loader2 className="animate-spin" /> : "Add to Cart"}
+    </Button>
+  );
 }
 
-export default AddCart
+export default AddCart;

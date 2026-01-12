@@ -6,7 +6,6 @@ import type {
   Timeframe,
 } from "./src/types/types.ts";
 
-
 declare global {
   namespace Express {
     interface User extends JWTUserPayload {}
@@ -17,7 +16,7 @@ declare global {
       oAuthUser?: OAuthUserPayload;
       currency?: CurrencyISO;
       countryCode?: string;
-      validatedQuery?:any
+      validatedQuery?: any;
     }
   }
 }

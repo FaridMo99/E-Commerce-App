@@ -1,19 +1,27 @@
 import chalk from "chalk";
 import prisma from "../services/prisma.js";
-import {redis} from "../services/redis.js";
+import { redis } from "../services/redis.js";
 import { getTimestamp } from "./utils.js";
 import { notifyAdmin } from "../services/email.js";
 import { NODE_ENV } from "../config/env.js";
-import type {Server} from "http"
+import type { Server } from "http";
 
 //so it wont run multiple times
-let isShuttingDown:boolean
+let isShuttingDown: boolean;
 
-export async function disconnectAllServices(reason: string, server: Server, error?: Error) {
+export async function disconnectAllServices(
+  reason: string,
+  server: Server,
+  error?: Error,
+) {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  console.log(chalk.blue(`${getTimestamp()} Disconnecting all Services, Reason:${reason}, Error Message: ${error?.message}`));
+  console.log(
+    chalk.blue(
+      `${getTimestamp()} Disconnecting all Services, Reason:${reason}, Error Message: ${error?.message}`,
+    ),
+  );
 
   try {
     await new Promise<void>((resolve, reject) => {
@@ -31,18 +39,24 @@ export async function disconnectAllServices(reason: string, server: Server, erro
     console.log(chalk.yellow(`${getTimestamp()} Disconnecting DB...`));
     await prisma.$disconnect();
 
-    console.log(chalk.green(`${getTimestamp()} Disconnects successful. Exiting...`));
+    console.log(
+      chalk.green(`${getTimestamp()} Disconnects successful. Exiting...`),
+    );
     if (NODE_ENV !== "dev") {
-       notifyAdmin(`Application is down, reason: ${reason}:: ERROR: ${error?.message}`)
+      notifyAdmin(
+        `Application is down, reason: ${reason}:: ERROR: ${error?.message}`,
+      );
     }
     process.exit(error ? 1 : 0);
   } catch (disconnectErr) {
-    console.log(chalk.red(getTimestamp(), "Error during disconnect:", disconnectErr));
-        if (NODE_ENV !== "dev") {
-          notifyAdmin(
-            `Application is down, reason: ${reason}:: ERROR: ${disconnectErr}`
-          );
-        }
+    console.log(
+      chalk.red(getTimestamp(), "Error during disconnect:", disconnectErr),
+    );
+    if (NODE_ENV !== "dev") {
+      notifyAdmin(
+        `Application is down, reason: ${reason}:: ERROR: ${disconnectErr}`,
+      );
+    }
     process.exit(1);
   }
 }

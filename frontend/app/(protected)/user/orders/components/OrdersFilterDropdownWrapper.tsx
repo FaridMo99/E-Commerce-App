@@ -1,21 +1,31 @@
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ReactNode } from "react";
 
 type OrdersFilterDropdownWrapperProps = {
-    label: string;
-    buttonText: string;
-    children:ReactNode
-}
+  label: string;
+  buttonText: string;
+  children: ReactNode;
+};
 
-function OrdersFilterDropdownWrapper({label, buttonText, children}:OrdersFilterDropdownWrapperProps) {
+function OrdersFilterDropdownWrapper({
+  label,
+  buttonText,
+  children,
+}: OrdersFilterDropdownWrapperProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-              <Button>{buttonText}</Button>
+        <Button>{buttonText}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="rounded-xl p-2 w-40 bg-foreground text-white">
-              <DropdownMenuLabel>{label}</DropdownMenuLabel>
+        <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {children}
       </DropdownMenuContent>
@@ -23,4 +33,4 @@ function OrdersFilterDropdownWrapper({label, buttonText, children}:OrdersFilterD
   );
 }
 
-export default OrdersFilterDropdownWrapper
+export default OrdersFilterDropdownWrapper;

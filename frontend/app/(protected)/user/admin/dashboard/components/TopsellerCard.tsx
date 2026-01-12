@@ -27,8 +27,7 @@ function TopsellerCard({ topseller }: TopsellerCardProps) {
 
         <CardHeader className="h-10">
           <CardTitle>{product.name}</CardTitle>
-          <CardDescription className="truncate">
-          </CardDescription>
+          <CardDescription className="truncate"></CardDescription>
         </CardHeader>
 
         <CardFooter className="h-10 self-end">

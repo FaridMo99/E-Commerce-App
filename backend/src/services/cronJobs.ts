@@ -14,14 +14,15 @@ cron.schedule("0 */6 * * *", async () => {
     const rates = await getExchangeRates();
     console.log(chalk.green(getTimestamp(), "Rates refreshed:", rates));
   } catch (err) {
-    console.log(chalk.red(getTimestamp(), "Failed to refresh exchange rates:", err));
+    console.log(
+      chalk.red(getTimestamp(), "Failed to refresh exchange rates:", err),
+    );
   }
 });
 
 //releasing stock from users that didnt finish order and left stripe checkout through none stripe supported ways
 cron.schedule("* * * * *", async () => {
   console.log(chalk.yellow(getTimestamp(), "Cleaning expired Orders..."));
-
 
   const expiredOrders = await prisma.order.findMany({
     where: {
@@ -32,8 +33,8 @@ cron.schedule("* * * * *", async () => {
 
   if (expiredOrders.length === 0) {
     console.log(chalk.green(getTimestamp(), "Cleaned Orders Successfully"));
-    return
-  };
+    return;
+  }
 
   await Promise.all(
     expiredOrders.map(async (order) => {
@@ -57,12 +58,9 @@ cron.schedule("* * * * *", async () => {
         });
         console.log(chalk.blue(`Restocked Order: ${order.id}`));
       } catch (err) {
-        console.error(
-          chalk.red(`Failed to release order ${order.id}:`),
-          err
-        );
+        console.error(chalk.red(`Failed to release order ${order.id}:`), err);
       }
-    })
+    }),
   );
 
   console.log(chalk.green(getTimestamp(), "Cleaned Orders Successfully"));

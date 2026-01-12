@@ -23,7 +23,6 @@ function PriceSlider({
   onCommit,
   value,
 }: PriceSliderProps) {
-  
   const handleChange = (index: number, newValue: string) => {
     if (newValue === "") {
       const updatedValues: [number, number] = [...value];

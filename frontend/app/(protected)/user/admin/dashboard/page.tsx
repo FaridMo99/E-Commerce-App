@@ -1,6 +1,10 @@
-"use client"
-import {getTopsellers,getNewUsers,getRevenue} from "@/lib/queries/client/adminQueries";
-import RevenueChart from "./components/RevenueChart"
+"use client";
+import {
+  getTopsellers,
+  getNewUsers,
+  getRevenue,
+} from "@/lib/queries/client/adminQueries";
+import RevenueChart from "./components/RevenueChart";
 import useAuth from "@/stores/authStore";
 import { useQueries } from "@tanstack/react-query";
 import TopsellersCarousel from "./components/TopsellersCarousel";
@@ -9,16 +13,14 @@ import { useSearchParams } from "next/navigation";
 import StatisticCard from "./components/StatisticCard";
 import { AdminNewUser, AdminRevenue, AdminTopseller } from "@/types/types";
 
-
 function Page() {
   const accessToken = useAuth((state) => state.accessToken);
 
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
   const from = fromParam ? new Date(fromParam) : undefined;
   const to = toParam ? new Date(toParam) : undefined;
-
 
   const [revenueResults, topsellersResults, usersResults] = useQueries({
     queries: [
@@ -39,7 +41,6 @@ function Page() {
       },
     ],
   });
-
 
   return (
     <>
@@ -74,4 +75,4 @@ function Page() {
   );
 }
 
-export default Page
+export default Page;

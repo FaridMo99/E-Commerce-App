@@ -34,21 +34,20 @@ export default function UserOrderTable() {
 
   const parsed = ordersQuerySchema.safeParse(rawParams);
 
-    const filters = parsed.data;
-        const {
-      data: orders,
-      isLoading,
-      isError,
-      error,
-    } = useQuery({
-      queryKey: ["get user orders", filters],
-      queryFn: () => getUserOrders(accessToken!, filters),
-      placeholderData: (pre) => pre,
-    });
+  const filters = parsed.data;
+  const {
+    data: orders,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["get user orders", filters],
+    queryFn: () => getUserOrders(accessToken!, filters),
+    placeholderData: (pre) => pre,
+  });
 
-    if (isLoading) return <LoadingPage />;
-    if (isError) throw error;
-
+  if (isLoading) return <LoadingPage />;
+  if (isError) throw error;
 
   const columns: ColumnDef<Order>[] = [
     {
@@ -120,7 +119,6 @@ export default function UserOrderTable() {
           )}
         </TableBody>
       </TableProvider>
-      
     </main>
   );
 }

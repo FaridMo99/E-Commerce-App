@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Select,
   SelectContent,
@@ -9,31 +9,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAllCategories } from "@/lib/queries/client/categoryQueries";
-import { ProductsQuerySchema } from "@monorepo/shared";
+import type { ProductsQuerySchema } from "@monorepo/shared";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { SetStateAction } from "react";
 
 type CategoryFilterProps = {
   queryParams: ProductsQuerySchema;
-  setQueryParams:React.Dispatch<SetStateAction<ProductsQuerySchema>>
+  setQueryParams: React.Dispatch<SetStateAction<ProductsQuerySchema>>;
 };
 
-function CategoryFilter({
-    queryParams,
-    setQueryParams
-}: CategoryFilterProps) {
-    const { data: categories, isLoading } = useQuery({
-        queryKey: ["get all categories"],
-        queryFn: () => getAllCategories(),
-        placeholderData:pre=>pre
-    })
+function CategoryFilter({ queryParams, setQueryParams }: CategoryFilterProps) {
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ["get all categories"],
+    queryFn: () => getAllCategories(),
+    placeholderData: (pre) => pre,
+  });
 
   return (
     <Select
       value={queryParams.category}
       onValueChange={(value) =>
-        setQueryParams((pre) => ({ ...pre, category: value }))
+        setQueryParams((pre: ProductsQuerySchema) => ({
+          ...pre,
+          category: value,
+        }))
       }
     >
       <SelectTrigger>
@@ -41,7 +41,7 @@ function CategoryFilter({
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-        <SelectLabel>Category</SelectLabel>
+          <SelectLabel>Category</SelectLabel>
           {isLoading && <Loader2 className="animate-spin" />}
           {!categories && <p>No Categories found</p>}
           {!isLoading &&
