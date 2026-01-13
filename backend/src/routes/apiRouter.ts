@@ -8,9 +8,11 @@ import authRouter from "./authRouter.js";
 import adminRouter from "./adminRouter.js";
 import settingsRouter from "./settingsRouter.js";
 import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
+import { healthStatus } from "../controller/apiController.js";
 
 const apiRouter = Router();
 
+apiRouter.get("/health", healthStatus);
 apiRouter.use("/users", isAuthenticated, usersRouter);
 apiRouter.use("/products", productsRouter);
 apiRouter.use("/categories", categoriesRouter);

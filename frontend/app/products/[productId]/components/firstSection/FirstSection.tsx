@@ -17,7 +17,7 @@ function FirstSection({ product }: FirstSectionProps) {
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationKey: ["add product to recently viewed", product],
+    mutationKey: ["add product to recently viewed", product.id],
     mutationFn: () =>
       addProductToRecentlyViewedProductsByProductId(product.id, accessToken!),
     onSuccess: () => {

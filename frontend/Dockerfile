@@ -1,33 +1,41 @@
-FROM node:20-alpine AS deps
+FROM node:20-alpine AS base
+
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
 
+COPY package.json package-lock.json* ./
+COPY shared ./packages/shared
+COPY frontend/package.json ./frontend/
 
-FROM node:20-alpine AS builder
+RUN npm ci --verbose
+
+FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npm run build
+ARG NEXT_PUBLIC_BACKEND_BASE_URL
+ARG NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL
+ARG NEXT_PUBLIC_DOCKER_ENV
+
+ENV NEXT_PUBLIC_BACKEND_BASE_URL=$NEXT_PUBLIC_BACKEND_BASE_URL
+ENV NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL=$NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL
+ENV NEXT_PUBLIC_DOCKER_ENV=$NEXT_PUBLIC_DOCKER_ENV
+
+RUN npm run build -w shared
+RUN npm run build -w frontend
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-
-ENV NODE_ENV production
-
+ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
 USER nextjs
 
-EXPOSE 3000
-ENV PORT 3000
+COPY --from=builder /app/frontend/public ./public
+COPY --from=builder /app/frontend/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/frontend/package.json ./package.json
 
+EXPOSE 3000
 CMD ["npm", "run", "start"]

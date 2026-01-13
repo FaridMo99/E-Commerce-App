@@ -55,7 +55,7 @@ function ChangePasswordForm({ token }: { token: string }) {
 
   return (
     <div className={cn("flex justify-center items-center")}>
-      <Card className="bg-backgroundBright text-white w-8/10">
+      <Card className=" bg-backgroundBright text-white w-8/10 md:w-full">
         <CardHeader>
           <CardTitle>Change Password:</CardTitle>
           <CardDescription>Enter your new Password</CardDescription>

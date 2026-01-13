@@ -1,7 +1,7 @@
 "use server";
 import type { ReviewsQuerySchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { API_BASE_URL } from "@/config/constants";
+import { getApiUrl } from "@/config/constants";
 import { AccessToken, AuthProductReview, ProductReview } from "@/types/types";
 import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
@@ -25,7 +25,7 @@ export async function getAllReviews(
       params.set("sortOrder", String(queryParam.sortOrder));
   }
 
-  const url = `${API_BASE_URL}/reviews?${params.toString()}`;
+  const url = `${getApiUrl()}/reviews?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -39,7 +39,7 @@ export async function getAllReviews(
 export async function getReviewByReviewId(id: string): Promise<ProductReview> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+  const res = await fetch(`${getApiUrl()}/reviews/${id}`, {
     headers: {
       ...additionalHeaders,
     },
@@ -57,7 +57,7 @@ export async function deleteReviewByReviewId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+  const res = await fetch(`${getApiUrl()}/reviews/${id}`, {
     method: "DELETE",
     credentials: "include",
     headers: {
@@ -79,7 +79,7 @@ export async function setReviewPrivateOrPublic(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+  const res = await fetch(`${getApiUrl()}/reviews/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {

@@ -53,16 +53,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Create Admin
-        run: node ./backend/scripts/seed.js
-        env:
-          ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-          ADMIN_COUNTRYCODE: ${{ secrets.ADMIN_COUNTRYCODE }}
-          ADMIN_CURRENCY: ${{ secrets.ADMIN_CURRENCY }}
-          BASE_CURRENCY: ${{ secrets.BASE_CURRENCY }}
-
   tests:
     needs: build
     runs-on: ubuntu-latest

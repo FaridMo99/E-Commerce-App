@@ -14,13 +14,15 @@ function MainImage({ url }: { url: string }) {
   }
 
   return (
-    <ImageZoom>
-      <img
-        src={url}
-        alt="product image"
-        className="bg-white w-[33vw] h-full object-cover"
-      />
-    </ImageZoom>
+    <div className="w-[33vw] aspect-square overflow-hidden rounded-sm bg-white">
+      <ImageZoom className="w-full h-full">
+        <img
+          src={url}
+          alt="product image"
+          className="w-full h-full object-cover block"
+        />
+      </ImageZoom>
+    </div>
   );
 }
 

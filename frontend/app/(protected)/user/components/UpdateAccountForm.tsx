@@ -23,19 +23,23 @@ import DeleteAccountButton from "./DeleteAccountButton";
 export function UpdateAccountForm({ user }: { user: AuthUser }) {
   const accessToken = useAuth((state) => state.accessToken);
 
+  console.log(user)
+
   const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(updateUserSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
       name: user.name,
-      birthdate: user.birthdate,
-      street: user.street ?? undefined,
-      state: user.state ?? undefined,
-      postalCode: user.postalCode ?? undefined,
-      city: user.city ?? undefined,
-      houseNumber: user.houseNumber ?? undefined,
-      countryCode: user.countryCode ?? undefined,
+      birthdate: user.birthdate
+        ? new Date(user.birthdate).toISOString().split("T")[0]
+        : "",
+      street: user.street ?? "",
+      state: user.state ?? "",
+      postalCode: user.postalCode ?? "",
+      city: user.city ?? "",
+      houseNumber: user.houseNumber ?? "",
+      countryCode: user.countryCode ?? "",
     },
   });
 

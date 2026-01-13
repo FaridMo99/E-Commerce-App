@@ -4,7 +4,7 @@ import type {
   UpdateProductSchema,
   SettingsSchema,
 } from "@monorepo/shared";
-import { API_BASE_URL } from "@/config/constants";
+import { getApiUrl } from "@/config/constants";
 import { handleResponse } from "../utils";
 import {
   AccessToken,
@@ -32,7 +32,7 @@ export async function getRevenue(
     if (timeframe.to) params.set("to", String(timeframe.to));
   }
 
-  const url = `${API_BASE_URL}/admin/analytics/revenue?${params.toString()}`;
+  const url = `${getApiUrl()}/admin/analytics/revenue?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -55,7 +55,7 @@ export async function getTopsellers(
     if (timeframe.to) params.set("to", String(timeframe.to));
   }
 
-  const url = `${API_BASE_URL}/admin/analytics/topsellers?${params.toString()}`;
+  const url = `${getApiUrl()}/admin/analytics/topsellers?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -78,7 +78,7 @@ export async function getNewUsers(
     if (timeframe.to) params.set("to", String(timeframe.to));
   }
 
-  const url = `${API_BASE_URL}/admin/analytics/new-users?${params.toString()}`;
+  const url = `${getApiUrl()}/admin/analytics/new-users?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -94,7 +94,7 @@ export async function getNewUsers(
 export async function getAllSettings(
   accessToken: AccessToken,
 ): Promise<AdminSetting[]> {
-  const res = await fetch(`${API_BASE_URL}/settings`, {
+  const res = await fetch(`${getApiUrl()}/settings`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -108,7 +108,7 @@ export async function createSetting(
   setting: SettingsSchema,
   accessToken: AccessToken,
 ): Promise<AdminSetting> {
-  const res = await fetch(`${API_BASE_URL}/settings`, {
+  const res = await fetch(`${getApiUrl()}/settings`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -126,7 +126,7 @@ export async function getSettingBySettingId(
   id: string,
   accessToken: AccessToken,
 ): Promise<AdminSetting> {
-  const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
+  const res = await fetch(`${getApiUrl()}/settings/${id}`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -147,7 +147,7 @@ export async function getBaseCurrency(accessToken: AccessToken): Promise<
     }
   >
 > {
-  const res = await fetch(`${API_BASE_URL}/settings/${BASE_CURRENCY_KEY}`, {
+  const res = await fetch(`${getApiUrl()}/settings/${BASE_CURRENCY_KEY}`, {
     credentials: "include",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -159,7 +159,7 @@ export async function getBaseCurrency(accessToken: AccessToken): Promise<
 export async function deleteAllSettings(
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/settings`, {
+  const res = await fetch(`${getApiUrl()}/settings`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -174,7 +174,7 @@ export async function deleteSettingBySettingId(
   id: string,
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
+  const res = await fetch(`${getApiUrl()}/settings/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -190,7 +190,7 @@ export async function updateSettingBySettingId(
   content: SettingsSchema,
   accessToken: AccessToken,
 ): Promise<AdminSetting> {
-  const res = await fetch(`${API_BASE_URL}/settings/${id}`, {
+  const res = await fetch(`${getApiUrl()}/settings/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -224,7 +224,7 @@ export async function createProduct(
     formData.append("images", file);
   });
 
-  const res = await fetch(`${API_BASE_URL}/products`, {
+  const res = await fetch(`${getApiUrl()}/products`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -241,7 +241,7 @@ export async function deleteProductByProductId(
   id: string,
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+  const res = await fetch(`${getApiUrl()}/products/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {
@@ -257,7 +257,7 @@ export async function updateProductByProductId(
   content: UpdateProductSchema,
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+  const res = await fetch(`${getApiUrl()}/products/${id}`, {
     credentials: "include",
     method: "PATCH",
     headers: {
@@ -290,7 +290,7 @@ export async function getOrders(
     if (timeframe.to) params.set("to", String(timeframe.to));
   }
 
-  const url = `${API_BASE_URL}/orders?${params.toString()}`;
+  const url = `${getApiUrl()}/orders?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -307,7 +307,7 @@ export async function createCategory(
   category: string,
   accessToken: AccessToken,
 ): Promise<ProductCategory> {
-  const res = await fetch(`${API_BASE_URL}/categories`, {
+  const res = await fetch(`${getApiUrl()}/categories`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -324,7 +324,7 @@ export async function deleteCategoryByCategoryId(
   id: string,
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
+  const res = await fetch(`${getApiUrl()}/categories/${id}`, {
     credentials: "include",
     method: "DELETE",
     headers: {

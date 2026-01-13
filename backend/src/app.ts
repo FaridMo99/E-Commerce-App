@@ -1,7 +1,7 @@
-import "../src/config/constants.js";
-import "../src/config/env.js";
-import "../src/services/redis.js";
-import "../src/services/prisma.js";
+import "./config/constants.js";
+import "./config/env.js";
+import "./services/redis.js";
+import "./services/prisma.js";
 import express, {
   type NextFunction,
   type Request,

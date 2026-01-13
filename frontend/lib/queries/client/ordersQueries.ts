@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/config/constants";
+import { getApiUrl } from "@/config/constants";
 import { handleResponse } from "../utils";
 import { AccessToken } from "@/types/types";
 import { getCsrfHeaderClientSide } from "@/lib/helpers";
@@ -6,7 +6,7 @@ import { getCsrfHeaderClientSide } from "@/lib/helpers";
 export async function makeOrder(
   accessToken: AccessToken,
 ): Promise<{ redirectUrl: string }> {
-  const res = await fetch(`${API_BASE_URL}/orders`, {
+  const res = await fetch(`${getApiUrl()}/orders`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -21,7 +21,7 @@ export async function cancelOrder(
   orderId: string,
   accessToken: AccessToken,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
+  const res = await fetch(`${getApiUrl()}/orders/${orderId}/cancel`, {
     credentials: "include",
     method: "POST",
     headers: {

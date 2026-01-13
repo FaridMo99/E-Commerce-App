@@ -88,7 +88,7 @@ export function SignupForm({
       className={cn("flex justify-center items-center", className)}
       {...props}
     >
-      <Card className=" bg-backgroundBright text-white w-8/10">
+      <Card className=" bg-backgroundBright text-white w-8/10 md:w-full">
         <CardContent>
           <form onSubmit={handleSubmit(submitHandler)}>
             <FieldGroup>
@@ -131,7 +131,6 @@ export function SignupForm({
                   text={errors.birthdate?.message}
                 />
               </Field>
-              <Field>
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -147,14 +146,14 @@ export function SignupForm({
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="confirmPassword">
+                    <FieldLabel className="block whitespace-nowrap overflow-x-hidden text-ellipsis" title="conform password" htmlFor="confirmPassword">
                       Confirm Password
                     </FieldLabel>
                     <Input
                       {...register("confirmPassword")}
                       id="confirmPassword"
                       type="password"
-                      required
+                    required
                     />
                     <InputValidationFailedText
                       trigger={errors.confirmPassword}
@@ -162,7 +161,6 @@ export function SignupForm({
                     />
                   </Field>
                 </Field>
-              </Field>
               <Turnstile
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY!}

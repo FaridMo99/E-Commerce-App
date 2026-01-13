@@ -29,7 +29,7 @@ function Navigation() {
 
   useEffect(() => {
     if (isError) {
-      toast.error(error.message);
+      toast.error("Failed to load Shopping Cart.");
     }
   }, [isError, error]);
 

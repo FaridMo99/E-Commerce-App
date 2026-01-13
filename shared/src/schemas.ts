@@ -6,7 +6,7 @@ const countryCodeSchema = z.enum(
   allowedCountries,
   "Country code must be one of US, GB, or DE"
 );
-/** --- Price Schema --- */
+
 //here as float, in controller turn to cents
 export const priceSchema = z
   .preprocess(
@@ -30,13 +30,13 @@ export const priceSchema = z
     { message: `Price must end with .${DEFAULT_NICE_PRICE}` }
   );
 
-/** --- Currency Schema --- */
+
 export const currencySchema = z.enum(
   ["USD", "EUR", "GBP"],
   "Must be USD EUR or GBP"
 );
 
-/** --- Password Schema --- */
+
 export const passwordSchema = z
   .string()
   .min(5, "Password must be at least 5 characters long")
@@ -44,17 +44,17 @@ export const passwordSchema = z
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/\d/, "Password must contain at least one number");
 
-/** --- Email Schema --- */
+
 export const emailShape = z.email("Invalid email address");
 
 export const emailSchema = z.object({ email: emailShape });
 
-/** --- Login Schema --- */
+
 export const loginSchema = emailSchema.extend({
   password: passwordSchema,
 });
 
-/** --- Signup Schema --- */
+
 export const signupSchema = loginSchema.extend({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   birthdate: z
@@ -73,50 +73,56 @@ export const signupSchema = loginSchema.extend({
     ),
 });
 
-/** --- Update User Schema --- */
+
 export const updateUserSchema = signupSchema
   .omit({ password: true, email: true })
   .partial()
   .extend({
+    name: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.string().min(3).optional()
+    ),
     street: z.string().optional(),
     houseNumber: z.string().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
     postalCode: z.string().optional(),
-    countryCode: countryCodeSchema.optional(),
+    
+    countryCode: z.union([countryCodeSchema, z.literal("")]).optional(),
     currency: currencySchema.optional(),
   })
   .superRefine((data, ctx) => {
-    const hasAny =
-      data.street ||
-      data.houseNumber ||
-      data.city ||
-      data.state ||
-      data.postalCode ||
-      data.countryCode;
-
-    const requiredFields: Array<keyof typeof data> = [
+    const addressFields: Array<keyof typeof data> = [
       "street",
       "houseNumber",
       "city",
       "postalCode",
       "countryCode",
+      "state",
     ];
 
-    if (hasAny) {
-      for (const field of requiredFields) {
-        if (!data[field]) {
+    const filledFields = addressFields.filter(
+      (field) =>
+        data[field] !== undefined && data[field] !== null && data[field] !== ""
+    );
+
+    const isPartiallyFilled =
+      filledFields.length > 0 && filledFields.length < addressFields.length;
+
+    if (isPartiallyFilled) {
+      addressFields.forEach((field) => {
+        if (!data[field] || data[field] === "") {
           ctx.addIssue({
             code: "custom",
             path: [field],
-            message: `${field} is required when providing an address`,
+            message: `${field} is required to complete the address`,
           });
         }
-      }
+      });
     }
   });
 
-/** --- Orders Query Schema --- */
+
 export const ordersQuerySchema = z.object({
   sort: z.enum(["status", "ordered_at"]).optional().default("ordered_at"),
   order: z.enum(["asc", "desc"]).optional().default("desc"),
@@ -141,7 +147,7 @@ export const ordersQuerySchema = z.object({
     .optional(),
 });
 
-/** --- Sort / Pagination Reusable Schemas --- */
+
 export const sortOrderSchema = z.enum(["asc", "desc"]).optional();
 export const paginationSchema = z.object({
   page: z
@@ -158,7 +164,7 @@ export const paginationSchema = z.object({
     .optional(),
 });
 
-//products meta query schema
+
 export const productsMetaInfosQuerySchema = paginationSchema.extend({
   search: z
     .string()
@@ -183,13 +189,13 @@ export const productsMetaInfosQuerySchema = paginationSchema.extend({
     .optional(),
 });
 
-/** --- Products Query Schema --- */
+
 export const productsQuerySchema = productsMetaInfosQuerySchema.extend({
   sortBy: z.enum(["name", "price", "created_at"]).optional(),
   sortOrder: sortOrderSchema,
 });
 
-/** --- Reviews Query Schema --- */
+
 export const reviewsQuerySchema = paginationSchema.extend({
   rating: z.preprocess(
     (val) => Number(val),
@@ -207,7 +213,7 @@ export const reviewsQuerySchema = paginationSchema.extend({
   sortOrder: sortOrderSchema,
 });
 
-/** --- Product Schema --- */
+
 export const productSchema = z.object({
   name: z.string().nonempty("Field is required"),
   description: z.string().nonempty("Field is required"),
@@ -222,12 +228,17 @@ export const productSchema = z.object({
     .refine((val) => val >= 0, { message: "Quantity must be 0 or more" }),
   is_public: z.boolean().default(false),
   category: z.string("Field is required").nonempty("Field is required"),
-  sale_price: priceSchema.optional().or(z.literal("")),
+  sale_price: z
+    .union([
+      z.literal(""),
+      priceSchema,
+    ])
+    .optional(),
 });
 
 export const updateProductSchema = productSchema.partial();
 
-/** --- Timeframe Query Schema --- */
+
 export const timeframeQuerySchema = z.object({
   from: z
     .preprocess(
@@ -247,7 +258,7 @@ export const timeframeQuerySchema = z.object({
     }),
 });
 
-/** --- Review Schema --- */
+
 export const reviewSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
@@ -255,7 +266,7 @@ export const reviewSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
-/** --- Item / Cart Schemas --- */
+
 const itemQuantity = z.preprocess(
   (val) => Number(val),
   z.number().int().min(1, "Quantity must be at least 1")
@@ -273,7 +284,7 @@ export const addCartItemSchema = productIdSchema.extend({
   quantity: itemQuantity,
 });
 
-/** --- Settings Schema --- */
+
 export const settingsSchema = z.object({
   key: z.string().nonempty("Key cannot be empty"),
   value: z.string().nonempty("Value cannot be empty"),

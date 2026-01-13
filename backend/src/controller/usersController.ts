@@ -87,6 +87,8 @@ export async function updateUserByUserId(
   } = req.body;
   const id = req.user?.id;
 
+  console.log(req.body, "pbijfebphijfwbpijf")
+
   if (!id) {
     console.log(chalk.red(`${getTimestamp()} User not logged in`));
     return res.status(400).json({ message: "User not logged in" });
@@ -96,15 +98,15 @@ export async function updateUserByUserId(
     console.log(chalk.yellow(`${getTimestamp()} Updating user ${id}`));
 
     const data: Partial<User> = {
-      ...(name && { name }),
-      ...(birthdate && { birthdate }),
-      ...(street && { street }),
-      ...(houseNumber && { houseNumber }),
-      ...(postalCode && { postalCode }),
-      ...(city && { city }),
-      ...(state && { state }),
-      ...(currency && { currency }),
-      ...(countryCode && { countryCode }),
+      ...(name !== undefined && { name }),
+      ...(birthdate !== undefined && { birthdate }),
+      ...(street !== undefined && { street }),
+      ...(houseNumber !== undefined && { houseNumber }),
+      ...(postalCode !== undefined && { postalCode }),
+      ...(city !== undefined && { city }),
+      ...(state !== undefined && { state }),
+      ...(currency !== undefined && { currency }),
+      ...(countryCode !== undefined && { countryCode }),
     };
 
     const user = await prisma.user.update({

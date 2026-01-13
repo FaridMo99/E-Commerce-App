@@ -110,7 +110,7 @@ export default function CaptchaForm<
 
   return (
     <div className={cn("flex justify-center items-center")}>
-      <Card className="bg-backgroundBright text-white w-8/10">
+      <Card className=" bg-backgroundBright text-white w-8/10 md:w-full">
         <CardHeader>
           <CardTitle>{headerText}</CardTitle>
           <CardDescription>{description}</CardDescription>

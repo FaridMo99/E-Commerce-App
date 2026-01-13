@@ -11,7 +11,7 @@ function ImagePart({ imageUrls }: ImagePartProps) {
   const [imageToShow, setImageToShow] = useState<string>(imageUrls[0]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-4/5">
       <MainImage url={imageToShow} />
 
       <div className="w-[33vw] h-50">

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/config/constants";
+import { getApiUrl } from "@/config/constants";
 import { AuthResponse } from "@/types/types";
 import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import {
@@ -9,8 +9,8 @@ import {
   ResponseResolver,
 } from "msw";
 
-const loginUrl = `${API_BASE_URL}/auth/login`;
-const signupUrl = `${API_BASE_URL}/auth/signup`;
+const loginUrl = `${getApiUrl()}/auth/login`;
+const signupUrl = `${getApiUrl()}/auth/signup`;
 
 const verificationData: EmailSchema = {
   email: "John@gmail.com",

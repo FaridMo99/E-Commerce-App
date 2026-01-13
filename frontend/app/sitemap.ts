@@ -2,15 +2,22 @@ import { MetadataRoute } from "next";
 import { DOMAIN } from "@/config/constants";
 import { getProducts } from "@/lib/queries/client/productQueries";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await getProducts();
+export const revalidate = 3600;
 
-  const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${DOMAIN}/products/${product.id}`,
-    lastModified: product.updated_at,
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  let productEntries: MetadataRoute.Sitemap = [];
+
+  try {
+    const products = await getProducts();
+    productEntries = products.map((product) => ({
+      url: `${DOMAIN}/products/${product.id}`,
+      lastModified: product.updated_at,
+      changeFrequency: "daily",
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.log("Sitemap Error:",error);
+  }
 
   const staticPages: MetadataRoute.Sitemap = [
     {

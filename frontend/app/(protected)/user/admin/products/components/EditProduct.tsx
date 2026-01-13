@@ -135,7 +135,10 @@ export function EditProduct({ product }: { product: AdminProduct }) {
                 type="number"
                 id="sale"
                 step={0.01}
-                {...register("sale_price")}
+                {...register("sale_price", {
+                  setValueAs: (v) =>
+                    v === "" || v === null || v === undefined ? "" : v,
+                })}
               />
               <InputValidationFailedText
                 trigger={errors.sale_price}

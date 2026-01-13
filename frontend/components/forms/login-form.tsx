@@ -97,7 +97,7 @@ export function LoginForm({
       className={cn("flex justify-center items-center", className)}
       {...props}
     >
-      <Card className="bg-backgroundBright text-white w-8/10">
+      <Card className=" bg-backgroundBright text-white w-8/10 md:w-full">
         <CardHeader>
           <CardTitle>Sign in to your account</CardTitle>
           <CardDescription>

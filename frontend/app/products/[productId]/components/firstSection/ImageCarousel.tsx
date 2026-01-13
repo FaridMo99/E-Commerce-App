@@ -14,7 +14,7 @@ function ImageCarousel({ imageUrls, setImageToShow }: ImageCarouselProps) {
           key={url}
           onClick={() => setImageToShow(url)}
           alt="product image"
-          className="h-30 w-1/6"
+          className="h-30 w-1/6 rounded-sm"
           src={url}
         />
       ))}

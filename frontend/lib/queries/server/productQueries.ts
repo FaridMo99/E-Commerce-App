@@ -5,7 +5,7 @@ import type {
   ReviewSchema,
 } from "@monorepo/shared";
 import { handleResponse } from "../utils";
-import { API_BASE_URL } from "@/config/constants";
+import { getApiUrl } from "@/config/constants";
 import {
   AccessToken,
   AuthProductReview,
@@ -38,7 +38,7 @@ export async function getProducts(
     if (queryParams.sortOrder) params.set("sortOrder", queryParams.sortOrder);
   }
 
-  const url = `${API_BASE_URL}/products?${params.toString()}`;
+  const url = `${getApiUrl()}/products?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -71,7 +71,7 @@ export async function getProductsMetaInfos(
       params.set("sale", String(queryParams.sale));
   }
 
-  const url = `${API_BASE_URL}/products/meta?${params.toString()}`;
+  const url = `${getApiUrl()}/products/meta?${params.toString()}`;
 
   const res = await fetch(url, {
     credentials: "include",
@@ -85,7 +85,7 @@ export async function getProductsMetaInfos(
 export async function getProductByProductId(id: string): Promise<Product> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+  const res = await fetch(`${getApiUrl()}/products/${id}`, {
     credentials: "include",
     headers: {
       ...additionalHeaders,
@@ -99,7 +99,7 @@ export async function getAllProductReviewsByProductId(
 ): Promise<ProductReview[]> {
   const additionalHeaders = await getAllHeaders();
 
-  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
+  const res = await fetch(`${getApiUrl()}/products/${id}/reviews`, {
     headers: {
       ...additionalHeaders,
     },
@@ -117,7 +117,7 @@ export async function createProductReviewByProductId(
     getCsrfHeader(),
   ]);
 
-  const res = await fetch(`${API_BASE_URL}/products/${id}/reviews`, {
+  const res = await fetch(`${getApiUrl()}/products/${id}/reviews`, {
     credentials: "include",
     method: "POST",
     headers: {
@@ -135,8 +135,8 @@ export async function getHomeProducts(
   accessToken?: AccessToken,
 ): Promise<HomeProducts> {
   const additionalHeaders = await getAllHeaders();
-  console.log(additionalHeaders);
-  const res = await fetch(`${API_BASE_URL}/products/home`, {
+
+  const res = await fetch(`${getApiUrl()}/products/home`, {
     credentials: "include",
     headers: {
       ...additionalHeaders,
