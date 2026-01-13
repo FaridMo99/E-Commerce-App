@@ -18,6 +18,7 @@ import { getCsrfHeaderClientSide } from "@/lib/helpers";
 
 export async function getProducts(
   queryParam?: ProductsQuerySchema,
+  accessToken?:AccessToken
 ): Promise<Product[]> {
   const params = new URLSearchParams();
 
@@ -40,6 +41,9 @@ export async function getProducts(
 
   const res = await fetch(url, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   return await handleResponse(res);
 }

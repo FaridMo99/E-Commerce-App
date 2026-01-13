@@ -7,9 +7,11 @@ import useDebounce from "@/hooks/useDebounce";
 import { getProducts } from "@/lib/queries/client/productQueries";
 import { Input } from "@/components/ui/input";
 import Searchlist from "./Searchlist";
+import useAuth from "@/stores/authStore";
 
 function Searchbar() {
   const [search, setSearch] = useState<string>("");
+  const accessToken = useAuth(state=> state.accessToken)
   const debouncedSearch = useDebounce(search, 600);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -18,7 +20,7 @@ function Searchbar() {
 
   const { data } = useQuery({
     queryKey: ["search", debouncedSearch],
-    queryFn: () => getProducts({ search: debouncedSearch }),
+    queryFn: () => getProducts({ search: debouncedSearch }, accessToken ?? undefined),
     enabled: debouncedSearch.length > 0,
   });
 

@@ -17,6 +17,7 @@
     "build:all": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
     "test:all": "npm run test -w backend && npm run test -w frontend",
     "docker:dev": "docker compose up --build",
+    "docker:up":"docker compose up",
     "docker:stop": "docker compose down"
   },
   "keywords": [],

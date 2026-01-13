@@ -18,6 +18,7 @@ import { getAllHeaders, getCsrfHeader } from "../../serverHelpers";
 
 export async function getProducts(
   queryParams?: ProductsQuerySchema,
+  accessToken?: AccessToken
 ): Promise<Product[]> {
   const additionalHeaders = await getAllHeaders();
 
@@ -44,6 +45,7 @@ export async function getProducts(
     credentials: "include",
     headers: {
       ...additionalHeaders,
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     },
   });
   return await handleResponse(res);
@@ -51,6 +53,7 @@ export async function getProducts(
 
 export async function getProductsMetaInfos(
   queryParams?: ProductsMetaInfosQuerySchema,
+  accessToken?: AccessToken
 ): Promise<ProductMetaInfos> {
   const additionalHeaders = await getAllHeaders();
 
@@ -77,18 +80,23 @@ export async function getProductsMetaInfos(
     credentials: "include",
     headers: {
       ...additionalHeaders,
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     },
   });
   return await handleResponse(res);
 }
 
-export async function getProductByProductId(id: string): Promise<Product> {
+export async function getProductByProductId(
+  id: string,
+  accessToken?: AccessToken
+): Promise<Product> {
   const additionalHeaders = await getAllHeaders();
 
   const res = await fetch(`${getApiUrl()}/products/${id}`, {
     credentials: "include",
     headers: {
       ...additionalHeaders,
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     },
   });
   return await handleResponse(res);
