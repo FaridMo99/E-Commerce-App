@@ -11,15 +11,15 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=myuser         
-      - POSTGRES_PASSWORD=mypassword  
-      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,14 +27,14 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/dockerfile
+      dockerfile: backend/Dockerfile
     image: backend-app:latest
     ports:
       - "3001:3001"
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/mydatabase
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       - REDIS_URL=redis://redis:6379
       - SEED_PRODUCTS=true 
     depends_on:
@@ -52,11 +52,11 @@ services:
   db-migrations:
     build:
       context: .
-      dockerfile: backend/dockerfile
+      dockerfile: backend/Dockerfile
     image: backend-app:latest
     command: npx prisma migrate deploy --schema ./prisma/schema.prisma    
     environment:
-      - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/mydatabase
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: frontend/dockerfile
+      dockerfile: frontend/Dockerfile
       args:
         - NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:3001
         - NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
