@@ -13,7 +13,11 @@
     "redis:start": "redis-server --daemonize yes",
     "dev:backend": "npm run build:shared && npm run redis:start && npm run prisma:dev && npm run dev -w backend",
     "dev:frontend": "npm run build:shared && npm run dev -w frontend",
-    "dev:all": "npm run build:shared && concurrently -k -n \"BACKEND,FRONTEND\" -c \"magenta,cyan\" \"npm run dev -w backend\" \"npm run dev -w frontend\""
+    "dev:all": "npm run build:shared && concurrently -k -n \"BACKEND,FRONTEND\" -c \"magenta,cyan\" \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build:all": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
+    "test:all": "npm run test -w backend && npm run test -w frontend",
+    "docker:dev": "docker compose up --build",
+    "docker:stop": "docker compose down"
   },
   "keywords": [],
   "author": "",

@@ -7,21 +7,24 @@ import dotenv from "dotenv";
 dotenv.config();
 import bcrypt from "bcrypt";
 import { BASE_CURRENCY_KEY } from "../config/constants.js";
+import {
+  ADMIN_COUNTRYCODE,
+  ADMIN_CURRENCY,
+  ADMIN_EMAIL,
+  ADMIN_NAME,
+  ADMIN_PASSWORD,
+  BASE_CURRENCY,
+  SEED_PRODUCTS,
+} from "../config/env.js";
+import chalk from "chalk";
+import { getTimestamp } from "../lib/utils.js";
 
-const ADMIN_NAME = process.env.ADMIN_NAME!;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL!;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
-const ADMIN_COUNTRYCODE = process.env.ADMIN_COUNTRYCODE!;
-const ADMIN_CURRENCY = process.env.ADMIN_CURRENCY as CurrencyISO;
-const BASE_CURRENCY = process.env.BASE_CURRENCY as CurrencyISO;
-const SEED_PRODUCTS = process.env.SEED_PRODUCTS!;
-
-export const mockCategoryId = "MockClothingId"
+export const mockCategoryId = "MockClothingId";
 
 export const mockCategory: Prisma.CategoryCreateInput = {
   name: "Clothes",
-  id:mockCategoryId
-}
+  id: mockCategoryId,
+};
 
 export const mockProducts: Prisma.ProductCreateManyInput[] = [
   {
@@ -90,7 +93,7 @@ const baseCurrency: Prisma.SettingsCreateInput = {
   value: BASE_CURRENCY,
 };
 
-async function createAdmin():Promise<void> {
+async function createAdmin(): Promise<void> {
   await Promise.all([
     prisma.user.create({
       data: baseAdmin,
@@ -102,39 +105,48 @@ async function createAdmin():Promise<void> {
 }
 
 async function createMockProducts(): Promise<void> {
-  
   await prisma.category.upsert({
     where: { id: mockCategoryId },
     update: {},
-    create:mockCategory,
+    create: mockCategory,
   });
 
   await prisma.product.createMany({
     data: mockProducts,
-    skipDuplicates:true
-  })
+    skipDuplicates: true,
+  });
 }
 
-async function checkIfSeeded() {
-  const adminExists = await prisma.user.findFirst({
-    where: {
-      role: "ADMIN",
-    },
-  });
-
-  const productsExist = await prisma.product.findFirst({
-    select: { id: true },
-  });
 
 
-  if (!productsExist && SEED_PRODUCTS === "true") {
-    await createMockProducts()
-  }
+export async function seedDb():Promise<void> {
+  console.log(chalk.yellow(getTimestamp(),"Running DB seeder..."));
+  try {
+    console.log(chalk.yellow(getTimestamp(), "Checking if already populated the DB..."));
 
+    const adminExists = await prisma.user.findFirst({
+      where: { role: "ADMIN" },
+    });
 
-  if (!adminExists) {
-    await createAdmin();
+    const productsExist = await prisma.product.findFirst({
+      select: { id: true },
+    });
+
+    if (!productsExist && SEED_PRODUCTS === "true") {
+      console.log(chalk.yellow(getTimestamp(),"Seeding mock products..."));
+      await createMockProducts();
+      console.log(chalk.green(getTimestamp(), "Created Mock Products successfully!"));
+
+    }
+
+    if (!adminExists) {
+      console.log(chalk.yellow(getTimestamp(), "Creating Admin..."));
+      await createAdmin();
+      console.log(
+      chalk.green(getTimestamp(),"Created Admin successfully!"));
+    }
+    console.log(chalk.green(getTimestamp(),"Seeded DB succesfully!"))
+  } catch (error) {
+    console.error("Seeding error:", error);
   }
 }
-
-await checkIfSeeded();

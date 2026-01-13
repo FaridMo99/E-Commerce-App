@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import type { CurrencyISO } from "../generated/prisma/enums.js";
 dotenv.config();
 
 //node
@@ -55,3 +56,14 @@ export const DEV_EMAIL_FALLBACK_IF_NO_ADMIN =
 
 //Ip locate
 export const IP_LOCATE_API_KEY = process.env.IP_LOCATE_API_KEY;
+
+//admin settings
+export const ADMIN_NAME = process.env.ADMIN_NAME!;
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL!;
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
+export const ADMIN_COUNTRYCODE = process.env.ADMIN_COUNTRYCODE!;
+export const ADMIN_CURRENCY = process.env.ADMIN_CURRENCY as CurrencyISO;
+export const BASE_CURRENCY = process.env.BASE_CURRENCY as CurrencyISO;
+
+//seed DB conitional
+export const SEED_PRODUCTS = process.env.SEED_PRODUCTS as "true" | "false";

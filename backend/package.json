@@ -5,10 +5,12 @@
   "main": "index.js",
   "scripts": {
     "copy-assets": "copyfiles -u 1 src/**/*.mmdb dist/",
+    "pre:db:seed":"npm run build",
+    "db:seed": "node dist/scripts/seed.js",
     "db:migrate": "npx prisma migrate deploy",
-    "dev": "npx prisma generate && tsx watch ./src/app.ts",
+    "dev": "npx prisma generate && npm run db:seed && tsx watch ./src/app.ts",
     "build": "npx prisma generate --schema ./prisma/schema.prisma && tsc && npm run copy-assets",
-    "start": "npx prisma generate  && npm run db:migrate && node ./dist/scripts/seed.js && node dist/app.js",
+    "start": "node dist/app.js",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage"

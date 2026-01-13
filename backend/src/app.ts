@@ -18,6 +18,7 @@ import webhookRouter from "./routes/webhooks/webhookRouter.js";
 import cors from "cors";
 import { loggerMiddleware } from "./middleware/utilityMiddleware.js";
 import { getTimestamp } from "./lib/utils.js";
+import { seedDb } from "./scripts/seed.js";
 
 export const app = express();
 
@@ -54,6 +55,7 @@ app.use("/webhooks", webhookRouter);
 
 export const server = app.listen(PORT, async () => {
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
+  await seedDb()
 });
 
 //global error middleware
