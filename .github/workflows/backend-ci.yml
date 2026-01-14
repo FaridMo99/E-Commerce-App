@@ -26,7 +26,7 @@ jobs:
         run: npm run lint -w backend
 
       - name: Type Check
-        run: npx tsc --noEmit
+        run: npx tsc --noEmit -w backend
 
       - name: Run Tests
         run: npm run test -w backend

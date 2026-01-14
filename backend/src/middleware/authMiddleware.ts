@@ -10,7 +10,7 @@ import { validateTurnstile } from "../lib/auth.js";
 import { getTimestamp, isValidUserPayload } from "../lib/utils.js";
 
 export async function isAdmin(req: Request, res: Response, next: NextFunction) {
-  const userId = req.user?.id!;
+  const userId = req.user?.id;
   console.log(
     chalk.yellow(
       getTimestamp(),
@@ -94,7 +94,7 @@ export async function hasRefreshToken(
     );
 
     next();
-  } catch (err) {
+  } catch (_err) {
     console.log(
       chalk.red(
         getTimestamp(),

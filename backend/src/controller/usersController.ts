@@ -20,7 +20,6 @@ import {
   productSelect,
   productWhere,
   userAuthenticatedSelect,
-  type CartWithSelectedFields,
 } from "../config/prismaHelpers.js";
 import type { User } from "../generated/prisma/client.js";
 
@@ -503,8 +502,6 @@ export async function addProductToUserCart(
     )
       return res.status(400).json({ message: "Total quantity exceeds stock" });
 
-    let updatedCart: CartWithSelectedFields | null;
-
     if (existingItem) {
       //update quantity
       await prisma.cartItem.update({
@@ -535,7 +532,7 @@ export async function addProductToUserCart(
     }
 
     //return full updated cart
-    updatedCart = await prisma.cart.findUnique({
+    const updatedCart = await prisma.cart.findUnique({
       where: { userId },
       select: cartSelect,
     });

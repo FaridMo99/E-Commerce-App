@@ -173,7 +173,7 @@ export async function makeOrder(
         .json({ message: "Your Order cant exceed 999999,99" });
 
     let order;
-    let finalItems = cartWithTotals.items;
+    const finalItems = cartWithTotals.items;
     const categoriesToInvalidate = new Set<string>(); //caches to invalidate for sold out products
 
     //atomic order creation, stock decrement, and check

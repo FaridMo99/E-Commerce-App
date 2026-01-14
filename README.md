@@ -38,8 +38,6 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **TypeScript**
 * **Zod**
 * **Vitest**
-* **Supertest**
-* * **Docker**
 
 ### Backend
 
@@ -52,7 +50,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **Rate Limiting:** Protects API endpoints from Brute Force attempts and DDoS attacks using `express-rate-limit` with a **Redis-backed** store for persistence.
 * **Secure Hashing:** All user passwords are encrypted using **Bcrypt**.
 * **Schema Validation:** All incoming data is validated against schemas using **Zod** to maintain data integrity.
-* * **Bot Protection (Turnstile):** Uses **Cloudflare Turnstile** to protect against Bots on publicly accessible Form inputs.
+* **Bot Protection (Turnstile):** Uses **Cloudflare Turnstile** to protect against Bots on publicly accessible Form inputs.
 
 #### E-Commerce & Payments
 
@@ -87,12 +85,13 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **Multer**
 * **Passport**
 * **Vitest**
+* **Supertest**
 * **Docker**
 
 ### General
 
 * **Architecture:** This Project was build as a Monorepo using npm workspaces
-* **Dpcker** Containerized Application through Docker
+* **Docker** Containerized Application through Docker
 * **Shared Packages:** The Projects share end-to-end TypeScript types, Zod Schemas and constants
 * **CI/CD** Automated Tests, Linting, Package Vulnerability Auditing aswell as Build Step through Github Actions for both, the Front- and Backend
 

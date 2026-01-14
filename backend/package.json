@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint",
     "copy-assets": "copyfiles -u 1 src/**/*.mmdb dist/",
     "db:seed": "npm run build && node dist/scripts/seed.js",
     "db:migrate": "npx prisma migrate deploy",
