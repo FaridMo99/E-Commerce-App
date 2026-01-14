@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,10 @@ function Searchbar() {
     inputRef.current?.blur();
     router.push(`/products?search=${search}`);
   }
+
+  useEffect(() => {
+    window.alert("This is just a Portfolio Project, not a real Online Shop. Products and checkout are not real and wont charge you.")
+  },[])
 
   return (
     <form

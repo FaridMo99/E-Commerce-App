@@ -7,9 +7,9 @@ type PoweredByProps = {
 };
 function PoweredBy({ by, text, link }: PoweredByProps) {
   return (
-    <p>
+    <p className="my-4">
       {text}
-      <Link href={link}>{by}</Link>
+      <Link className="font-bold" href={link}>{by}</Link>
     </p>
   );
 }
