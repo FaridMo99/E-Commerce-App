@@ -42,7 +42,7 @@ export async function disconnectAllServices(
     console.log(
       chalk.green(`${getTimestamp()} Disconnects successful. Exiting...`),
     );
-    if (NODE_ENV !== "dev") {
+    if (NODE_ENV !== "development") {
       notifyAdmin(
         `Application is down, reason: ${reason}:: ERROR: ${error?.message}`,
       );
@@ -52,9 +52,9 @@ export async function disconnectAllServices(
     console.log(
       chalk.red(getTimestamp(), "Error during disconnect:", disconnectErr),
     );
-    if (NODE_ENV !== "dev") {
+    if (NODE_ENV !== "development") {
       notifyAdmin(
-        `Application is down, reason: ${reason}:: ERROR: ${disconnectErr}`,
+        `Application is down, reason: ${reason}:: ERROR: ${disconnectErr}`
       );
     }
     process.exit(1);

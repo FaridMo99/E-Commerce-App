@@ -74,6 +74,7 @@ export function turnPriceToPriceInCents(price: number): number {
 //future reference, when implementing .00 this wont return floats to display
 export function formatPriceForClient(cents: number): number {
   const result = Number((cents / 100).toFixed(2));
+  console.log(result)
   return result;
 }
 
@@ -158,6 +159,7 @@ export async function transformAndFormatProductPriceInCents(
 ): Promise<void> {
   try {
     // 1. If currency is the same → nothing to exchange
+
     if (baseCurrency !== wantedCurrency) {
       const { rates } = await getExchangeRates();
 
@@ -195,6 +197,7 @@ export async function transformAndFormatProductPriceInCents(
     if (product.sale_price) {
       product.sale_price = roundPriceUpInCents(product.sale_price);
     }
+
   } catch (err) {
     console.log(
       chalk.red(

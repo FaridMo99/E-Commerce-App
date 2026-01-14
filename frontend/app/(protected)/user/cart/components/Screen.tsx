@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ItemSection from "./ItemSection";
 import SummarySection from "./SummarySection";
 
+
 function Screen() {
   const accessToken = useAuth((state) => state.accessToken);
 
@@ -22,6 +23,7 @@ function Screen() {
   });
 
   if (isError) throw error;
+
 
   return (
     <main className="w-full h-full flex justify-center items-center">

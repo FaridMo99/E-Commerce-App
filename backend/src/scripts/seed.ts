@@ -31,8 +31,8 @@ export const mockProducts: Prisma.ProductCreateManyInput[] = [
     name: "Classic Cotton T-Shirt",
     description:
       "A comfortable, 100% cotton t-shirt perfect for everyday wear.",
-    price: 2500,
-    sale_price: 2000,
+    price: 2599,
+    sale_price: 2099,
     currency: "USD" as CurrencyISO,
     stock_quantity: 100,
     is_public: true,
@@ -43,7 +43,7 @@ export const mockProducts: Prisma.ProductCreateManyInput[] = [
     name: "Reflex Running Shoes",
     description:
       "Lightweight running shoes with advanced cushioning technology.",
-    price: 12000,
+    price: 1299,
     sale_price: null,
     currency: "EUR" as CurrencyISO,
     stock_quantity: 45,
@@ -54,8 +54,8 @@ export const mockProducts: Prisma.ProductCreateManyInput[] = [
   {
     name: "Midnight Denim Jeans",
     description: "Slim-fit dark wash denim jeans with a slight stretch.",
-    price: 5500,
-    sale_price: 4500,
+    price: 5599,
+    sale_price: 4599,
     currency: "GBP",
     stock_quantity: 0,
     is_public: true,
@@ -66,7 +66,7 @@ export const mockProducts: Prisma.ProductCreateManyInput[] = [
     name: "Minimalist Leather Wallet",
     description:
       "Genuine leather wallet with RFID protection and slim profile.",
-    price: 3500,
+    price: 3599,
     sale_price: null,
     currency: "USD" as CurrencyISO,
     stock_quantity: 200,

@@ -4,7 +4,7 @@ dotenv.config();
 
 //node
 export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN!;
-export const NODE_ENV = process.env.NODE_ENV;
+export const NODE_ENV = process.env.NODE_ENV as "development" | "production";
 export const PORT = process.env.PORT;
 export const BACKEND_URL = process.env.BACKEND_URL;
 

@@ -60,7 +60,7 @@ export const server = app.listen(PORT, async () => {
 
 //global error middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  if (NODE_ENV === "dev") {
+  if (NODE_ENV === "development") {
     console.log(chalk.magenta(err.stack));
   }
 

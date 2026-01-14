@@ -21,8 +21,7 @@ function OrderSummary({ order }: { order: Order }) {
             <div className="flex flex-col">
               <p className="font-semibold">{item.product.name}</p>
               <p className="text-sm text-gray-300">
-                {item.quantity} x {item.price_at_purchase}{" "}
-                {item.product.currency}
+                {item.quantity} x {item.price_at_purchase} {order.currency}
               </p>
             </div>
           </div>
@@ -35,7 +34,7 @@ function OrderSummary({ order }: { order: Order }) {
         </h2>
         <p>
           <span className="font-semibold">Total Price:</span>{" "}
-          {order.total_amount} {order.items[0]?.product.currency}
+          {order.total_amount} {order.currency}
         </p>
         <p>
           <span className="font-semibold">Ordered At:</span>{" "}
@@ -46,10 +45,6 @@ function OrderSummary({ order }: { order: Order }) {
         </p>
         <p>
           <span className="font-semibold">Currency:</span> {order.currency}
-        </p>
-        <p>
-          <span className="font-semibold">Total Amount:</span>{" "}
-          {order.total_amount}
         </p>
         <p>
           <span className="font-semibold">Payment Method:</span>{" "}

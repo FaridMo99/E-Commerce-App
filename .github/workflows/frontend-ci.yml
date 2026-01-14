@@ -1,11 +1,12 @@
-name: Frontend Continous Integration Workflow
+name: Frontend Continous Integration
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -32,12 +33,8 @@ jobs:
 
       - name: Production Build
         run: npm run build -w frontend
+
         env:
           NEXT_PUBLIC_BACKEND_BASE_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_BASE_URL }}
-          ENV: ${{secrets.ENV}}
-          CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS: ${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS}}
-          CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK: ${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK}}
-          NEXT_PUBLIC_CLOUDFLARE_SITE_KEY: ${{secrets.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY}}
-          NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${{secrets.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}}
-          NEXT_PUBLIC_DOMAIN_NAME: ${{secrets.NEXT_PUBLIC_DOMAIN_NAME}}
-          NEXT_PUBLIC_DOMAIN: ${{secrets.NEXT_PUBLIC_DOMAIN}}
+          NEXT_PUBLIC_STRIPE_ENV: ${{ secrets.NEXT_PUBLIC_STRIPE_ENV }}
+

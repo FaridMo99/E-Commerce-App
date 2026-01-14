@@ -63,7 +63,7 @@ export async function issueTokens(
     const csrfToken = v4();
     const maxAge = 7 * 24 * 60 * 60 * 1000;
 
-    const isProd = NODE_ENV !== "dev";
+    const isProd = NODE_ENV !== "development";
 
     res.cookie("csrfToken", csrfToken, {
       httpOnly: false,
