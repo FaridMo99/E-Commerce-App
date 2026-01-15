@@ -23,7 +23,7 @@ import { seedDb } from "./scripts/seed.js";
 export const app = express();
 
 //proxy support middleware to access ip
-app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+app.set("trust proxy",1);
 
 app.use(loggerMiddleware);
 
