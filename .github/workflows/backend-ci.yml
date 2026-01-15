@@ -45,11 +45,9 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # 2. Generate Prisma Client (Fixes the "Cannot find module" error)
       - name: Generate Prisma Client
         run: npx prisma generate --schema=./backend/prisma/schema.prisma
 
-      # 3. Apply Migrations (Fixes the "Table does not exist" error)
       - name: Push Database Schema
         run: npx prisma db push --schema=./backend/prisma/schema.prisma
         env:
@@ -69,6 +67,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_TOKEN_SECRET: testAccessTokenSecret123
+          JWT_REFRESH_TOKEN_SECRET: testRefreshTokenSecret123
+          OPEN_EXCHANGE_RATE_APP_KEY: ${{ secrets.OPEN_EXCHANGE_RATE_APP_KEY }}
+          CLOUDFLARE_SECRET_KEY: ${{ secrets.CLOUDFLARE_SECRET_KEY }}
 
       - name: Production Build
         run: npm run build -w backend
