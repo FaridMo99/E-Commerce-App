@@ -39,6 +39,6 @@ COPY --from=builder /app/frontend/.next/static ./frontend/.next/static
 COPY --from=builder /app/frontend/public ./frontend/public
 
 USER nextjs
-EXPOSE 3000
+EXPOSE 10000
 
 CMD ["node", "frontend/server.js"]
