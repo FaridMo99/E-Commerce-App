@@ -24,11 +24,11 @@ export const authRateLimiter = rateLimit({
   store: new RedisStore({
     sendCommand: (...args: string[]) => redis.sendCommand(args),
   }),
-  windowMs: NODE_ENV === "development" ? 1 : 15 * 60 * 1000,
+  windowMs: NODE_ENV === "development" ? 1 : 3 * 60 * 1000,
   max: 5,
   handler: (req, res) => {
     console.log(
-      `${getTimestamp()} Rate limit reached for: " + req.ip + " on " + req.url`,
+      `${getTimestamp()} Rate limit reached for: ${req.ip}  ${req.url}`,
     );
     res.status(429).json({
       message:

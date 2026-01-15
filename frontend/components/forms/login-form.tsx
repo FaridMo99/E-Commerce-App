@@ -36,7 +36,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div"> & { error?: boolean }) {
-  //submission states
   const { mutate, isPending } = useMutation({
     mutationKey: ["login user"],
     mutationFn: ({

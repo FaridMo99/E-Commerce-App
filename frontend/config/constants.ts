@@ -1,6 +1,7 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL!;
 export const ENV = process.env.ENV as "development" | "production";
 export const DOCKER_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL!;
+export const THROUGH_NEXTJS_REWRITE = process.env.NEXT_THROUGH_NEXTJS_REWRITE || false;
 export const API_BASE_URL = BASE_URL + "/api";
 export const API_DOCKER_BASE_URL = DOCKER_BASE_URL + "/api";
 export const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!;

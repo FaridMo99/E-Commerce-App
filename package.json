@@ -9,6 +9,8 @@
     "build:shared": "npm run build -w shared",
     "build:frontend": "npm run build -w frontend",
     "build:backend": "npm run build -w backend",
+    "start:frontend": "npm run start -w frontend",
+    "start:backend": "npm run start -w backend",
     "prisma:dev": "cd ./backend && npx prisma dev --detach",
     "redis:start": "redis-server --daemonize yes",
     "dev:backend": "npm run build:shared && npm run redis:start && npm run prisma:dev && npm run dev -w backend",
@@ -17,7 +19,7 @@
     "build:all": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
     "test:all": "npm run test -w backend && npm run test -w frontend",
     "docker:dev": "docker compose up --build",
-    "docker:up":"docker compose up",
+    "docker:up": "docker compose up",
     "docker:stop": "docker compose down"
   },
   "keywords": [],
@@ -38,4 +40,4 @@
   "dependencies": {
     "zod": "^4.3.5"
   }
-}
+} 

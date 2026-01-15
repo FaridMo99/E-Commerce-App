@@ -31,7 +31,8 @@ app.use(
   cors({
     origin: [CLIENT_ORIGIN],
     credentials: true,
-  }),
+    exposedHeaders: ["set-cookie"],
+  })
 );
 
 //middleware to parse form submits to req.body

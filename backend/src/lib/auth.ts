@@ -34,7 +34,7 @@ export async function issueTokens(
       JWT_ACCESS_TOKEN_SECRET,
       {
         expiresIn: "15m",
-      },
+      }
     );
 
     const refreshToken = jwt.sign(
@@ -42,7 +42,7 @@ export async function issueTokens(
       JWT_REFRESH_TOKEN_SECRET,
       {
         expiresIn: "7d",
-      },
+      }
     );
 
     await prisma.refreshToken.create({
@@ -56,8 +56,8 @@ export async function issueTokens(
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Refresh token stored for user ${user.id}, device ${deviceId}`,
-      ),
+        `${getTimestamp()} Refresh token stored for user ${user.id}, device ${deviceId}`
+      )
     );
 
     const csrfToken = v4();
@@ -69,20 +69,24 @@ export async function issueTokens(
       httpOnly: false,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge
+      path: "/",
+      domain: isProd ? ".shoppi.lat" : undefined,
+      maxAge,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge
+      path: "/",
+      domain: isProd ? ".shoppi.lat" : undefined,
+      maxAge,
     });
 
     console.log(
       chalk.green(
-        `${getTimestamp()} Access & CSRF tokens set for user ${user.id}`,
-      ),
+        `${getTimestamp()} Access & CSRF tokens set for user ${user.id}`
+      )
     );
     return accessToken;
   } catch (err) {
