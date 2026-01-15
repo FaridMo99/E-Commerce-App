@@ -4,6 +4,11 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 ---
 
+## Test Admin Account
+
+--E-Mail:Test@gmail.com
+--Password:Test123
+
 ## Features
 
 ### Frontend
@@ -96,7 +101,3 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **CI/CD** Automated Tests, Linting, Package Vulnerability Auditing aswell as Build Step through Github Actions for both, the Front- and Backend
 
 ---
-
-## Repository
-
-[Repository](https://github.com/FaridMo99/E-Commerce-App)

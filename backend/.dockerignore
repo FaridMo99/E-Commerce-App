@@ -2,11 +2,8 @@ node_modules/
 **/node_modules/
 dist/
 **/dist/
-.next/
 **/out/
 **/src/generated/
 .git/
 .env
 .env.*
-./backend/.env
-./backend/.env.*
