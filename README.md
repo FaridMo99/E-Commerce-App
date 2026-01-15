@@ -6,8 +6,8 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 ## Test Admin Account
 
---E-Mail:Test@gmail.com
---Password:Test123
+-- E-Mail:Test@gmail.com
+-- Password:Test123
 
 ## Features
 
