@@ -67,8 +67,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
-          JWT_ACCESS_TOKEN_SECRET: testAccessTokenSecret123
-          JWT_REFRESH_TOKEN_SECRET: testRefreshTokenSecret123
+          JWT_ACCESS_SECRET: testAccessTokenSecret123
+          JWT_REFRESH_SECRET: testRefreshTokenSecret123
           OPEN_EXCHANGE_RATE_APP_KEY: ${{ secrets.OPEN_EXCHANGE_RATE_APP_KEY }}
           CLOUDFLARE_SECRET_KEY: ${{ secrets.CLOUDFLARE_SECRET_KEY }}
 
