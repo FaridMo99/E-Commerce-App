@@ -68,15 +68,15 @@ export async function issueTokens(
     res.cookie("csrfToken", csrfToken, {
       httpOnly: false,
       secure: isProd,
-      sameSite: "lax",
-      maxAge,
+      sameSite: isProd ? "none" : "lax",
+      maxAge
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: "lax",
-      maxAge,
+      sameSite: isProd ? "none" : "lax",
+      maxAge
     });
 
     console.log(
