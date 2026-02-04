@@ -1,10 +1,9 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { AccessToken, User } from "@/types/types";
 import { redirect } from "next/navigation";
 import "server-only";
 import Navbar from "./components/Navbar";
 import { Metadata } from "next";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getProtectedHeaders } from "@/lib/queries/utils";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -12,22 +11,12 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user/admin">) {
-  let res;
-  let user: User | undefined;
-  let accessToken: AccessToken | undefined;
+  const {accessToken, user} = await getProtectedHeaders()
 
-  try {
-    res = await getNewRefreshToken();
-    accessToken = res.accessToken;
-    user = res.user;
-  } catch (err) {
-    console.log("User not logged in: " + err);
-  }
-
-  if (!res?.accessToken) {
+  if (!accessToken) {
     redirect("/");
   }
-  if (res.user.role !== "ADMIN") {
+  if (user.role !== "ADMIN") {
     redirect("/user");
   }
 

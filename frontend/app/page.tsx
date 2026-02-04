@@ -1,9 +1,8 @@
 import RecentlyViewedProducts from "@/app/components/ClientCarousel";
 import ProductsCarousel from "@/components/main/product/ProductsCarousel";
 import { DOMAIN_NAME } from "@/config/constants";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";
-import { AccessToken } from "@/types/types";
+import { getProtectedHeaders } from "@/lib/queries/utils";
 import { Metadata } from "next";
 import "server-only";
 
@@ -16,14 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  let accessToken: AccessToken | undefined;
+    const {accessToken} = await getProtectedHeaders()
 
-  try {
-    const res = await getNewRefreshToken();
-    accessToken = res.accessToken;
-  } catch (err) {
-    console.log(err)
-  }
 
   const { newProducts, trendingProducts, productsOnSale, categoryProducts } =
     await getHomeProducts(accessToken);

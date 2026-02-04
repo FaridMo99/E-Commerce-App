@@ -1,16 +1,11 @@
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getProtectedHeaders } from "@/lib/queries/utils";
 import { redirect } from "next/navigation";
 import "server-only";
 
 async function layout(props: LayoutProps<"/">) {
-  let res;
-  try {
-    res = await getNewRefreshToken();
-  } catch (err) {
-    console.log("User not logged in: " + err);
-  }
+  const {accessToken} = await getProtectedHeaders()
 
-  if (res?.accessToken) {
+  if (!accessToken) {
     redirect("/");
   }
 

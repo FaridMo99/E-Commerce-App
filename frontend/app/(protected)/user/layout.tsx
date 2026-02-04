@@ -1,6 +1,5 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
-import { AccessToken, User } from "@/types/types";
+import { getProtectedHeaders } from "@/lib/queries/utils";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import "server-only";
@@ -11,17 +10,9 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user">) {
-  let res;
-  let user: User | undefined;
-  let accessToken: AccessToken | undefined;
+  const {accessToken, user} = await getProtectedHeaders()
 
-  try {
-    res = await getNewRefreshToken();
-  } catch (err) {
-    console.log("User not logged in: " + err);
-  }
-
-  if (!res?.accessToken) {
+  if (!accessToken) {
     redirect("/");
   }
 

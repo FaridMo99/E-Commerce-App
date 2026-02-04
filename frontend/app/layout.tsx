@@ -3,13 +3,13 @@ import "server-only";
 import Footer from "@/components/main/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
-import { AccessToken, ChildrenProps, User } from "@/types/types";
+import { ChildrenProps } from "@/types/types";
 import QueryContext from "@/context/QueryContext";
 import Header from "@/components/main/header/Header";
 import { Questrial } from "next/font/google";
 import { Metadata, Viewport } from "next";
 import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getProtectedHeaders } from "@/lib/queries/utils";
 
 const questrial = Questrial({
   subsets: ["latin"],
@@ -55,16 +55,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: ChildrenProps) {
-  let user: User | undefined;
-  let accessToken: AccessToken | undefined;
-
-  try {
-    const res = await getNewRefreshToken();
-    user = res.user;
-    accessToken = res.accessToken;
-  } catch (err) {
-    console.log("User not authenticated, Bad Response: " + err);
-  }
+  const {accessToken, user} = await getProtectedHeaders()
 
   return (
     <html lang="de" className={questrial.className}>

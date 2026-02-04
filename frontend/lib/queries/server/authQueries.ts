@@ -169,8 +169,6 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
     },
   });
 
-  await syncCookies(res)
-
   return await handleResponse<AuthResponse>(res);
 }
 
