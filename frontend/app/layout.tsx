@@ -10,6 +10,7 @@ import { Questrial } from "next/font/google";
 import { Metadata, Viewport } from "next";
 import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
 import { getProtectedHeaders } from "@/lib/queries/utils";
+import { headers } from "next/headers";
 
 const questrial = Questrial({
   subsets: ["latin"],
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: ChildrenProps) {
-  const {accessToken, user} = await getProtectedHeaders()
+  const {accessToken, user} = await getProtectedHeaders(headers)
 
   return (
     <html lang="de" className={questrial.className}>

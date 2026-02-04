@@ -1,6 +1,7 @@
 import AuthZustandSetter from "@/components/main/AuthZustandSetter";
 import { getProtectedHeaders } from "@/lib/queries/utils";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import "server-only";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user">) {
-  const {accessToken, user} = await getProtectedHeaders()
+  const {accessToken, user} = await getProtectedHeaders(headers)
 
   if (!accessToken) {
     redirect("/");

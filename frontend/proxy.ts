@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getAllHeaders } from "./lib/serverHelpers";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
     const refreshToken = request.cookies.get("refreshToken");
     const additionalHeaders = await getAllHeaders();
@@ -17,21 +17,25 @@ export async function middleware(request: NextRequest) {
         },
       );
 
-        if (backendRes.ok) {
+      if (backendRes.ok) {
           
         const setCookies = backendRes.headers.getSetCookie();
+          
         setCookies.forEach((cookie) => {
+          
           response.headers.append("Set-Cookie", cookie);
+            
         });
           
-          const data = await backendRes.json();
+        const data = await backendRes.json();
+          
         response.headers.set("x-internal-user", JSON.stringify(data.user));
         response.headers.set("x-internal-token", data.accessToken);
-      } else if (backendRes.status === 401) {
-          return NextResponse.redirect(new URL("/", request.url));
+          
       }
+      
     } catch (error) {
-      console.error("Middleware Sync Error:", error);
+      console.error("Middleware Error:", error);
     }
   }
 

@@ -4,6 +4,7 @@ import "server-only";
 import Navbar from "./components/Navbar";
 import { Metadata } from "next";
 import { getProtectedHeaders } from "@/lib/queries/utils";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user/admin">) {
-  const {accessToken, user} = await getProtectedHeaders()
+  const {accessToken, user} = await getProtectedHeaders(headers)
 
   if (!accessToken) {
     redirect("/");

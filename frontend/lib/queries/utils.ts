@@ -1,5 +1,5 @@
 import { AccessToken, User } from "@/types/types";
-import { headers } from "next/headers";
+import { type ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
 
 export async function handleResponse<T>(res: Response): Promise<T> {
   const data = await res.json();
@@ -10,16 +10,18 @@ export async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 
-export async function getProtectedHeaders():Promise<{accessToken:AccessToken | undefined,user:User }> {
-      const headerList = await headers();
+export async function getProtectedHeaders(
+  headers: ()=>Promise<ReadonlyHeaders>,
+): Promise<{ accessToken: AccessToken | undefined; user: User }> {
+  const headerList = await headers();
 
-      const userJson = headerList.get("x-internal-user");
+  const userJson = headerList.get("x-internal-user");
   const accessToken = headerList.get("x-internal-token") || undefined;
 
-      const user = userJson ? JSON.parse(userJson) : undefined;
-  
+  const user = userJson ? JSON.parse(userJson) : undefined;
+
   return {
     accessToken,
-    user
-  }
+    user,
+  };
 }

@@ -4,6 +4,7 @@ import { DOMAIN_NAME } from "@/config/constants";
 import { getHomeProducts } from "@/lib/queries/server/productQueries";
 import { getProtectedHeaders } from "@/lib/queries/utils";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import "server-only";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-    const {accessToken} = await getProtectedHeaders()
+    const {accessToken} = await getProtectedHeaders(headers)
 
 
   const { newProducts, trendingProducts, productsOnSale, categoryProducts } =
