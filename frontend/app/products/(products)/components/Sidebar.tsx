@@ -50,8 +50,6 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
     maxPrice ? Number(maxPrice) : (data?.maxPrice ?? 0),
   ];
 
-  // --- Handlers ---
-
   function handleCategoryChange(selectedCategory: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", selectedCategory);
@@ -92,7 +90,7 @@ function Sidebar({ categories }: { categories: ProductCategory[] }) {
   }
 
   return (
-    <aside className="w-1/5 h-[50vh] sticky top-[20vh] bg-backgroundBright rounded-xl p-6 flex flex-col justify-around font-bold text-white">
+    <aside className="sm:w-1/5 h-[50vh] sm:sticky sm:top-[20vh] bg-backgroundBright rounded-xl p-6 mx-4 mb-12 sm:m-0 flex flex-col justify-around font-bold text-white">
       {/* Sorting Select */}
       <SidebarSelect
         valueChangeHandler={handleSorting}

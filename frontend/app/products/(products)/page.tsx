@@ -13,7 +13,7 @@ async function page({ searchParams }: SearchParamsProps) {
   const products = await getProducts(params, accessToken);
 
   return (
-    <main className="ml-[5vw]">
+    <main className="sm:ml-[5vw] flex flex-col justify-evenly sm:items-start items-center">
       {products.length > 0 ? (
         products.map((product) => (
           <ProductView key={product.id} product={product} />

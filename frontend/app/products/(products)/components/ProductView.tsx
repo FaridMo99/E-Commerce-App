@@ -13,7 +13,7 @@ function ProductView({ product }: ProductViewProps) {
   return (
     <Link
       href={`/products/${product.id}`}
-      className={`w-[65vw] mb-2 bg-backgroundBright relative flex justify-center items-center h-[20vh] border-y border-y-background pr-4 z-10 ${product.stock_quantity === 0 ? "bg-muted/50" : ""}`}
+      className={`sm:w-[65vw] w-9/10 mb-2 bg-backgroundBright relative flex justify-center items-center h-[20vh] border-y border-y-background pr-4 z-10 ${product.stock_quantity === 0 ? "bg-muted/50" : ""}`}
     >
       <ProductCardTags
         position="left"
