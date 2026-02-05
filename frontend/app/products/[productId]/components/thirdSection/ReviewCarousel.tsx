@@ -10,6 +10,7 @@ type ReviewsCarouselProps = {
 };
 
 function ReviewsCarousel({ reviews }: ReviewsCarouselProps) {
+
   return (
     <BaseSlider>
       {reviews.map((review) => (

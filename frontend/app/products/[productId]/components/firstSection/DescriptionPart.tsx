@@ -4,9 +4,9 @@ import { Product } from "@/types/types";
 import Link from "next/link";
 
 function DescriptionPart({ product }: { product: Product }) {
-  console.log(product.description);
+
   return (
-    <div className="flex flex-col pl-4 h-full w-[30vw]">
+    <div className="flex flex-col pl-4 h-full sm:w-[30vw] flex-1">
       <h1 className="md:text-4xl text-2xl font-bold">
         <span className="mr-2">{product.name}</span>{" "}
         <FavoriteProduct productId={product.id} />

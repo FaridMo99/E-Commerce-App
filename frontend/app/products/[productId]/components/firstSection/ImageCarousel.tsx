@@ -8,13 +8,13 @@ type ImageCarouselProps = {
 
 function ImageCarousel({ imageUrls, setImageToShow }: ImageCarouselProps) {
   return (
-    <section className="w-full flex justify-between items-center h-full">
+    <section className="w-full flex justify-start gap-4 items-start h-full">
       {imageUrls.map((url) => (
         <img
           key={url}
           onClick={() => setImageToShow(url)}
           alt="product image"
-          className="h-30 w-1/6 rounded-sm"
+          className=" w-1/6 rounded-sm"
           src={url}
         />
       ))}

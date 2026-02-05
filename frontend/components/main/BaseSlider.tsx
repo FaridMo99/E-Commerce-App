@@ -10,8 +10,7 @@ export const settings: Settings = {
   swipe: true,
   swipeToSlide: true,
   arrows: true,
-  infinite: true,
-
+  infinite:false,
   responsive: [
     { breakpoint: 1270, settings: { slidesToShow: 4 } },
     { breakpoint: 1020, settings: { slidesToShow: 3 } },
@@ -20,9 +19,7 @@ export const settings: Settings = {
   ],
 };
 
-function BaseSlider({ children }: { children: ReactNode }) {
-
-  
+function BaseSlider({ children }: { children: ReactNode }) {  
   return <Slider {...settings}>{children}</Slider>;
 }
 

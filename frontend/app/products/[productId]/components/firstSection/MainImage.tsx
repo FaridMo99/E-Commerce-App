@@ -14,8 +14,8 @@ function MainImage({ url }: { url: string }) {
   }
 
   return (
-    <div className="w-[33vw] aspect-square overflow-hidden rounded-sm bg-white">
-      <ImageZoom className="w-full h-full">
+    <div className="w-full aspect-square overflow-hidden rounded-sm bg-white">
+      <ImageZoom className="w-full h-4/6">
         <img
           src={url}
           alt="product image"

@@ -17,7 +17,11 @@ async function SimilarProductsSection({
 
   if (!products || products.length === 0) return null;
 
-  return <ProductsCarousel title="Similar Products" products={products} />;
+  return (
+    <div className="mt-12">
+      <ProductsCarousel title="Similar Products" products={products} />
+    </div>
+  );
 }
 
 export default SimilarProductsSection;
