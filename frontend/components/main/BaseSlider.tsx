@@ -21,6 +21,8 @@ export const settings: Settings = {
 };
 
 function BaseSlider({ children }: { children: ReactNode }) {
+
+  
   return <Slider {...settings}>{children}</Slider>;
 }
 

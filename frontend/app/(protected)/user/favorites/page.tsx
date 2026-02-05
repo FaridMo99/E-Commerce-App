@@ -29,11 +29,11 @@ function Page() {
       as="main"
       header={`Favorites(${favoriteProducts?.length})`}
     >
-      <BaseSlider>
-        {favoriteProducts?.map((product) => (
+      {favoriteProducts && favoriteProducts.length > 0 && <BaseSlider>
+        {favoriteProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
-      </BaseSlider>
+      </BaseSlider>}
     </SectionWrapper>
   );
 }

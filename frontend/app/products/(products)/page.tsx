@@ -1,19 +1,14 @@
 import "server-only";
 import ProductView from "./components/ProductView";
 import { getProducts } from "@/lib/queries/server/productQueries";
-import { AccessToken, SearchParamsProps } from "@/types/types";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { SearchParamsProps } from "@/types/types";
+import { getProtectedHeaders } from "@/lib/queries/utils";
+import { headers } from "next/headers";
 
 async function page({ searchParams }: SearchParamsProps) {
   const params = await searchParams;
-  let accessToken: AccessToken | undefined;
+  const {accessToken} = await getProtectedHeaders(headers)
   
-    try {
-      const res = await getNewRefreshToken();
-      accessToken = res.accessToken;
-    } catch (err) {
-      console.log(err)
-    }
 
   const products = await getProducts(params, accessToken);
 

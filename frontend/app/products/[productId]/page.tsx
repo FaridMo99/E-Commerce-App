@@ -1,5 +1,5 @@
 import { getProductByProductId } from "@/lib/queries/server/productQueries";
-import { AccessToken, Product } from "@/types/types";
+import { Product } from "@/types/types";
 import { notFound } from "next/navigation";
 import "server-only";
 import FirstSection from "./components/firstSection/FirstSection";
@@ -9,7 +9,8 @@ import { Loader2 } from "lucide-react";
 import ReviewsSection from "./components/thirdSection/ReviewsSection";
 import { Metadata } from "next";
 import { DOMAIN, DOMAIN_NAME } from "@/config/constants";
-import { getNewRefreshToken } from "@/lib/queries/server/authQueries";
+import { getProtectedHeaders } from "@/lib/queries/utils";
+import { headers } from "next/headers";
 
 export async function generateMetadata({
   params,
@@ -44,25 +45,17 @@ export async function generateMetadata({
 async function page(props: PageProps<"/products/[productId]">) {
   const { productId } = await props.params;
   let product: Product;
+    const {accessToken} = await getProtectedHeaders(headers)
+  
 
   try {
-    let accessToken: AccessToken | undefined;
-
-    try {
-
-      const res = await getNewRefreshToken();
-      accessToken = res.accessToken;
-      
-    } catch (err) {
-      console.log(err);  
-    }
     
     const productReturn = await getProductByProductId(productId, accessToken);
-    if (!productReturn) {
-      return notFound();
-    }
+
+    if (!productReturn) return notFound();
 
     product = productReturn;
+
   } catch (err) {
     console.log(err);
     notFound();
