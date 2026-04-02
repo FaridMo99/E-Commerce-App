@@ -16,12 +16,6 @@ export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY!;
 export const STRIPE_PUBLIC_KEY = process.env.STRIPE_PUBLIC_KEY!;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
-//cloudinary
-export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME!;
-export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY!;
-export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET!;
-export const CLOUDINARY_URL = process.env.CLOUDINARY_URL!;
-
 //mailjet
 export const MJ_APIKEY_PUBLIC = process.env.MJ_APIKEY_PUBLIC!;
 export const MJ_APIKEY_PRIVATE = process.env.MJ_APIKEY_PRIVATE!;
@@ -67,3 +61,15 @@ export const BASE_CURRENCY = process.env.BASE_CURRENCY as CurrencyISO;
 
 //seed DB conitional
 export const SEED_PRODUCTS = process.env.SEED_PRODUCTS as "true" | "false";
+
+//cloudinary
+export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME!;
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY!;
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET!;
+export const CLOUDINARY_URL = process.env.CLOUDINARY_URL!;
+
+// AWS S3 
+export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID!;
+export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY!;
+export const AWS_REGION = process.env.AWS_REGION!;
+export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;

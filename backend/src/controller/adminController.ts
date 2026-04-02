@@ -107,6 +107,7 @@ export async function getTopsellers(
       select: {
         name: true,
         imageUrls: true,
+        imageKeys:true,
         id: true,
       },
     });

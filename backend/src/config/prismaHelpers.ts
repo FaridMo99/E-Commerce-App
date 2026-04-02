@@ -37,6 +37,7 @@ export const productSelect = {
   published_at: true,
   updated_at: true,
   imageUrls: true,
+  imageKeys:true,
   currency: true,
   category: {
     select: {

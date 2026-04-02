@@ -21,7 +21,7 @@ import {
   validateImages,
   validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
-import { upload } from "../services/cloud.js";
+import { upload } from "../services/cloudinary.js";
 import {
   productSchema,
   productsMetaInfosQuerySchema,

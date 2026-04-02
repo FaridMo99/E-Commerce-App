@@ -20,6 +20,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1022.0",
     "@monorepo/shared": "1.0.0",
     "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
