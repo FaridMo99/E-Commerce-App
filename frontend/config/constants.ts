@@ -1,5 +1,5 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL!;
-export const DOCKER_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL!;
+export const DOCKER_BASE_URL = process.env.BACKEND_DOCKER_INTERNAL_URL!;
 export const API_BASE_URL = BASE_URL + "/api";
 export const API_DOCKER_BASE_URL = DOCKER_BASE_URL + "/api";
 export const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!;
