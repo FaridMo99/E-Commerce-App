@@ -23,7 +23,10 @@ resource "aws_s3_bucket_policy" "allow_access_from_vpc_only" {
         ]
         Condition = {
           StringNotEquals = {
-            "aws:sourceVpce" = aws_vpc_endpoint.s3.id
+            "aws:SourceVpce" = aws_vpc_endpoint.s3.id
+          }
+          ArnNotLike = {
+            "aws:PrincipalArn" = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/admin"
           }
         }
       }
@@ -31,13 +34,20 @@ resource "aws_s3_bucket_policy" "allow_access_from_vpc_only" {
   })
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_vpc_endpoint_service" "s3" {
+  service      = "s3"
+  service_type = "Gateway"
+}
+
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-central-1.s3"
+  service_name      = data.aws_vpc_endpoint_service.s3.service_name
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.main.id]
 }
 
 resource "aws_s3_bucket" "main" {
-  bucket = "my-portfolio-app-data-2026" # Buckets must be globally unique
+  bucket = "shoppi-bucket-app-2026"
 }
