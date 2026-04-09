@@ -1,14 +1,16 @@
+resource "aws_db_subnet_group" "main" {
+  name       = "shoppi-rds-subnets"
+  subnet_ids = [aws_subnet.public.id] 
+}
+
 resource "aws_db_instance" "main" {
   allocated_storage    = 20
   engine               = "postgres"
   instance_class       = "db.t3.micro"
-  db_name              = "portfolio_db"
-  username             = "dbadmin"
-  #password             = var.db_password
+  db_name                = aws_ssm_parameter.db_vars["db_name"].value
+  username               = aws_ssm_parameter.db_vars["username"].value
+  password               = aws_ssm_parameter.db_vars["password"].value
+  db_subnet_group_name = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.ecs_main_only.id]
-  skip_final_snapshot  = true
+  skip_final_snapshot  = true # otherwise not free
 }
-
-# needs to be free
-# maybe needs iam role to allow ecs to talk with it
-# needs to pull the vars from ssm

@@ -1,0 +1,49 @@
+name: Frontend CD
+
+on:
+  push:
+    branches: [main]
+    paths: ['frontend/**', 'shared/**']
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-ecr-role
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: frontend/Dockerfile
+          target: runner
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/shoppi-frontend:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_BACKEND_BASE_URL=${{ secrets.NEXT_PUBLIC_BACKEND_BASE_URL }}
+            NEXT_PUBLIC_DOMAIN_NAME=${{ secrets.NEXT_PUBLIC_DOMAIN_NAME }}
+            NEXT_PUBLIC_DOMAIN=${{ secrets.NEXT_PUBLIC_DOMAIN }}
+            NEXT_PUBLIC_BACKEND_BASE_URL=${{ secrets.NEXT_PUBLIC_BACKEND_BASE_URL }}
+            ENV=${{secrets.ENV}}
+            CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS=${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS}}
+            CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK=${{secrets.CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK}}
+            NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{secrets.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY}}
+            NEXT_PUBLIC_STRIPE_PUBLIC_KEY=${{secrets.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}}
+            NEXT_PUBLIC_DOMAIN_NAME=${{secrets.NEXT_PUBLIC_DOMAIN_NAME}}
+            NEXT_PUBLIC_DOMAIN=${{secrets.NEXT_PUBLIC_DOMAIN}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

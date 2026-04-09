@@ -3,8 +3,6 @@ FROM nginx:alpine
 RUN apk add --no-cache openssl
 
 ENV NGINX_PORT=443
-ENV FRONTEND_DOMAIN=shoppi.lat
-ENV BACKEND_DOMAIN=api.shoppi.lat
 ENV FRONTEND_PORT=3000
 ENV BACKEND_PORT=3001
 ENV FRONTEND_DOCKER_BASE_URL=frontend

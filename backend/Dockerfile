@@ -23,6 +23,12 @@ RUN npm run build -w backend
 
 RUN npm prune --omit=dev
 
+FROM builder AS tester
+RUN npm run test -w backend
+RUN npm run lint -w backend 
+RUN npx tsc --noEmit
+
+
 FROM node:20-alpine AS runner
 WORKDIR /app
 

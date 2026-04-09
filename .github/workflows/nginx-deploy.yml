@@ -1,0 +1,40 @@
+name: Proxy CD
+
+on:
+  push:
+    branches: [main]
+    paths: ['nginx/**']
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-ecr-role
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Proxy
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nginx/Dockerfile
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/shoppi-proxy:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster shoppi-cluster --service proxy-service --force-new-deployment

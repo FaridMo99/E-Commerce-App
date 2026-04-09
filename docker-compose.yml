@@ -25,5 +25,9 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
+    environment:
+      environment:
+      - FRONTEND_DOMAIN=shoppi.lat
+      - BACKEND_DOMAIN=api.shoppi.lat
     ports:
       - "443:443"
