@@ -56,14 +56,7 @@ resource "aws_ssm_parameter" "nginx_vars" {
 # frontend env vars
 variable "frontend_vars" {
   type = map(string)
-  default = {
-    ENV="development"
-    CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS="1x00000000000000000000BB"
-    CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK="2x00000000000000000000BB"
-    BACKEND_DOCKER_INTERNAL_URL="http://backend:3001"
-    PORT=3000
-    HOSTNAME="0.0.0.0"
-  }
+  sensitive = true # marked sensitive for nextjs bff
 }
 resource "aws_ssm_parameter" "frontend_vars" {
   for_each = var.frontend_vars
