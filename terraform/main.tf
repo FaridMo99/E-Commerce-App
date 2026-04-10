@@ -8,7 +8,7 @@ terraform {
   backend "s3" {
     bucket         = "terraform-remote-backend-shoppi"
     key            = "shoppi/terraform.tfstate"
-    region         = "eu-central-1"
+    region         = var.aws_region
     encrypt        = true
 
     use_lockfile = true
@@ -29,10 +29,15 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 }
 
+resource "aws_eip" "shoppi_static_ip" {
+  domain = "vpc"
+  tags   = { Name = "shoppi-static-ip" }
+}
+
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.0.128/25"
-  map_public_ip_on_launch = true # costs money, change later
+  map_public_ip_on_launch = true
 }
 
 resource "aws_route_table" "main" {

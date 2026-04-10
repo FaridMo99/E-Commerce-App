@@ -3,6 +3,94 @@ resource "aws_cloudwatch_log_group" "ecs" {
   retention_in_days = 2
 }
 
+# ecs ami
+data "aws_ssm_parameter" "ecs_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
+}
+
+# ecs launch template
+resource "aws_launch_template" "ecs_nodes" {
+  name_prefix   = "shoppi-node-"
+  image_id      = data.aws_ssm_parameter.ecs_ami.value
+  instance_type = "t3.micro" # Strictly Free Tier
+
+  # The IAM Profile that allows the EC2 to talk to ECS
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ecs_node_profile.name
+  }
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.ecs_node_sg.id]
+  }
+
+  # This shell script runs at boot to register the node to your cluster
+  user_data = base64encode(<<-EOF
+      #!/bin/bash
+      # Get the ID of the new instance
+      TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+      INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+
+      # Grab the Elastic IP (Static IP)
+      aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id ${aws_eip.shoppi_static_ip.id} --region ${var.aws_region}
+
+      # Register with ECS Cluster
+      echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+    EOF
+    )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# ecs auto-scaling-group
+resource "aws_autoscaling_group" "ecs" {
+  name                = "shoppi-asg"
+  vpc_zone_identifier = [aws_subnet.public.id]
+  launch_template {
+    id      = aws_launch_template.ecs_nodes.id
+    version = "$Latest"
+  }
+
+  desired_capacity          = 1
+  min_size                  = 1
+  max_size                  = 1
+  health_check_grace_period = 300
+  health_check_type         = "EC2"
+
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = true
+    propagate_at_launch = true
+  }
+}
+
+# ecs connector
+resource "aws_ecs_capacity_provider" "main" {
+  name = "shoppi-capacity-provider"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.ecs.arn
+    managed_termination_protection = "DISABLED"
+    managed_scaling {
+      status          = "ENABLED"
+      target_capacity = 100
+    }
+  }
+}
+
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  cluster_name       = aws_ecs_cluster.main.name
+  capacity_providers = [aws_ecs_capacity_provider.main.name]
+
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.main.name
+    weight            = 1
+  }
+}
+
+# ecs task definition
 resource "aws_ecs_task_definition" "shoppi_stack" {
   family                   = "shoppi-monolith"
   network_mode             = "awsvpc"
@@ -21,21 +109,22 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       essential = true
       memory    = 256
       portMappings = [{ containerPort = 3001, hostPort = 3001 }]
-      environment = [{ name  = "ENV", value = var.general_env_vars["environment"]},]
+      environment = [
+        { name  = "ENV", value = var.general_env_vars["environment"]},
+        { name = "AWS_REGION",   value = var.aws_region},
+        { name = "S3_BUCKET_NAME", value = aws_s3_bucket.main.id}]
       secrets = concat(
         [for k, v in aws_ssm_parameter.backend_vars : { name = k, valueFrom = v.arn }],
         [
           { name = "DATABASE_URL", valueFrom = aws_ssm_parameter.database_url.arn },
           { name = "REDIS_URL",    valueFrom = aws_ssm_parameter.redis_url.arn },
-          { name = "AWS_REGION",   valueFrom = var.aws_region},
-          { name = "S3_BUCKET_NAME", valueFrom = aws_s3_bucket.main.id}
         ]
       )
       logConfiguration = {
         logDriver = "awslogs"
         options = {
           "awslogs-group" = aws_cloudwatch_log_group.ecs.name
-          "awslogs-region" = "eu-central-1"
+          "awslogs-region" = var.aws_region
           "awslogs-stream-prefix" = "backend"
         }
       }
@@ -54,7 +143,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
         logDriver = "awslogs"
         options = {
           "awslogs-group" = aws_cloudwatch_log_group.ecs.name
-          "awslogs-region" = "eu-central-1"
+          "awslogs-region" = var.aws_region
           "awslogs-stream-prefix" = "frontend"
         }
       }
@@ -73,7 +162,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
         logDriver = "awslogs"
         options = {
           "awslogs-group" = aws_cloudwatch_log_group.ecs.name
-          "awslogs-region" = "eu-central-1"
+          "awslogs-region" = var.aws_region
           "awslogs-stream-prefix" = "nginx"
         }
       }
@@ -82,10 +171,19 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
 }
 
 resource "aws_ecs_service" "main" {
-  name = "shoppi-app"
+  name            = "shoppi-app"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.shoppi_stack.arn
+  desired_count   = 1
+
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.main.name
+    weight            = 1
+  }
+
+  network_configuration {
+    subnets         = [aws_subnet.public.id]
+    security_groups = [aws_security_group.ecs_sg.id]
+    assign_public_ip = true
+  }
 }
-
-# steps
-# check because of launch templates and ami what to do
-
-# give domain name (get ip of ec2/give public ip)

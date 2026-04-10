@@ -112,7 +112,7 @@ resource "aws_iam_role_policy" "ecs_ssm_read" {
       {
         Action   = ["ssm:GetParameters", "secretsmanager:GetSecretValue"]
         Effect   = "Allow"
-        Resource = ["arn:aws:ssm:eu-central-1:${data.aws_caller_identity.current.account_id}:parameter/shoppi/*"]
+        Resource = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/shoppi/*"]
       },
       {
         Action   = ["kms:Decrypt"]
@@ -120,5 +120,20 @@ resource "aws_iam_role_policy" "ecs_ssm_read" {
         Resource = ["*"]
       }
     ]
+  })
+}
+
+# elastic ip policy
+resource "aws_iam_role_policy" "eip_association" {
+  name = "shoppi-eip-association-policy"
+  role = aws_iam_role.ecs_node_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "ec2:AssociateAddress"
+      Resource = "*"
+    }]
   })
 }

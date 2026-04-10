@@ -2,8 +2,8 @@ output "vpc_id" {
   value = aws_vpc.main.id
 }
 
-output "ecs_ip" {
-  value = aws_ecs_cluster.main.ecs_ip
+output "ecs_elastic_public_ip" {
+  value = aws_eip.shoppi_static_ip.public_ip
 }
 
 output "github_actions_role_arn" {

@@ -16,7 +16,7 @@ resource "aws_ssm_parameter" "environment" {
 resource "aws_ssm_parameter" "redis_url" {
   name  = "/shoppi/backend/REDIS_URL"
   type  = "SecureString"
-  value = "redis://${aws_elasticache_cluster.redis.cache_nodes[0].address}:6379"
+  value = "redis://${aws_elasticache_cluster.main.cache_nodes[0].address}:6379"
 }
 # db env vars
 variable "db_vars" {
