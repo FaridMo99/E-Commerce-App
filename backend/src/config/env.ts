@@ -68,8 +68,6 @@ export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY!;
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET!;
 export const CLOUDINARY_URL = process.env.CLOUDINARY_URL!;
 
-// AWS S3 
-export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID!;
-export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY!;
+// AWS S3
 export const AWS_REGION = process.env.AWS_REGION!;
 export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;

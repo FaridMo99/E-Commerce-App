@@ -1,5 +1,5 @@
 locals {
-  repos = ["backend", "frontend", "nginx"]
+  repos = ["shoppi-backend", "shoppi-frontend", "shoppi-nginx"]
 }
 
 resource "aws_ecr_repository" "main" {
@@ -34,5 +34,35 @@ resource "aws_ecr_lifecycle_policy" "main_policy" {
   })
 }
 
+# Github policy
+resource "aws_iam_role_policy" "github_ecr_push" {
+  name = "shoppi-github-ecr-push-policy"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["ecr:GetAuthorizationToken"]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+        Effect   = "Allow"
+        Resource = [for repo in aws_ecr_repository.main : repo.arn]
+      }
+    ]
+  })
+}
+
 # make sure images are in total <=500MB
-# has to be same region as apps so eu-central-1
+# has to be same region as apps to stay free so eu-central-1

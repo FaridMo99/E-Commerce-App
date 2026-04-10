@@ -47,7 +47,7 @@ variable "nginx_vars" {
   }
 }
 resource "aws_ssm_parameter" "nginx_vars" {
-    for_each = var.nginx_vars
+  for_each = var.nginx_vars
   name        = "/shoppi/nginx/${each.key}"
   type        = "String"
   value       = each.value
@@ -76,21 +76,3 @@ resource "aws_ssm_parameter" "backend_vars" {
   type        = "SecureString"
   value       = each.value
 }
-
-# steps
-# give gh actions and ecs the ability to interact with ecr
-# give these env vars to ecs including these:
-    # AWS_ACCESS_KEY_ID
-    # AWS_SECRET_ACCESS_KEY
-    # AWS_REGION
-    # S3_BUCKET_NAME
-# give ecs its task definition, execution role and task role
-
-# do in compose the db migration only once
-# build the image through ci cd gh actions and connect gh actions to aws so it gets automatically the updates
-
-# put into ci cd flow also add tfsec command
-# give domain name (get ip of ec2/give public ip)
-
-
-# only do git commit after solved the issue why .tfvars not marke

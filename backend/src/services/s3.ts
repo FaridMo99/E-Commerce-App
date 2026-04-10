@@ -5,8 +5,6 @@ import {
 } from "@aws-sdk/client-s3";
 import multer from "multer";
 import {
-  AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY,
   AWS_REGION,
   S3_BUCKET_NAME,
 } from "../config/env.js";
@@ -14,13 +12,7 @@ import { getTimestamp } from "../lib/utils.js";
 import chalk from "chalk";
 
 // Initialize the S3 Client
-const s3Client = new S3Client({
-  region: AWS_REGION,
-  credentials: {
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY,
-  },
-});
+const s3Client = new S3Client({region: AWS_REGION});
 
 export async function handleS3Upload(file: Express.Multer.File) {
   try {
