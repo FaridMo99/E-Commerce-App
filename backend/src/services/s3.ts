@@ -11,7 +11,6 @@ import {
 import { getTimestamp } from "../lib/utils.js";
 import chalk from "chalk";
 
-// Initialize the S3 Client
 const s3Client = new S3Client({region: AWS_REGION});
 
 export async function handleS3Upload(file: Express.Multer.File) {
@@ -22,14 +21,13 @@ export async function handleS3Upload(file: Express.Multer.File) {
       ),
     );
 
-    // Create a unique key (filename) for the S3 object
     const fileKey = `${Date.now()}-${file.originalname}`;
 
     const command = new PutObjectCommand({
       Bucket: S3_BUCKET_NAME,
       Key: fileKey,
-      Body: file.buffer, // Multer buffer works directly here
-      ContentType: file.mimetype, // CRITICAL: Tells S3 how to serve the file
+      Body: file.buffer,
+      ContentType: file.mimetype,
     });
 
     await s3Client.send(command);
@@ -38,7 +36,6 @@ export async function handleS3Upload(file: Express.Multer.File) {
       chalk.green(`${getTimestamp()} S3 Upload Success: ${file.originalname}`),
     );
 
-    // Construct the URL manually (or use your CloudFront URL if set up)
     return {
       url: `https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${fileKey}`,
       key: fileKey,

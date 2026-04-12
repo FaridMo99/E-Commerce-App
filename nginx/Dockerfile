@@ -2,6 +2,10 @@ FROM nginx:alpine
 
 RUN apk add --no-cache openssl
 
+# remove these two later
+ARG FRONTEND_DOMAIN=localhost 
+ARG BACKEND_DOMAIN=api.localhost
+
 ENV NGINX_PORT=443
 ENV FRONTEND_PORT=3000
 ENV BACKEND_PORT=3001
@@ -15,6 +19,6 @@ RUN mkdir -p /etc/nginx/ssl && \
     -subj "/C=US/O=Shoppi/CN=${FRONTEND_DOMAIN}" \
     -addext "subjectAltName = DNS:${FRONTEND_DOMAIN}, DNS:${BACKEND_DOMAIN}"
 
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+COPY nginx/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
 EXPOSE 443

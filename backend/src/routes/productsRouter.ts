@@ -21,7 +21,6 @@ import {
   validateImages,
   validateSearchQueries,
 } from "../middleware/validationMiddleware.js";
-import { upload } from "../services/cloudinary.js";
 import {
   productSchema,
   productsMetaInfosQuerySchema,
@@ -33,6 +32,7 @@ import {
   geoCurrencyMiddleware,
   transformProductFormData,
 } from "../middleware/utilityMiddleware.js";
+import { upload } from "../services/s3.js";
 
 const productsRouter = Router();
 

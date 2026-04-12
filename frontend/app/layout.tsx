@@ -20,7 +20,7 @@ export const viewport: Viewport = { themeColor: "#f46b61" };
 
 export const metadata: Metadata = {
   title: DOMAIN_NAME,
-  metadataBase: new URL(DOMAIN!),
+  metadataBase: new URL(DOMAIN),
   description: "Online Shop for various Products",
   authors: [{ name: "Farid Mohseni" }],
   openGraph: {
