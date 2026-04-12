@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import useAuth from "@/stores/authStore";
 
 function Searchbar() {
   const [search, setSearch] = useState<string>("");
-  const accessToken = useAuth(state=> state.accessToken)
+  const accessToken = useAuth((state) => state.accessToken);
   const debouncedSearch = useDebounce(search, 600);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -20,7 +20,8 @@ function Searchbar() {
 
   const { data } = useQuery({
     queryKey: ["search", debouncedSearch],
-    queryFn: () => getProducts({ search: debouncedSearch }, accessToken ?? undefined),
+    queryFn: () =>
+      getProducts({ search: debouncedSearch }, accessToken ?? undefined),
     enabled: debouncedSearch.length > 0,
   });
 
@@ -30,6 +31,12 @@ function Searchbar() {
     inputRef.current?.blur();
     router.push(`/products?search=${search}`);
   }
+
+  useEffect(() => {
+    window.alert(
+      "This is just a Portfolio Project, not a real Online Shop. Products and checkout are not real and wont charge you.",
+    );
+  }, []);
 
   return (
     <form

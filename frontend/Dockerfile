@@ -37,6 +37,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
 ENV NEXT_PUBLIC_DOCKER_ENV=true
+ENV STRIPE_ENV=testing
+ENV ENV=production
+
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs

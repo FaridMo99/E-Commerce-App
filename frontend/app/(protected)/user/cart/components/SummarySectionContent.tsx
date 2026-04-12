@@ -1,12 +1,14 @@
 import { Cart } from "@/types/types";
 
+type SummarySectionContentProps = {
+  totalItems: number;
+  cart: Cart;
+};
+
 function SummarySectionContent({
   totalItems,
   cart,
-}: {
-  totalItems: number;
-  cart: Cart;
-}) {
+}: SummarySectionContentProps) {
   return (
     <div className="w-full h-2/3 flex flex-col justify-evenly items-start ">
       <p className="self-center text-center text-white md:text-lg font-semibold">
@@ -19,7 +21,7 @@ function SummarySectionContent({
         </p>
       ))}
       <p className="self-center text-center text-white md:text-lg font-semibold">
-        Total Price: {cart?.total}
+        Total Price: {cart.total}
         {cart?.items[0]?.product.currency}
       </p>
     </div>

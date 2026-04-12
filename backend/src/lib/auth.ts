@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { v4 } from "uuid";
-import type { User } from "../generated/prisma/client.js";
 import prisma from "../services/prisma.js";
 import type { Response, Request } from "express";
 import bcrypt from "bcrypt";
@@ -14,6 +13,7 @@ import {
 } from "../config/env.js";
 import { getTimestamp } from "./utils.js";
 import chalk from "chalk";
+import type { User } from "../generated/prisma/client.js";
 
 //issues new refresh and csrf tokens and returns access token
 export async function issueTokens(
@@ -63,19 +63,23 @@ export async function issueTokens(
     const csrfToken = v4();
     const maxAge = 7 * 24 * 60 * 60 * 1000;
 
-    const isProd = NODE_ENV !== "dev";
+    const isProd = NODE_ENV !== "development";
 
     res.cookie("csrfToken", csrfToken, {
       httpOnly: false,
       secure: isProd,
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+      domain: isProd ? ".shoppi.lat" : undefined,
       maxAge,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+      domain: isProd ? ".shoppi.lat" : undefined,
       maxAge,
     });
 
@@ -99,7 +103,11 @@ export async function issueTokens(
 //need frontend page to verify
 export async function OauthLogin(req: Request, res: Response) {
   try {
-    const user = req.oAuthUser?.user!;
+    const user = req.oAuthUser?.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "User missing Data" });
+    }
 
     const accessToken = await issueTokens(user, res);
 

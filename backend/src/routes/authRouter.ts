@@ -93,10 +93,10 @@ authRouter.post(
 
 authRouter.post(
   "/refresh-token",
-  authRateLimiter,
   hasRefreshToken,
   issueRefreshToken,
 );
+
 //Oauth routes
 authRouter.get(
   "/oauth/google",

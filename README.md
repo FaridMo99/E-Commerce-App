@@ -4,6 +4,13 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 ---
 
+## Test Admin Account
+
+-- E-Mail:Test@gmail.com
+-- Password:Test123
+
+---
+
 ## AWS Cloud Architecture
 
 This version of the application is build to stay inside the **AWS Free Tier**. The entire infrastructure is provisioned as **IaC** using **Terraform**.

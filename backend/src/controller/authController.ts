@@ -419,7 +419,7 @@ export async function sendEmailToChangePassword(
 export async function issueRefreshToken(
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) {
   const token = req.refreshTokenPayload!;
   const rawToken: string = req.cookies.refreshToken;

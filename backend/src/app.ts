@@ -23,7 +23,7 @@ import { seedDb } from "./scripts/seed.js";
 export const app = express();
 
 //proxy support middleware to access ip
-app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+app.set("trust proxy", 1);
 
 app.use(loggerMiddleware);
 
@@ -31,6 +31,7 @@ app.use(
   cors({
     origin: [CLIENT_ORIGIN],
     credentials: true,
+    exposedHeaders: ["set-cookie"],
   }),
 );
 
@@ -55,12 +56,12 @@ app.use("/webhooks", webhookRouter);
 
 export const server = app.listen(PORT, async () => {
   console.log(chalk.green(`${getTimestamp()} Server running on Port:${PORT}`));
-  await seedDb()
+  await seedDb();
 });
 
 //global error middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  if (NODE_ENV === "dev") {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  if (NODE_ENV === "development") {
     console.log(chalk.magenta(err.stack));
   }
 

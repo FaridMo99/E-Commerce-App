@@ -11,7 +11,7 @@ function ProductTag({ type, styles }: ProductTagProps) {
 
   return (
     <div
-      className={`flex justify-center items-center px-6 ${bgColor} text-background font-semibold ${styles}`}
+      className={`flex justify-center items-center px-2 ${bgColor} text-background font-semibold ${styles}`}
     >
       {type}
     </div>

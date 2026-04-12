@@ -12,10 +12,15 @@ function Price({ price, sale_price, currency, styles }: PriceProps) {
   return (
     <div className={`flex flex-col ${styles}`}>
       {sale_price && (
-        <p className="flex items-center text-gray-400 scale-75">
-          Previous: {price}
-          <CurrencySymbol currency={currency} />
-          <span className="absolute inset-0 top-1/2 h-px bg-gray-400 w-full" />
+        <p className="flex items-center relative text-gray-400 scale-75">
+          Previous:
+          <span className="flex items-center">
+            {price}
+            <CurrencySymbol currency={currency} />
+          </span>
+          <span className="w-full h-full absolute top-0 left-0 break-after-all flex justify-center items-center">
+            <span className="h-px bg-gray-400 w-full" />
+          </span>
         </p>
       )}
       <p className="flex items-center">

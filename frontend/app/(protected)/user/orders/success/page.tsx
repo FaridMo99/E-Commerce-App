@@ -10,7 +10,11 @@ async function page(props: PageProps<"/user/orders/success">) {
     return notFound();
   }
 
-  return <Screen sessionId={sessionId} />;
+  return (
+    <main className="w-full h-full flex justify-center items-center">
+      <Screen sessionId={sessionId} />
+    </main>
+  );
 }
 
 export default page;

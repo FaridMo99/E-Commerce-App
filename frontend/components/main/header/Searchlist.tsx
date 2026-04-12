@@ -1,50 +1,18 @@
-import { Search } from "lucide-react";
-import Link from "next/link";
 import { Product } from "@/types/types";
-import ImageWithPlaceholder from "../product/ImageWithPlaceholder";
-import Price from "../product/Price";
-import RatingPreview from "../product/Rating";
+import SearchlistItem from "./SearchlistItem";
 
 function Searchlist({ products }: { products: Product[] }) {
   return (
-    <div className="bg-white overflow-x-clip overflow-y-scroll w-full max-h-100 rounded-b-lg border border-foreground text-black absolute top-full left-0">
+    <ul className="bg-white overflow-x-clip overflow-y-scroll w-full max-h-100 rounded-b-lg border border-foreground text-black absolute top-full left-0">
       {products?.map((product) => (
-        <Link
-          key={product.id}
-          className="w-full"
-          href={`/products/${product.id}`}
-        >
-          <li
-            key={product.id}
-            className="w-full flex h-30 justify-around items-center bg-foreground hover:bg-foreground/50"
-          >
-            <ImageWithPlaceholder
-              imageUrls={product.imageUrls}
-              width="w-20"
-              height="h-20"
-            />
-            <div className="w-1/3 h-full flex flex-col justify-evenly items-start truncate">
-              <p>{product.name}</p>
-              <p className="text-black/50">{product.description}</p>
-            </div>
-            <div className="w-1/3 h-full flex truncate flex-col justify-evenly items-start">
-              <RatingPreview rating={product.averageRating} />
-              <Price
-                price={product.price}
-                sale_price={product.sale_price}
-                currency={product.currency}
-              />
-            </div>
-          </li>
-        </Link>
+        <SearchlistItem product={product} key={product.id} />
       ))}
       {products.length === 0 && (
-        <div className="w-full h-[10vh] flex justify-center items-center text-gray-500">
-          <p>No Products Found</p>
-          <Search className="ml-2 text-foreground" />
-        </div>
+        <li className="w-full bg-foreground h-[10vh] flex justify-center items-center text-white">
+          <p>No Products Found...</p>
+        </li>
       )}
-    </div>
+    </ul>
   );
 }
 

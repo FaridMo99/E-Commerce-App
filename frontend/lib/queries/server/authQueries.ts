@@ -1,15 +1,37 @@
 "use server";
-import type {
-  EmailSchema,
-  LoginSchema,
-  SignupSchema,
-} from "@monorepo/shared";
+import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { AccessToken, AuthResponse } from "@/types/types";
-import { getApiUrl } from "@/config/constants";
+import { ENV, getApiUrl } from "@/config/constants";
 import { getCsrfHeader, getAllHeaders } from "../../serverHelpers";
 import { cookies } from "next/headers";
 import { stripContentLengthHeader } from "../../helpers";
+
+async function syncCookies(res: Response) {
+  const setCookieHeaders = res.headers.getSetCookie();
+  if (setCookieHeaders.length === 0) return;
+
+  const cookieStore = await cookies();
+
+  setCookieHeaders.forEach((cookieString) => {
+    const parts = cookieString.split(";").map((p) => p.trim());
+    const [nameValue, ...attributes] = parts;
+    const [name, ...valueParts] = nameValue.split("=");
+    const value = valueParts.join("=");
+
+    const isProd = ENV === "production";
+
+    cookieStore.set(name, value, {
+      httpOnly:
+        name === "refreshToken" ||
+        attributes.some((a) => a.toLowerCase() === "httponly"),
+      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      domain: ".shoppi.lat",
+      path: "/",
+    });
+  });
+}
 
 export async function login(
   credentials: LoginSchema,
@@ -26,6 +48,9 @@ export async function login(
     },
     body: JSON.stringify(credentials),
   });
+
+  await syncCookies(res);
+
   return await handleResponse<AuthResponse>(res);
 }
 
@@ -84,6 +109,9 @@ export async function verifyAfterEmailLink(
     },
     body: JSON.stringify({ token }),
   });
+
+  await syncCookies(res);
+
   return await handleResponse<AuthResponse>(res);
 }
 
@@ -135,6 +163,7 @@ export async function getNewRefreshToken(): Promise<AuthResponse> {
       ...additionalHeaders,
     },
   });
+
   return await handleResponse<AuthResponse>(res);
 }
 
@@ -154,5 +183,8 @@ export async function changePasswordUnauthenticated(
     },
     body: JSON.stringify({ token, password }),
   });
+
+  await syncCookies(res);
+
   return await handleResponse<AuthResponse>(res);
 }

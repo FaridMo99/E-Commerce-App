@@ -3,6 +3,10 @@ export const API_BASE_URL = BASE_URL + "/api";
 export const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!;
 export const DOMAIN_NAME = process.env.NEXT_PUBLIC_DOMAIN_NAME!;
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN!;
+export const STRIPE_ENV = process.env.NEXT_PUBLIC_STRIPE_ENV as
+  | "testing"
+  | "production";
+export const ENV = process.env.ENV as "development" | "production";
 
 export function getApiUrl(): string {
   if (typeof window !== "undefined") {

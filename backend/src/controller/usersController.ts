@@ -194,16 +194,18 @@ export async function getAllOrdersByUser(
       ...(page && { take: page }),
     });
 
-    orders.forEach(
-      (order) =>
-        (order.total_amount = formatPriceForClient(order.total_amount)),
-    );
+
+    orders.forEach(order => {
+      order.total_amount = formatPriceForClient(order.total_amount);
+      order.items.forEach(item=>item.price_at_purchase = formatPriceForClient(item.price_at_purchase))
+    });
 
     console.log(
       chalk.green(
         `${getTimestamp()} Orders fetched successfully for user ${userId}`,
       ),
     );
+
     return res.status(200).json(orders);
   } catch (err) {
     console.log(
@@ -250,12 +252,16 @@ export async function getSingleOrderByUser(
       return res.status(404).json({ message: "Order not found" });
     }
 
+    order.items.forEach(item=> item.price_at_purchase = formatPriceForClient(item.price_at_purchase))
     order.total_amount = formatPriceForClient(order.total_amount);
+    console.log(order)
+
     console.log(
       chalk.green(
         `${getTimestamp()} Order ${orderId} fetched successfully for user ${userId}`,
       ),
     );
+    
     return res.status(200).json(order);
   } catch (err) {
     console.log(
@@ -301,13 +307,17 @@ export async function getSingleStripeOrderByUser(
       return res.status(404).json({ message: "Order not found" });
     }
 
-    order.total_amount = formatPriceForClient(order.total_amount);
+    order.items.forEach(item=> item.price_at_purchase = formatPriceForClient(item.price_at_purchase))
+
     console.log(
       chalk.green(
         `${getTimestamp()} Stripe Order ${sessionId} fetched successfully for user ${userId}`,
       ),
     );
-    return res.status(200).json(order);
+
+    console.log(order)
+
+    return res.status(200).json({...order,total_amount:formatPriceForClient(order.total_amount)});
   } catch (err) {
     console.log(
       chalk.red(
@@ -377,6 +387,7 @@ export async function getUserCart(
       select: cartSelect,
     });
 
+
     if (!cart) {
       console.log(
         chalk.red(`${getTimestamp()} Cart not found for user ${userId}`),
@@ -400,9 +411,9 @@ export async function getUserCart(
       ),
     );
 
-    calculateCartTotals(cart);
+    const cartWithTotals = calculateCartTotals(cart);
 
-    return res.status(200).json(cart);
+    return res.status(200).json(cartWithTotals);
   } catch (err) {
     console.log(
       chalk.red(
@@ -491,8 +502,6 @@ export async function addProductToUserCart(
     )
       return res.status(400).json({ message: "Total quantity exceeds stock" });
 
-    let updatedCart;
-
     if (existingItem) {
       //update quantity
       await prisma.cartItem.update({
@@ -523,14 +532,18 @@ export async function addProductToUserCart(
     }
 
     //return full updated cart
-    updatedCart = await prisma.cart.findUnique({
+    const updatedCart = await prisma.cart.findUnique({
       where: { userId },
       select: cartSelect,
     });
 
+    if (!updatedCart) {
+      return res.status(400).json({message:"Something went wrong"})
+    }
+
     //convert and format prices
     await Promise.all(
-      updatedCart!.items.map((item) =>
+      updatedCart.items.map((item) =>
         transformAndFormatProductPrice(
           item.product,
           item.product.currency,
@@ -539,9 +552,9 @@ export async function addProductToUserCart(
       ),
     );
 
-    calculateCartTotals(updatedCart!);
+    const cartWithTotals = calculateCartTotals(updatedCart);
 
-    return res.status(200).json(updatedCart);
+    return res.status(200).json(cartWithTotals);
   } catch (err) {
     console.log(
       chalk.red(
@@ -599,8 +612,9 @@ export async function removeProductFromUserCart(
       ),
     );
 
-    calculateCartTotals(cart.cart);
-    return res.status(200).json(cart.cart);
+    const cartWithTotals = calculateCartTotals(cart.cart);
+
+    return res.status(200).json(cartWithTotals);
   } catch (err) {
     console.log(
       chalk.red(
@@ -698,9 +712,9 @@ export async function updateItemQuantity(
       ),
     );
 
-    calculateCartTotals(cart.cart);
+    const cartWithTotals = calculateCartTotals(cart.cart);
 
-    return res.status(200).json(cart.cart);
+    return res.status(200).json(cartWithTotals);
   } catch (err) {
     console.log(
       chalk.red(

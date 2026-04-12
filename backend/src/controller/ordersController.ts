@@ -7,7 +7,7 @@ import {
 import stripe from "../services/stripe.js";
 import { CLIENT_ORIGIN } from "../config/env.js";
 import chalk from "chalk";
-import { calculateCartTotalsInCents, getTimestamp } from "../lib/utils.js";
+import { calculateCartTotals, getTimestamp } from "../lib/utils.js";
 import { cartSelect, orderSelect } from "../config/prismaHelpers.js";
 import type Stripe from "stripe";
 import { ORDERS_EXPIRATION_TIME } from "../config/constants.js";
@@ -165,7 +165,7 @@ export async function makeOrder(
       ),
     );
 
-    const cartWithTotals = calculateCartTotalsInCents(shoppingCart);
+    const cartWithTotals = calculateCartTotals(shoppingCart);
 
     if (cartWithTotals.total && cartWithTotals.total > 99999999)
       return res
@@ -173,7 +173,7 @@ export async function makeOrder(
         .json({ message: "Your Order cant exceed 999999,99" });
 
     let order;
-    let finalItems = cartWithTotals.items;
+    const finalItems = cartWithTotals.items;
     const categoriesToInvalidate = new Set<string>(); //caches to invalidate for sold out products
 
     //atomic order creation, stock decrement, and check
@@ -230,7 +230,7 @@ export async function makeOrder(
             status: "PENDING",
             currency,
             expires_at: new Date(Date.now() + ORDERS_EXPIRATION_TIME),
-            total_amount: cartWithTotals.total!,
+            total_amount: cartWithTotals.total,
             items: {
               create: finalItems.map((item) => ({
                 product: { connect: { id: item.product.id } },
