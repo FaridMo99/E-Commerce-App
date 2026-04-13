@@ -35,4 +35,5 @@ COPY --chown=nodeuser:nodegroup --from=builder /app/backend/prisma ./prisma
 
 USER nodeuser
 EXPOSE 3001
-CMD ["node", "dist/app.js"]
+
+CMD npx prisma migrate deploy --schema ./prisma/schema.prisma && node dist/app.js

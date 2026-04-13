@@ -19,9 +19,52 @@ resource "aws_iam_role" "github_actions" {
         }
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:FaridMo99/E-Commerce-App"
+            "token.actions.githubusercontent.com:sub": "repo:FaridMo99/E-Commerce-App:*"
           }
         }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "github_ecr_push" {
+  name = "shoppi-github-ecr-push"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr-public:GetAuthorizationToken",
+          "sts:GetServiceBearerToken"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr-public:BatchCheckLayerAvailability",
+          "ecr-public:PutImage",
+          "ecr-public:InitiateLayerUpload",
+          "ecr-public:UploadLayerPart",
+          "ecr-public:CompleteLayerUpload"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = "ecs:UpdateService"
+        Effect = "Allow"
+        Resource = "*" 
       }
     ]
   })
