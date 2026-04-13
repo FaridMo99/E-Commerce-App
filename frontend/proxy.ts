@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
   if (refreshToken) {
     try {
       const backendRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/auth/refresh-token`,
+        `${process.env.BACKEND_DOCKER_INTERNAL_URL}/api/auth/refresh-token`,
         {
           method: "POST",
           headers: additionalHeaders,
