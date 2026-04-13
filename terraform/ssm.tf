@@ -25,10 +25,10 @@ variable "db_vars" {
 }
 
 resource "aws_ssm_parameter" "db_vars" {
-  for_each = var.db_vars
+  for_each = nonsensitive(toset(keys(var.db_vars)))
   name        = "/shoppi/db/${each.key}"
   type        = "SecureString"
-  value       = each.value
+  value       = var.db_vars[each.key]
 }
 
 resource "aws_ssm_parameter" "database_url" {
@@ -49,10 +49,10 @@ variable "nginx_vars" {
   }
 }
 resource "aws_ssm_parameter" "nginx_vars" {
-  for_each = var.nginx_vars
+  for_each = nonsensitive(toset(keys(var.nginx_vars)))
   name        = "/shoppi/nginx/${each.key}"
   type        = "String"
-  value       = each.value
+  value       = var.nginx_vars[each.key]
 }
 
 # frontend env vars
@@ -60,11 +60,12 @@ variable "frontend_vars" {
   type = map(string)
   sensitive = true # marked sensitive for nextjs bff
 }
+
 resource "aws_ssm_parameter" "frontend_vars" {
-  for_each = var.frontend_vars
+  for_each = nonsensitive(toset(keys(var.frontend_vars)))
   name        = "/shoppi/frontend/${each.key}"
   type        = "String"
-  value       = each.value
+  value       = var.frontend_vars[each.key]
 }
 
 # backend env vars
@@ -73,8 +74,9 @@ variable "backend_vars" {
   sensitive = true
 }
 resource "aws_ssm_parameter" "backend_vars" {
-  for_each = var.backend_vars
+  for_each = nonsensitive(toset(keys(var.backend_vars)))
+
   name        = "/shoppi/backend/${each.key}"
   type        = "SecureString"
-  value       = each.value
+  value       = var.backend_vars[each.key]
 }

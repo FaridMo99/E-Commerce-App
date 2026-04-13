@@ -9,7 +9,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/shoppi"
-  retention_in_days = 2
+  retention_in_days = 1
 }
 
 # ecs ami
@@ -110,6 +110,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
   cpu    = "512"
   memory = "814"
 
+
   container_definitions = jsonencode([
     # backend
     {
@@ -123,7 +124,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
         { name = "AWS_REGION",   value = var.aws_region},
         { name = "S3_BUCKET_NAME", value = aws_s3_bucket.main.id}]
       secrets = concat(
-        [for k, v in aws_ssm_parameter.backend_vars : { name = k, valueFrom = v.arn }],
+        [for k in nonsensitive(keys(var.backend_vars)) : { name = k, valueFrom = aws_ssm_parameter.backend_vars[k].arn }],
         [
           { name = "DATABASE_URL", valueFrom = aws_ssm_parameter.database_url.arn },
           { name = "REDIS_URL",    valueFrom = aws_ssm_parameter.redis_url.arn },
@@ -147,7 +148,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       memory    = 450
       portMappings = [{ containerPort = 3000, hostPort = 3000 }]
       environment = [{ name  = "ENV", value = var.general_env_vars["environment"]},]
-      secrets = concat([for k, v in aws_ssm_parameter.frontend_vars : { name = k, valueFrom = v.arn }])
+      secrets = concat([for k in nonsensitive(keys(var.frontend_vars)) : { name = k, valueFrom = aws_ssm_parameter.frontend_vars[k].arn }])
       logConfiguration = {
         logDriver = "awslogs"
         options = {
