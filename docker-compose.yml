@@ -5,7 +5,7 @@ services:
       dockerfile: backend/Dockerfile
     image: backend-app:latest
     ports:
-      - "10000:10000"
+      - "3001:3001"
     env_file:
       - ./backend/.env
     networks:
@@ -21,21 +21,28 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-       # - NEXT_PUBLIC_BACKEND_BASE_URL=https://api.shoppi.lat
-        - NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:3001
+        #- NEXT_PUBLIC_BACKEND_BASE_URL=https://api.shoppi.lat
+        - NEXT_PUBLIC_BACKEND_BASE_URL=https://localhost:3001
         - NEXT_PUBLIC_DOCKER_ENV=true
         - NEXT_PUBLIC_DOMAIN=https://shoppi.lat/
         - NEXT_PUBLIC_DOMAIN_NAME=shoppi
         - BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
         - NEXT_PUBLIC_STRIPE_ENV=testing
+        - NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=0x4AAAAAACAJ7tYYt340DZW7
+        - NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_51SQQEHDSklUwZqQ3k0jdNLJZCuWOKxCHPS599G9vjIYEIW1NHQmfeW9eUazGIYnEb6r77oojkZTTYXH40F1lnZTU00HHdoRBOR
     environment:
       - BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
       - NEXT_PUBLIC_DOCKER_ENV=true
     ports:
-      - "3000:10000"
+      - "3000:3000"
     depends_on:
       backend:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
     networks:
       - shoppi-network
 
@@ -43,13 +50,20 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     environment:
       - FRONTEND_DOMAIN=shoppi.lat
       - BACKEND_DOMAIN=api.shoppi.lat
     ports:
       - "443:443"
+      - "80:80"
     networks:
       - shoppi-network
+ 
 
 networks:
   shoppi-network:

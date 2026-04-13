@@ -51,6 +51,6 @@ COPY --from=builder /app/backend/src/generated/prisma ./dist/generated/prisma
 RUN chown -R nodeuser:nodegroup /app
 USER nodeuser
 
-EXPOSE 10000
+EXPOSE 3001
 
 CMD ["node", "dist/app.js"]

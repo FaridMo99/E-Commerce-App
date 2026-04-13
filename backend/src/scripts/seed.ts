@@ -88,6 +88,18 @@ const baseAdmin: Prisma.UserCreateInput = {
   cart: { create: {} },
 };
 
+const testAdmin: Prisma.UserCreateInput = {
+  role: "ADMIN",
+  name: "Test123",
+  email: "Test123@gmail.com",
+  verified: true,
+  createdBy: "SELF",
+  password: await bcrypt.hash("Test123", 10),
+  countryCode: ADMIN_COUNTRYCODE,
+  currency: ADMIN_CURRENCY,
+  cart: { create: {} },
+};
+
 const baseCurrency: Prisma.SettingsCreateInput = {
   key: BASE_CURRENCY_KEY,
   value: BASE_CURRENCY,
@@ -103,6 +115,15 @@ async function createAdmin(): Promise<void> {
     }),
   ]);
 }
+
+async function createTestAdmin(): Promise<void> {
+  await Promise.all([
+    prisma.user.create({
+      data: testAdmin,
+    }),
+  ]);
+}
+
 
 async function createMockProducts(): Promise<void> {
   await prisma.category.upsert({
@@ -143,6 +164,7 @@ export async function seedDb(): Promise<void> {
     if (!adminExists) {
       console.log(chalk.yellow(getTimestamp(), "Creating Admin..."));
       await createAdmin();
+      await createTestAdmin();
       console.log(chalk.green(getTimestamp(), "Created Admin successfully!"));
     }
     console.log(chalk.green(getTimestamp(), "Seeded DB succesfully!"));

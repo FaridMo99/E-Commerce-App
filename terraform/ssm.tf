@@ -42,8 +42,8 @@ resource "aws_ssm_parameter" "database_url" {
 variable "nginx_vars" {
   type = map(string)
   default = {
-    frontend-domain-name="shoppi.lat"
-    backend-domain-name="api.shoppi.lat"
+    FRONTEND_DOMAIN="shoppi.lat"
+    BACKEND_DOMAIN="api.shoppi.lat"
   }
 }
 resource "aws_ssm_parameter" "nginx_vars" {

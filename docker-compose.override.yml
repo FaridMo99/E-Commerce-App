@@ -32,7 +32,6 @@ services:
     networks:
       - shoppi-network
 
-# only do once, so basically check if up to date, if not do it
   db-migrations:
     build:
       context: .

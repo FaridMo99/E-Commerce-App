@@ -19,7 +19,7 @@ resource "aws_iam_role" "github_actions" {
         }
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:FaridMo99/E-Commerce-App:ref:refs/heads/feature/awsTransition"
+            "token.actions.githubusercontent.com:sub": "repo:FaridMo99/E-Commerce-App"
           }
         }
       }
