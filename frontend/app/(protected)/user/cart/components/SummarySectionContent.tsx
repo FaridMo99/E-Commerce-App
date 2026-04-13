@@ -3,10 +3,12 @@ import { Cart } from "@/types/types";
 type SummarySectionContentProps = {
   totalItems: number;
   cart: Cart;
-}
+};
 
-function SummarySectionContent({ totalItems, cart, }: SummarySectionContentProps) {
-
+function SummarySectionContent({
+  totalItems,
+  cart,
+}: SummarySectionContentProps) {
   return (
     <div className="w-full h-2/3 flex flex-col justify-evenly items-start ">
       <p className="self-center text-center text-white md:text-lg font-semibold">

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 
 export async function healthStatus(
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction,
 ) {

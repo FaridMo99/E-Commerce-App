@@ -56,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: ChildrenProps) {
-  const {accessToken, user} = await getProtectedHeaders(headers)
+  const { accessToken, user } = await getProtectedHeaders(headers);
 
   return (
     <html lang="de" className={questrial.className}>

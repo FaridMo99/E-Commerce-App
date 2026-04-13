@@ -1,9 +1,5 @@
 "use server";
-import type {
-  EmailSchema,
-  LoginSchema,
-  SignupSchema,
-} from "@monorepo/shared";
+import type { EmailSchema, LoginSchema, SignupSchema } from "@monorepo/shared";
 import { handleResponse } from "../utils";
 import { AccessToken, AuthResponse } from "@/types/types";
 import { ENV, getApiUrl } from "@/config/constants";
@@ -23,7 +19,7 @@ async function syncCookies(res: Response) {
     const [name, ...valueParts] = nameValue.split("=");
     const value = valueParts.join("=");
 
-    const isProd = ENV === "production"
+    const isProd = ENV === "production";
 
     cookieStore.set(name, value, {
       httpOnly:
@@ -190,6 +186,6 @@ export async function changePasswordUnauthenticated(
   });
 
   await syncCookies(res);
-  
+
   return await handleResponse<AuthResponse>(res);
 }

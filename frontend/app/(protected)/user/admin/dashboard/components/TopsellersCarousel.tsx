@@ -19,13 +19,15 @@ function TopsellersCarousel({ fetchResult }: TopsellerCarouselProps) {
       {fetchResult.isLoading && (
         <CarouselLoadingSkeleton cardWidth="40" cardHeight="50" />
       )}
-      {!fetchResult.isLoading && fetchResult.data && fetchResult.data?.length > 0 && (
-        <BaseSlider>
-          {fetchResult.data.map((product) => (
-            <TopsellerCard key={product.product.id} topseller={product} />
-          ))}
-        </BaseSlider>
-      )}
+      {!fetchResult.isLoading &&
+        fetchResult.data &&
+        fetchResult.data?.length > 0 && (
+          <BaseSlider>
+            {fetchResult.data.map((product) => (
+              <TopsellerCard key={product.product.id} topseller={product} />
+            ))}
+          </BaseSlider>
+        )}
     </SectionWrapper>
   );
 }

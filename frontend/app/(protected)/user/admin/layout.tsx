@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user/admin">) {
-  const {accessToken, user} = await getProtectedHeaders(headers)
+  const { accessToken, user } = await getProtectedHeaders(headers);
 
   if (!accessToken) {
     redirect("/");

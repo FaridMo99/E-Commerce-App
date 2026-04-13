@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import "server-only";
 
 async function layout(props: LayoutProps<"/">) {
-  const {accessToken} = await getProtectedHeaders(headers)
+  const { accessToken } = await getProtectedHeaders(headers);
 
   if (accessToken) {
     redirect("/");

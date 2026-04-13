@@ -160,7 +160,7 @@ export async function getTrendingProducts(): Promise<
 
   // remove metrics, only keep product fields
   const returnProducts = topTrending.map((product) => {
-    const { _count, score:_score, ...productRest } = product;
+    const { _count, score: _score, ...productRest } = product;
     const {
       favoredBy: _favoredBy,
       order_items: _order_items,

@@ -1,7 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { deleteUserCart, getUserOrderByStripeSessionId } from "@/lib/queries/client/usersQueries";
+import {
+  deleteUserCart,
+  getUserOrderByStripeSessionId,
+} from "@/lib/queries/client/usersQueries";
 import useAuth from "@/stores/authStore";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -14,7 +17,7 @@ function Screen({ sessionId }: { sessionId: string }) {
     data: order,
     isLoading,
     isError,
-    isSuccess
+    isSuccess,
   } = useQuery({
     queryKey: ["get recent order", sessionId],
     queryFn: () => getUserOrderByStripeSessionId(sessionId, accessToken!),
@@ -24,7 +27,7 @@ function Screen({ sessionId }: { sessionId: string }) {
   const {} = useQuery({
     queryKey: ["empty cart", sessionId],
     queryFn: () => deleteUserCart(accessToken!),
-    enabled:isSuccess
+    enabled: isSuccess,
   });
 
   return (

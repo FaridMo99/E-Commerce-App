@@ -1,7 +1,7 @@
-import { Product } from '@/types/types'
-import RatingPreview from '../product/Rating';
+import { Product } from "@/types/types";
+import RatingPreview from "../product/Rating";
 
-function SearchlistItemHeader({product}:{product:Product}) {
+function SearchlistItemHeader({ product }: { product: Product }) {
   return (
     <div className="flex justify-between items-center w-full gap-2">
       <p className="font-bold truncate flex-1 min-w-0">{product.name}</p>
@@ -12,4 +12,4 @@ function SearchlistItemHeader({product}:{product:Product}) {
   );
 }
 
-export default SearchlistItemHeader
+export default SearchlistItemHeader;

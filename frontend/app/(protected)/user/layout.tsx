@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 async function layout(props: LayoutProps<"/user">) {
-  const {accessToken, user} = await getProtectedHeaders(headers)
+  const { accessToken, user } = await getProtectedHeaders(headers);
 
   if (!accessToken) {
     redirect("/");

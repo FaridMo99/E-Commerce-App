@@ -1,3 +1,4 @@
+/*
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 import multer from "multer";
 import {
@@ -71,3 +72,4 @@ export async function deleteCloudAsset(url: string): Promise<void> {
 }
 
 export const upload = multer({ storage: multer.memoryStorage() });
+*/

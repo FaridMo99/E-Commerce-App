@@ -9,9 +9,8 @@ export async function handleResponse<T>(res: Response): Promise<T> {
   return data;
 }
 
-
 export async function getProtectedHeaders(
-  headers: ()=>Promise<ReadonlyHeaders>,
+  headers: () => Promise<ReadonlyHeaders>,
 ): Promise<{ accessToken: AccessToken | undefined; user: User }> {
   const headerList = await headers();
 

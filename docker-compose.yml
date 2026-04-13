@@ -1,29 +1,4 @@
 services:
-
-  redis:
-    image: redis:alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       context: .
@@ -33,51 +8,49 @@ services:
       - "10000:10000"
     env_file:
       - ./backend/.env
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
-      - REDIS_URL=redis://redis:6379
-      - SEED_PRODUCTS=true 
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+    networks:
+      - shoppi-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 3s
       retries: 5
-      start_period: 10s
-
-  db-migrations:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    image: backend-app:latest
-    command: npx prisma migrate deploy --schema ./prisma/schema.prisma    
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
+       # - NEXT_PUBLIC_BACKEND_BASE_URL=https://api.shoppi.lat
         - NEXT_PUBLIC_BACKEND_BASE_URL=http://localhost:3001
-        - NEXT_PUBLIC_BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
         - NEXT_PUBLIC_DOCKER_ENV=true
+        - NEXT_PUBLIC_DOMAIN=https://shoppi.lat/
+        - NEXT_PUBLIC_DOMAIN_NAME=shoppi
+        - BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
         - NEXT_PUBLIC_STRIPE_ENV=testing
-    env_file:
-      - ./frontend/.env
+    environment:
+      - BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
+      - NEXT_PUBLIC_DOCKER_ENV=true
     ports:
       - "3000:10000"
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - shoppi-network
 
+  proxy:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    environment:
+      - FRONTEND_DOMAIN=shoppi.lat
+      - BACKEND_DOMAIN=api.shoppi.lat
+    ports:
+      - "443:443"
+    networks:
+      - shoppi-network
 
-volumes:
-  postgres_data:
+networks:
+  shoppi-network:
+    driver: bridge

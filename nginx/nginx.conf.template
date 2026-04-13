@@ -1,0 +1,38 @@
+# Save this as nginx.conf.template
+http {
+    underscores_in_headers on;
+    client_max_body_size 20M;
+
+    ssl_certificate     /etc/nginx/ssl/server.crt;
+    ssl_certificate_key /etc/nginx/ssl/server.key;
+
+    # Frontend
+    server {
+        listen ${NGINX_PORT} ssl;
+        server_name ${FRONTEND_DOMAIN};
+
+        location / {
+            # Use the service name 'frontend'
+            proxy_pass http://${FRONTEND_DOCKER_BASE_URL}:${FRONTEND_PORT};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass_request_headers on;
+            proxy_buffering off;
+        }
+    }
+
+    # Backend
+    server {
+        listen ${NGINX_PORT} ssl;
+        server_name ${BACKEND_DOMAIN};
+
+        location / {
+            # Use the service name 'backend'
+            proxy_pass http://${BACKEND_DOCKER_BASE_URL}:${BACKEND_PORT};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass_request_headers on;
+            proxy_buffering off;
+        }
+    }
+}

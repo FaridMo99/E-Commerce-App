@@ -1,4 +1,6 @@
 node_modules
-zStructure.txt
+stepByStep.txt
 .env
 dump.rdb
+
+bootstrap

@@ -18,11 +18,15 @@ export async function getCsrfHeader(): Promise<Record<string, string>> {
 export async function getAllHeaders(): Promise<Record<string, string>> {
   const clientHeaders = await headers();
   const cookieStore = await cookies();
-  
-  const headersObject: Record<string, string> = Object.fromEntries(clientHeaders);
-  
-  const cookieHeader = (await cookieStore).getAll().map(c => `${c.name}=${c.value}`).join('; ');
-  headersObject['Cookie'] = cookieHeader;
+
+  const headersObject: Record<string, string> =
+    Object.fromEntries(clientHeaders);
+
+  const cookieHeader = (await cookieStore)
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  headersObject["Cookie"] = cookieHeader;
 
   return headersObject;
 }

@@ -106,7 +106,7 @@ export async function OauthLogin(req: Request, res: Response) {
     const user = req.oAuthUser?.user;
 
     if (!user) {
-      return res.status(401).json({message:"User missing Data"})
+      return res.status(401).json({ message: "User missing Data" });
     }
 
     const accessToken = await issueTokens(user, res);

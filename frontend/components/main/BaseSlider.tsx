@@ -10,7 +10,7 @@ export const settings: Settings = {
   swipe: true,
   swipeToSlide: true,
   arrows: true,
-  infinite:false,
+  infinite: false,
   responsive: [
     { breakpoint: 1270, settings: { slidesToShow: 4 } },
     { breakpoint: 1020, settings: { slidesToShow: 3 } },

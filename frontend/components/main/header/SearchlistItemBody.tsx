@@ -1,8 +1,8 @@
-import { Product } from '@/types/types'
+import { Product } from "@/types/types";
 
-import Price from '../product/Price';
+import Price from "../product/Price";
 
-function SearchlistItemBody({product}:{product:Product}) {
+function SearchlistItemBody({ product }: { product: Product }) {
   return (
     <div className="flex flex-col flex-1 justify-between mt-1 min-w-0">
       <p className="text-black/50 text-sm line-clamp-3 wrap-break-word">
@@ -18,4 +18,4 @@ function SearchlistItemBody({product}:{product:Product}) {
   );
 }
 
-export default SearchlistItemBody
+export default SearchlistItemBody;

@@ -16,8 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-    const {accessToken} = await getProtectedHeaders(headers)
-
+  const { accessToken } = await getProtectedHeaders(headers);
 
   const { newProducts, trendingProducts, productsOnSale, categoryProducts } =
     await getHomeProducts(accessToken);

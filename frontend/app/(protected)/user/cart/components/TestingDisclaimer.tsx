@@ -36,9 +36,7 @@ function TestingDisclaimer() {
 
         {/* Failure Case */}
         <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-          <h3 className="mb-2 font-bold text-red-600">
-            Failure Input:
-          </h3>
+          <h3 className="mb-2 font-bold text-red-600">Failure Input:</h3>
           <ul className="space-y-1 text-zinc-300">
             <li>
               <span className="text-white font-mono">Card:</span> 4000 0000 0000

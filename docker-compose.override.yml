@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+    networks:
+      - shoppi-network
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "51214:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+    networks:
+      - shoppi-network
+
+  backend:
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+      db-migrations: { condition: service_completed_successfully }
+    networks:
+      - shoppi-network
+
+# only do once, so basically check if up to date, if not do it
+  db-migrations:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: backend-app:latest
+    command: npx prisma migrate deploy --schema ./prisma/schema.prisma    
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks:
+      - shoppi-network
+
+volumes:
+  postgres_data:

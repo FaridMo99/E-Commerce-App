@@ -10,7 +10,8 @@ function Footer() {
       />
       <p className="text-center mb-4">
         Private Demo Project. Not a commercial service.
-        <br/>Created for portfolio purposes.
+        <br />
+        Created for portfolio purposes.
       </p>
     </footer>
   );

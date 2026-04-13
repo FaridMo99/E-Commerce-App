@@ -14,12 +14,12 @@ function SearchlistItem({ product }: { product: Product }) {
           height="h-1/2"
         />
         <div className="h-full flex p-3 flex-1 flex-col min-w-0">
-        <SearchlistItemHeader product={product} />
-        <SearchlistItemBody product={product}/>
+          <SearchlistItemHeader product={product} />
+          <SearchlistItemBody product={product} />
         </div>
       </li>
     </Link>
   );
 }
 
-export default SearchlistItem
+export default SearchlistItem;

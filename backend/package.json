@@ -20,6 +20,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1022.0",
     "@monorepo/shared": "1.0.0",
     "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
@@ -44,6 +45,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@prisma/cli-dev": "^0.16.13",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",

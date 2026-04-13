@@ -9,6 +9,38 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 -- E-Mail:Test@gmail.com
 -- Password:Test123
 
+---
+
+## AWS Cloud Architecture
+
+This version of the application is build to stay inside the **AWS Free Tier**. The entire infrastructure is provisioned as **IaC** using **Terraform**.
+
+* **Compute:** **AWS ECS EC2 mode** provides container orchestration.
+* **Networking:** * **Public Subnets:** To avoid the high cost of NAT Gateways, containers are deployed in public subnets with **Security Groups**.
+* **Storage & Database:**
+* **RDS PostgreSQL:** A Single-AZ instance providing a relational data store within the Free Tier.
+* **Amazon S3:** Used for persistent storage of product images and user uploads, integrated via the AWS SDK.
+* **Security:**
+* **SSM Parameter Store:** Credentials are stored in AWS Systems Manager and injected as environment variables at runtime.
+* **IAM Roles:** Implements **Task Execution Roles** and **Task Roles** to provide least-privilege access to AWS resources.
+* **Container Registry:** **Amazon ECR** is used to store and version-control private Docker images.
+
+### **DevOps Pipeline**
+
+* **Infrastructure as Code:** **Terraform** manages the lifecycle of the VPC.
+* **State Management:** Terraform state is stored securely in an **S3 Backend** with **DynamoDB** for state locking, preventing concurrent configuration changes.
+* **CI/CD:** Automated GitHub Actions workflows handle building the TypeScript source, containerizing the app, and pushing to ECR for deployment.
+
+---
+
+### My Free Architecture
+
+![App Architecture](AwsDiagram.png)
+
+### Optimal Architecture
+
+![App Architecture](AwsOptimalDiagram.png)
+
 ## Features
 
 ### Frontend
@@ -43,6 +75,8 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **TypeScript**
 * **Zod**
 * **Vitest**
+* **Supertest**
+* **Docker**
 
 ### Backend
 
@@ -73,7 +107,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 
 * **Automated Cron Jobs:** Scheduled background tasks like database cleanup and cache refreshing handled by **Node-Cron**.
 * **Transactional Emails:** Integration with **Mailjet** for sending order confirmations, welcome emails, and password reset links.
-* **Cloud Asset Management:** Multi-part image uploads handled by **Multer** and optimized/stored in the cloud via **Cloudinary**.
+* **AWS S3 Asset Management:** Multi-part image uploads handled by **Multer** and optimized/stored in the cloud via **AWS S3**.
 * **Validation:** Request bodies are validated at runtime using **Zod**.
 
 #### Tech-Stack
@@ -82,7 +116,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 * **TypeScript**
 * **Express**
 * **Zod**
-* **Cloudinary**
+* **AWS SDK (S3)**
 * **Redis**
 * **Prisma**
 * **Stripe**
@@ -96,8 +130,7 @@ This E-Commerce-App is written in TypeScript from end-to-end using NextJs at the
 ### General
 
 * **Architecture:** This Project was build as a Monorepo using npm workspaces
-* **Docker** Containerized Application through Docker
+* **Docker** Containerized Applications through Docker
 * **Shared Packages:** The Projects share end-to-end TypeScript types, Zod Schemas and constants
-* **CI/CD** Automated Tests, Linting, Package Vulnerability Auditing aswell as Build Step through Github Actions for both, the Front- and Backend
 
 ---

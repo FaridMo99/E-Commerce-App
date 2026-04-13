@@ -117,12 +117,12 @@ async function createMockProducts(): Promise<void> {
   });
 }
 
-
-
-export async function seedDb():Promise<void> {
-  console.log(chalk.yellow(getTimestamp(),"Running DB seeder..."));
+export async function seedDb(): Promise<void> {
+  console.log(chalk.yellow(getTimestamp(), "Running DB seeder..."));
   try {
-    console.log(chalk.yellow(getTimestamp(), "Checking if already populated the DB..."));
+    console.log(
+      chalk.yellow(getTimestamp(), "Checking if already populated the DB..."),
+    );
 
     const adminExists = await prisma.user.findFirst({
       where: { role: "ADMIN" },
@@ -133,19 +133,19 @@ export async function seedDb():Promise<void> {
     });
 
     if (!productsExist && SEED_PRODUCTS === "true") {
-      console.log(chalk.yellow(getTimestamp(),"Seeding mock products..."));
+      console.log(chalk.yellow(getTimestamp(), "Seeding mock products..."));
       await createMockProducts();
-      console.log(chalk.green(getTimestamp(), "Created Mock Products successfully!"));
-
+      console.log(
+        chalk.green(getTimestamp(), "Created Mock Products successfully!"),
+      );
     }
 
     if (!adminExists) {
       console.log(chalk.yellow(getTimestamp(), "Creating Admin..."));
       await createAdmin();
-      console.log(
-      chalk.green(getTimestamp(),"Created Admin successfully!"));
+      console.log(chalk.green(getTimestamp(), "Created Admin successfully!"));
     }
-    console.log(chalk.green(getTimestamp(),"Seeded DB succesfully!"))
+    console.log(chalk.green(getTimestamp(), "Seeded DB succesfully!"));
   } catch (error) {
     console.error("Seeding error:", error);
   }

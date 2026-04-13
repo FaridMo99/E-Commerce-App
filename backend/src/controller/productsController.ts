@@ -7,7 +7,6 @@ import {
   type ReviewSchema,
   type UpdateProductSchema,
 } from "@monorepo/shared";
-import { deleteCloudAsset, handleCloudUpload } from "../services/cloud.js";
 import {
   convertAndFormatPriceInCents,
   getBaseCurrency,
@@ -34,6 +33,7 @@ import {
   type ProductWithSelectedFields,
 } from "../config/prismaHelpers.js";
 import type { Prisma } from "../generated/prisma/client.js";
+import { deleteS3Asset, handleS3Upload } from "../services/s3.js";
 
 export async function getAllProducts(
   req: Request,
@@ -245,11 +245,17 @@ export async function createProduct(
 
     //add images to cloud
     let imageUrls: string[] | undefined;
+    let imageKeys: string[] | undefined;
+
+
     if (images && Array.isArray(images)) {
       const results = await Promise.all(
-        images.map((image) => handleCloudUpload(image)),
+        images.map((image) => handleS3Upload(image)),
       );
-      imageUrls = results.map((result) => result.secure_url);
+
+      imageUrls = results.map((result) => result.url);
+      imageKeys = results.map((result) => result.key);
+
       console.log(
         chalk.green(`${getTimestamp()} Uploaded ${imageUrls.length} images`),
       );
@@ -281,6 +287,7 @@ export async function createProduct(
           connect: { id: product.category },
         },
         ...(imageUrls && { imageUrls }),
+        ...(imageKeys && { imageKeys }),
         ...(product.is_public && { published_at: new Date() }),
         ...(salePriceInCents !== undefined && { sale_price: salePriceInCents }),
       };
@@ -363,26 +370,31 @@ export async function deleteProductByProductId(
   try {
     console.log(chalk.yellow(`${getTimestamp()} Deleting product ${id}`));
 
-    const preProduct = await prisma.product.findUnique({ where: { id } });
+    const preProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { imageKeys: true, imageUrls: true },
+    });
+
     if (!preProduct) {
       console.log(chalk.red(`${getTimestamp()} Product ${id} not found`));
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const imagesToDelete = preProduct.imageUrls.slice(1);
-    if (imagesToDelete.length > 0) {
+    if (preProduct.imageKeys.length > 0) {
       console.log(
-        chalk.yellow(
-          `${getTimestamp()} Deleting ${imagesToDelete.length} cloud images for product ${id}`,
-        ),
+        chalk.yellow(`${getTimestamp()} Deleting S3 assets for product ${id}`),
       );
-      await Promise.all(imagesToDelete.map((url) => deleteCloudAsset(url)));
+      await Promise.all(preProduct.imageKeys.map((key) => deleteS3Asset(key)));
     }
 
     await prisma.$transaction(async (tx) => {
       const updatedProduct = await tx.product.update({
         where: { id },
-        data: { deleted: true, imageUrls: preProduct.imageUrls.slice(0, 1) },
+        data: {
+          deleted: true,
+          imageUrls: [],
+          imageKeys: [],
+        },
       });
 
       await tx.product.update({

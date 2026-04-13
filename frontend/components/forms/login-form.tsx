@@ -184,7 +184,7 @@ export function LoginForm({
           </CardContent>
         </Card>
       </div>
-      <TestInput setValue={setValue}/>
+      <TestInput setValue={setValue} />
     </>
   );
 }
