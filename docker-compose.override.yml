@@ -37,7 +37,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     image: backend-app:latest
-    command: npx prisma migrate deploy --schema ./prisma/schema.prisma    
+    command: npx prisma migrate deploy --schema prisma/schema.prisma
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
     depends_on:
