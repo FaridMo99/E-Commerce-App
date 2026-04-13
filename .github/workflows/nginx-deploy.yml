@@ -31,10 +31,12 @@ jobs:
           context: .
           file: nginx/Dockerfile
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/shoppi-proxy:${{ github.sha }}
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/shoppi-nginx:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/shoppi-nginx:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Update ECS Service
         run: |
-          aws ecs update-service --cluster shoppi-cluster --service proxy-service --force-new-deployment
+          aws ecs update-service --cluster shoppi-cluster --service shoppi-app --force-new-deployment

@@ -1,3 +1,12 @@
+resource "aws_ecs_cluster" "main" {
+  name = "shoppi-cluster"
+
+  setting {
+    name  = "containerInsights"
+    value = "disabled"
+  }
+}
+
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/shoppi"
   retention_in_days = 2
@@ -12,7 +21,7 @@ data "aws_ssm_parameter" "ecs_ami" {
 resource "aws_launch_template" "ecs_nodes" {
   name_prefix   = "shoppi-node-"
   image_id      = data.aws_ssm_parameter.ecs_ami.value
-  instance_type = "t3.micro" # Strictly Free Tier
+  instance_type = "t3.micro"
 
   # The IAM Profile that allows the EC2 to talk to ECS
   iam_instance_profile {
@@ -21,23 +30,23 @@ resource "aws_launch_template" "ecs_nodes" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.ecs_node_sg.id]
+    security_groups             = [aws_security_group.ecs_sg.id]
   }
 
-  # This shell script runs at boot to register the node to your cluster
   user_data = base64encode(<<-EOF
       #!/bin/bash
-      # Get the ID of the new instance
+      echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+
+      sleep 30
+
       TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
       INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 
-      # Grab the Elastic IP (Static IP)
-      aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id ${aws_eip.shoppi_static_ip.id} --region ${var.aws_region}
-
-      # Register with ECS Cluster
-      echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+      for i in {1..5}; do
+        aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id ${aws_eip.shoppi_static_ip.id} --region ${var.aws_region} --allow-reassociation && break || sleep 10
+      done
     EOF
-    )
+  )
 
   lifecycle {
     create_before_destroy = true
@@ -98,8 +107,8 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
-  cpu    = "1024"
-  memory = "800"
+  cpu    = "512"
+  memory = "814"
 
   container_definitions = jsonencode([
     # backend
@@ -107,7 +116,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "backend"
       image     = "${aws_ecr_repository.main["shoppi-backend"].repository_url}:latest"
       essential = true
-      memory    = 256
+      memory    = 300
       portMappings = [{ containerPort = 3001, hostPort = 3001 }]
       environment = [
         { name  = "ENV", value = var.general_env_vars["environment"]},
@@ -135,7 +144,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "frontend"
       image     = "${aws_ecr_repository.main["shoppi-frontend"].repository_url}:latest"
       essential = true
-      memory    = 256
+      memory    = 450
       portMappings = [{ containerPort = 3000, hostPort = 3000 }]
       environment = [{ name  = "ENV", value = var.general_env_vars["environment"]},]
       secrets = concat([for k, v in aws_ssm_parameter.frontend_vars : { name = k, valueFrom = v.arn }])
@@ -154,10 +163,12 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "nginx"
       image     = "${aws_ecr_repository.main["shoppi-nginx"].repository_url}:latest"
       essential = true
-      memory    = 128
+      memory    = 64
       portMappings = [{ containerPort = 80, hostPort = 80 }, { containerPort = 443, hostPort = 443 }]
-      environment = [{ name  = "ENV", value = var.general_env_vars["environment"]},]
-      secrets = concat([for k, v in aws_ssm_parameter.nginx_vars : { name = k, valueFrom = v.arn }])
+      environment = concat(
+        [{ name  = "ENV", value = var.general_env_vars["environment"] }],
+        [for k, v in aws_ssm_parameter.nginx_vars : { name = k, value = v.value }]
+      )
       logConfiguration = {
         logDriver = "awslogs"
         options = {

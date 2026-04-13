@@ -1,0 +1,21 @@
+name: General CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tfsec:
+    name: tfsec security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v4
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

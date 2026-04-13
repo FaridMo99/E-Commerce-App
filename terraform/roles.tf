@@ -41,6 +41,22 @@ resource "aws_iam_role" "ecs_node_role" {
   })
 }
 
+resource "aws_iam_role_policy" "execution_ssm_access" {
+  name = "shoppi-execution-ssm-access"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ssm:GetParameters"]
+        Resource = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/shoppi/*"]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_execution_standard" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
@@ -49,6 +65,11 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_standard" {
 resource "aws_iam_role_policy_attachment" "ecs_node_role_policy" {
   role       = aws_iam_role.ecs_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_node_ssm" {
+  role       = aws_iam_role.ecs_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "ecs_node_profile" {
@@ -132,7 +153,11 @@ resource "aws_iam_role_policy" "eip_association" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = "ec2:AssociateAddress"
+      Action   = [
+        "ec2:AssociateAddress",
+        "ec2:DescribeAddresses",
+        "ec2:DescribeInstances"
+      ]
       Resource = "*"
     }]
   })

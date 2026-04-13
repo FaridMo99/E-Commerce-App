@@ -8,7 +8,7 @@ terraform {
   backend "s3" {
     bucket         = "terraform-remote-backend-shoppi"
     key            = "shoppi/terraform.tfstate"
-    region         = var.aws_region
+    region         = "eu-central-1"
     encrypt        = true
 
     use_lockfile = true
@@ -66,6 +66,12 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+  from_port       = 0
+  to_port         = 0
+  protocol        = "-1"
+  self            = true
+}
+  ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -80,7 +86,7 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-resource "aws_security_group" "ecs_main_only" {
+resource "aws_security_group" "rds_sg" {
   name   = "rds-sg"
   vpc_id = aws_vpc.main.id
 
@@ -90,4 +96,30 @@ resource "aws_security_group" "ecs_main_only" {
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs_sg.id]
   }
+}
+
+resource "aws_security_group" "elasticache_sg" {
+  name   = "elasticache-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_sg.id]
+  }
+}
+
+
+# sitting empty, only needed because of rds needing 2 azs
+resource "aws_subnet" "public_b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.0.0/25"
+  availability_zone       = "${var.aws_region}b"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_route_table_association" "public_b_association" {
+  subnet_id      = aws_subnet.public_b.id
+  route_table_id = aws_route_table.main.id
 }

@@ -1,3 +1,7 @@
+resource "aws_s3_bucket" "main" {
+  bucket = "shoppi-bucket-app-2026"
+}
+
 resource "aws_s3_bucket_public_access_block" "main" {
   bucket = aws_s3_bucket.main.id
 
@@ -17,16 +21,15 @@ resource "aws_s3_bucket_policy" "allow_access_from_vpc_only" {
         Effect    = "Deny"
         Principal = "*"
         Action    = "s3:*"
-        Resource = [
-          aws_s3_bucket.main.arn,
-          "${aws_s3_bucket.main.arn}/*"
-        ]
+        Resource  = [aws_s3_bucket.main.arn, "${aws_s3_bucket.main.arn}/*"]
         Condition = {
-          StringNotEquals = {
-            "aws:SourceVpce" = aws_vpc_endpoint.s3.id
-          }
+          StringNotEquals = { "aws:SourceVpce" = aws_vpc_endpoint.s3.id }
           ArnNotLike = {
-            "aws:PrincipalArn" = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/admin"
+            "aws:PrincipalArn" = [
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/shoppi-github-actions-role",
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*"
+            ]
           }
         }
       }
@@ -46,8 +49,4 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = data.aws_vpc_endpoint_service.s3.service_name
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.main.id]
-}
-
-resource "aws_s3_bucket" "main" {
-  bucket = "shoppi-bucket-app-2026"
 }

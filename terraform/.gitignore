@@ -5,3 +5,6 @@
 *.tfstate.*
 
 *.tfvars
+
+do.sh
+cp.txt

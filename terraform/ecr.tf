@@ -12,7 +12,7 @@ resource "aws_ecr_repository" "main" {
   }
 
   encryption_configuration {
-    encryption_type = "KMS"
+    encryption_type = "AES256"
   }
 }
 

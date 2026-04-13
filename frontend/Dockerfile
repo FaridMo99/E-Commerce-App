@@ -44,7 +44,7 @@ RUN npm run build -w frontend
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV BACKEND_DOCKER_INTERNAL_URL=http://backend:3001
+ENV BACKEND_DOCKER_INTERNAL_URL=http://127.0.0.1:3001
 ENV NEXT_PUBLIC_DOCKER_ENV=true
 ENV NEXT_PUBLIC_STRIPE_ENV=testing
 ENV ENV=production

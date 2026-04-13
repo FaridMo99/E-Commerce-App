@@ -44,6 +44,8 @@ variable "nginx_vars" {
   default = {
     FRONTEND_DOMAIN="shoppi.lat"
     BACKEND_DOMAIN="api.shoppi.lat"
+    FRONTEND_DOCKER_BASE_URL="127.0.0.1"
+    BACKEND_DOCKER_BASE_URL="127.0.0.1"
   }
 }
 resource "aws_ssm_parameter" "nginx_vars" {
