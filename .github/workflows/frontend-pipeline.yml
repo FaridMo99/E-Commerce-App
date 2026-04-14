@@ -1,7 +1,10 @@
-name: Frontend CD
+name: Frontend Pipeline
 
 on:
   push:
+    branches: [main]
+    paths: ['frontend/**', 'shared/**', '.github/workflows/frontend-pipeline.yml']
+  pull_request:
     branches: [main]
     paths: ['frontend/**', 'shared/**']
 
@@ -10,8 +13,36 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  # CI
+  install-and-test:
+    name: Install and Test
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit & Lint
+        run: |
+          npm audit --audit-level=high -w frontend
+          npm run lint -w frontend
+
+      - name: Build Shared & Run Tests
+        run: |
+          npm run build -w shared
+          npm run test -w frontend
+
+  # CD
+  deploy:
+    name: Build and Deploy to ECS
+    needs: install-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +55,9 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
@@ -39,13 +73,8 @@ jobs:
             NEXT_PUBLIC_BACKEND_BASE_URL=${{ vars.NEXT_PUBLIC_BACKEND_BASE_URL }}
             NEXT_PUBLIC_DOMAIN_NAME=${{ vars.NEXT_PUBLIC_DOMAIN_NAME }}
             NEXT_PUBLIC_DOMAIN=${{ vars.NEXT_PUBLIC_DOMAIN }}
-            ENV=${{vars.ENV}}
-            CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS=${{vars.CLOUDFLARE_DUMMY_KEY_INVISIBLE_PASS}}
-            CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK=${{vars.CLOUDFLARE_DUMMY_KEY_INVISIBLE_BLOCK}}
-            NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{vars.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY}}
-            NEXT_PUBLIC_STRIPE_PUBLIC_KEY=${{vars.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}}
-            NEXT_PUBLIC_DOMAIN_NAME=${{vars.NEXT_PUBLIC_DOMAIN_NAME}}
-            NEXT_PUBLIC_DOMAIN=${{vars.NEXT_PUBLIC_DOMAIN}}
+            NEXT_PUBLIC_CLOUDFLARE_SITE_KEY=${{ vars.NEXT_PUBLIC_CLOUDFLARE_SITE_KEY }}
+            NEXT_PUBLIC_STRIPE_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_STRIPE_PUBLIC_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
