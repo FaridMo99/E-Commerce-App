@@ -36,5 +36,6 @@ COPY --chown=nodeuser:nodegroup --from=builder /app/backend/prisma ./prisma
 USER nodeuser
 EXPOSE 3001
 
-RUN chmod +x ./entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+COPY backend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
