@@ -39,7 +39,7 @@ resource "aws_ssm_parameter" "database_url" {
 }
 
 # nginx env vars
-variable "nginx_vars" {
+variable "nginx_public_vars" {
   type = map(string)
   default = {
     FRONTEND_DOMAIN="shoppi.lat"
@@ -48,11 +48,23 @@ variable "nginx_vars" {
     BACKEND_DOCKER_BASE_URL="127.0.0.1"
   }
 }
-resource "aws_ssm_parameter" "nginx_vars" {
-  for_each = nonsensitive(toset(keys(var.nginx_vars)))
+resource "aws_ssm_parameter" "nginx_public_vars" {
+  for_each = var.nginx_public_vars
   name        = "/shoppi/nginx/${each.key}"
   type        = "String"
-  value       = var.nginx_vars[each.key]
+  value       = each.value
+}
+
+variable "nginx_private_vars" {
+  type = map(string)
+  sensitive = true
+}
+
+resource "aws_ssm_parameter" "nginx_private_vars" {
+  for_each = nonsensitive(toset(keys(var.nginx_private_vars)))
+  name        = "/shoppi/nginx/${each.key}"
+  type        = "SecureString"
+  value       = var.nginx_private_vars[each.key]
 }
 
 # frontend env vars

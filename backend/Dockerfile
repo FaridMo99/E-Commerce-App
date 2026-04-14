@@ -36,4 +36,5 @@ COPY --chown=nodeuser:nodegroup --from=builder /app/backend/prisma ./prisma
 USER nodeuser
 EXPOSE 3001
 
-CMD npx prisma migrate deploy --schema ./prisma/schema.prisma && node dist/app.js
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

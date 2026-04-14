@@ -120,7 +120,6 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       memory    = 300
       portMappings = [{ containerPort = 3001, hostPort = 3001 }]
       environment = [
-        { name  = "ENV", value = var.general_env_vars["environment"]},
         { name = "AWS_REGION",   value = var.aws_region},
         { name = "S3_BUCKET_NAME", value = aws_s3_bucket.main.id}]
       secrets = concat(
@@ -147,7 +146,6 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       essential = true
       memory    = 450
       portMappings = [{ containerPort = 3000, hostPort = 3000 }]
-      environment = [{ name  = "ENV", value = var.general_env_vars["environment"]},]
       secrets = concat([for k in nonsensitive(keys(var.frontend_vars)) : { name = k, valueFrom = aws_ssm_parameter.frontend_vars[k].arn }])
       logConfiguration = {
         logDriver = "awslogs"
@@ -166,9 +164,10 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       essential = true
       memory    = 64
       portMappings = [{ containerPort = 80, hostPort = 80 }, { containerPort = 443, hostPort = 443 }]
+      secrets = concat([for k in nonsensitive(keys(var.nginx_private_vars)) : { name = k, valueFrom = aws_ssm_parameter.nginx_private_vars[k].arn }])
       environment = concat(
         [{ name  = "ENV", value = var.general_env_vars["environment"] }],
-        [for k, v in aws_ssm_parameter.nginx_vars : { name = k, value = v.value }]
+        [for k, v in aws_ssm_parameter.nginx_public_vars : { name = k, value = v.value }]
       )
       logConfiguration = {
         logDriver = "awslogs"
@@ -196,6 +195,6 @@ resource "aws_ecs_service" "main" {
   network_configuration {
     subnets         = [aws_subnet.public.id]
     security_groups = [aws_security_group.ecs_sg.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 }

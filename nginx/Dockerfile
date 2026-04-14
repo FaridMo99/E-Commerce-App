@@ -1,7 +1,5 @@
 FROM nginx:alpine
 
-RUN apk add --no-cache openssl
-
 ENV FRONTEND_DOMAIN=localhost 
 ENV BACKEND_DOMAIN=api.localhost
 ENV NGINX_PORT=443
