@@ -33,9 +33,12 @@ COPY --chown=nodeuser:nodegroup --from=builder /app/shared/dist ./shared/dist
 COPY --chown=nodeuser:nodegroup --from=builder /app/backend/src/generated/prisma ./dist/generated/prisma
 COPY --chown=nodeuser:nodegroup --from=builder /app/backend/prisma ./prisma
 
-USER nodeuser
-EXPOSE 3001
 
-COPY backend/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+COPY backend/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+RUN chown nodeuser:nodegroup ./entrypoint.sh
+
+USER nodeuser
+
+EXPOSE 3001
+ENTRYPOINT ["./entrypoint.sh"]
