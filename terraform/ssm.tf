@@ -53,6 +53,8 @@ resource "aws_ssm_parameter" "nginx_public_vars" {
   name        = "/shoppi/nginx/${each.key}"
   type        = "String"
   value       = each.value
+
+  overwrite = true
 }
 
 variable "nginx_private_vars" {
