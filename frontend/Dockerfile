@@ -49,7 +49,7 @@ ENV NEXT_PUBLIC_DOCKER_ENV=true
 ENV NEXT_PUBLIC_STRIPE_ENV=testing
 ENV ENV=production
 
-
+ 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
