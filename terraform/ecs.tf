@@ -102,13 +102,13 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 # ecs task definition
 resource "aws_ecs_task_definition" "shoppi_stack" {
   family                   = "shoppi-monolith"
-  network_mode             = "awsvpc"
+  network_mode             = "bridge" ###
   requires_compatibilities = ["EC2"]
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   cpu    = "512"
-  memory = "814"
+  memory = "800"
 
 
   container_definitions = jsonencode([
@@ -117,7 +117,8 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "backend"
       image     = "${aws_ecr_repository.main["shoppi-backend"].repository_url}:latest"
       essential = true
-      memory    = 300
+      cpu       = 128
+      memory    = 250
       portMappings = [{ containerPort = 3001, hostPort = 3001 }]
       environment = [
         { name = "AWS_REGION",   value = var.aws_region},
@@ -144,7 +145,8 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "frontend"
       image     = "${aws_ecr_repository.main["shoppi-frontend"].repository_url}:latest"
       essential = true
-      memory    = 450
+      cpu       = 256
+      memory    = 400
       portMappings = [{ containerPort = 3000, hostPort = 3000 }]
       secrets = concat([for k in nonsensitive(keys(var.frontend_vars)) : { name = k, valueFrom = aws_ssm_parameter.frontend_vars[k].arn }])
       logConfiguration = {
@@ -162,6 +164,7 @@ resource "aws_ecs_task_definition" "shoppi_stack" {
       name      = "nginx"
       image     = "${aws_ecr_repository.main["shoppi-nginx"].repository_url}:latest"
       essential = true
+      cpu       = 64
       memory    = 64
       portMappings = [{ containerPort = 80, hostPort = 80 }, { containerPort = 443, hostPort = 443 }]
       secrets = concat([for k in nonsensitive(keys(var.nginx_private_vars)) : { name = k, valueFrom = aws_ssm_parameter.nginx_private_vars[k].arn }])
@@ -191,10 +194,10 @@ resource "aws_ecs_service" "main" {
     capacity_provider = aws_ecs_capacity_provider.main.name
     weight            = 1
   }
-
-  network_configuration {
-    subnets         = [aws_subnet.public.id]
-    security_groups = [aws_security_group.ecs_sg.id]
-    assign_public_ip = false
-  }
+###
+  #network_configuration {
+   # subnets         = [aws_subnet.public.id]
+    #security_groups = [aws_security_group.ecs_sg.id]
+    #assign_public_ip = false
+  #}
 }
