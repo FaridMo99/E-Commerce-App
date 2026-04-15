@@ -35,11 +35,11 @@ This version of the application is build to stay inside the **AWS Free Tier**. T
 
 ### My Free Architecture
 
-![App Architecture](AwsDiagram.png)
+![App Architecture](AwsDiagram.svg)
 
 ### Optimal Architecture
 
-![App Architecture](AwsOptimalDiagram.png)
+![App Architecture](AwsOptimalDiagram.svg)
 
 ## Features
 
