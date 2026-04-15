@@ -190,9 +190,6 @@ resource "aws_ecs_service" "main" {
   task_definition = aws_ecs_task_definition.shoppi_stack.arn
   desired_count   = 1
 
-  deployment_minimum_healthy_percent = 0
-  deployment_maximum_percent         = 100
-
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.main.name
     weight            = 1
